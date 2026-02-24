@@ -309,7 +309,14 @@
                 conn.on('data', function (data) {
                     console.log("Comando recibido en host:", data);
                     if (data.type === 'JOIN') {
-                        players.push({ id: conn.peer, name: data.name, score: 0, cards: [] });
+                        // PROTECCIÓN DUPLICADOS: Buscar si el nombre ya existe
+                        var existing = players.find(function (p) { return p.name === data.name; });
+                        if (existing) {
+                            console.log("Reconexión de jugador:", data.name);
+                            existing.id = conn.peer;
+                        } else {
+                            players.push({ id: conn.peer, name: data.name, score: 0, cards: [] });
+                        }
                         connections[conn.peer] = conn;
                         updateLobby();
                     } else if (data.type === 'COMMAND') {

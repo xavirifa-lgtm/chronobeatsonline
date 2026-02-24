@@ -38,43 +38,49 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 10px;
+            padding: 20px;
         }
 
         .logo {
             font-family: 'Bungee';
-            font-size: 1.8em;
+            font-size: 2em;
             color: var(--neon);
             text-shadow: 0 0 20px var(--neon);
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
 
         input {
             background: #1a1a1a;
             border: 2px solid #333;
             color: #fff;
-            padding: 12px;
-            border-radius: 10px;
+            padding: 15px;
+            border-radius: 12px;
             width: 100%;
-            max-width: 250px;
-            margin-bottom: 10px;
+            max-width: 280px;
+            margin-bottom: 12px;
             font-family: 'Bungee';
             text-align: center;
-            font-size: 1em;
+            font-size: 1.1em;
         }
 
         .btn {
             background: var(--neon);
             color: #000;
             border: none;
-            padding: 15px;
+            padding: 18px;
             border-radius: 50px;
             font-family: 'Bungee';
             width: 100%;
-            max-width: 250px;
+            max-width: 280px;
             cursor: pointer;
-            font-size: 1.1em;
+            font-size: 1.2em;
             box-shadow: 0 0 20px rgba(0, 242, 255, 0.3);
+            transition: 0.3s;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         #game-screen {
@@ -90,39 +96,40 @@
         #turn-status {
             font-family: 'Bungee';
             color: var(--neon);
-            font-size: 0.7em;
-            margin: 5px 0;
+            font-size: 0.8em;
+            margin: 10px 0;
+            letter-spacing: 1px;
         }
 
         .music-controls {
-            display: grid;
+            display: none;
             grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
+            gap: 10px;
             width: 100%;
-            max-width: 320px;
-            margin-top: 5px;
-            margin-bottom: 5px;
+            max-width: 340px;
+            margin-bottom: 10px;
         }
 
         .skip-controls {
-            display: grid;
+            display: none;
             grid-template-rows: repeat(2, 1fr);
             grid-template-columns: repeat(3, 1fr);
-            gap: 6px;
+            gap: 8px;
             width: 100%;
-            max-width: 320px;
-            margin-bottom: 5px;
+            max-width: 340px;
+            margin-bottom: 15px;
         }
 
         .ctrl-btn {
-            background: #222;
+            background: #1a1a1a;
             border: 2px solid #444;
             color: #fff;
-            padding: 12px 5px;
-            border-radius: 8px;
+            padding: 15px 5px;
+            border-radius: 10px;
             font-family: 'Bungee';
-            font-size: 0.8em;
+            font-size: 0.85em;
             cursor: pointer;
+            transition: 0.2s;
         }
 
         .btn-play {
@@ -136,48 +143,49 @@
         }
 
         .sk-btn {
-            background: #000;
+            background: #050505;
             border: 1px solid #333;
             color: #fff;
-            padding: 10px 2px;
-            border-radius: 6px;
+            padding: 12px 2px;
+            border-radius: 8px;
             font-family: 'Bungee';
-            font-size: 0.7em;
+            font-size: 0.75em;
             cursor: pointer;
         }
 
         .sk-fwd {
             color: var(--neon);
-            border-color: rgba(0, 242, 255, 0.4);
+            border-color: rgba(0, 242, 255, 0.3);
         }
 
         .sk-back {
             color: var(--accent);
-            border-color: rgba(255, 0, 85, 0.4);
+            border-color: rgba(255, 0, 85, 0.3);
         }
 
         #bet-btn {
             display: none;
-            background: none;
+            background: transparent;
             border: 2px dashed var(--gold);
             color: var(--gold);
-            padding: 8px;
+            padding: 15px;
             width: 100%;
-            max-width: 320px;
-            margin-bottom: 10px;
+            max-width: 340px;
+            margin-bottom: 15px;
             font-family: 'Bungee';
-            font-size: 0.75em;
-            border-radius: 10px;
+            font-size: 0.9em;
+            border-radius: 15px;
+            cursor: pointer;
         }
 
         .card-container {
-            flex: 0 0 160px;
+            flex: 0 0 180px;
             perspective: 1000px;
             display: flex;
             align-items: center;
             justify-content: center;
             width: 100%;
-            margin-top: 10px;
+            margin-top: 5px;
         }
 
         .card {
@@ -185,7 +193,7 @@
             aspect-ratio: 2/3;
             position: relative;
             transform-style: preserve-3d;
-            transition: transform 0.6s;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .card.flipped {
@@ -197,17 +205,18 @@
             width: 100%;
             height: 100%;
             backface-visibility: hidden;
-            border-radius: 12px;
+            border-radius: 15px;
             border: 2px solid var(--neon);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 10px;
+            padding: 15px;
         }
 
         .card-front {
             background: #111;
+            box-shadow: inset 0 0 30px rgba(0, 242, 255, 0.05);
         }
 
         .card-back {
@@ -219,9 +228,10 @@
         #wait-msg {
             font-family: 'Bungee';
             opacity: 0.4;
-            font-size: 0.7em;
+            font-size: 0.8em;
             text-align: center;
-            margin-top: 10px;
+            margin-top: 15px;
+            color: #888;
         }
     </style>
 </head>
@@ -237,13 +247,13 @@
     <div id="game-screen">
         <div id="turn-status">TURNO DE: <span id="cur-player">---</span></div>
 
-        <div class="music-controls" id="m-ctrl" style="display:none;">
+        <div class="music-controls" id="m-ctrl">
             <button class="ctrl-btn btn-play" onclick="send('PLAY')">PLAY</button>
             <button class="ctrl-btn" onclick="send('PAUSE')">PAUSE</button>
             <button class="ctrl-btn btn-stop" onclick="send('STOP')">STOP</button>
         </div>
 
-        <div class="skip-controls" id="s-ctrl" style="display:none;">
+        <div class="skip-controls" id="s-ctrl">
             <button class="sk-btn sk-fwd" onclick="send('SKIP',5)">+5s</button>
             <button class="sk-btn sk-fwd" onclick="send('SKIP',10)">+10s</button>
             <button class="sk-btn sk-fwd" onclick="send('SKIP',20)">+20s</button>
@@ -257,13 +267,15 @@
         <div class="card-container">
             <div id="card" class="card">
                 <div class="card-face card-front">
-                    <div style="font-family:'Bungee';color:var(--neon);opacity:0.3;font-size:2em;text-align:center">
+                    <div style="font-family:'Bungee';color:var(--neon);opacity:0.2;font-size:2.5em;text-align:center">
                         CHRONO<br>BEATS</div>
                 </div>
                 <div class="card-face card-back">
-                    <div id="c-artist" style="font-size:0.6em;color:#aaa;text-transform:uppercase">ARTISTA</div>
-                    <div id="c-song" style="font-family:'Bungee';font-size:1em;margin:5px 0">TÍTULO</div>
-                    <div id="c-year" style="font-family:'Bungee';font-size:2.5em;color:var(--accent)">1999</div>
+                    <div id="c-artist" style="font-size:0.7em;color:#aaa;text-transform:uppercase;margin-bottom:5px">
+                        ARTISTA</div>
+                    <div id="c-song" style="font-family:'Bungee';font-size:1.1em;margin-bottom:10px;text-align:center">
+                        TÍTULO</div>
+                    <div id="c-year" style="font-family:'Bungee';font-size:2.8em;color:var(--accent)">1999</div>
                 </div>
             </div>
             <div id="wait-msg">ESPERANDO SIGUIENTE TRACK...</div>
@@ -271,55 +283,70 @@
     </div>
 
     <script>
-        var peer, conn, myId;
+        var peer, conn, myId, playerName;
         function conectar() {
-            var hostId = document.getElementById('host-id').value.toUpperCase();
-            var name = document.getElementById('player-name').value;
-            if (!hostId || !name) return alert("Rellena los datos");
+            var hostId = document.getElementById('host-id').value.toUpperCase().trim();
+            playerName = document.getElementById('player-name').value.trim();
+            if (!hostId || !playerName) return alert("Rellena los datos");
 
-            document.getElementById('join-btn').disabled = true;
-            document.getElementById('join-btn').innerText = "CONECTANDO...";
+            var btn = document.getElementById('join-btn');
+            btn.disabled = true;
+            btn.innerText = "CONECTANDO...";
 
             peer = new Peer();
             peer.on('open', function (id) {
                 myId = id;
-                console.log("Mi ID:", id);
+                console.log("Conectando con ID Peer:", id);
                 conn = peer.connect("CB-HOST-" + hostId);
 
                 conn.on('open', function () {
-                    console.log("Conexión abierta con el host");
-                    conn.send({ type: 'JOIN', name: name });
+                    console.log("¡Conectado!");
+                    conn.send({ type: 'JOIN', name: playerName });
                     document.getElementById('login-screen').style.display = 'none';
                     document.getElementById('game-screen').style.display = 'flex';
                 });
 
                 conn.on('data', handle);
 
-                conn.on('error', function (err) {
-                    alert("Error de conexión: " + err);
-                    document.getElementById('join-btn').disabled = false;
-                    document.getElementById('join-btn').innerText = "ENTRAR";
+                conn.on('close', function () {
+                    alert("Conexión cerrada. Recarga la página.");
+                    location.reload();
                 });
             });
 
             peer.on('error', function (err) {
-                alert("Error PeerJS: " + err.type);
-                document.getElementById('join-btn').disabled = false;
-                document.getElementById('join-btn').innerText = "ENTRAR";
+                console.error("Error PeerJS:", err);
+                alert("Error: " + err.type);
+                btn.disabled = false;
+                btn.innerText = "ENTRAR";
             });
         }
 
-        function send(action, value) { if (conn) conn.send({ type: 'COMMAND', action: action, value: value }); }
+        function send(action, value) {
+            if (conn && conn.open) {
+                conn.send({ type: 'COMMAND', action: action, value: value });
+            } else {
+                alert("Conexión perdida. Recarga la página.");
+            }
+        }
 
         function handle(data) {
-            console.log("Datos recibidos:", data);
+            console.log("Evento:", data.type, data);
             if (data.type === 'STATE_UPDATE') {
                 document.getElementById('cur-player').innerText = data.activePlayer.name;
-                var isMyTurn = (data.activePlayer.id === myId);
 
+                // Identificar si es mi turno usando el ID de PeerJS
+                var isMyTurn = (data.activePlayer.id === myId);
+                console.log("¿Es mi turno?", isMyTurn, "Mi ID:", myId, "ID Activo:", data.activePlayer.id);
+
+                // Control de visibilidad de bloques de mando
                 document.getElementById('m-ctrl').style.display = isMyTurn ? 'grid' : 'none';
                 document.getElementById('s-ctrl').style.display = isMyTurn ? 'grid' : 'none';
+
+                // Botón Apostar (solo si NO es mi turno y la carta NO está revelada)
                 document.getElementById('bet-btn').style.display = (!isMyTurn && !data.revealed) ? 'block' : 'none';
+
+                // Mensaje de espera (solo si NO es mi turno)
                 document.getElementById('wait-msg').style.display = isMyTurn ? 'none' : 'block';
 
                 if (data.revealed) {
