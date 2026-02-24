@@ -120,12 +120,13 @@
             border-left: 4px solid var(--neon);
         }
 
-        /* Reproductor Totalmente fuera de la pantalla */
+        /* Reproductor Fuera de pantalla pero sin visibility:hidden (que bloquea autoplay) */
         #player-container {
             position: absolute;
             top: -999px;
             left: -999px;
-            visibility: hidden;
+            opacity: 0.1;
+            /* Mínima opacidad pero técnicamente visible para el navegador */
         }
 
         #player-container iframe {
@@ -755,30 +756,45 @@
             // V26: Lógica de Himnos
             var isXavi = name.toLowerCase().includes('xavi');
             var songId = "";
+            var songTitle = "";
 
             if (isXavi) {
                 songId = '04854XqcfCY'; // Queen - We Are The Champions
+                songTitle = "Queen - We Are The Champions";
             } else {
-                // El "Pool de la Frikada" (V26)
+                // El "Pool de la Frikada" (V26.1 - IDs más estables)
                 var frikiPool = [
-                    'hK_zK-pE2b8', // Chikilicuatre
-                    'vYt2l5_JbA8', // El Koala
-                    'i1x1p95xV_o', // Tractor Amarillo
-                    'eP6D-M0q9f8', // La Barbacoa
-                    'V0STYR7F9bE', // Aserejé
-                    '3WJ4Wn52o8U', // Leonardo Dantés
-                    'Cxf9Hj1Mh0E', // King África
-                    'Yf0t1e6dZ0Y', // Leticia Sabater
-                    'aG-Qy2wK1o4'  // Paco Pil
+                    { id: 'hK_zK-pE2b8', t: "Chikilicuatre - Chiki Chiki" },
+                    { id: 'vYt2l5_JbA8', t: "El Koala - Opá" },
+                    { id: 'i1x1p95xV_o', t: "Zapato Veloz - Tractor Amarillo" },
+                    { id: 'eP6D-M0q9f8', t: "Georgie Dann - La Barbacoa" },
+                    { id: 'V0STYR7F9bE', t: "Las Ketchup - Aserejé" },
+                    { id: '3WJ4Wn52o8U', t: "Leonardo Dantés - Pañuelo" },
+                    { id: 'zrYqL-0_gW0', t: "King África - La Bomba" },
+                    { id: 'iI8s-B1r9m8', t: "Leticia Sabater - Salchipapa" },
+                    { id: 'aG-Qy2wK1o4', t: "Paco Pil - Viva la Fiesta" }
                 ];
-                songId = frikiPool[Math.floor(Math.random() * frikiPool.length)];
+                var picked = frikiPool[Math.floor(Math.random() * frikiPool.length)];
+                songId = picked.id;
+                songTitle = picked.t;
             }
 
             console.log("¿Es Xavi?", isXavi, "ID Canción:", songId);
 
+            // Info de depuración visual (V26.1)
+            var debugInfo = document.getElementById('debug-song-info');
+            if (!debugInfo) {
+                debugInfo = document.createElement('div');
+                debugInfo.id = 'debug-song-info';
+                debugInfo.style.cssText = 'font-size: 12px; color: #555; margin-top: 20px; font-family: monospace; z-index: 3000;';
+                document.getElementById('winner-screen').appendChild(debugInfo);
+            }
+            debugInfo.innerText = "SONANDO: " + songTitle + " (ID: " + songId + ")";
+
             // Usar el contenedor de video para sonar (oculto)
             var container = document.getElementById('player-container');
-            container.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + songId + '?autoplay=1&mute=0&enablejsapi=1" allow="autoplay" style="width:1px;height:1px;opacity:0;position:absolute;"></iframe>';
+            // V26.1: youtube.com (no nocookie) + allow completo + posicionamiento mas robusto
+            container.innerHTML = '<iframe src="https://www.youtube.com/embed/' + songId + '?autoplay=1&mute=0&enablejsapi=1&playsinline=1" allow="autoplay; encrypted-media" style="width:300px;height:200px;border:none;"></iframe>';
 
             // Confeti (Efectos V26)
             if (isXavi) {
