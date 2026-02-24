@@ -291,6 +291,17 @@
             font-size: 0.9em;
             color: #fff;
         }
+
+        .neon-chip {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background: #00f2fe;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #00f2fe, 0 0 15px #00f2fe;
+            margin: 0 3px;
+            vertical-align: middle;
+        }
     </style>
 </head>
 
@@ -334,7 +345,7 @@
                         style="display:none; gap: 10px; width: 100%; margin-top: 15px;">
                         <button class="btn-val btn-ok" onclick="validateResult(true, false)">ACERTÓ</button>
                         <button class="btn-val btn-ok" style="background:#ffd700;"
-                            onclick="validateResult(true, true)">ACERTÓ TODO +🔘</button>
+                            onclick="validateResult(true, true)">ACERTÓ TODO + <span class="neon-chip"></span></button>
                         <button class="btn-val btn-fail" onclick="validateResult(false, false)">FALLÓ</button>
                     </div>
                 </div>
@@ -444,6 +455,7 @@
             document.getElementById('validation-buttons').style.display = 'none';
             document.getElementById('ui-current-player').innerText = players[activePlayerIdx].name;
             document.getElementById('host-instructions').innerText = "ESPERANDO ACCIÓN...";
+            document.getElementById('player-container').innerHTML = '<div id="youtube-player"></div>';
             syncState();
         }
 
@@ -499,12 +511,18 @@
                         p.tokens--;
                         p.canReload = false; // Solo uno por turno
                         isPlaying = false;
-                        container.innerHTML = ''; // Parar música
+                        container.innerHTML = '<div id="youtube-player"></div>'; // Parar música de verdad
                         currentSongIdx++; // Descartar y pasar a la siguiente
                         segundosAcumulados = 0;
                         momentoDeInicio = 0;
+                        isRevealed = false; // Resetear revelado
+                        document.getElementById('ui-card-artist').innerText = "????";
+                        document.getElementById('ui-card-song').innerText = "????";
+                        document.getElementById('ui-card-year').innerText = "????";
+                        document.getElementById('btn-reveal-host').style.display = 'block';
+                        document.getElementById('val-card-ui').style.display = 'block';
+                        document.getElementById('validation-buttons').style.display = 'none';
                         document.getElementById('host-instructions').innerText = "CANCIÓN CAMBIADA (DALE A PLAY)";
-                        // NO llamamos a nextTurn(), el jugador sigue siendo el mismo
                         syncState();
                     }
                     break;
@@ -584,7 +602,8 @@
 
         function updateUI() {
             var h = ""; players.slice().sort(function (a, b) { return b.score - a.score }).forEach(function (p) {
-                h += '<div class="leader-item ' + (p.id === players[activePlayerIdx].id ? 'active' : '') + '"><span>' + p.name + ' (' + p.tokens + '🔵)</span><span class="score">' + p.score + ' p</span></div>';
+                var chipsHtml = ""; for (var i = 0; i < p.tokens; i++) chipsHtml += '<span class="neon-chip"></span>';
+                h += '<div class="leader-item ' + (p.id === players[activePlayerIdx].id ? 'active' : '') + '"><span>' + p.name + ' (' + chipsHtml + ')</span><span class="score">' + p.score + ' p</span></div>';
             });
             document.getElementById('leaderboard-list').innerHTML = h;
 
