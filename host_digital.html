@@ -426,10 +426,17 @@
         initPeer();
 
         fetch('lista_final.txt').then(function (r) { return r.text() }).then(function (t) {
-            songs = t.split('\n').map(function (l) {
+            var lines = t.split('\n');
+            songs = lines.map(function (l, index) {
                 var p = l.split('|');
                 var m = p[3] ? p[3].match(/[?&]v=([^&#]+)|youtu\.be\/([^?&#]+)/) : null;
-                return { artist: p[0], song: p[1], year: p[2], id: m ? (m[1] || m[2]) : null };
+                return {
+                    artist: p[0],
+                    song: p[1],
+                    year: p[2],
+                    id: m ? (m[1] || m[2]) : null,
+                    line: index + 1 // Guardar número de fila original
+                };
             }).filter(function (s) { return s.id; }).sort(function () { return Math.random() - 0.5; });
         });
 
@@ -599,6 +606,32 @@
             return (songYear >= timeline[slotIdx - 1] && songYear <= timeline[slotIdx]);
         }
 
+        function reportSystemError() {
+            var s = songs[currentSongIdx];
+            var newYear = prompt("ERROR EN DATOS: " + s.artist + " - " + s.song + "\nIntroduce el AÑO CORRECTO para registro:");
+            if (newYear) {
+                var recipient = "xavi.rifa@gmail.com";
+                var subject = "CORRECCION CHRONOBEATS: Fila " + s.line;
+                var body = "DETECTADO ERROR EN LISTA\n\n" +
+                    "Fila: " + s.line + "\n" +
+                    "Artista: " + s.artist + "\n" +
+                    "Canción: " + s.song + "\n" +
+                    "Año en TXT: " + s.year + "\n" +
+                    "Año Correcto: " + newYear + "\n\n" +
+                    "Instrucciones: Abrir lista_final.txt en la fila " + s.line + " y corregir el año.";
+
+                var mailtoUrl = "mailto:" + recipient + "?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
+
+                console.log("!!! ERROR DE SISTEMA DETECTADO !!!");
+                console.log("Referencia: " + s.artist + " - " + s.song + " (Fila " + s.line + ")");
+                console.log("Corrección: " + s.year + " -> " + newYear);
+
+                window.location.href = mailtoUrl;
+                alert("¡Error registrado! Se ha preparado un email para " + recipient + ".\nSe descarta esta canción y repites el turno.");
+            }
+            nextTurn();
+        }
+
         function revealData() {
             isRevealed = true;
             var s = songs[currentSongIdx];
@@ -616,18 +649,18 @@
 
             document.getElementById('validation-buttons').style.display = 'flex';
             if (isCorrect) {
-                document.getElementById('host-instructions').innerHTML = "<span style='color:#00ff00; font-size:1.5em;'>¡POSICIÓN CORRECTA! ✅</span><br>¿Acertó Artista/Canción?";
+                document.getElementById('host-instructions').innerHTML = "<span style='color:#00ff00; font-size:1.5em;'>¡POSICIÓN CORRECTA! ✅</span><br>¿Detalles?";
                 document.getElementById('validation-buttons').innerHTML = `
-                    <button class="btn-val btn-ok" onclick="validateResult(true, false)">SÍ (SOLO CARTA)</button>
+                    <button class="btn-val btn-ok" onclick="validateResult(true, false)">SÍ</button>
                     <button class="btn-val btn-ok" style="background:#ffd700; color:#000;" onclick="validateResult(true, true)">SÍ (+ 🔵 FICHA)</button>
-                    <button class="btn-val btn-fail" onclick="validateResult(false, false)">FALLÓ (FORZAR)</button>
+                    <button class="btn-val btn-fail" style="background:#555;" onclick="reportSystemError()">ERROR SISTEMA</button>
                  `;
             } else {
-                document.getElementById('host-instructions').innerHTML = "<span style='color:#ff4444; font-size:1.5em;'>POSICIÓN INCORRECTA ❌</span><br>¿Pero acertó Artista/Canción?";
+                document.getElementById('host-instructions').innerHTML = "<span style='color:#ff4444; font-size:1.5em;'>POSICIÓN INCORRECTA ❌</span><br>¿Pero acertó Algo?";
                 document.getElementById('validation-buttons').innerHTML = `
-                    <button class="btn-val btn-fail" onclick="validateResult(false, false)">NO (SIGUIENTE/ROBOS)</button>
-                    <button class="btn-val btn-ok" style="background:#00f2fe; color:#000;" onclick="validateResult(false, true)">SÍ (+ 🔵 FICHA Y ROBOS)</button>
-                    <button class="btn-val btn-ok" onclick="validateResult(true, false)">ERROR SISTEMA (DAR CARTA)</button>
+                    <button class="btn-val btn-fail" onclick="validateResult(false, false)">NO</button>
+                    <button class="btn-val btn-ok" style="background:#00f2fe; color:#000;" onclick="validateResult(false, true)">SÍ (+ 🔵 FICHA)</button>
+                    <button class="btn-val btn-fail" style="background:#00f2fe; color:#000; font-size: 0.6em;" onclick="reportSystemError()">ERROR SISTEMA (REPETIR)</button>
                  `;
             }
             syncState();
