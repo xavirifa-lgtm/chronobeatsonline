@@ -475,12 +475,13 @@
         }
 
         function handlePlayerCommand(peerId, action, value) {
-            if (peerId !== players[activePlayerIdx].id) return;
+            var activeP = players[activePlayerIdx];
             var s = songs[currentSongIdx];
             var container = document.getElementById('player-container');
 
             switch (action) {
                 case 'PLAY':
+                    if (peerId !== activeP.id) return;
                     if (!isPlaying) {
                         momentoDeInicio = Date.now();
                         isPlaying = true;
@@ -490,6 +491,7 @@
                     }
                     break;
                 case 'PAUSE':
+                    if (peerId !== activeP.id) return;
                     if (isPlaying) {
                         var tiempoTranscurrido = Math.floor((Date.now() - momentoDeInicio) / 1000);
                         segundosAcumulados += tiempoTranscurrido;
@@ -500,6 +502,7 @@
                     }
                     break;
                 case 'STOP':
+                    if (peerId !== activeP.id) return;
                     isPlaying = false;
                     container.innerHTML = '';
                     document.getElementById('host-instructions').innerText = "¿ACERTÓ?";
@@ -507,6 +510,7 @@
                     syncState();
                     break;
                 case 'SKIP':
+                    if (peerId !== activeP.id) return;
                     if (isPlaying) {
                         var tiempoTranscurrido = Math.floor((Date.now() - momentoDeInicio) / 1000);
                         segundosAcumulados += tiempoTranscurrido + value;
