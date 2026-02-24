@@ -38,26 +38,26 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 10px;
         }
 
         .logo {
             font-family: 'Bungee';
-            font-size: 2em;
+            font-size: 1.8em;
             color: var(--neon);
             text-shadow: 0 0 20px var(--neon);
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         input {
             background: #1a1a1a;
             border: 2px solid #333;
             color: #fff;
-            padding: 12px;
+            padding: 10px;
             border-radius: 10px;
             width: 100%;
             max-width: 250px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             font-family: 'Bungee';
             text-align: center;
         }
@@ -66,7 +66,7 @@
             background: var(--neon);
             color: #000;
             border: none;
-            padding: 15px;
+            padding: 12px;
             border-radius: 50px;
             font-family: 'Bungee';
             width: 100%;
@@ -78,32 +78,31 @@
             display: none;
             flex: 1;
             flex-direction: column;
-            padding: 10px;
+            padding: 5px 10px;
             align-items: center;
-            justify-content: flex-start;
+            justify-content: space-between;
         }
 
         #turn-status {
             font-family: 'Bungee';
             color: var(--neon);
-            margin-bottom: 5px;
-            font-size: 0.8em;
+            font-size: 0.75em;
+            margin-bottom: 2px;
         }
 
         .card-container {
-            flex: 1;
+            flex: 0 1 auto;
             perspective: 1000px;
             display: flex;
             align-items: center;
             justify-content: center;
             width: 100%;
-            min-height: 0;
-            margin-bottom: 15px;
+            height: 35vh;
+            min-height: 120px;
         }
 
         .card {
-            width: 85%;
-            max-width: 220px;
+            height: 90%;
             aspect-ratio: 2/3;
             position: relative;
             transform-style: preserve-3d;
@@ -119,13 +118,13 @@
             width: 100%;
             height: 100%;
             backface-visibility: hidden;
-            border-radius: 15px;
-            border: 3px solid var(--neon);
+            border-radius: 12px;
+            border: 2px solid var(--neon);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 15px;
+            padding: 10px;
         }
 
         .card-front {
@@ -138,33 +137,33 @@
             border-color: var(--accent);
         }
 
-        /* Controles - Muy compactos */
         .music-controls {
             display: none;
             grid-template-columns: repeat(3, 1fr);
             gap: 8px;
             width: 100%;
-            max-width: 300px;
-            margin-bottom: 10px;
+            max-width: 320px;
+            margin-top: 5px;
         }
 
         .skip-controls {
             display: none;
+            grid-template-rows: repeat(2, 1fr);
             grid-template-columns: repeat(3, 1fr);
-            gap: 5px;
+            gap: 6px;
             width: 100%;
-            max-width: 300px;
-            margin-bottom: 25px;
+            max-width: 320px;
+            margin-bottom: 5px;
         }
 
         .ctrl-btn {
             background: #222;
             border: 2px solid #444;
             color: #fff;
-            padding: 12px 5px;
-            border-radius: 10px;
+            padding: 10px 5px;
+            border-radius: 8px;
             font-family: 'Bungee';
-            font-size: 0.8em;
+            font-size: 0.75em;
             cursor: pointer;
         }
 
@@ -181,11 +180,11 @@
         .sk-btn {
             background: #000;
             border: 1px solid #333;
-            color: #666;
-            padding: 6px 2px;
+            color: #fff;
+            padding: 8px 2px;
             border-radius: 6px;
             font-family: 'Bungee';
-            font-size: 0.6em;
+            font-size: 0.65em;
             cursor: pointer;
         }
 
@@ -206,10 +205,10 @@
             color: var(--gold);
             padding: 8px;
             width: 100%;
-            max-width: 300px;
-            margin-bottom: 25px;
+            max-width: 320px;
+            margin-bottom: 10px;
             font-family: 'Bungee';
-            font-size: 0.8em;
+            font-size: 0.75em;
             border-radius: 10px;
         }
 
@@ -254,12 +253,12 @@
         </div>
 
         <div class="skip-controls" id="s-ctrl">
-            <button class="sk-btn sk-back" onclick="send('SKIP',-5)">-5s</button>
-            <button class="sk-btn sk-back" onclick="send('SKIP',-10)">-10s</button>
-            <button class="sk-btn sk-back" onclick="send('SKIP',-20)">-20s</button>
             <button class="sk-btn sk-fwd" onclick="send('SKIP',5)">+5s</button>
             <button class="sk-btn sk-fwd" onclick="send('SKIP',10)">+10s</button>
             <button class="sk-btn sk-fwd" onclick="send('SKIP',20)">+20s</button>
+            <button class="sk-btn sk-back" onclick="send('SKIP',-5)">-5s</button>
+            <button class="sk-btn sk-back" onclick="send('SKIP',-10)">-10s</button>
+            <button class="sk-btn sk-back" onclick="send('SKIP',-20)">-20s</button>
         </div>
 
         <button id="bet-btn" onclick="send('BET')">💎 APOSTAR FICHA</button>

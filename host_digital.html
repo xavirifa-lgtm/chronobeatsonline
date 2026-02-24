@@ -306,13 +306,14 @@
 
         function startGame() {
             if (!youtubeReady) return alert("Cargando reproductor...");
+            ytPlayer.unMute();
             ytPlayer.playVideo(); // Unlocking audio
             setTimeout(function () {
                 ytPlayer.stopVideo();
                 document.getElementById('lobby').style.display = 'none';
                 document.getElementById('dashboard').style.display = 'grid';
                 nextTurn();
-            }, 500);
+            }, 800);
         }
 
         function nextTurn() {
@@ -331,9 +332,13 @@
         function handlePlayerCommand(peerId, action, value) {
             if (peerId !== players[activePlayerIdx].id) return;
             switch (action) {
-                case 'PLAY': ytPlayer.playVideo(); break;
+                case 'PLAY': ytPlayer.unMute(); ytPlayer.playVideo(); break;
                 case 'PAUSE': ytPlayer.pauseVideo(); break;
-                case 'STOP': ytPlayer.stopVideo(); document.getElementById('host-instructions').innerText = "¿ACERTÓ?"; break;
+                case 'STOP':
+                    ytPlayer.stopVideo();
+                    document.getElementById('host-instructions').innerText = "¿ACERTÓ?";
+                    revealData();
+                    break;
                 case 'SKIP': ytPlayer.seekTo(ytPlayer.getCurrentTime() + value, true); break;
             }
         }
