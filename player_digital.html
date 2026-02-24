@@ -448,9 +448,9 @@
                 var specialCtrl = document.getElementById('special-ctrl');
                 if (isMyTurn && !data.revealed) {
                     specialCtrl.style.display = 'flex';
-                    // COMPRAR (Antes de sonar y antes de revelar)
+                    // COMPRAR (Solo si NO está sonando)
                     document.getElementById('btn-autowin').style.display = (!data.isPlaying) ? 'block' : 'none';
-                    // CAMBIAR (Solo si está sonando y antes de revelar)
+                    // CAMBIAR (Solo si SÍ está sonando)
                     document.getElementById('btn-reload').style.display = (data.isPlaying) ? 'block' : 'none';
                 } else {
                     specialCtrl.style.display = 'none';

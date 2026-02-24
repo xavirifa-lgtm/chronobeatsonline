@@ -459,6 +459,7 @@
                         isPlaying = true;
                         container.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + s.id + '?autoplay=1&start=' + segundosAcumulados + '" allow="autoplay"></iframe>';
                         document.getElementById('host-instructions').innerText = "REPRODUCIENDO";
+                        syncState();
                     }
                     break;
                 case 'PAUSE':
@@ -468,6 +469,7 @@
                         container.innerHTML = '';
                         isPlaying = false;
                         document.getElementById('host-instructions').innerText = "PAUSADO";
+                        syncState();
                     }
                     break;
                 case 'STOP':
@@ -475,6 +477,7 @@
                     container.innerHTML = '';
                     document.getElementById('host-instructions').innerText = "¿ACERTÓ?";
                     revealData();
+                    syncState();
                     break;
                 case 'SKIP':
                     if (isPlaying) {
