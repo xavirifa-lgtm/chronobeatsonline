@@ -601,14 +601,14 @@
             var imIn = false;
             var isTakenByOther = false;
             for (var pid in bets) {
-                if (bets[pid] === idx) {
+                if (bets[pid] == idx) {
                     if (pid === myId) imIn = true;
                     else isTakenByOther = true;
                     occupants.push(pid === myId ? "YO" : "?");
                 }
             }
 
-            var isGuess = (activeGuess === idx);
+            var isGuess = (activeGuess == idx);
             var cls = "bet-slot";
 
             if (isGuess) cls += " active-guess";
