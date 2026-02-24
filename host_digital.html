@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Montserrat:wght@400;700&display=swap"
         rel="stylesheet">
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <!-- Eliminado script de YouTube API ya que usamos inyección de iframe directa -->
     <style>
         :root {
@@ -240,10 +241,65 @@
             font-size: 1.4em;
             cursor: pointer;
         }
+
+        /* Pantalla Ganador */
+        #winner-screen {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        #winner-screen h1 {
+            font-family: 'Bungee';
+            font-size: 4em;
+            color: var(--gold);
+            margin: 0;
+        }
+
+        #winner-screen h2 {
+            font-family: 'Bungee';
+            font-size: 2em;
+            color: var(--neon);
+        }
+
+        .active-player-cards {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        .mini-card {
+            background: #222;
+            border: 1px solid var(--neon);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-family: 'Bungee';
+            font-size: 0.9em;
+            color: #fff;
+        }
     </style>
 </head>
 
 <body>
+    <div id="winner-screen">
+        <h1>¡TENEMOS GANADOR!</h1>
+        <h2 id="winner-name">---</h2>
+        <button class="btn-start" onclick="location.reload()" style="margin-top:30px">JUGAR OTRA VEZ</button>
+    </div>
     <div class="logo">CHRONOBEATS</div>
 
     <div id="lobby">
@@ -281,9 +337,11 @@
                     </div>
                 </div>
                 <div id="host-instructions">ESPERANDO ACCIÓN...</div>
+                <div id="active-player-inventory" class="active-player-cards"></div>
             </div>
         </div>
-        <div class="timeline-grid" id="global-timelines"></div>
+    </div>
+    <div class="timeline-grid" id="global-timelines"></div>
     </div>
     </div>
 
@@ -319,7 +377,7 @@
                             console.log("Reconexión de jugador:", data.name);
                             existing.id = conn.peer;
                         } else {
-                            players.push({ id: conn.peer, name: data.name, score: 0, cards: [] });
+                            players.push({ id: conn.peer, name: data.name, score: 1, cards: [] });
                         }
                         connections[conn.peer] = conn;
                         updateLobby();
@@ -449,14 +507,43 @@
                 players[activePlayerIdx].score++;
                 players[activePlayerIdx].cards.push(songs[currentSongIdx].year);
                 players[activePlayerIdx].cards.sort();
+                if (players[activePlayerIdx].score >= 10) {
+                    showWinner(players[activePlayerIdx].name);
+                    return;
+                }
             }
             activePlayerIdx = (activePlayerIdx + 1) % players.length;
             nextTurn();
         }
 
+        function showWinner(name) {
+            document.getElementById('winner-name').innerText = name;
+            document.getElementById('winner-screen').style.display = 'flex';
+            var duration = 15 * 1000;
+            var animationEnd = Date.now() + duration;
+            var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+            function randomInRange(min, max) { return Math.random() * (max - min) + min; }
+            var interval = setInterval(function () {
+                var timeLeft = animationEnd - Date.now();
+                if (timeLeft <= 0) return clearInterval(interval);
+                var particleCount = 50 * (timeLeft / duration);
+                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+            }, 250);
+        }
+
         function syncState() {
-            var state = { type: 'STATE_UPDATE', activePlayer: { id: players[activePlayerIdx].id, name: players[activePlayerIdx].name }, currentTrack: songs[currentSongIdx], revealed: isRevealed };
-            for (var id in connections) connections[id].send(state);
+            for (var id in connections) {
+                var p = players.find(p => p.id === id);
+                var state = {
+                    type: 'STATE_UPDATE',
+                    activePlayer: { id: players[activePlayerIdx].id, name: players[activePlayerIdx].name },
+                    currentTrack: songs[currentSongIdx],
+                    revealed: isRevealed,
+                    myCards: p ? p.cards : []
+                };
+                connections[id].send(state);
+            }
             updateUI();
         }
 
@@ -465,6 +552,14 @@
                 h += '<div class="leader-item ' + (p.id === players[activePlayerIdx].id ? 'active' : '') + '"><span>' + p.name + '</span><span class="score">' + p.score + ' p</span></div>';
             });
             document.getElementById('leaderboard-list').innerHTML = h;
+
+            // Mostrar cartas del jugador actual en el centro
+            var currentCardsHtml = "";
+            players[activePlayerIdx].cards.forEach(function (year) {
+                currentCardsHtml += '<div class="mini-card">' + year + '</div>';
+            });
+            document.getElementById('active-player-inventory').innerHTML = currentCardsHtml;
+
             var timelinesHtml = ""; players.forEach(function (p) {
                 timelinesHtml += '<div class="player-row"><div style="font-size:0.6em;color:#888;">' + p.name + '</div><div class="slots">';
                 for (var k = 0; k < 10; k++) timelinesHtml += '<div class="slot ' + (p.cards[k] ? 'filled' : '') + '">' + (p.cards[k] || '') + '</div>';

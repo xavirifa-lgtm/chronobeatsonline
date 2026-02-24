@@ -257,6 +257,43 @@
             margin-top: 15px;
             color: #888;
         }
+
+        .collection-summary {
+            width: 100%;
+            max-width: 340px;
+            margin-top: 20px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+        }
+
+        .collection-summary h4 {
+            font-family: 'Bungee';
+            font-size: 0.7em;
+            margin: 0 0 10px 0;
+            color: var(--neon);
+            text-align: center;
+        }
+
+        .vertical-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .card-row {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            padding: 8px;
+            border-radius: 8px;
+            font-family: 'Bungee';
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.1em;
+            color: var(--neon);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
     </style>
 </head>
 
@@ -302,6 +339,11 @@
                 </div>
             </div>
             <div id="wait-msg">ESPERANDO SIGUIENTE TRACK...</div>
+        </div>
+
+        <div class="collection-summary">
+            <h4>MIS CARTAS</h4>
+            <div id="my-cards-list" class="vertical-cards"></div>
         </div>
     </div>
 
@@ -379,6 +421,14 @@
                     document.getElementById('c-year').innerText = data.currentTrack.year || "";
                 } else {
                     document.getElementById('card').classList.remove('flipped');
+                }
+
+                if (data.myCards) {
+                    var h = "";
+                    data.myCards.forEach(function (year) {
+                        h += '<div class="card-row">' + year + '</div>';
+                    });
+                    document.getElementById('my-cards-list').innerHTML = h;
                 }
             }
         }
