@@ -752,30 +752,44 @@
             // Limpiar confeti previo si existe
             if (window.victoryInterval) clearInterval(window.victoryInterval);
 
-            // V25: Himno de Victoria Condicional
+            // V26: Lógica de Himnos
             var isXavi = name.toLowerCase().includes('xavi');
-            var songId = isXavi ? '04854XqcfCY' : 's5z-V5L0eLg'; // Queen / Los Rodríguez (Mucha Suerte)
+            var songId = "";
+
+            if (isXavi) {
+                songId = '04854XqcfCY'; // Queen - We Are The Champions
+            } else {
+                // El "Pool de la Frikada" (V26)
+                var frikiPool = [
+                    'hK_zK-pE2b8', // Chikilicuatre
+                    'vYt2l5_JbA8', // El Koala
+                    'i1x1p95xV_o', // Tractor Amarillo
+                    'eP6D-M0q9f8', // La Barbacoa
+                    'V0STYR7F9bE', // Aserejé
+                    '3WJ4Wn52o8U', // Leonardo Dantés
+                    'Cxf9Hj1Mh0E', // King África
+                    'Yf0t1e6dZ0Y', // Leticia Sabater
+                    'aG-Qy2wK1o4'  // Paco Pil
+                ];
+                songId = frikiPool[Math.floor(Math.random() * frikiPool.length)];
+            }
+
             console.log("¿Es Xavi?", isXavi, "ID Canción:", songId);
 
             // Usar el contenedor de video para sonar (oculto)
             var container = document.getElementById('player-container');
             container.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + songId + '?autoplay=1&mute=0&enablejsapi=1" allow="autoplay" style="width:1px;height:1px;opacity:0;position:absolute;"></iframe>';
 
-            // Confeti SOLO para Xavi (V25.1)
+            // Confeti (Efectos V26)
             if (isXavi) {
-                var duration = 15 * 1000;
-                var animationEnd = Date.now() + duration;
-                // V25.2: zIndex 2000 para que salga POR ENCIMA de la pantalla negra (z-index 1000)
+                // V26: Confeti INFINITO para Xavi
                 var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 2000 };
                 function randomInRange(min, max) { return Math.random() * (max - min) + min; }
 
                 window.victoryInterval = setInterval(function () {
-                    var timeLeft = animationEnd - Date.now();
-                    if (timeLeft <= 0) return clearInterval(window.victoryInterval);
-                    var particleCount = 50 * (timeLeft / duration);
-                    confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
-                    confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
-                }, 250);
+                    confetti(Object.assign({}, defaults, { particleCount: 40, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+                    confetti(Object.assign({}, defaults, { particleCount: 40, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+                }, 300);
             }
         }
 
