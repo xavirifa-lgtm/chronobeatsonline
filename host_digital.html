@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Montserrat:wght@400;700&display=swap"
         rel="stylesheet">
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-    <script src="https://www.youtube.com/iframe_api"></script>
+    <!-- Eliminado script de YouTube API ya que usamos inyección de iframe directa -->
     <style>
         :root {
             --neon: #00f2ff;
@@ -48,6 +48,25 @@
             color: var(--gold);
             letter-spacing: 10px;
             margin: 20px 0;
+        }
+
+        .music-controls {
+            display: none;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            width: 100%;
+            max-width: 320px;
+            margin-top: 10px;
+        }
+
+        .skip-controls {
+            display: none;
+            grid-template-rows: repeat(2, 1fr);
+            grid-template-columns: repeat(3, 1fr);
+            gap: 4px;
+            width: 100%;
+            max-width: 320px;
+            margin-top: 5px;
         }
 
         .player-list {
@@ -100,22 +119,17 @@
             border-left: 4px solid var(--neon);
         }
 
-        /* Reproductor Invisible pero funcional */
+        /* Reproductor Totalmente fuera de la pantalla */
         #player-container {
             position: absolute;
-            left: 10px;
-            bottom: 10px;
-            width: 200px;
-            height: 200px;
-            opacity: 0.1;
-            /* Un poco visible para depuración si fuera necesario, pero invisible en uso normal */
-            pointer-events: none;
-            z-index: -1;
+            top: -999px;
+            left: -999px;
+            visibility: hidden;
         }
 
         #player-container iframe {
-            width: 100%;
-            height: 100%;
+            width: 1px;
+            height: 1px;
             border: none;
         }
 
@@ -259,10 +273,8 @@
                         style="display:block; margin: 10px auto;">REVELAR DATOS</button>
                     <div class="actions" id="validation-buttons"
                         style="display:none; gap: 10px; width: 100%; margin-top: 15px;">
-                        <button class="btn-val btn-ok" onclick="validateResult(true)"
-                            style="background:#00ff88; padding: 15px; flex:1; border:none; border-radius:10px; font-family:'Bungee'; cursor:pointer;">ACERTÓ</button>
-                        <button class="btn-val btn-fail" onclick="validateResult(false)"
-                            style="background:var(--accent); color:#fff; padding: 15px; flex:1; border:none; border-radius:10px; font-family:'Bungee'; cursor:pointer;">FALLÓ</button>
+                        <button class="btn-val btn-ok" onclick="validateResult(true)">ACERTÓ</button>
+                        <button class="btn-val btn-fail" onclick="validateResult(false)">FALLÓ</button>
                     </div>
                 </div>
                 <div id="host-instructions">ESPERANDO ACCIÓN...</div>
@@ -274,18 +286,15 @@
     <script>
         var peer, roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
         var players = [], connections = {}, songs = [], currentSongIdx = -1, activePlayerIdx = 0, isRevealed = false;
-        var youtubeReady = false, ytPlayer;
+
+        // Seguimiento de tiempo para skips manuales
+        var segundosAcumulados = 0;
+        var momentoDeInicio = 0;
+        var isPlaying = false;
 
         document.getElementById('join-code').innerText = roomCode;
 
-        function onYouTubeIframeAPIReady() {
-            ytPlayer = new YT.Player('youtube-player', {
-                host: 'https://www.youtube-nocookie.com',
-                height: '0', width: '0',
-                playerVars: { 'autoplay': 0, 'controls': 0, 'enablejsapi': 1, 'origin': window.location.origin },
-                events: { 'onReady': function () { youtubeReady = true; } }
-            });
-        }
+        // Eliminadas funciones de YT API
 
         function initPeer() {
             peer = new Peer("CB-HOST-" + roomCode);
@@ -318,13 +327,12 @@
         }
 
         function startGame() {
-            if (!youtubeReady) return alert("Cargando reproductor...");
 
             // MECÁNICA INICIAL: Repartir una carta a cada jugador
             players.forEach(function (p) {
                 currentSongIdx++;
                 var s = songs[currentSongIdx];
-                p.cards.push(s.year);
+                if (s) p.cards.push(s.year);
             });
 
             document.getElementById('lobby').style.display = 'none';
@@ -334,6 +342,9 @@
 
         function nextTurn() {
             currentSongIdx++; isRevealed = false;
+            segundosAcumulados = 0; // Reset tiempo para nueva canción
+            momentoDeInicio = 0;
+            isPlaying = false;
             var s = songs[currentSongIdx];
             document.getElementById('ui-card-title').innerText = "????";
             document.getElementById('ui-card-info').innerText = "???? - ????";
@@ -341,27 +352,50 @@
             document.getElementById('val-card-ui').style.display = 'block';
             document.getElementById('validation-buttons').style.display = 'none';
             document.getElementById('ui-current-player').innerText = players[activePlayerIdx].name;
-            ytPlayer.cueVideoById(s.id);
+            document.getElementById('host-instructions').innerText = "ESPERANDO ACCIÓN...";
             syncState();
         }
 
         function handlePlayerCommand(peerId, action, value) {
             if (peerId !== players[activePlayerIdx].id) return;
             var s = songs[currentSongIdx];
+            var container = document.getElementById('player-container');
+
             switch (action) {
                 case 'PLAY':
-                    document.getElementById('player-container').innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + s.id + '?autoplay=1" allow="autoplay"></iframe>';
+                    if (!isPlaying) {
+                        momentoDeInicio = Date.now();
+                        isPlaying = true;
+                        container.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + s.id + '?autoplay=1&start=' + segundosAcumulados + '" allow="autoplay"></iframe>';
+                    }
                     break;
                 case 'PAUSE':
+                    if (isPlaying) {
+                        var tiempoTranscurrido = Math.floor((Date.now() - momentoDeInicio) / 1000);
+                        segundosAcumulados += tiempoTranscurrido;
+                        container.innerHTML = '';
+                        isPlaying = false;
+                        document.getElementById('host-instructions').innerText = "PAUSADO";
+                    }
+                    break;
                 case 'STOP':
-                    document.getElementById('player-container').innerHTML = '';
+                    isPlaying = false;
+                    container.innerHTML = '';
                     document.getElementById('host-instructions').innerText = "¿ACERTÓ?";
                     revealData();
                     break;
                 case 'SKIP':
-                    // El skip con iframe dinámico es más complejo, pero si el usuario quiere saltar, 
-                    // tendríamos que recargar el iframe con el parámetro start=
-                    // Por ahora reseteamos o simplificamos
+                    if (isPlaying) {
+                        var tiempoTranscurrido = Math.floor((Date.now() - momentoDeInicio) / 1000);
+                        segundosAcumulados += tiempoTranscurrido + value;
+                    } else {
+                        segundosAcumulados += value;
+                    }
+                    if (segundosAcumulados < 0) segundosAcumulados = 0;
+                    momentoDeInicio = Date.now();
+                    if (isPlaying) {
+                        container.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + s.id + '?autoplay=1&start=' + segundosAcumulados + '" allow="autoplay"></iframe>';
+                    }
                     break;
             }
         }

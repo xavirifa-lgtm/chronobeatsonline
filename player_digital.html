@@ -78,7 +78,7 @@
             display: none;
             flex: 1;
             flex-direction: column;
-            padding: 5px;
+            padding: 10px;
             align-items: center;
             justify-content: flex-start;
             overflow-y: auto;
@@ -89,6 +89,82 @@
             color: var(--neon);
             font-size: 0.7em;
             margin: 5px 0;
+        }
+
+        .music-controls {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            width: 100%;
+            max-width: 320px;
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+
+        .skip-controls {
+            display: grid;
+            grid-template-rows: repeat(2, 1fr);
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            width: 100%;
+            max-width: 320px;
+            margin-bottom: 5px;
+        }
+
+        .ctrl-btn {
+            background: #222;
+            border: 2px solid #444;
+            color: #fff;
+            padding: 12px 5px;
+            border-radius: 8px;
+            font-family: 'Bungee';
+            font-size: 0.8em;
+            cursor: pointer;
+        }
+
+        .btn-play {
+            border-color: var(--neon);
+            color: var(--neon);
+        }
+
+        .btn-stop {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .sk-btn {
+            background: #000;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 10px 2px;
+            border-radius: 6px;
+            font-family: 'Bungee';
+            font-size: 0.7em;
+            cursor: pointer;
+        }
+
+        .sk-fwd {
+            color: var(--neon);
+            border-color: rgba(0, 242, 255, 0.4);
+        }
+
+        .sk-back {
+            color: var(--accent);
+            border-color: rgba(255, 0, 85, 0.4);
+        }
+
+        #bet-btn {
+            display: none;
+            background: none;
+            border: 2px dashed var(--gold);
+            color: var(--gold);
+            padding: 8px;
+            width: 100%;
+            max-width: 320px;
+            margin-bottom: 10px;
+            font-family: 'Bungee';
+            font-size: 0.8em;
+            border-radius: 10px;
         }
 
         .card-container {
@@ -137,81 +213,6 @@
             border-color: var(--accent);
         }
 
-        .music-controls {
-            display: none;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            width: 100%;
-            max-width: 320px;
-            margin-top: 5px;
-        }
-
-        .skip-controls {
-            display: none;
-            grid-template-rows: repeat(2, 1fr);
-            grid-template-columns: repeat(3, 1fr);
-            gap: 6px;
-            width: 100%;
-            max-width: 320px;
-            margin-bottom: 5px;
-        }
-
-        .ctrl-btn {
-            background: #222;
-            border: 2px solid #444;
-            color: #fff;
-            padding: 10px 5px;
-            border-radius: 8px;
-            font-family: 'Bungee';
-            font-size: 0.75em;
-            cursor: pointer;
-        }
-
-        .btn-play {
-            border-color: var(--neon);
-            color: var(--neon);
-        }
-
-        .btn-stop {
-            border-color: var(--accent);
-            color: var(--accent);
-        }
-
-        .sk-btn {
-            background: #000;
-            border: 1px solid #333;
-            color: #fff;
-            padding: 8px 2px;
-            border-radius: 6px;
-            font-family: 'Bungee';
-            font-size: 0.65em;
-            cursor: pointer;
-        }
-
-        .sk-fwd {
-            color: var(--neon);
-            border-color: rgba(0, 242, 255, 0.4);
-        }
-
-        .sk-back {
-            color: var(--accent);
-            border-color: rgba(255, 0, 85, 0.4);
-        }
-
-        #bet-btn {
-            display: none;
-            background: none;
-            border: 2px dashed var(--gold);
-            color: var(--gold);
-            padding: 8px;
-            width: 100%;
-            max-width: 320px;
-            margin-bottom: 10px;
-            font-family: 'Bungee';
-            font-size: 0.75em;
-            border-radius: 10px;
-        }
-
         #wait-msg {
             font-family: 'Bungee';
             opacity: 0.4;
@@ -225,21 +226,20 @@
     <div id="login-screen">
         <div class="logo">CHRONOBEATS</div>
         <input type="text" id="host-id" placeholder="CÓDIGO SALA" maxlength="6">
-        <input type="text" id="player-name" placeholder="TU NOMBRE" maxlength="12">
+        <input type="text" id="player-name" placeholder="TU NOMBRE">
         <button class="btn" onclick="conectar()">ENTRAR</button>
     </div>
 
     <div id="game-screen">
         <div id="turn-status">TURNO DE: <span id="cur-player">---</span></div>
 
-        <!-- CONTROLES ARRIBA -->
-        <div class="music-controls" id="m-ctrl">
+        <div class="music-controls" id="m-ctrl" style="display:none;">
             <button class="ctrl-btn btn-play" onclick="send('PLAY')">PLAY</button>
             <button class="ctrl-btn" onclick="send('PAUSE')">PAUSE</button>
             <button class="ctrl-btn btn-stop" onclick="send('STOP')">STOP</button>
         </div>
 
-        <div class="skip-controls" id="s-ctrl">
+        <div class="skip-controls" id="s-ctrl" style="display:none;">
             <button class="sk-btn sk-fwd" onclick="send('SKIP',5)">+5s</button>
             <button class="sk-btn sk-fwd" onclick="send('SKIP',10)">+10s</button>
             <button class="sk-btn sk-fwd" onclick="send('SKIP',20)">+20s</button>
@@ -250,7 +250,6 @@
 
         <button id="bet-btn" onclick="send('BET')">💎 APOSTAR FICHA</button>
 
-        <!-- CARTA ABAJO (más pequeña si es necesario) -->
         <div class="card-container">
             <div id="card" class="card">
                 <div class="card-face card-front">
@@ -268,45 +267,42 @@
     </div>
 
     <script>
-        var peer, conn, myId = "CB-P-" + Math.floor(Math.random() * 9999), pName = "";
+        var peer, conn, myId;
         function conectar() {
-            var h = document.getElementById('host-id').value.trim().toUpperCase();
-            pName = document.getElementById('player-name').value.trim();
-            if (!h || !pName) return alert("Faltan datos");
-            peer = new Peer(myId);
-            peer.on('open', function () {
-                conn = peer.connect("CB-HOST-" + h);
+            var hostId = document.getElementById('host-id').value.toUpperCase();
+            var name = document.getElementById('player-name').value;
+            if (!hostId || !name) return alert("Rellena los datos");
+            peer = new Peer();
+            peer.on('open', function (id) {
+                myId = id;
+                conn = peer.connect("CB-HOST-" + hostId);
                 conn.on('open', function () {
-                    conn.send({ type: 'JOIN', name: pName });
+                    conn.send({ type: 'JOIN', name: name });
                     document.getElementById('login-screen').style.display = 'none';
                     document.getElementById('game-screen').style.display = 'flex';
                 });
                 conn.on('data', handle);
             });
-            peer.on('error', function () { alert("Error de conexión. ¿Código correcto?"); });
         }
+        function send(action, value) { if (conn) conn.send({ type: 'COMMAND', action: action, value: value }); }
         function handle(data) {
             if (data.type === 'STATE_UPDATE') {
                 document.getElementById('cur-player').innerText = data.activePlayer.name;
-                var isMe = data.activePlayer.id === myId;
-                document.getElementById('m-ctrl').style.display = isMe ? 'grid' : 'none';
-                document.getElementById('s-ctrl').style.display = isMe ? 'grid' : 'none';
-                document.getElementById('bet-btn').style.display = (!isMe && data.currentTrack) ? 'block' : 'none';
-                if (data.currentTrack) {
-                    document.getElementById('wait-msg').style.display = 'none';
-                    document.getElementById('card').style.display = 'block';
+                var isMyTurn = (data.activePlayer.id === myId);
+                document.getElementById('m-ctrl').style.display = isMyTurn ? 'grid' : 'none';
+                document.getElementById('s-ctrl').style.display = isMyTurn ? 'grid' : 'none';
+                document.getElementById('bet-btn').style.display = (!isMyTurn && !data.revealed) ? 'block' : 'none';
+                document.getElementById('wait-msg').style.display = isMyTurn ? 'none' : 'block';
+                if (data.revealed) {
+                    document.getElementById('card').classList.add('flipped');
                     document.getElementById('c-artist').innerText = data.currentTrack.artist;
                     document.getElementById('c-song').innerText = data.currentTrack.song;
                     document.getElementById('c-year').innerText = data.currentTrack.year;
-                    if (data.revealed) document.getElementById('card').classList.add('flipped');
-                    else document.getElementById('card').classList.remove('flipped');
                 } else {
-                    document.getElementById('card').style.display = 'none';
-                    document.getElementById('wait-msg').style.display = 'block';
+                    document.getElementById('card').classList.remove('flipped');
                 }
             }
         }
-        function send(a, v) { if (conn && conn.open) conn.send({ type: 'COMMAND', action: a, value: v }); }
     </script>
 </body>
 
