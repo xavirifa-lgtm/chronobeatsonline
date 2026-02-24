@@ -326,6 +326,19 @@
                 <div class="active-player-name" id="ui-current-player">---</div>
             </div>
             <div id="leaderboard-list"></div>
+
+            <!-- V25: Test de Sonidos -->
+            <div style="margin-top: 30px; border-top: 1px solid #333; padding-top: 15px;">
+                <p style="font-size: 0.6em; color: #666; margin-bottom: 10px; font-family: 'Bungee';">TEST VICTORIA</p>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <button class="spec-btn"
+                        style="border-color: #ffd700; color: #ffd700; font-size: 0.6em; padding: 10px;"
+                        onclick="showWinner('Xavi')">TEST XAVI (QUEEN)</button>
+                    <button class="spec-btn"
+                        style="border-color: #ff4444; color: #ff4444; font-size: 0.6em; padding: 10px;"
+                        onclick="showWinner('Otro')">TEST OTROS (RODRÍGUEZ)</button>
+                </div>
+            </div>
         </div>
         <div class="main-content">
             <div id="player-container">
@@ -734,6 +747,15 @@
         function showWinner(name) {
             document.getElementById('winner-name').innerText = name;
             document.getElementById('winner-screen').style.display = 'flex';
+
+            // V25: Himno de Victoria Condicional
+            var isXavi = name.toLowerCase().includes('xavi');
+            var songId = isXavi ? '04854XqcfCY' : '46RdyP12K1k'; // Queen / Los Rodríguez
+
+            // Usar el contenedor de video para sonar (oculto)
+            var container = document.getElementById('player-container');
+            container.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + songId + '?autoplay=1" allow="autoplay" style="width:1px;height:1px;opacity:0;position:absolute;"></iframe>';
+
             var duration = 15 * 1000;
             var animationEnd = Date.now() + duration;
             var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
