@@ -313,14 +313,11 @@
         <button class="btn-start" onclick="location.reload()" style="margin-top:30px">JUGAR OTRA VEZ</button>
     </div>
     <div class="logo">CHRONOBEATS</div>
-
-    <div id="room-code-display"
-        style="display:none; color: var(--gold); font-family: 'Bungee'; font-size: 1.2em; margin-bottom: 30px;">CÓDIGO:
-        <span id="current-room-code">------</span></div>
-    <div class="room-code" id="join-code">------</div>
-    <div class="player-list" id="lobby-players" style="margin-bottom: 40px;"></div>
-    <button class="btn-start" onclick="startGame()" style="display:none; margin-top: 40px;" id="start-btn">EMPEZAR
-        PARTIDA</button>
+    <div id="lobby">
+        <div class="room-code" id="join-code">------</div>
+        <div class="player-list" id="lobby-players" style="margin-bottom: 40px;"></div>
+        <button class="btn-start" onclick="startGame()" style="display:none; margin-top: 40px;" id="start-btn">EMPEZAR
+            PARTIDA</button>
     </div>
 
     <div id="dashboard">

@@ -3,20 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chronobeats Online</title>
+    <title>Chronobeats Online - Portal</title>
+    <!-- Fuentes oficiales -->
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        body { background: #0d0d0d; color: white; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .btn { display: block; width: 280px; padding: 20px; border: 2px solid #00f2ff; margin: 10px; text-align: center; color: #00f2ff; text-decoration: none; font-weight: bold; border-radius: 50px; text-transform: uppercase; transition: 0.3s; }
-        .btn:hover { background: #00f2ff; color: black; }
-        h1 { color: white; font-size: 3em; text-shadow: 0 0 10px #00f2ff; margin-bottom: 30px; }
+        :root {
+            --neon: #00f2ff;
+            --bg: #0d0d0d;
+            --accent: #ff0055;
+            --gold: #ffd700;
+        }
+
+        body { 
+            background: var(--bg); 
+            color: #fff; 
+            font-family: 'Montserrat', sans-serif; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            min-height: 100vh; 
+            margin: 0; 
+            overflow: hidden;
+            padding: 20px;
+        }
+
+        .logo {
+            font-family: 'Bungee';
+            font-size: 2em;
+            color: var(--neon);
+            text-shadow: 0 0 20px var(--neon);
+            text-align: center;
+            margin-bottom: 40px;
+            letter-spacing: 2px;
+        }
+
+        .btn-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .btn { 
+            display: block; 
+            width: 320px; 
+            padding: 22px; 
+            border: 2px solid #333; 
+            text-align: center; 
+            color: #888; 
+            text-decoration: none; 
+            font-family: 'Bungee';
+            font-size: 0.9em;
+            border-radius: 50px; 
+            text-transform: uppercase; 
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            letter-spacing: 1px;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .btn:hover { 
+            border-color: var(--neon); 
+            color: var(--neon); 
+            background: rgba(0, 242, 255, 0.05);
+            box-shadow: 0 0 30px rgba(0, 242, 255, 0.2);
+            transform: translateY(-3px) scale(1.02);
+        }
+
+        .btn-gold {
+            border-color: #444;
+            color: #aaa;
+        }
+
+        .btn-gold:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+            background: rgba(255, 215, 0, 0.05);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.2);
+        }
     </style>
 </head>
 <body>
-    <h1>CHRONOBEATS</h1>
-    <!-- PRUEBA ESTOS ENLACES. Si fallan, quítales el "digital/" -->
-    <a href="host_digital.html" class="btn">CENTRO DE CONTROL (Tablet)</a>
-    <a href="player_digital.html" class="btn">MANDO JUGADOR (Móvil)</a>
+    <div class="logo">CHRONOBEATS</div>
     
-    <p style="color: #444; margin-top: 50px; font-size: 0.8em;">SI DAN ERROR 404, REVISA SI HAS SUBIDO LA CARPETA 'digital' O SOLO LOS ARCHIVOS SUELTOS</p>
+    <div class="btn-container">
+        <!-- Rutas relativas para misma carpeta -->
+        <a href="host_digital.html" class="btn btn-gold">CENTRO DE CONTROL <span style="font-size: 0.7em; opacity: 0.7;">(Tablet)</span></a>
+        <a href="player_digital.html" class="btn">MANDO JUGADOR <span style="font-size: 0.7em; opacity: 0.7;">(Móvil)</span></a>
+    </div>
 </body>
 </html>
