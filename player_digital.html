@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>PLAYER - CHRONOBEATS DIGITAL</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Montserrat:wght@400;700&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <style>
+        :root {
+            --neon: #00f2ff;
+            --bg: #0d0d0d;
+            --accent: #ff0055;
+            --gold: #ffd700;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: var(--bg);
+            color: #fff;
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* --- PANTALLA DE LOGIN --- */
+        #login-screen {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .logo {
+            font-family: 'Bungee';
+            font-size: 2.5em;
+            color: var(--neon);
+            text-shadow: 0 0 20px var(--neon);
+            margin-bottom: 40px;
+        }
+
+        input {
+            background: #1a1a1a;
+            border: 2px solid #333;
+            color: #fff;
+            padding: 15px;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 300px;
+            margin-bottom: 15px;
+            font-size: 1em;
+            text-align: center;
+            font-family: 'Bungee';
+        }
+
+        input:focus {
+            border-color: var(--neon);
+            outline: none;
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.2);
+        }
+
+        .btn {
+            background: var(--neon);
+            color: #000;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-family: 'Bungee';
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: 0.3s;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+            opacity: 0.8;
+        }
+
+        /* --- PANTALLA DE JUEGO --- */
+        #game-screen {
+            display: none;
+            flex: 1;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        /* Estado del Turno */
+        #turn-status {
+            font-family: 'Bungee';
+            color: var(--neon);
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+            letter-spacing: 1px;
+        }
+
+        /* Tarjeta Digital */
+        .card-container {
+            flex: 1;
+            perspective: 1000px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card {
+            width: 100%;
+            max-width: 280px;
+            height: 100%;
+            max-height: 400px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            aspect-ratio: 2/3;
+        }
+
+        .card.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 20px;
+            border: 3px solid var(--neon);
+            padding: 20px;
+        }
+
+        .card-front {
+            background: #111;
+            box-shadow: 0 0 30px rgba(0, 242, 255, 0.1);
+        }
+
+        .card-front .logo-mini {
+            font-family: 'Bungee';
+            font-size: 2em;
+            text-align: center;
+            color: var(--neon);
+            opacity: 0.5;
+        }
+
+        .card-back {
+            background: linear-gradient(145deg, #1a1a1a, #0a0a0a);
+            transform: rotateY(180deg);
+            text-align: center;
+            border-color: var(--accent);
+            box-shadow: 0 0 30px rgba(255, 0, 85, 0.2);
+        }
+
+        .card-back .artist {
+            font-size: 0.8em;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            color: #ccc;
+        }
+
+        .card-back .song {
+            font-family: 'Bungee';
+            font-size: 1.4em;
+            color: #fff;
+            margin-bottom: 20px;
+        }
+
+        .card-back .year {
+            font-family: 'Bungee';
+            font-size: 3em;
+            color: var(--accent);
+            text-shadow: 0 0 15px var(--accent);
+        }
+
+        /* Controles de Música */
+        .music-controls {
+            display: none;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .control-btn {
+            background: #1a1a1a;
+            border: 2px solid #333;
+            color: #fff;
+            padding: 15px;
+            border-radius: 15px;
+            font-family: 'Bungee';
+            font-size: 0.8em;
+            cursor: pointer;
+        }
+
+        .control-btn.play {
+            border-color: var(--neon);
+            color: var(--neon);
+        }
+
+        .control-btn.pause {
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+
+        .control-btn.stop {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* Botón de Apuesta */
+        #bet-btn {
+            display: none;
+            margin-top: 20px;
+            background: transparent;
+            border: 2px dashed var(--gold);
+            color: var(--gold);
+        }
+
+        /* Indicador de Espera */
+        #waiting-msg {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            opacity: 0.5;
+            font-family: 'Bungee';
+            font-size: 0.8em;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- PANTALLA DE IDENTIFICACIÓN -->
+    <div id="login-screen">
+        <div class="logo">CHRONOBEATS</div>
+        <p style="color: #888; margin-bottom: 20px;">Introduce el código de la tablet</p>
+        <input type="text" id="host-id" placeholder="CÓDIGO SALA" maxlength="6">
+        <input type="text" id="player-name" placeholder="TU NOMBRE" maxlength="12">
+        <button class="btn" onclick="conectar()">UNIRSE AL BEAT</button>
+    </div>
+
+    <!-- PANTALLA DE JUEGO -->
+    <div id="game-screen">
+        <div id="turn-status">TURNO DE: <span id="current-player-ui">---</span></div>
+
+        <div class="card-container">
+            <div id="card" class="card">
+                <div class="card-face card-front">
+                    <div class="logo-mini">CHRONO<br>BEATS</div>
+                </div>
+                <div class="card-face card-back">
+                    <div class="artist" id="card-artist">ARTISTA</div>
+                    <div class="song" id="card-song">TÍTULO CANCIÓN</div>
+                    <div class="year" id="card-year">1999</div>
+                </div>
+            </div>
+            <div id="waiting-msg">ESPERANDO SIGUIENTE TRACK...</div>
+        </div>
+
+        <div class="music-controls" id="my-controls">
+            <button class="control-btn play" onclick="sendCmd('PLAY')">PLAY</button>
+            <button class="control-btn pause" onclick="sendCmd('PAUSE')">PAUSE</button>
+            <button class="control-btn stop" onclick="sendCmd('STOP')">STOP</button>
+        </div>
+
+        <button id="bet-btn" class="btn" onclick="sendCmd('BET')">💎 APOSTAR FICHA</button>
+    </div>
+
+    <script>
+        let peer;
+        let conn;
+        let myId = "CB-" + Math.floor(Math.random() * 999);
+        let playerName = "";
+
+        function conectar() {
+            var hostIdInput = document.getElementById('host-id');
+            var playerNameInput = document.getElementById('player-name');
+            var hostId = hostIdInput.value.trim().toUpperCase();
+            playerName = playerNameInput.value.trim();
+
+            if (!hostId || !playerName) return alert("Rellena los campos");
+
+            if (typeof Peer === 'undefined') {
+                return alert("La librería de conexión no ha cargado. Revisa tu conexión a internet.");
+            }
+
+            peer = new Peer(myId);
+
+            peer.on('open', function () {
+                conn = peer.connect("CB-HOST-" + hostId);
+
+                conn.on('open', function () {
+                    conn.send({ type: 'JOIN', name: playerName });
+                    document.getElementById('login-screen').style.display = 'none';
+                    document.getElementById('game-screen').style.display = 'flex';
+                });
+
+                conn.on('data', function (data) {
+                    handleGameData(data);
+                });
+
+                conn.on('close', function () {
+                    alert("Conexión perdida con el Host");
+                    location.reload();
+                });
+            });
+
+            peer.on('error', function (err) {
+                alert("Error al conectar. ¿Seguro que el código es correcto?");
+                console.error(err);
+            });
+        }
+
+        function handleGameData(data) {
+            console.log("Msg recibido:", data);
+
+            if (data.type === 'STATE_UPDATE') {
+                document.getElementById('current-player-ui').innerText = data.activePlayer.name;
+
+                var isMyTurn = data.activePlayer.id === myId;
+                var controls = document.getElementById('my-controls');
+                var betBtn = document.getElementById('bet-btn');
+                var waiting = document.getElementById('waiting-msg');
+                var card = document.getElementById('card');
+
+                // Mostrar/Ocultar controles
+                controls.style.display = isMyTurn ? 'grid' : 'none';
+                betBtn.style.display = (!isMyTurn && data.gameState === 'PLAYING') ? 'block' : 'none';
+
+                // Manejo de la carta
+                if (data.currentTrack) {
+                    waiting.style.display = 'none';
+                    card.style.display = 'block';
+                    document.getElementById('card-artist').innerText = data.currentTrack.artist;
+                    document.getElementById('card-song').innerText = data.currentTrack.song;
+                    document.getElementById('card-year').innerText = data.currentTrack.year;
+
+                    if (data.revealed) {
+                        card.classList.add('flipped');
+                    } else {
+                        card.classList.remove('flipped');
+                    }
+                } else {
+                    card.style.display = 'none';
+                    waiting.style.display = 'block';
+                }
+            }
+        }
+
+        function sendCmd(cmd) {
+            if (conn && conn.open) {
+                conn.send({ type: 'COMMAND', action: cmd });
+            }
+        }
+    </script>
+</body>
+
+</html>

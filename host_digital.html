@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HOST - CHRONOBEATS DIGITAL</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Montserrat:wght@400;700&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <style>
+        :root {
+            --neon: #00f2ff;
+            --bg: #0d0d0d;
+            --accent: #ff0055;
+            --gold: #ffd700;
+            --card-bg: #1a1a1a;
+        }
+
+        body {
+            background: var(--bg);
+            color: #fff;
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .logo {
+            font-family: 'Bungee';
+            font-size: 2.5em;
+            color: var(--neon);
+            text-shadow: 0 0 20px var(--neon);
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        /* --- LOBBY --- */
+        #lobby {
+            text-align: center;
+            max-width: 600px;
+            margin: auto;
+            padding-top: 50px;
+        }
+
+        .room-code {
+            font-family: 'Bungee';
+            font-size: 4em;
+            color: var(--gold);
+            letter-spacing: 10px;
+            margin: 20px 0;
+        }
+
+        .player-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .player-tag {
+            background: #222;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid #444;
+            font-family: 'Bungee';
+            font-size: 0.8em;
+        }
+
+        /* --- DASHBOARD --- */
+        #dashboard {
+            display: none;
+            grid-template-columns: 350px 1fr;
+            gap: 30px;
+            max-width: 1400px;
+            margin: auto;
+        }
+
+        /* Lateral: Leaderboard & Status */
+        .sidebar {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 20px;
+            border-radius: 20px;
+            border: 1px solid #333;
+        }
+
+        .status-box {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #222;
+            padding-bottom: 20px;
+        }
+
+        .active-player-name {
+            font-family: 'Bungee';
+            font-size: 1.5em;
+            color: var(--neon);
+        }
+
+        .leaderboard h2 {
+            font-family: 'Bungee';
+            font-size: 1em;
+            color: var(--gold);
+            margin-bottom: 20px;
+        }
+
+        .leader-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            background: #111;
+            padding: 10px 15px;
+            border-radius: 8px;
+        }
+
+        .leader-item.active {
+            border-left: 4px solid var(--neon);
+            background: #1a1a1a;
+        }
+
+        .score {
+            color: var(--neon);
+            font-family: 'Bungee';
+        }
+
+        /* Centro: Player & Board */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Reproductor Invisible/Pequeño */
+        #player-container {
+            width: 100%;
+            height: 200px;
+            background: #000;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+            border: 2px solid #222;
+        }
+
+        #youtube-player {
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        /* Validación de Carta */
+        .validation-area {
+            background: #111;
+            padding: 20px;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .val-card {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid var(--neon);
+            width: 100%;
+        }
+
+        .card-details {
+            flex: 1;
+        }
+
+        .card-details h3 {
+            margin: 0;
+            font-family: 'Bungee';
+            font-size: 1.2em;
+        }
+
+        .card-details p {
+            margin: 5px 0 0 0;
+            color: #888;
+        }
+
+        .reveal-btn {
+            background: var(--gold);
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-family: 'Bungee';
+            cursor: pointer;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .btn-val {
+            flex: 1;
+            padding: 20px;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Bungee';
+            font-size: 1em;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-ok {
+            background: #00ff88;
+            color: #000;
+        }
+
+        .btn-fail {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .btn-val:hover {
+            transform: scale(1.02);
+            filter: brightness(1.1);
+        }
+
+        /* Timeline View */
+        .timeline-grid {
+            display: grid;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .player-row {
+            background: #161616;
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .slots {
+            display: flex;
+            gap: 5px;
+            overflow-x: auto;
+            padding: 5px 0;
+        }
+
+        .slot {
+            min-width: 50px;
+            height: 30px;
+            background: #222;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #444;
+            border: 1px dashed #333;
+        }
+
+        .slot.filled {
+            background: var(--neon);
+            color: #000;
+            font-weight: bold;
+            border-style: solid;
+        }
+
+        .btn-start {
+            background: var(--neon);
+            color: #000;
+            border: none;
+            padding: 20px 60px;
+            border-radius: 50px;
+            font-family: 'Bungee';
+            font-size: 1.4em;
+            cursor: pointer;
+            margin-top: 30px;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .playing-indicator {
+            color: var(--accent);
+            font-family: 'Bungee';
+            font-size: 0.7em;
+            animation: pulse 1.5s infinite;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="logo">CHRONOBEATS DIGITAL</div>
+
+    <!-- PANTALLA DE ESPERA (LOBBY) -->
+    <div id="lobby">
+        <p style="color: #666;">CÓDIGO DE LA SALA</p>
+        <div class="room-code" id="join-code">------</div>
+        <p>Los jugadores deben entrar en sus móviles y poner este código.</p>
+
+        <div class="player-list" id="lobby-players">
+            <!-- Dinámico -->
+        </div>
+
+        <button class="btn-start" onclick="startGame()" style="display:none;" id="start-btn">EMPEZAR PARTIDA</button>
+    </div>
+
+    <!-- PANTALLA DE JUEGO (DASHBOARD) -->
+    <div id="dashboard">
+        <div class="sidebar">
+            <div class="status-box">
+                <p style="font-size: 0.7em; color: #888; margin-bottom: 5px;">TURNO ACTUAL</p>
+                <div class="active-player-name" id="ui-current-player">ADRIÁN</div>
+                <div id="playback-status" class="playing-indicator" style="display:none;">• ESCUCHANDO...</div>
+            </div>
+
+            <div class="leaderboard">
+                <h2>LEADERBOARD</h2>
+                <div id="leaderboard-list">
+                    <!-- Dinámico -->
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div id="player-container">
+                <div id="youtube-player"></div>
+                <div id="player-msg"
+                    style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background: rgba(0,0,0,0.8); font-family:'Bungee'; text-align:center; padding:20px;">
+                    ESPERANDO ACCIÓN DEL JUGADOR
+                </div>
+            </div>
+
+            <div class="validation-area">
+                <div class="val-card" id="val-card-ui" style="display:none;">
+                    <div class="card-details">
+                        <p style="font-size: 0.6em; color: var(--neon);">CARTA EN JUEGO</p>
+                        <h3 id="ui-card-title">Título de la Canción</h3>
+                        <p id="ui-card-info">Artista - 1985</p>
+                    </div>
+                </div>
+
+                <div class="actions" id="validation-buttons" style="display:none;">
+                    <button class="btn-val btn-ok" onclick="validateResult(true)">✓ CORRECTO</button>
+                    <button class="btn-val btn-fail" onclick="validateResult(false)">✗ ERROR</button>
+                </div>
+
+                <div id="host-instructions">
+                    CARGANDO SIGUIENTE TRACK...
+                </div>
+            </div>
+
+            <div class="timeline-grid" id="global-timelines">
+                <!-- Líneas temporales de todos -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let peer;
+        let roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+        let players = [];
+        let connections = {};
+        let songs = [];
+        let currentSongIdx = -1;
+        let activePlayerIdx = 0;
+        let isRevealed = false;
+        let youtubeReady = false;
+        let ytPlayer;
+
+        // PeerJS Setup - MOVIDO AL PRINCIPIO PARA VER EL CÓDIGO INMEDIATAMENTE
+        var joinCodeEl = document.getElementById('join-code');
+        if (joinCodeEl) joinCodeEl.innerText = roomCode;
+
+        function initPeer() {
+            if (typeof Peer === 'undefined') {
+                console.error('PeerJS no cargado. Reintentando...');
+                setTimeout(initPeer, 1000);
+                return;
+            }
+
+            peer = new Peer("CB-HOST-" + roomCode);
+
+            peer.on('open', function (id) {
+                console.log('Host ID:', id);
+            });
+
+            peer.on('connection', function (conn) {
+                conn.on('data', function (data) {
+                    if (data.type === 'JOIN') {
+                        var newPlayer = {
+                            id: conn.peer,
+                            name: data.name,
+                            score: 0,
+                            cards: [],
+                            tokens: 2
+                        };
+                        players.push(newPlayer);
+                        connections[conn.peer] = conn;
+                        updateLobby();
+                    } else if (data.type === 'COMMAND') {
+                        handlePlayerCommand(conn.peer, data.action);
+                    }
+                });
+            });
+        }
+
+        // Cargar canciones al inicio
+        fetch('lista_final.txt')
+            .then(function (res) { return res.text(); })
+            .then(function (text) {
+                songs = text.split('\n')
+                    .map(function (l) {
+                        var parts = l.split('|');
+                        var artist = parts[0];
+                        var song = parts[1];
+                        var year = parts[2];
+                        var url = parts[3];
+                        var m = url ? url.match(/[?&]v=([^&#]+)|youtu\.be\/([^?&#]+)/) : null;
+                        return { artist: artist, song: song, year: year, id: m ? (m[1] || m[2]) : null };
+                    })
+                    .filter(function (s) { return s.id; });
+                // Mezclar canciones
+                songs.sort(function () { return Math.random() - 0.5; });
+            })
+            .catch(function (err) {
+                console.error("Error cargando canciones:", err);
+                alert("No se pudo cargar 'lista_final.txt'. Asegúrate de que el archivo existe y estás usando un servidor local.");
+            });
+
+        // YouTube IFrame API
+        function onYouTubeIframeAPIReady() {
+            if (typeof YT === 'undefined') return;
+            ytPlayer = new YT.Player('youtube-player', {
+                height: '100%', width: '100%',
+                playerVars: { 'autoplay': 0, 'controls': 0, 'showinfo': 0, 'modestbranding': 1 },
+                events: { 'onReady': function () { youtubeReady = true; } }
+            });
+        }
+
+        // Iniciar PeerJS tras una pequeña espera
+        setTimeout(initPeer, 500);
+
+        function updateLobby() {
+            var list = document.getElementById('lobby-players');
+            var html = "";
+            for (var i = 0; i < players.length; i++) {
+                html += '<div class="player-tag">' + players[i].name + '</div>';
+            }
+            list.innerHTML = html;
+            if (players.length >= 1) document.getElementById('start-btn').style.display = 'inline-block';
+        }
+
+        function startGame() {
+            document.getElementById('lobby').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'grid';
+            nextTurn();
+        }
+
+        function nextTurn() {
+            currentSongIdx++;
+            isRevealed = false;
+
+            // Actualizar UI del Host
+            var song = songs[currentSongIdx];
+            if (!song) {
+                alert("¡Fin de la lista de canciones!");
+                return;
+            }
+            document.getElementById('ui-card-title').innerText = song.song;
+            document.getElementById('ui-card-info').innerText = song.artist + " - " + song.year;
+            document.getElementById('val-card-ui').style.display = 'flex';
+            document.getElementById('validation-buttons').style.display = 'none';
+            document.getElementById('host-instructions').innerText = "EL JUGADOR ESTÁ ESCUCHANDO...";
+            document.getElementById('ui-current-player').innerText = players[activePlayerIdx].name;
+
+            // Cargar en YouTube (pero no dar play aún)
+            ytPlayer.loadVideoById(song.id);
+            ytPlayer.pauseVideo();
+
+            syncState();
+        }
+
+        function handlePlayerCommand(peerId, action) {
+            var activePlayer = players[activePlayerIdx];
+            if (peerId !== activePlayer.id && action !== 'BET') return;
+
+            switch (action) {
+                case 'PLAY':
+                    ytPlayer.playVideo();
+                    document.getElementById('player-msg').style.display = 'none';
+                    document.getElementById('playback-status').style.display = 'block';
+                    break;
+                case 'PAUSE':
+                    ytPlayer.pauseVideo();
+                    document.getElementById('playback-status').style.display = 'none';
+                    break;
+                case 'STOP':
+                    ytPlayer.stopVideo();
+                    document.getElementById('playback-status').style.display = 'none';
+                    document.getElementById('validation-buttons').style.display = 'flex';
+                    document.getElementById('host-instructions').innerText = "¿HA ACERTADO?";
+                    break;
+                case 'BET':
+                    // Lógica de apuesta pendiente (restar fichas)
+                    console.log("Apuesta de:", peerId);
+                    break;
+            }
+        }
+
+        function validateResult(isOk) {
+            isRevealed = true;
+            if (isOk) {
+                players[activePlayerIdx].score++;
+                players[activePlayerIdx].cards.push(songs[currentSongIdx].year);
+                players[activePlayerIdx].cards.sort();
+            }
+
+            syncState();
+
+            // Esperar 3 segundos para que vean el resultado y pasar turno
+            document.getElementById('validation-buttons').style.display = 'none';
+            document.getElementById('host-instructions').innerText = "PASANDO AL SIGUIENTE...";
+
+            setTimeout(function () {
+                activePlayerIdx = (activePlayerIdx + 1) % players.length;
+                nextTurn();
+            }, 4000);
+        }
+
+        function syncState() {
+            var state = {
+                type: 'STATE_UPDATE',
+                gameState: 'PLAYING',
+                activePlayer: { id: players[activePlayerIdx].id, name: players[activePlayerIdx].name },
+                currentTrack: songs[currentSongIdx],
+                revealed: isRevealed
+            };
+
+            // Notificar a todos
+            for (var id in connections) {
+                if (connections.hasOwnProperty(id)) {
+                    connections[id].send(state);
+                }
+            }
+
+            updateUI();
+        }
+
+        function updateUI() {
+            // Leaderboard
+            var leaderList = document.getElementById('leaderboard-list');
+            var sortedPlayers = players.slice().sort(function (a, b) { return b.score - a.score; });
+            var html = "";
+            for (var i = 0; i < sortedPlayers.length; i++) {
+                var p = sortedPlayers[i];
+                var isActive = p.id === players[activePlayerIdx].id;
+                html += '<div class="leader-item ' + (isActive ? 'active' : '') + '">' +
+                    '<span>' + p.name + '</span>' +
+                    '<span class="score">' + p.score + ' ptos</span>' +
+                    '</div>';
+            }
+            leaderList.innerHTML = html;
+
+            // Timelines
+            var timelineBox = document.getElementById('global-timelines');
+            var timelinesHtml = "";
+            for (var j = 0; j < players.length; j++) {
+                var p2 = players[j];
+                timelinesHtml += '<div class="player-row">' +
+                    '<div style="font-size: 0.7em; color: #888; margin-bottom: 5px;">' + p2.name + '</div>' +
+                    '<div class="slots">';
+                for (var k = 0; k < 10; k++) {
+                    var cardYear = p2.cards[k];
+                    timelinesHtml += '<div class="slot ' + (cardYear ? 'filled' : '') + '">' +
+                        (cardYear || '') +
+                        '</div>';
+                }
+                timelinesHtml += '</div></div>';
+            }
+            timelineBox.innerHTML = timelinesHtml;
+        }
+    </script>
+</body>
+
+</html>
