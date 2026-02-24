@@ -597,10 +597,12 @@
         function renderBetSlot(idx, bets, activeGuess, amIActive) {
             var occupants = [];
             var imIn = false;
+            var isTakenByOther = false;
             for (var pid in bets) {
                 if (bets[pid] === idx) {
-                    occupants.push(pid === myId ? "YO" : "?");
                     if (pid === myId) imIn = true;
+                    else isTakenByOther = true;
+                    occupants.push(pid === myId ? "YO" : "?");
                 }
             }
 
@@ -611,18 +613,28 @@
             if (occupants.length > 0) cls += " occupied";
             if (imIn) cls += " my-bet";
 
-            // Bloqueo: si soy desafiante y el activo ya marcó este sitio
-            if (!amIActive && isGuess) cls += " blocked";
+            // Bloqueo: si el hueco está pillado por el activo (y no soy yo) o por otro desafiante
+            var blockedForMe = false;
+            if (!amIActive && isGuess) blockedForMe = true;
+            if (isTakenByOther) blockedForMe = true;
+            // El activo no puede pisar a un desafiante
+            if (amIActive && isTakenByOther) blockedForMe = true;
+
+            if (blockedForMe) cls += " blocked";
 
             var label = "";
             if (isGuess) label = "X";
             else if (imIn) label = "YO";
-            else if (occupants.length > 0) label = occupants.length;
+            else if (isTakenByOther) label = "🔘";
 
-            return '<div class="' + cls + '" onclick="interactuarSlot(' + idx + ', ' + amIActive + ', ' + isGuess + ')">' + label + '</div>';
+            return '<div class="' + cls + '" onclick="interactuarSlot(' + idx + ', ' + amIActive + ', ' + isGuess + ', ' + isTakenByOther + ')">' + label + '</div>';
         }
 
-        function interactuarSlot(idx, amIActive, isGuess) {
+        function interactuarSlot(idx, amIActive, isGuess, isTakenByOther) {
+            if (isTakenByOther) {
+                alert("¡Este hueco ya lo ha pillado otro jugador!");
+                return;
+            }
             if (amIActive) {
                 send('GUESS', idx);
             } else {

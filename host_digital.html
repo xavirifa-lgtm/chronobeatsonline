@@ -551,7 +551,11 @@
                 case 'BET':
                     // Apostar en un hueco específico (value = slotIndex)
                     var p = players.find(function (pl) { return pl.id === peerId; });
-                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 1 && !currentBets[peerId]) {
+                    // Comprobar si el hueco ya está ocupado por el activo o por otro desafiante
+                    var slotOccupied = (activeGuess === value);
+                    for (var pid in currentBets) { if (currentBets[pid] === value) slotOccupied = true; }
+
+                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 1 && !currentBets[peerId] && !slotOccupied) {
                         p.tokens--;
                         currentBets[peerId] = value;
                         syncState();
@@ -559,13 +563,25 @@
                     break;
                 case 'GUESS':
                     // Adivinanza del jugador activo (no gasta fichas)
-                    if (peerId === players[activePlayerIdx].id) {
+                    // Comprobar si el desafiante ya ocupó ese hueco (el activo puede "pisar" o no? El usuario dijo "una vez uno pone el resto no lo tendran disponible")
+                    var slotOccupiedByBet = false;
+                    for (var pid in currentBets) { if (currentBets[pid] === value) slotOccupiedByBet = true; }
+
+                    if (peerId === players[activePlayerIdx].id && !slotOccupiedByBet) {
                         activeGuess = value;
                         syncState();
                     }
                     break;
             }
             syncState();
+        }
+
+        function isSlotCorrect(slotIdx, songYear, timeline) {
+            if (timeline.length === 0) return true;
+            if (slotIdx === 0) return songYear <= timeline[0];
+            if (slotIdx === timeline.length) return songYear >= timeline[timeline.length - 1];
+            // En medio
+            return (songYear >= timeline[slotIdx - 1] && songYear <= timeline[slotIdx]);
         }
 
         function revealData() {
@@ -575,7 +591,31 @@
             document.getElementById('ui-card-song').innerText = s.song;
             document.getElementById('ui-card-year').innerText = s.year;
             document.getElementById('btn-reveal-host').style.display = 'none';
+
+            // Validación automática
+            var activeP = players[activePlayerIdx];
+            var isCorrect = false;
+            if (activeGuess !== null) {
+                isCorrect = isSlotCorrect(activeGuess, s.year, activeP.cards);
+            }
+
             document.getElementById('validation-buttons').style.display = 'flex';
+            if (isCorrect) {
+                document.getElementById('host-instructions').innerHTML = "<span style='color:#00ff00; font-size:1.5em;'>¡POSICIÓN CORRECTA! ✅</span><br>¿Acertó Artista/Canción?";
+                // Configurar botones para acierto
+                document.getElementById('validation-buttons').innerHTML = `
+                    <button class="btn-val btn-ok" onclick="validateResult(true, false)">SÍ (SOLO CARTA)</button>
+                    <button class="btn-val btn-ok" style="background:#ffd700;" onclick="validateResult(true, true)">SÍ (+ 🔵 FICHA)</button>
+                    <button class="btn-val btn-fail" onclick="validateResult(false, false)">FALLÓ (FORZAR)</button>
+                 `;
+            } else {
+                document.getElementById('host-instructions').innerHTML = "<span style='color:#ff4444; font-size:1.5em;'>POSICIÓN INCORRECTA ❌</span>";
+                // Configurar botones para fallo
+                document.getElementById('validation-buttons').innerHTML = `
+                    <button class="btn-val btn-fail" onclick="validateResult(false, false)">SIGUIENTE TURNO / ROBOS</button>
+                    <button class="btn-val btn-ok" onclick="validateResult(true, false)">EROR DEL SISTEMA (DAR CARTA)</button>
+                 `;
+            }
             syncState();
         }
 
@@ -603,8 +643,13 @@
                     var h = "";
                     for (var pid in currentBets) {
                         var p = players.find(x => x.id === pid);
-                        if (p) {
-                            h += '<button class="btn-val" style="background:var(--gold); color:#000;" onclick="awardToChallenger(\'' + pid + '\')">' + p.name + ' ACERTÓ</button>';
+                        var s = songs[currentSongIdx];
+                        var slotCorrect = isSlotCorrect(currentBets[pid], s.year, players[activePlayerIdx].cards);
+
+                        if (p && slotCorrect) {
+                            h += '<button class="btn-val" style="background:var(--gold); color:#000; border: 2px solid #00ff00;" onclick="awardToChallenger(\'' + pid + '\')">' + p.name + ' ROBÓ (✅)</button>';
+                        } else if (p) {
+                            h += '<button class="btn-val" style="background:#555; color:#888; cursor:not-allowed;" disabled>' + p.name + ' FALLÓ (❌)</button>';
                         }
                     }
                     document.getElementById('challenger-buttons').innerHTML = h;
