@@ -348,6 +348,16 @@
                             onclick="validateResult(true, true)">ACERTÓ TODO + <span class="neon-chip"></span></button>
                         <button class="btn-val btn-fail" onclick="validateResult(false, false)">FALLÓ</button>
                     </div>
+                    <div id="challenger-validation"
+                        style="display:none; margin-top: 15px; border-top: 1px solid #333; padding-top: 15px;">
+                        <p style="font-size: 0.7em; color: var(--gold); margin-bottom: 10px;">¿ALGÚN DESAFIANTE ACERTÓ
+                            EL HUECO?</p>
+                        <div id="challenger-buttons"
+                            style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;"></div>
+                        <button class="btn-val"
+                            style="background:#444; margin-top:10px; font-size: 0.6em; padding: 10px;"
+                            onclick="nextTurn()">NADIE ACERTÓ</button>
+                    </div>
                 </div>
                 <div id="host-instructions">ESPERANDO ACCIÓN...</div>
                 <div id="active-player-inventory" class="active-player-cards"></div>
@@ -361,6 +371,7 @@
     <script>
         var peer, roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
         var players = [], connections = {}, songs = [], currentSongIdx = -1, activePlayerIdx = 0, isRevealed = false;
+        var currentBets = {}; // playerId -> slotIndex
 
         // Seguimiento de tiempo para skips manuales
         var segundosAcumulados = 0;
@@ -443,9 +454,10 @@
 
         function nextTurn() {
             currentSongIdx++; isRevealed = false;
-            segundosAcumulados = 0; // Reset tiempo para nueva canción
+            segundosAcumulados = 0;
             momentoDeInicio = 0;
             isPlaying = false;
+            currentBets = {}; // Limpiar apuestas al cambiar de turno
             var s = songs[currentSongIdx];
             document.getElementById('ui-card-artist').innerText = "????";
             document.getElementById('ui-card-song').innerText = "????";
@@ -453,6 +465,7 @@
             document.getElementById('btn-reveal-host').style.display = 'block';
             document.getElementById('val-card-ui').style.display = 'block';
             document.getElementById('validation-buttons').style.display = 'none';
+            document.getElementById('challenger-validation').style.display = 'none';
             document.getElementById('ui-current-player').innerText = players[activePlayerIdx].name;
             document.getElementById('host-instructions').innerText = "ESPERANDO ACCIÓN...";
             document.getElementById('player-container').innerHTML = '<div id="youtube-player"></div>';
@@ -533,8 +546,17 @@
                         validateResult(true, false);
                     }
                     break;
+                case 'BET':
+                    // Apostar en un hueco específico (value = slotIndex)
+                    var p = players.find(function (pl) { return pl.id === peerId; });
+                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 1 && !currentBets[peerId]) {
+                        p.tokens--;
+                        currentBets[peerId] = value;
+                        syncState();
+                    }
+                    break;
             }
-            syncState(); // Sincronizar siempre después de comando
+            syncState();
         }
 
         function revealData() {
@@ -560,9 +582,44 @@
                     showWinner(players[activePlayerIdx].name);
                     return;
                 }
+                activePlayerIdx = (activePlayerIdx + 1) % players.length;
+                players[activePlayerIdx].canReload = true; // Resetear permiso de recarga
+                nextTurn();
+            } else {
+                // Si falla, dar opción a los desafiantes antes de pasar turno
+                var challengersExist = Object.keys(currentBets).length > 0;
+                if (challengersExist) {
+                    document.getElementById('validation-buttons').style.display = 'none';
+                    document.getElementById('challenger-validation').style.display = 'block';
+                    var h = "";
+                    for (var pid in currentBets) {
+                        var p = players.find(x => x.id === pid);
+                        if (p) {
+                            h += '<button class="btn-val" style="background:var(--gold); color:#000;" onclick="awardToChallenger(\'' + pid + '\')">' + p.name + ' ACERTÓ</button>';
+                        }
+                    }
+                    document.getElementById('challenger-buttons').innerHTML = h;
+                } else {
+                    activePlayerIdx = (activePlayerIdx + 1) % players.length;
+                    players[activePlayerIdx].canReload = true; // Resetear permiso de recarga
+                    nextTurn();
+                }
+            }
+        }
+
+        function awardToChallenger(pid) {
+            var p = players.find(x => x.id === pid);
+            if (p) {
+                p.score++;
+                p.cards.push(songs[currentSongIdx].year);
+                p.cards.sort();
+                if (p.score >= 10) {
+                    showWinner(p.name);
+                    return;
+                }
             }
             activePlayerIdx = (activePlayerIdx + 1) % players.length;
-            players[activePlayerIdx].canReload = true; // Resetear permiso de recarga
+            players[activePlayerIdx].canReload = true;
             nextTurn();
         }
 
@@ -593,7 +650,9 @@
                     isPlaying: isPlaying,
                     myCards: p ? p.cards : [],
                     myTokens: p ? p.tokens : 0,
-                    canReload: p ? p.canReload : false
+                    canReload: p ? p.canReload : false,
+                    activeTimeline: players[activePlayerIdx].cards,
+                    currentBets: currentBets
                 };
                 connections[id].send(state);
             }

@@ -339,6 +339,42 @@
             box-shadow: 0 0 8px #00f2fe, 0 0 15px #00f2fe;
         }
 
+        /* Slots de apuesta */
+        .bet-slot {
+            width: 30px;
+            height: 30px;
+            background: rgba(0, 242, 254, 0.1);
+            border: 2px dashed #00f2fe;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            margin: 4px auto;
+            font-size: 0.6em;
+            color: #00f2fe;
+            font-family: 'Bungee';
+            transition: 0.3s;
+        }
+
+        .bet-slot.occupied {
+            background: #00f2fe;
+            color: #000;
+            border-style: solid;
+            box-shadow: 0 0 8px #00f2fe;
+        }
+
+        .bet-slot.my-bet {
+            background: var(--gold);
+            border-color: var(--gold);
+            color: #000;
+            box-shadow: 0 0 12px var(--gold);
+        }
+
+        .bet-slot:active {
+            transform: scale(0.9);
+        }
+
         .spec-btn:disabled {
             opacity: 0.4;
             pointer-events: none;
@@ -363,6 +399,9 @@
     </div>
 
     <div id="game-screen">
+        <h4 id="inventory-title"
+            style="margin: 0 0 5px 0; font-family: 'Bungee'; font-size: 0.6em; color: #888; text-align: center;">MIS
+            CARTAS</h4>
         <div id="turn-status">TURNO DE: <span id="cur-player">---</span></div>
         <div class="chip-display" id="my-tokens-ui">MIS FICHAS: <span class="neon-chip"></span><span
                 class="neon-chip"></span></div>
@@ -502,12 +541,27 @@
                     document.getElementById('card').classList.remove('flipped');
                 }
 
-                if (data.myCards) {
-                    var h = "";
-                    data.myCards.forEach(function (year) {
-                        h += '<div class="card-row">' + year + '</div>';
-                    });
-                    document.getElementById('my-cards-list').innerHTML = h;
+                if (isMyTurn) {
+                    document.getElementById('inventory-title').innerText = "MIS CARTAS";
+                    if (data.myCards) {
+                        var h = "";
+                        data.myCards.forEach(function (year) {
+                            h += '<div class="card-row">' + year + '</div>';
+                        });
+                        document.getElementById('my-cards-list').innerHTML = h;
+                    }
+                } else {
+                    document.getElementById('inventory-title').innerText = "CRONOLOGÍA DE " + data.activePlayer.name;
+                    if (data.activeTimeline) {
+                        var h = "";
+                        // Slot inicial
+                        h += renderBetSlot(0, data.currentBets);
+                        data.activeTimeline.forEach(function (year, idx) {
+                            h += '<div class="card-row" style="border-color: #444; color: #888;">' + year + '</div>';
+                            h += renderBetSlot(idx + 1, data.currentBets);
+                        });
+                        document.getElementById('my-cards-list').innerHTML = h;
+                    }
                 }
 
                 if (data.myTokens !== undefined) {
@@ -519,6 +573,30 @@
                     document.getElementById('btn-reload').disabled = (data.myTokens < 1 || data.canReload === false);
                 }
             }
+        }
+
+        function renderBetSlot(idx, bets) {
+            var occupants = [];
+            var imIn = false;
+            for (var pid in bets) {
+                if (bets[pid] === idx) {
+                    occupants.push(pid === myId ? "YO" : "?");
+                    if (pid === myId) imIn = true;
+                }
+            }
+
+            var cls = "bet-slot";
+            if (occupants.length > 0) cls += " occupied";
+            if (imIn) cls += " my-bet";
+
+            var label = imIn ? "YO" : (occupants.length > 0 ? occupants.length : "");
+            return '<div class="' + cls + '" onclick="apostar(' + idx + ')">' + label + '</div>';
+        }
+
+        function apostar(idx) {
+            // Evitar apostar si ya has apostado o no es tu turno o ya se reveló
+            // La lógica de fichas se checkea en el host, pero aquí bloqueamos UI
+            send('BET', idx);
         }
     </script>
 </body>
