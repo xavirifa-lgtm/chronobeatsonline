@@ -753,16 +753,16 @@
             // Limpiar confeti previo si existe
             if (window.victoryInterval) clearInterval(window.victoryInterval);
 
-            // V26: Lógica de Himnos
+            // V26.2: PRUEBA DE FUEGO (Forzar Queen para todos)
             var isXavi = name.toLowerCase().includes('xavi');
-            var songId = "";
+            var intendedSongId = "";
             var songTitle = "";
 
+            // Lógica de pool friki normal (para depuración visual)
             if (isXavi) {
-                songId = '04854XqcfCY'; // Queen - We Are The Champions
+                intendedSongId = '04854XqcfCY'; // Queen
                 songTitle = "Queen - We Are The Champions";
             } else {
-                // El "Pool de la Frikada" (V26.1 - IDs más estables)
                 var frikiPool = [
                     { id: 'hK_zK-pE2b8', t: "Chikilicuatre - Chiki Chiki" },
                     { id: 'vYt2l5_JbA8', t: "El Koala - Opá" },
@@ -775,11 +775,14 @@
                     { id: 'aG-Qy2wK1o4', t: "Paco Pil - Viva la Fiesta" }
                 ];
                 var picked = frikiPool[Math.floor(Math.random() * frikiPool.length)];
-                songId = picked.id;
+                intendedSongId = picked.id;
                 songTitle = picked.t;
             }
 
-            console.log("¿Es Xavi?", isXavi, "ID Canción:", songId);
+            // FORZAR QUEEN EN LA PRÁCTICA (V26.2 TEST)
+            var actualSongId = '04854XqcfCY';
+
+            console.log("Ganador:", name, "| Intención:", songTitle, "| Sonando real: Queen");
 
             // Info de depuración visual (V26.1)
             var debugInfo = document.getElementById('debug-song-info');
@@ -789,12 +792,11 @@
                 debugInfo.style.cssText = 'font-size: 12px; color: #555; margin-top: 20px; font-family: monospace; z-index: 3000;';
                 document.getElementById('winner-screen').appendChild(debugInfo);
             }
-            debugInfo.innerText = "SONANDO: " + songTitle + " (ID: " + songId + ")";
+            debugInfo.innerText = "TEST V26.2: Forzando Queen (Debería sonar: " + songTitle + ")";
 
             // Usar el contenedor de video para sonar (oculto)
             var container = document.getElementById('player-container');
-            // V26.1: youtube.com (no nocookie) + allow completo + posicionamiento mas robusto
-            container.innerHTML = '<iframe src="https://www.youtube.com/embed/' + songId + '?autoplay=1&mute=0&enablejsapi=1&playsinline=1" allow="autoplay; encrypted-media" style="width:300px;height:200px;border:none;"></iframe>';
+            container.innerHTML = '<iframe src="https://www.youtube.com/embed/' + actualSongId + '?autoplay=1&mute=0&enablejsapi=1&playsinline=1" allow="autoplay; encrypted-media" style="width:300px;height:200px;border:none;"></iframe>';
 
             // Confeti (Efectos V26)
             if (isXavi) {
