@@ -314,10 +314,13 @@
     </div>
     <div class="logo">CHRONOBEATS</div>
 
-    <div id="lobby">
-        <div class="room-code" id="join-code">------</div>
-        <div class="player-list" id="lobby-players"></div>
-        <button class="btn-start" onclick="startGame()" style="display:none;" id="start-btn">EMPEZAR PARTIDA</button>
+    <div id="room-code-display"
+        style="display:none; color: var(--gold); font-family: 'Bungee'; font-size: 1.2em; margin-bottom: 30px;">CÓDIGO:
+        <span id="current-room-code">------</span></div>
+    <div class="room-code" id="join-code">------</div>
+    <div class="player-list" id="lobby-players" style="margin-bottom: 40px;"></div>
+    <button class="btn-start" onclick="startGame()" style="display:none; margin-top: 40px;" id="start-btn">EMPEZAR
+        PARTIDA</button>
     </div>
 
     <div id="dashboard">
@@ -328,18 +331,6 @@
             </div>
             <div id="leaderboard-list"></div>
 
-            <!-- V25: Test de Sonidos -->
-            <div style="margin-top: 30px; border-top: 1px solid #333; padding-top: 15px;">
-                <p style="font-size: 0.6em; color: #666; margin-bottom: 10px; font-family: 'Bungee';">TEST VICTORIA</p>
-                <div style="display: flex; flex-direction: column; gap: 10px;">
-                    <button class="spec-btn"
-                        style="border-color: #ffd700; color: #ffd700; font-size: 0.6em; padding: 10px;"
-                        onclick="showWinner('Xavi')">TEST XAVI (QUEEN)</button>
-                    <button class="spec-btn"
-                        style="border-color: #ff4444; color: #ff4444; font-size: 0.6em; padding: 10px;"
-                        onclick="showWinner('Otro')">TEST OTROS (RODRÍGUEZ)</button>
-                </div>
-            </div>
         </div>
         <div class="main-content">
             <div id="player-container">
