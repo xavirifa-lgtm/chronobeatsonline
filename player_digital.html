@@ -468,6 +468,7 @@
 
     <script>
         var peer, conn, myId, playerName;
+        var lastState = null;
         function conectar() {
             var hostId = document.getElementById('host-id').value.toUpperCase().trim();
             playerName = document.getElementById('player-name').value.trim();
@@ -516,6 +517,7 @@
 
         function handle(data) {
             console.log("Evento:", data.type, data);
+            lastState = data;
             if (data.type === 'STATE_UPDATE') {
                 document.getElementById('cur-player').innerText = data.activePlayer.name;
 
@@ -639,7 +641,7 @@
                 send('GUESS', idx);
             } else {
                 // REGLA: Solo se puede apostar si el jugador activo YA ha puesto su carta
-                if (data && data.activeGuess === null) {
+                if (lastState && lastState.activeGuess === null) {
                     alert("Espera a que el jugador activo coloque primero su marca blanca.");
                     return;
                 }

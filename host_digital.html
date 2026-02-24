@@ -607,37 +607,39 @@
                 // Configurar botones para acierto
                 document.getElementById('validation-buttons').innerHTML = `
                     <button class="btn-val btn-ok" onclick="validateResult(true, false)">SÍ (SOLO CARTA)</button>
-                    <button class="btn-val btn-ok" style="background:#ffd700;" onclick="validateResult(true, true)">SÍ (+ 🔵 FICHA)</button>
+                    <button class="btn-val btn-ok" style="background:#ffd700; color:#000;" onclick="validateResult(true, true)">SÍ (+ 🔵 FICHA)</button>
                     <button class="btn-val btn-fail" onclick="validateResult(false, false)">FALLÓ (FORZAR)</button>
                  `;
             } else {
-                document.getElementById('host-instructions').innerHTML = "<span style='color:#ff4444; font-size:1.5em;'>POSICIÓN INCORRECTA ❌</span>";
+                document.getElementById('host-instructions').innerHTML = "<span style='color:#ff4444; font-size:1.5em;'>POSICIÓN INCORRECTA ❌</span><br>¿Pero acertó Artista/Canción?";
                 // Configurar botones para fallo
                 document.getElementById('validation-buttons').innerHTML = `
-                    <button class="btn-val btn-fail" onclick="validateResult(false, false)">SIGUIENTE TURNO / ROBOS</button>
-                    <button class="btn-val btn-ok" onclick="validateResult(true, false)">EROR DEL SISTEMA (DAR CARTA)</button>
+                    <button class="btn-val btn-fail" onclick="validateResult(false, false)">NO (SIGUIENTE/ROBOS)</button>
+                    <button class="btn-val btn-ok" style="background:#00f2fe; color:#000;" onclick="validateResult(false, true)">SÍ (+ 🔵 FICHA Y ROBOS)</button>
+                    <button class="btn-val btn-ok" onclick="validateResult(true, false)">ERROR SISTEMA (DAR CARTA)</button>
                  `;
             }
             syncState();
         }
 
-        function validateResult(isOk, perfect) {
-            if (isOk) {
+        function validateResult(isCardOk, isTokenOk) {
+            if (isTokenOk && players[activePlayerIdx].tokens < 5) {
+                players[activePlayerIdx].tokens++;
+            }
+
+            if (isCardOk) {
                 players[activePlayerIdx].score++;
                 players[activePlayerIdx].cards.push(songs[currentSongIdx].year);
                 players[activePlayerIdx].cards.sort();
-                if (perfect && players[activePlayerIdx].tokens < 5) {
-                    players[activePlayerIdx].tokens++;
-                }
                 if (players[activePlayerIdx].score >= 10) {
                     showWinner(players[activePlayerIdx].name);
                     return;
                 }
                 activePlayerIdx = (activePlayerIdx + 1) % players.length;
-                players[activePlayerIdx].canReload = true; // Resetear permiso de recarga
+                players[activePlayerIdx].canReload = true;
                 nextTurn();
             } else {
-                // Si falla, dar opción a los desafiantes antes de pasar turno
+                // Si no hay carta para el activo, ver si hay robos
                 var challengersExist = Object.keys(currentBets).length > 0;
                 if (challengersExist) {
                     document.getElementById('validation-buttons').style.display = 'none';
