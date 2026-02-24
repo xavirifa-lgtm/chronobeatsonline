@@ -551,24 +551,26 @@
                 case 'BET':
                     // Apostar en un hueco específico (value = slotIndex)
                     var p = players.find(function (pl) { return pl.id === peerId; });
+                    var valNum = parseInt(value);
                     // Comprobar si el hueco ya está ocupado por el activo o por otro desafiante
-                    var slotOccupied = (activeGuess === value);
-                    for (var pid in currentBets) { if (currentBets[pid] === value) slotOccupied = true; }
+                    var slotOccupied = (activeGuess === valNum);
+                    for (var pid in currentBets) { if (currentBets[pid] === valNum) slotOccupied = true; }
 
-                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 1 && !currentBets[peerId] && !slotOccupied) {
+                    // REGLA: Solo se puede apostar si el jugador activo YA ha puesto su carta (activeGuess != null)
+                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 1 && !currentBets[peerId] && !slotOccupied && activeGuess !== null) {
                         p.tokens--;
-                        currentBets[peerId] = value;
+                        currentBets[peerId] = valNum;
                         syncState();
                     }
                     break;
                 case 'GUESS':
                     // Adivinanza del jugador activo (no gasta fichas)
-                    // Comprobar si el desafiante ya ocupó ese hueco (el activo puede "pisar" o no? El usuario dijo "una vez uno pone el resto no lo tendran disponible")
+                    var valNum = parseInt(value);
                     var slotOccupiedByBet = false;
-                    for (var pid in currentBets) { if (currentBets[pid] === value) slotOccupiedByBet = true; }
+                    for (var pid in currentBets) { if (currentBets[pid] === valNum) slotOccupiedByBet = true; }
 
                     if (peerId === players[activePlayerIdx].id && !slotOccupiedByBet) {
-                        activeGuess = value;
+                        activeGuess = valNum;
                         syncState();
                     }
                     break;

@@ -638,6 +638,11 @@
             if (amIActive) {
                 send('GUESS', idx);
             } else {
+                // REGLA: Solo se puede apostar si el jugador activo YA ha puesto su carta
+                if (data && data.activeGuess === null) {
+                    alert("Espera a que el jugador activo coloque primero su marca blanca.");
+                    return;
+                }
                 if (isGuess) {
                     alert("¡Ese hueco ya lo ha elegido el jugador activo! Elige otro sitio para tu apuesta.");
                     return;
