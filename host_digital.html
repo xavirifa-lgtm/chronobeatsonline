@@ -332,8 +332,10 @@
                         style="display:block; margin: 15px auto;">REVELAR DATOS</button>
                     <div class="actions" id="validation-buttons"
                         style="display:none; gap: 10px; width: 100%; margin-top: 15px;">
-                        <button class="btn-val btn-ok" onclick="validateResult(true)">ACERTÓ</button>
-                        <button class="btn-val btn-fail" onclick="validateResult(false)">FALLÓ</button>
+                        <button class="btn-val btn-ok" onclick="validateResult(true, false)">ACERTÓ</button>
+                        <button class="btn-val btn-ok" style="background:#ffd700;"
+                            onclick="validateResult(true, true)">ACERTÓ TODO +🔘</button>
+                        <button class="btn-val btn-fail" onclick="validateResult(false, false)">FALLÓ</button>
                     </div>
                 </div>
                 <div id="host-instructions">ESPERANDO ACCIÓN...</div>
@@ -377,7 +379,7 @@
                             console.log("Reconexión de jugador:", data.name);
                             existing.id = conn.peer;
                         } else {
-                            players.push({ id: conn.peer, name: data.name, score: 1, cards: [] });
+                            players.push({ id: conn.peer, name: data.name, score: 1, cards: [], tokens: 2 });
                         }
                         connections[conn.peer] = conn;
                         updateLobby();
@@ -488,6 +490,20 @@
                         document.getElementById('host-instructions').innerText = "REPRODUCIENDO";
                     }
                     break;
+                case 'RELOAD_SONG':
+                    var p = players.find(function (pl) { return pl.id === peerId; });
+                    if (p && p.tokens >= 1) {
+                        p.tokens--;
+                        nextTurn();
+                    }
+                    break;
+                case 'AUTO_WIN':
+                    var p = players.find(function (pl) { return pl.id === peerId; });
+                    if (p && p.tokens >= 3) {
+                        p.tokens -= 3;
+                        validateResult(true, false);
+                    }
+                    break;
             }
         }
 
@@ -502,11 +518,14 @@
             syncState();
         }
 
-        function validateResult(isOk) {
+        function validateResult(isOk, perfect) {
             if (isOk) {
                 players[activePlayerIdx].score++;
                 players[activePlayerIdx].cards.push(songs[currentSongIdx].year);
                 players[activePlayerIdx].cards.sort();
+                if (perfect && players[activePlayerIdx].tokens < 5) {
+                    players[activePlayerIdx].tokens++;
+                }
                 if (players[activePlayerIdx].score >= 10) {
                     showWinner(players[activePlayerIdx].name);
                     return;
@@ -540,7 +559,9 @@
                     activePlayer: { id: players[activePlayerIdx].id, name: players[activePlayerIdx].name },
                     currentTrack: songs[currentSongIdx],
                     revealed: isRevealed,
-                    myCards: p ? p.cards : []
+                    isPlaying: isPlaying,
+                    myCards: p ? p.cards : [],
+                    myTokens: p ? p.tokens : 0
                 };
                 connections[id].send(state);
             }
@@ -549,7 +570,7 @@
 
         function updateUI() {
             var h = ""; players.slice().sort(function (a, b) { return b.score - a.score }).forEach(function (p) {
-                h += '<div class="leader-item ' + (p.id === players[activePlayerIdx].id ? 'active' : '') + '"><span>' + p.name + '</span><span class="score">' + p.score + ' p</span></div>';
+                h += '<div class="leader-item ' + (p.id === players[activePlayerIdx].id ? 'active' : '') + '"><span>' + p.name + ' (' + p.tokens + '🔘)</span><span class="score">' + p.score + ' p</span></div>';
             });
             document.getElementById('leaderboard-list').innerHTML = h;
 

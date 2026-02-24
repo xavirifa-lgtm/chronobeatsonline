@@ -278,21 +278,51 @@
         .vertical-cards {
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 4px;
         }
 
         .card-row {
             background: #1a1a1a;
             border: 1px solid #333;
-            padding: 8px;
-            border-radius: 8px;
+            padding: 5px;
+            border-radius: 6px;
             font-family: 'Bungee';
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 1.1em;
+            font-size: 0.9em;
             color: var(--neon);
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+            width: 80px;
+            margin: 0 auto;
+        }
+
+        .special-actions {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            max-width: 340px;
+            margin-bottom: 10px;
+            justify-content: center;
+        }
+
+        .spec-btn {
+            background: #222;
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            padding: 10px;
+            border-radius: 8px;
+            font-family: 'Bungee';
+            font-size: 0.7em;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .chip-display {
+            font-family: 'Bungee';
+            color: var(--gold);
+            font-size: 0.9em;
+            margin-bottom: 5px;
         }
     </style>
 </head>
@@ -307,6 +337,12 @@
 
     <div id="game-screen">
         <div id="turn-status">TURNO DE: <span id="cur-player">---</span></div>
+        <div class="chip-display" id="my-tokens-ui">MIS FICHAS: 🔘🔘</div>
+
+        <div class="special-actions" id="special-ctrl">
+            <button class="spec-btn" id="btn-autowin" onclick="send('AUTO_WIN')">COMPRAR CARTA (3🔘)</button>
+            <button class="spec-btn" id="btn-reload" onclick="send('RELOAD_SONG')">CAMBIAR CANCIÓN (1🔘)</button>
+        </div>
 
         <div class="music-controls" id="m-ctrl">
             <button class="ctrl-btn btn-play" onclick="send('PLAY')">PLAY</button>
@@ -408,6 +444,18 @@
                 document.getElementById('m-ctrl').style.display = isMyTurn ? 'grid' : 'none';
                 document.getElementById('s-ctrl').style.display = isMyTurn ? 'grid' : 'none';
 
+                // Botones Especiales (Solo mi turno y si no está revelada)
+                var specialCtrl = document.getElementById('special-ctrl');
+                if (isMyTurn && !data.revealed) {
+                    specialCtrl.style.display = 'flex';
+                    // COMPRAR (Antes de sonar y antes de revelar)
+                    document.getElementById('btn-autowin').style.display = (!data.isPlaying) ? 'block' : 'none';
+                    // CAMBIAR (Solo si está sonando y antes de revelar)
+                    document.getElementById('btn-reload').style.display = (data.isPlaying) ? 'block' : 'none';
+                } else {
+                    specialCtrl.style.display = 'none';
+                }
+
                 // Botón Apostar (solo si NO es mi turno y la carta NO está revelada)
                 document.getElementById('bet-btn').style.display = (!isMyTurn && !data.revealed) ? 'block' : 'none';
 
@@ -429,6 +477,15 @@
                         h += '<div class="card-row">' + year + '</div>';
                     });
                     document.getElementById('my-cards-list').innerHTML = h;
+                }
+
+                if (data.myTokens !== undefined) {
+                    var chips = "";
+                    for (var i = 0; i < data.myTokens; i++) chips += "🔘";
+                    document.getElementById('my-tokens-ui').innerText = "MIS FICHAS: " + chips;
+                    // Deshabilitar botones si no tiene fichas suficientes
+                    document.getElementById('btn-autowin').disabled = (data.myTokens < 3);
+                    document.getElementById('btn-reload').disabled = (data.myTokens < 1);
                 }
             }
         }
