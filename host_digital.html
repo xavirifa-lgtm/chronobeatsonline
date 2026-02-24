@@ -379,7 +379,7 @@
                             console.log("Reconexión de jugador:", data.name);
                             existing.id = conn.peer;
                         } else {
-                            players.push({ id: conn.peer, name: data.name, score: 1, cards: [], tokens: 2 });
+                            players.push({ id: conn.peer, name: data.name, score: 1, cards: [], tokens: 2, canReload: true });
                         }
                         connections[conn.peer] = conn;
                         updateLobby();
@@ -495,9 +495,17 @@
                     break;
                 case 'RELOAD_SONG':
                     var p = players.find(function (pl) { return pl.id === peerId; });
-                    if (p && p.tokens >= 1) {
+                    if (p && p.tokens >= 1 && p.canReload) {
                         p.tokens--;
-                        nextTurn();
+                        p.canReload = false; // Solo uno por turno
+                        isPlaying = false;
+                        container.innerHTML = ''; // Parar música
+                        currentSongIdx++; // Descartar y pasar a la siguiente
+                        segundosAcumulados = 0;
+                        momentoDeInicio = 0;
+                        document.getElementById('host-instructions').innerText = "CANCIÓN CAMBIADA (DALE A PLAY)";
+                        // NO llamamos a nextTurn(), el jugador sigue siendo el mismo
+                        syncState();
                     }
                     break;
                 case 'AUTO_WIN':
@@ -536,6 +544,7 @@
                 }
             }
             activePlayerIdx = (activePlayerIdx + 1) % players.length;
+            players[activePlayerIdx].canReload = true; // Resetear permiso de recarga
             nextTurn();
         }
 
@@ -565,7 +574,8 @@
                     revealed: isRevealed,
                     isPlaying: isPlaying,
                     myCards: p ? p.cards : [],
-                    myTokens: p ? p.tokens : 0
+                    myTokens: p ? p.tokens : 0,
+                    canReload: p ? p.canReload : false
                 };
                 connections[id].send(state);
             }
@@ -574,7 +584,7 @@
 
         function updateUI() {
             var h = ""; players.slice().sort(function (a, b) { return b.score - a.score }).forEach(function (p) {
-                h += '<div class="leader-item ' + (p.id === players[activePlayerIdx].id ? 'active' : '') + '"><span>' + p.name + ' (' + p.tokens + '🔘)</span><span class="score">' + p.score + ' p</span></div>';
+                h += '<div class="leader-item ' + (p.id === players[activePlayerIdx].id ? 'active' : '') + '"><span>' + p.name + ' (' + p.tokens + '🔵)</span><span class="score">' + p.score + ' p</span></div>';
             });
             document.getElementById('leaderboard-list').innerHTML = h;
 

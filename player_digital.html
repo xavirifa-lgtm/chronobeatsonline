@@ -323,6 +323,20 @@
             color: var(--gold);
             font-size: 0.9em;
             margin-bottom: 5px;
+            text-shadow: 0 0 5px #00f2fe;
+        }
+
+        .spec-btn:disabled {
+            opacity: 0.4;
+            pointer-events: none;
+            border-color: #444;
+            color: #444;
+        }
+
+        .spec-btn#btn-reload {
+            border-color: #00f2fe;
+            color: #00f2fe;
+            box-shadow: 0 0 10px rgba(0, 242, 254, 0.2);
         }
     </style>
 </head>
@@ -337,11 +351,11 @@
 
     <div id="game-screen">
         <div id="turn-status">TURNO DE: <span id="cur-player">---</span></div>
-        <div class="chip-display" id="my-tokens-ui">MIS FICHAS: 🔘🔘</div>
+        <div class="chip-display" id="my-tokens-ui">MIS FICHAS: 🔵🔵</div>
 
         <div class="special-actions" id="special-ctrl">
-            <button class="spec-btn" id="btn-autowin" onclick="send('AUTO_WIN')">COMPRAR CARTA (3🔘)</button>
-            <button class="spec-btn" id="btn-reload" onclick="send('RELOAD_SONG')">CAMBIAR CANCIÓN (1🔘)</button>
+            <button class="spec-btn" id="btn-autowin" onclick="send('AUTO_WIN')">COMPRAR CARTA (3🔵)</button>
+            <button class="spec-btn" id="btn-reload" onclick="send('RELOAD_SONG')">CAMBIAR CANCIÓN (1🔵)</button>
         </div>
 
         <div class="music-controls" id="m-ctrl">
@@ -451,8 +465,8 @@
                     console.log("Estado de botones:", data.isPlaying ? "PLAYING" : "STOPPED");
                     // COMPRAR (Solo si NO está sonando)
                     document.getElementById('btn-autowin').style.display = (!data.isPlaying) ? 'block' : 'none';
-                    // CAMBIAR (Solo si SÍ está sonando)
-                    document.getElementById('btn-reload').style.display = (data.isPlaying) ? 'block' : 'none';
+                    // CAMBIAR (Solo si SÍ está sonando y NO ha cambiado ya)
+                    document.getElementById('btn-reload').style.display = (data.isPlaying && data.canReload) ? 'block' : 'none';
                 } else {
                     specialCtrl.style.display = 'none';
                 }
@@ -482,11 +496,11 @@
 
                 if (data.myTokens !== undefined) {
                     var chips = "";
-                    for (var i = 0; i < data.myTokens; i++) chips += "🔘";
+                    for (var i = 0; i < data.myTokens; i++) chips += "🔵";
                     document.getElementById('my-tokens-ui').innerText = "MIS FICHAS: " + chips;
-                    // Deshabilitar botones si no tiene fichas suficientes
+                    // Deshabilitar botones si no tiene fichas suficientes o si ya recargó
                     document.getElementById('btn-autowin').disabled = (data.myTokens < 3);
-                    document.getElementById('btn-reload').disabled = (data.myTokens < 1);
+                    document.getElementById('btn-reload').disabled = (data.myTokens < 1 || data.canReload === false);
                 }
             }
         }
