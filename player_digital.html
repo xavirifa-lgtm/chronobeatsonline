@@ -442,7 +442,7 @@
             <button class="sk-btn sk-back" onclick="send('SKIP',-20)">-20s</button>
         </div>
 
-        <button id="bet-btn" onclick="send('BET')">💎 APOSTAR FICHA</button>
+        <!-- Botón Apostar eliminado para simplificar flujo (V20) -->
 
         <div class="card-container">
             <div id="card" class="card">
@@ -542,8 +542,7 @@
                     specialCtrl.style.display = 'none';
                 }
 
-                // Botón Apostar (solo si NO es mi turno y la carta NO está revelada)
-                document.getElementById('bet-btn').style.display = (!isMyTurn && !data.revealed) ? 'block' : 'none';
+                // Botón Apostar eliminado (V20)
 
                 // Mensaje de espera (solo si NO es mi turno)
                 document.getElementById('wait-msg').style.display = isMyTurn ? 'none' : 'block';
@@ -653,6 +652,7 @@
                     alert("¡Ese hueco ya lo ha elegido el jugador activo! Elige otro sitio para tu apuesta.");
                     return;
                 }
+                console.log("Rival intentando apostar en:", idx);
                 send('BET', idx);
             }
         }

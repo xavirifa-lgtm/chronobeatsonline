@@ -549,6 +549,7 @@
                     }
                     break;
                 case 'BET':
+                    console.log("[BET] de", peerId, "en slot", value);
                     var p = players.find(function (pl) { return pl.id === peerId; });
                     var valNum = parseInt(value);
                     if (isNaN(valNum)) break;
@@ -557,12 +558,16 @@
                     for (var pid in currentBets) { if (currentBets[pid] == valNum) slotOccupied = true; }
 
                     if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 1 && currentBets[peerId] === undefined && !slotOccupied && activeGuess !== null) {
+                        console.log("[OK] Apuesta aceptada para", p.name);
                         p.tokens--;
                         currentBets[peerId] = valNum;
                         syncState();
+                    } else {
+                        console.log("[FAIL] Apuesta rechazada. p:", !!p, "Tokens:", p ? p.tokens : 0, "Ya apostó?", p ? currentBets[peerId] !== undefined : false, "Slot ocupado?", slotOccupied, "Guess es", activeGuess);
                     }
                     break;
                 case 'GUESS':
+                    console.log("[GUESS] de", peerId, "en slot", value);
                     var p = players.find(function (pl) { return pl.id === peerId; });
                     var valNum = parseInt(value);
                     if (isNaN(valNum)) break;
@@ -571,8 +576,11 @@
                     for (var pid in currentBets) { if (currentBets[pid] == valNum) slotOccupiedByBet = true; }
 
                     if (p && p.id === players[activePlayerIdx].id && !slotOccupiedByBet && activeGuess === null) {
+                        console.log("[OK] Marca del activo fijada en", valNum);
                         activeGuess = valNum;
                         syncState();
+                    } else {
+                        console.log("[FAIL] Guess rechazado. ¿Ya hay marca?", activeGuess !== null);
                     }
                     break;
             }
