@@ -324,6 +324,19 @@
             font-size: 0.9em;
             margin-bottom: 5px;
             text-shadow: 0 0 5px #00f2fe;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .neon-chip {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            background: #00f2fe;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #00f2fe, 0 0 15px #00f2fe;
         }
 
         .spec-btn:disabled {
@@ -351,11 +364,14 @@
 
     <div id="game-screen">
         <div id="turn-status">TURNO DE: <span id="cur-player">---</span></div>
-        <div class="chip-display" id="my-tokens-ui">MIS FICHAS: 🔵🔵</div>
+        <div class="chip-display" id="my-tokens-ui">MIS FICHAS: <span class="neon-chip"></span><span
+                class="neon-chip"></span></div>
 
         <div class="special-actions" id="special-ctrl">
-            <button class="spec-btn" id="btn-autowin" onclick="send('AUTO_WIN')">COMPRAR CARTA (3🔵)</button>
-            <button class="spec-btn" id="btn-reload" onclick="send('RELOAD_SONG')">CAMBIAR CANCIÓN (1🔵)</button>
+            <button class="spec-btn" id="btn-autowin" onclick="send('AUTO_WIN')">COMPRAR CARTA (3 <span
+                    class="neon-chip" style="width:10px;height:10px;"></span>)</button>
+            <button class="spec-btn" id="btn-reload" onclick="send('RELOAD_SONG')">CAMBIAR CANCIÓN (1 <span
+                    class="neon-chip" style="width:10px;height:10px;"></span>)</button>
         </div>
 
         <div class="music-controls" id="m-ctrl">
@@ -495,9 +511,9 @@
                 }
 
                 if (data.myTokens !== undefined) {
-                    var chips = "";
-                    for (var i = 0; i < data.myTokens; i++) chips += "🔵";
-                    document.getElementById('my-tokens-ui').innerText = "MIS FICHAS: " + chips;
+                    var chipsHtml = "";
+                    for (var i = 0; i < data.myTokens; i++) chipsHtml += '<span class="neon-chip"></span>';
+                    document.getElementById('my-tokens-ui').innerHTML = "MIS FICHAS: " + chipsHtml;
                     // Deshabilitar botones si no tiene fichas suficientes o si ya recargó
                     document.getElementById('btn-autowin').disabled = (data.myTokens < 3);
                     document.getElementById('btn-reload').disabled = (data.myTokens < 1 || data.canReload === false);
