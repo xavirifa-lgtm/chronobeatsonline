@@ -315,8 +315,21 @@
     <div class="logo">CHRONOBEATS</div>
     <div id="lobby">
         <div class="room-code" id="join-code">------</div>
-        <div class="player-list" id="lobby-players" style="margin-bottom: 40px;"></div>
-        <button class="btn-start" onclick="startGame()" style="display:none; margin-top: 40px;" id="start-btn">EMPEZAR
+        <div class="player-list" id="lobby-players" style="margin-bottom: 20px;"></div>
+
+        <!-- NEW MODE SELECTOR -->
+        <div id="mode-selector" style="margin-bottom: 20px;">
+            <label
+                style="font-family: 'Bungee'; color: var(--neon); font-size: 1.2em; display: block; margin-bottom: 10px;">MODO
+                DE JUEGO</label>
+            <select id="game-mode-select"
+                style="padding: 10px; font-family: 'Montserrat'; font-size: 1em; border-radius: 8px; background: #222; color: #fff; border: 1px solid var(--neon);">
+                <option value="normal">CLÁSICO (Gana a los 10)</option>
+                <option value="rey">MODO REY (Adivina Año Final)</option>
+            </select>
+        </div>
+
+        <button class="btn-start" onclick="startGame()" style="display:none; margin-top: 20px;" id="start-btn">EMPEZAR
             PARTIDA</button>
     </div>
 
@@ -375,6 +388,11 @@
         var players = [], connections = {}, songs = [], currentSongIdx = -1, activePlayerIdx = 0, isRevealed = false;
         var currentBets = {}; // playerId -> slotIndex
         var activeGuess = null; // slotIndex del jugador activo
+
+        // Variables de estado del Modo Rey
+        var gameMode = 'normal';
+        var turnPhase = 'NORMAL'; // 'NORMAL', 'KING_SELECTION', 'KING_GUESS'
+        var kingOptions = []; // Array de opciones para los retadores
 
         // Seguimiento de tiempo para skips manuales
         var segundosAcumulados = 0;
@@ -449,6 +467,7 @@
         }
 
         function startGame() {
+            gameMode = document.getElementById('game-mode-select').value;
 
             // MECÁNICA INICIAL: Repartir una carta a cada jugador
             players.forEach(function (p) {
@@ -469,6 +488,35 @@
             isPlaying = false;
             currentBets = {}; // Limpiar apuestas al cambiar de turno
             activeGuess = null; // Limpiar adivinanza
+
+            // --- INICIO MODO REY CHECK ---
+            if (gameMode === 'rey' && players[activePlayerIdx] && players[activePlayerIdx].score >= 10) {
+                turnPhase = 'KING_SELECTION';
+                kingOptions = [];
+                // Calcular un número de cartas igual a (players.length - 1)
+                var numOptions = Math.max(1, players.length - 1);
+                for (var i = 0; i < numOptions; i++) {
+                    currentSongIdx++;
+                    kingOptions.push(songs[currentSongIdx]);
+                }
+
+                document.getElementById('ui-card-artist').innerText = "ELIGIENDO CARTA...";
+                document.getElementById('ui-card-song').innerText = "ESPERANDO RIVALES";
+                document.getElementById('ui-card-year').innerText = "----";
+                document.getElementById('btn-reveal-host').style.display = 'none';
+                document.getElementById('val-card-ui').style.display = 'block';
+                document.getElementById('validation-buttons').style.display = 'none';
+                document.getElementById('challenger-validation').style.display = 'none';
+                document.getElementById('ui-current-player').innerText = players[activePlayerIdx].name + " (REY)";
+                document.getElementById('host-instructions').innerText = "ESPERANDO A QUE LOS JUGADORES ELIJAN QUÉ CARTA TE TOCA...";
+                document.getElementById('player-container').innerHTML = '';
+                syncState();
+                return;
+            } else {
+                turnPhase = 'NORMAL';
+            }
+            // --- FIN MODO REY CHECK ---
+
             var s = songs[currentSongIdx];
             document.getElementById('ui-card-artist').innerText = "????";
             document.getElementById('ui-card-song').innerText = "????";
@@ -596,6 +644,47 @@
                         console.log("[FAIL] Guess rechazado. ¿Ya hay marca?", activeGuess !== null);
                     }
                     break;
+                case 'KING_SELECT_CARD':
+                    if (turnPhase !== 'KING_SELECTION') return;
+                    if (peerId === players[activePlayerIdx].id) return; // Rey no puede elegir
+
+                    var indexElegido = parseInt(value);
+                    if (indexElegido >= 0 && indexElegido < kingOptions.length) {
+                        var cartaElegida = kingOptions[indexElegido];
+                        songs[currentSongIdx] = cartaElegida;
+
+                        turnPhase = 'KING_GUESS';
+                        document.getElementById('ui-card-artist').innerText = cartaElegida.artist;
+                        document.getElementById('ui-card-song').innerText = cartaElegida.song;
+                        document.getElementById('ui-card-year').innerText = "????";
+                        document.getElementById('host-instructions').innerHTML = "CARTA ELEGIDA.<br>ESPERANDO A QUE EL REY INTRODUZCA EL AÑO...";
+                        document.getElementById('player-container').innerHTML = '<div id="youtube-player"></div>';
+                        syncState();
+                    }
+                    break;
+                case 'KING_GUESS':
+                    if (turnPhase !== 'KING_GUESS') return;
+                    if (peerId !== players[activePlayerIdx].id) return; // Solo Rey
+
+                    var guessedYear = parseInt(value);
+                    if (!isNaN(guessedYear)) {
+                        var s = songs[currentSongIdx];
+                        var actualYear = parseInt(s.year);
+
+                        document.getElementById('ui-card-year').innerText = actualYear;
+
+                        if (Math.abs(guessedYear - actualYear) <= 2) {
+                            showWinner(players[activePlayerIdx].name);
+                        } else {
+                            document.getElementById('host-instructions').innerHTML = "<span style='color:#ff4444; font-size:1.5em;'>¡FALLÓ!</span> El año era " + actualYear + ".";
+                            setTimeout(function () {
+                                activePlayerIdx = (activePlayerIdx + 1) % players.length;
+                                players[activePlayerIdx].canReload = true;
+                                nextTurn();
+                            }, 5000);
+                        }
+                    }
+                    break;
             }
             // Eliminamos el syncState duplicado que podría causar problemas de carrera
         }
@@ -677,7 +766,7 @@
                 players[activePlayerIdx].score++;
                 players[activePlayerIdx].cards.push(songs[currentSongIdx].year);
                 players[activePlayerIdx].cards.sort();
-                if (players[activePlayerIdx].score >= 10) {
+                if (players[activePlayerIdx].score >= 10 && gameMode === 'normal') {
                     showWinner(players[activePlayerIdx].name);
                     return;
                 }
@@ -723,7 +812,7 @@
                 p.score++;
                 p.cards.push(songs[currentSongIdx].year);
                 p.cards.sort();
-                if (p.score >= 10) {
+                if (p.score >= 10 && gameMode === 'normal') {
                     showWinner(p.name);
                     return;
                 }
@@ -810,7 +899,10 @@
                     canReload: p ? p.canReload : false,
                     activeTimeline: players[activePlayerIdx].cards,
                     currentBets: currentBets,
-                    activeGuess: activeGuess
+                    activeGuess: activeGuess,
+                    gameMode: gameMode,
+                    turnPhase: turnPhase,
+                    kingOptions: kingOptions
                 };
                 connections[id].send(state);
             }

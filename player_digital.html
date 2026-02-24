@@ -443,9 +443,11 @@
             <button class="sk-btn sk-back" onclick="send('SKIP',-20)">-20s</button>
         </div>
 
-        <!-- Botón Apostar eliminado para simplificar flujo (V20) -->
+        <div id="king-mode-ui"
+            style="display: none; width: 100%; max-width: 340px; margin-top: 10px; text-align: center; flex-direction: column; gap: 10px;">
+        </div>
 
-        <div class="card-container">
+        <div class="card-container" id="normal-card-container">
             <div id="card" class="card">
                 <div class="card-face card-front">
                     <div
@@ -461,7 +463,7 @@
             <div id="wait-msg">ESPERANDO SIGUIENTE TRACK...</div>
         </div>
 
-        <div class="collection-summary">
+        <div class="collection-summary" id="normal-collection">
             <h4>MIS CARTAS</h4>
             <div id="my-cards-list" class="vertical-cards"></div>
         </div>
@@ -526,15 +528,65 @@
                 var isMyTurn = (data.activePlayer.id === myId);
                 console.log("¿Es mi turno?", isMyTurn, "Mi ID:", myId, "ID Activo:", data.activePlayer.id);
 
-                // Control de visibilidad de bloques de mando
-                document.getElementById('m-ctrl').style.display = isMyTurn ? 'grid' : 'none';
-                document.getElementById('s-ctrl').style.display = isMyTurn ? 'grid' : 'none';
+                var isKingMode = (data.turnPhase && data.turnPhase !== 'NORMAL');
+                var normalCardContainer = document.getElementById('normal-card-container');
+                var normalCollection = document.getElementById('normal-collection');
+                var kingModeUi = document.getElementById('king-mode-ui');
 
-                // Botones Especiales (Solo mi turno y si no está revelada)
+                if (isKingMode) {
+                    normalCardContainer.style.display = 'none';
+                    normalCollection.style.display = 'none';
+                    kingModeUi.style.display = 'flex';
+
+                    if (data.turnPhase === 'KING_SELECTION') {
+                        if (isMyTurn) {
+                            kingModeUi.innerHTML = "<h3 style='color:var(--gold);font-family:Bungee;'>ERES EL REY</h3><p>EL RESTO DE JUGADORES ESTÁ ELIGIENDO TU CARTA...</p>";
+                        } else {
+                            var html = "<h3 style='color:var(--neon);font-family:Bungee;'>¡ELIGE LA CARTA MÁS DIFÍCIL!</h3>";
+                            if (data.kingOptions) {
+                                data.kingOptions.forEach(function (opt, idx) {
+                                    html += "<div style='background:#111; border:1px solid var(--neon); border-radius:10px; padding:10px; margin-bottom:10px; text-align:left;'>";
+                                    html += "<span style='color:#00f2fe; font-family:Bungee; font-size:1.2em; margin-right:10px;'>#" + (idx + 1) + "</span>";
+                                    html += "<span style='font-size:0.8em; color:#aaa;'>" + opt.artist + "</span><br>";
+                                    html += "<strong style='font-family:Bungee;'>" + opt.song + "</strong><br>";
+                                    html += "<span style='color:var(--accent); font-family:Bungee; font-size:1.2em;'>" + opt.year + "</span>";
+                                    html += "<button class='btn' style='margin-top:10px; padding:10px; font-size:1em;' onclick=\"send('KING_SELECT_CARD', " + idx + ")\">¡ELEGIR ESTA!</button>";
+                                    html += "</div>";
+                                });
+                            }
+                            kingModeUi.innerHTML = html;
+                        }
+                    } else if (data.turnPhase === 'KING_GUESS') {
+                        if (isMyTurn) {
+                            var html = "<h3 style='color:var(--gold);font-family:Bungee;'>¡ADIVINA EL AÑO!</h3>";
+                            html += "<p style='font-size:0.8em;color:#aaa;'>" + data.currentTrack.artist + "</p>";
+                            html += "<p style='font-family:Bungee;font-size:1.2em; border-bottom:1px solid #333; padding-bottom:10px;'>" + data.currentTrack.song + "</p>";
+                            html += "<p style='font-size:0.8em; color:var(--neon); margin-bottom:15px;'>(Márgen de error: +/- 2 años)</p>";
+                            html += "<input type='number' id='king-guess-input' placeholder='AÑO' style='font-size:1.5em; text-align:center;'>";
+                            html += "<button class='btn' style='margin-top:10px;' onclick=\"var y = document.getElementById('king-guess-input').value; if(y) send('KING_GUESS', y);\">CONFIRMAR AÑO</button>";
+                            kingModeUi.innerHTML = html;
+                        } else {
+                            kingModeUi.innerHTML = "<h3 style='color:var(--neon);font-family:Bungee;'>CARTA ENVIADA</h3><p>EL REY ESTÁ ADIVINANDO EL AÑO DE: <br><strong style='color:var(--accent)'>" + data.currentTrack.artist + " - " + data.currentTrack.song + "</strong></p>";
+                        }
+                    }
+                } else {
+                    normalCardContainer.style.display = 'flex';
+                    normalCollection.style.display = 'block';
+                    kingModeUi.style.display = 'none';
+                    kingModeUi.innerHTML = '';
+                }
+
+                // Control de visibilidad de bloques de mando
+                var showMusic = isMyTurn;
+                if (data.turnPhase === 'KING_SELECTION') showMusic = false; // Nadie tiene música en este punto
+
+                document.getElementById('m-ctrl').style.display = showMusic ? 'grid' : 'none';
+                document.getElementById('s-ctrl').style.display = showMusic ? 'grid' : 'none';
+
+                // Botones Especiales (Solo mi turno y si no está revelada Y no en modo rey)
                 var specialCtrl = document.getElementById('special-ctrl');
-                if (isMyTurn && !data.revealed) {
+                if (isMyTurn && !data.revealed && (!data.turnPhase || data.turnPhase === 'NORMAL')) {
                     specialCtrl.style.display = 'flex';
-                    console.log("Estado de botones:", data.isPlaying ? "PLAYING" : "STOPPED");
                     // COMPRAR (Solo si NO está sonando)
                     document.getElementById('btn-autowin').style.display = (!data.isPlaying) ? 'block' : 'none';
                     // CAMBIAR (Solo si SÍ está sonando y NO ha cambiado ya)
@@ -543,12 +595,10 @@
                     specialCtrl.style.display = 'none';
                 }
 
-                // Botón Apostar eliminado (V20)
+                // Mensaje de espera (solo si NO es mi turno en modo normal)
+                document.getElementById('wait-msg').style.display = (!isMyTurn && !isKingMode) ? 'block' : 'none';
 
-                // Mensaje de espera (solo si NO es mi turno)
-                document.getElementById('wait-msg').style.display = isMyTurn ? 'none' : 'block';
-
-                if (data.revealed) {
+                if (data.revealed && !isKingMode) {
                     document.getElementById('card').classList.add('flipped');
                     document.getElementById('c-artist').innerText = data.currentTrack.artist || "";
                     document.getElementById('c-song').innerText = data.currentTrack.song || "";
@@ -557,31 +607,33 @@
                     document.getElementById('card').classList.remove('flipped');
                 }
 
-                if (isMyTurn) {
-                    document.getElementById('inventory-title').innerText = "MIS CARTAS (MARCA TU APUESTA)";
-                } else {
-                    document.getElementById('inventory-title').innerText = "CRONOLOGÍA DE " + data.activePlayer.name;
-                }
-
-                if (isMyTurn) {
-                    if (data.myCards) {
-                        var h = "";
-                        h += renderBetSlot(0, data.currentBets, data.activeGuess, true);
-                        data.myCards.forEach(function (year, idx) {
-                            h += '<div class="card-row">' + year + '</div>';
-                            h += renderBetSlot(idx + 1, data.currentBets, data.activeGuess, true);
-                        });
-                        document.getElementById('my-cards-list').innerHTML = h;
+                if (!isKingMode) {
+                    if (isMyTurn) {
+                        document.getElementById('inventory-title').innerText = "MIS CARTAS (MARCA TU APUESTA)";
+                    } else {
+                        document.getElementById('inventory-title').innerText = "CRONOLOGÍA DE " + data.activePlayer.name;
                     }
-                } else {
-                    if (data.activeTimeline) {
-                        var h = "";
-                        h += renderBetSlot(0, data.currentBets, data.activeGuess, false);
-                        data.activeTimeline.forEach(function (year, idx) {
-                            h += '<div class="card-row" style="border-color: #444; color: #888;">' + year + '</div>';
-                            h += renderBetSlot(idx + 1, data.currentBets, data.activeGuess, false);
-                        });
-                        document.getElementById('my-cards-list').innerHTML = h;
+
+                    if (isMyTurn) {
+                        if (data.myCards) {
+                            var h = "";
+                            h += renderBetSlot(0, data.currentBets, data.activeGuess, true);
+                            data.myCards.forEach(function (year, idx) {
+                                h += '<div class="card-row">' + year + '</div>';
+                                h += renderBetSlot(idx + 1, data.currentBets, data.activeGuess, true);
+                            });
+                            document.getElementById('my-cards-list').innerHTML = h;
+                        }
+                    } else {
+                        if (data.activeTimeline) {
+                            var h = "";
+                            h += renderBetSlot(0, data.currentBets, data.activeGuess, false);
+                            data.activeTimeline.forEach(function (year, idx) {
+                                h += '<div class="card-row" style="border-color: #444; color: #888;">' + year + '</div>';
+                                h += renderBetSlot(idx + 1, data.currentBets, data.activeGuess, false);
+                            });
+                            document.getElementById('my-cards-list').innerHTML = h;
+                        }
                     }
                 }
 
