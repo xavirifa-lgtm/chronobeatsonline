@@ -372,6 +372,7 @@
         var peer, roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
         var players = [], connections = {}, songs = [], currentSongIdx = -1, activePlayerIdx = 0, isRevealed = false;
         var currentBets = {}; // playerId -> slotIndex
+        var activeGuess = null; // slotIndex del jugador activo
 
         // Seguimiento de tiempo para skips manuales
         var segundosAcumulados = 0;
@@ -458,6 +459,7 @@
             momentoDeInicio = 0;
             isPlaying = false;
             currentBets = {}; // Limpiar apuestas al cambiar de turno
+            activeGuess = null; // Limpiar adivinanza
             var s = songs[currentSongIdx];
             document.getElementById('ui-card-artist').innerText = "????";
             document.getElementById('ui-card-song').innerText = "????";
@@ -552,6 +554,13 @@
                     if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 1 && !currentBets[peerId]) {
                         p.tokens--;
                         currentBets[peerId] = value;
+                        syncState();
+                    }
+                    break;
+                case 'GUESS':
+                    // Adivinanza del jugador activo (no gasta fichas)
+                    if (peerId === players[activePlayerIdx].id) {
+                        activeGuess = value;
                         syncState();
                     }
                     break;
@@ -652,7 +661,8 @@
                     myTokens: p ? p.tokens : 0,
                     canReload: p ? p.canReload : false,
                     activeTimeline: players[activePlayerIdx].cards,
-                    currentBets: currentBets
+                    currentBets: currentBets,
+                    activeGuess: activeGuess
                 };
                 connections[id].send(state);
             }
