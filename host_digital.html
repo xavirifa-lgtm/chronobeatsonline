@@ -133,21 +133,19 @@
             gap: 20px;
         }
 
-        /* Reproductor Invisible/Pequeño */
+        /* Reproductor Invisible (como en play.html) */
         #player-container {
-            width: 100%;
-            height: 200px;
-            background: #000;
-            border-radius: 15px;
+            position: absolute;
+            top: -9999px;
+            left: -9999px;
+            width: 1px;
+            height: 1px;
             overflow: hidden;
-            position: relative;
-            border: 2px solid #222;
         }
 
         #youtube-player {
             width: 100%;
             height: 100%;
-            pointer-events: none;
         }
 
         /* Validación de Carta */
@@ -341,10 +339,6 @@
         <div class="main-content">
             <div id="player-container">
                 <div id="youtube-player"></div>
-                <div id="player-msg"
-                    style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background: rgba(0,0,0,0.8); font-family:'Bungee'; text-align:center; padding:20px;">
-                    ESPERANDO ACCIÓN DEL JUGADOR
-                </div>
             </div>
 
             <div class="validation-area">
@@ -416,7 +410,7 @@
                         connections[conn.peer] = conn;
                         updateLobby();
                     } else if (data.type === 'COMMAND') {
-                        handlePlayerCommand(conn.peer, data.action);
+                        handlePlayerCommand(conn.peer, data.action, data.value);
                     }
                 });
             });
@@ -491,17 +485,16 @@
 
         function startGame() {
             // DESBLOQUEO DE AUDIO (Indispensable para Tablets/Móviles)
-            // Intentamos reproducir y pausar inmediatamente para "despertar" el audio
+            // Cargamos un video de 1 segundo de silencio para activar el audio
             if (ytPlayer && youtubeReady) {
-                ytPlayer.playVideo();
+                ytPlayer.loadVideoById('h6N1CiS1e8k'); // 1 seg de silencio
                 setTimeout(function () {
-                    ytPlayer.pauseVideo();
+                    ytPlayer.stopVideo();
                     document.getElementById('lobby').style.display = 'none';
                     document.getElementById('dashboard').style.display = 'grid';
                     nextTurn();
-                }, 500);
+                }, 1000);
             } else {
-                // Si no está listo, esperamos un poco más
                 alert("Esperando al reproductor de YouTube... Prueba en 2 segundos.");
             }
         }
@@ -526,9 +519,8 @@
             document.getElementById('host-instructions').innerText = "EL JUGADOR ESTÁ ESCUCHANDO...";
             document.getElementById('ui-current-player').innerText = players[activePlayerIdx].name;
 
-            // Cargar en YouTube (pero no dar play aún)
-            ytPlayer.loadVideoById(song.id);
-            ytPlayer.pauseVideo();
+            // PREPARAR video (CUE) pero NO cargar ni reproducir aún (evita anuncios prematuros)
+            ytPlayer.cueVideoById(song.id);
 
             syncState();
         }
@@ -548,7 +540,7 @@
             syncState();
         }
 
-        function handlePlayerCommand(peerId, action) {
+        function handlePlayerCommand(peerId, action, value) {
             var activePlayer = players[activePlayerIdx];
             if (peerId !== activePlayer.id && action !== 'BET') return;
 
@@ -575,6 +567,12 @@
                             document.getElementById('validation-buttons').style.display = 'flex';
                         }
                         document.getElementById('host-instructions').innerText = "¿HA ACERTADO?";
+                    }
+                    break;
+                case 'SKIP':
+                    if (ytPlayer && ytPlayer.getCurrentTime) {
+                        var currentTime = ytPlayer.getCurrentTime();
+                        ytPlayer.seekTo(currentTime + value, true);
                     }
                     break;
                 case 'BET':

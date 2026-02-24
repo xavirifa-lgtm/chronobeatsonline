@@ -103,8 +103,9 @@
             font-family: 'Bungee';
             color: var(--neon);
             text-align: center;
-            margin-bottom: 20px;
-            font-size: 0.9em;
+            margin-bottom: 5px;
+            /* Reducido */
+            font-size: 0.8em;
             letter-spacing: 1px;
         }
 
@@ -196,8 +197,16 @@
             display: none;
             grid-template-columns: repeat(3, 1fr);
             gap: 10px;
-            margin-top: 10px;
-            padding-bottom: 30px;
+            margin-top: 5px;
+            padding-bottom: 10px;
+            flex-shrink: 0;
+        }
+
+        .skip-controls {
+            display: none;
+            grid-template-columns: repeat(3, 2fr);
+            gap: 5px;
+            margin-bottom: 15px;
             flex-shrink: 0;
         }
 
@@ -205,11 +214,32 @@
             background: #1a1a1a;
             border: 2px solid #333;
             color: #fff;
-            padding: 20px 10px;
-            border-radius: 15px;
+            padding: 15px 5px;
+            border-radius: 12px;
             font-family: 'Bungee';
-            font-size: 0.9em;
+            font-size: 0.8em;
             cursor: pointer;
+        }
+
+        .skip-btn {
+            background: #000;
+            border: 1px solid #444;
+            color: #888;
+            padding: 8px 2px;
+            border-radius: 8px;
+            font-family: 'Bungee';
+            font-size: 0.6em;
+            cursor: pointer;
+        }
+
+        .skip-btn.forward {
+            border-color: var(--neon);
+            color: var(--neon);
+        }
+
+        .skip-btn.backward {
+            border-color: var(--accent);
+            color: var(--accent);
         }
 
         .control-btn.play {
@@ -230,12 +260,14 @@
         /* Botón de Apuesta */
         #bet-btn {
             display: none;
-            margin-top: 10px;
-            margin-bottom: 30px;
+            margin-top: 5px;
+            margin-bottom: 20px;
             background: transparent;
             border: 2px dashed var(--gold);
             color: var(--gold);
             flex-shrink: 0;
+            padding: 10px;
+            font-size: 0.9em;
         }
 
         /* Indicador de Espera */
@@ -297,6 +329,15 @@
             <button class="control-btn stop" onclick="sendCmd('STOP')">STOP</button>
         </div>
 
+        <div class="skip-controls" id="my-skips">
+            <button class="skip-btn backward" onclick="sendCmd('SKIP', -5)">-5S</button>
+            <button class="skip-btn backward" onclick="sendCmd('SKIP', -10)">-10S</button>
+            <button class="skip-btn backward" onclick="sendCmd('SKIP', -20)">-20S</button>
+            <button class="skip-btn forward" onclick="sendCmd('SKIP', 5)">+5S</button>
+            <button class="skip-btn forward" onclick="sendCmd('SKIP', 10)">+10S</button>
+            <button class="skip-btn forward" onclick="sendCmd('SKIP', 20)">+20S</button>
+        </div>
+
         <button id="bet-btn" class="btn" onclick="sendCmd('BET')">💎 APOSTAR FICHA</button>
     </div>
 
@@ -353,12 +394,14 @@
 
                 var isMyTurn = data.activePlayer.id === myId;
                 var controls = document.getElementById('my-controls');
+                var skips = document.getElementById('my-skips');
                 var betBtn = document.getElementById('bet-btn');
                 var waiting = document.getElementById('waiting-msg');
                 var card = document.getElementById('card');
 
                 // Mostrar/Ocultar controles
                 controls.style.display = isMyTurn ? 'grid' : 'none';
+                skips.style.display = isMyTurn ? 'grid' : 'none';
                 betBtn.style.display = (!isMyTurn && data.gameState === 'PLAYING') ? 'block' : 'none';
 
                 // Manejo de la carta
@@ -381,9 +424,9 @@
             }
         }
 
-        function sendCmd(cmd) {
+        function sendCmd(cmd, val) {
             if (conn && conn.open) {
-                conn.send({ type: 'COMMAND', action: cmd });
+                conn.send({ type: 'COMMAND', action: cmd, value: val });
             }
         }
     </script>
