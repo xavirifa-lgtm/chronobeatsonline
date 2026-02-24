@@ -448,6 +448,7 @@
                 var specialCtrl = document.getElementById('special-ctrl');
                 if (isMyTurn && !data.revealed) {
                     specialCtrl.style.display = 'flex';
+                    console.log("Estado de botones:", data.isPlaying ? "PLAYING" : "STOPPED");
                     // COMPRAR (Solo si NO está sonando)
                     document.getElementById('btn-autowin').style.display = (!data.isPlaying) ? 'block' : 'none';
                     // CAMBIAR (Solo si SÍ está sonando)
