@@ -556,7 +556,7 @@
                     var slotOccupied = (activeGuess == valNum);
                     for (var pid in currentBets) { if (currentBets[pid] == valNum) slotOccupied = true; }
 
-                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 1 && !currentBets[peerId] && !slotOccupied && activeGuess !== null) {
+                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 1 && currentBets[peerId] === undefined && !slotOccupied && activeGuess !== null) {
                         p.tokens--;
                         currentBets[peerId] = valNum;
                         syncState();
@@ -570,7 +570,7 @@
                     var slotOccupiedByBet = false;
                     for (var pid in currentBets) { if (currentBets[pid] == valNum) slotOccupiedByBet = true; }
 
-                    if (p && p.id === players[activePlayerIdx].id && !slotOccupiedByBet) {
+                    if (p && p.id === players[activePlayerIdx].id && !slotOccupiedByBet && activeGuess === null) {
                         activeGuess = valNum;
                         syncState();
                     }

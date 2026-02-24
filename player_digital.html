@@ -638,6 +638,10 @@
                 return;
             }
             if (amIActive) {
+                if (lastState && lastState.activeGuess !== null) {
+                    alert("Ya has colocado tu carta en este turno.");
+                    return;
+                }
                 send('GUESS', idx);
             } else {
                 // REGLA: Solo se puede apostar si el jugador activo YA ha puesto su carta
