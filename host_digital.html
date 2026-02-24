@@ -753,36 +753,33 @@
             // Limpiar confeti previo si existe
             if (window.victoryInterval) clearInterval(window.victoryInterval);
 
-            // V26.2: PRUEBA DE FUEGO (Forzar Queen para todos)
+            // V26.3: Integración de IDs Verificados por el Usuario
             var isXavi = name.toLowerCase().includes('xavi');
-            var intendedSongId = "";
+            var songId = "";
             var songTitle = "";
 
-            // Lógica de pool friki normal (para depuración visual)
             if (isXavi) {
-                intendedSongId = '04854XqcfCY'; // Queen
+                songId = '04854XqcfCY'; // Queen - We Are The Champions
                 songTitle = "Queen - We Are The Champions";
             } else {
+                // El "Pool de la Frikada" (V26.3 - IDs proporcionados por el usuario)
                 var frikiPool = [
-                    { id: 'hK_zK-pE2b8', t: "Chikilicuatre - Chiki Chiki" },
-                    { id: 'vYt2l5_JbA8', t: "El Koala - Opá" },
-                    { id: 'i1x1p95xV_o', t: "Zapato Veloz - Tractor Amarillo" },
-                    { id: 'eP6D-M0q9f8', t: "Georgie Dann - La Barbacoa" },
-                    { id: 'V0STYR7F9bE', t: "Las Ketchup - Aserejé" },
-                    { id: '3WJ4Wn52o8U', t: "Leonardo Dantés - Pañuelo" },
-                    { id: 'zrYqL-0_gW0', t: "King África - La Bomba" },
-                    { id: 'iI8s-B1r9m8', t: "Leticia Sabater - Salchipapa" },
-                    { id: 'aG-Qy2wK1o4', t: "Paco Pil - Viva la Fiesta" }
+                    { id: 'wfeCIvOxXBo', t: "Rodolfo Chikilicuatre - Chiki Chiki" },
+                    { id: '5mKKc2F0GbQ', t: "El Koala - Opá" },
+                    { id: '62Z8vUIk9s8', t: "Zapato Veloz - Tractor Amarillo" },
+                    { id: 'lTxGto9ADx0', t: "Georgie Dann - La Barbacoa" },
+                    { id: 'arZZw8NyPq8', t: "Las Ketchup - Aserejé" },
+                    { id: 'd21lBEXv6RE', t: "Leonardo Dantés - Pañuelo" },
+                    { id: 'WCQuf90qf9U', t: "King África - La Bomba" },
+                    { id: 'tUHtrE533X4', t: "Mandangastyle" },
+                    { id: 'YMlDlM7lvO0', t: "Paco Pil - Viva la Fiesta" }
                 ];
                 var picked = frikiPool[Math.floor(Math.random() * frikiPool.length)];
-                intendedSongId = picked.id;
+                songId = picked.id;
                 songTitle = picked.t;
             }
 
-            // FORZAR QUEEN EN LA PRÁCTICA (V26.2 TEST)
-            var actualSongId = '04854XqcfCY';
-
-            console.log("Ganador:", name, "| Intención:", songTitle, "| Sonando real: Queen");
+            console.log("Ganador:", name, "| Sonando:", songTitle);
 
             // Info de depuración visual (V26.1)
             var debugInfo = document.getElementById('debug-song-info');
@@ -792,11 +789,11 @@
                 debugInfo.style.cssText = 'font-size: 12px; color: #555; margin-top: 20px; font-family: monospace; z-index: 3000;';
                 document.getElementById('winner-screen').appendChild(debugInfo);
             }
-            debugInfo.innerText = "TEST V26.2: Forzando Queen (Debería sonar: " + songTitle + ")";
+            debugInfo.innerText = "SONANDO: " + songTitle + " (ID: " + songId + ")";
 
             // Usar el contenedor de video para sonar (oculto)
             var container = document.getElementById('player-container');
-            container.innerHTML = '<iframe src="https://www.youtube.com/embed/' + actualSongId + '?autoplay=1&mute=0&enablejsapi=1&playsinline=1" allow="autoplay; encrypted-media" style="width:300px;height:200px;border:none;"></iframe>';
+            container.innerHTML = '<iframe src="https://www.youtube.com/embed/' + songId + '?autoplay=1&mute=0&enablejsapi=1&playsinline=1" allow="autoplay; encrypted-media" style="width:300px;height:200px;border:none;"></iframe>';
 
             // Confeti (Efectos V26)
             if (isXavi) {
