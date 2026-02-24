@@ -291,7 +291,7 @@
             justify-content: center;
             align-items: center;
             font-size: 0.9em;
-            color: var(--neon);
+            color: #fff;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
             width: 80px;
             margin: 0 auto;
@@ -406,7 +406,8 @@
 
 <body>
     <div id="login-screen">
-        <div class="logo">CHRONOBEATS</div>
+        <div class="logo" style="font-family:'Bungee'; color:var(--neon); text-shadow: 0 0 10px var(--neon);">
+            CHRONOBEATS</div>
         <input type="text" id="host-id" placeholder="CÓDIGO SALA" maxlength="6">
         <input type="text" id="player-name" placeholder="TU NOMBRE">
         <button class="btn" id="join-btn" onclick="conectar()">ENTRAR</button>
@@ -448,7 +449,7 @@
             <div id="card" class="card">
                 <div class="card-face card-front">
                     <div
-                        style="font-family:'Bungee';color:var(--neon);opacity:0.2;font-size:2.5em;text-align:center;line-height:0.9;word-wrap:break-word;width:100%">
+                        style="font-family:'Bungee';color:var(--neon);opacity:0.2;font-size:1.8em;text-align:center;line-height:0.95;word-wrap:break-word;width:100%">
                         CHRONO<br>BEATS</div>
                 </div>
                 <div class="card-face card-back">
