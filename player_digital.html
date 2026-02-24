@@ -179,13 +179,13 @@
         }
 
         .card-container {
-            flex: 0 0 180px;
+            flex: 0 0 220px;
             perspective: 1000px;
             display: flex;
             align-items: center;
             justify-content: center;
             width: 100%;
-            margin-top: 5px;
+            margin-top: 25px;
         }
 
         .card {
@@ -212,6 +212,7 @@
             align-items: center;
             justify-content: center;
             padding: 15px;
+            text-align: center;
         }
 
         .card-front {
@@ -224,6 +225,29 @@
             transform: rotateY(180deg);
             border-color: var(--accent);
         }
+
+        #c-artist {
+            font-size: 0.7em;
+            color: #aaa;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            line-height: 1.2;
+        }
+
+        #c-song {
+            font-family: 'Bungee';
+            font-size: 1em;
+            margin-bottom: 10px;
+            line-height: 1.2;
+        }
+
+        #c-year {
+            font-family: 'Bungee';
+            font-size: 3.5em;
+            color: var(--accent);
+            line-height: 0.9;
+        }
+
 
         #wait-msg {
             font-family: 'Bungee';
@@ -267,15 +291,14 @@
         <div class="card-container">
             <div id="card" class="card">
                 <div class="card-face card-front">
-                    <div style="font-family:'Bungee';color:var(--neon);opacity:0.2;font-size:2.5em;text-align:center">
+                    <div
+                        style="font-family:'Bungee';color:var(--neon);opacity:0.2;font-size:1.8em;text-align:center;line-height:1.1;word-wrap:break-word;width:100%">
                         CHRONO<br>BEATS</div>
                 </div>
                 <div class="card-face card-back">
-                    <div id="c-artist" style="font-size:0.7em;color:#aaa;text-transform:uppercase;margin-bottom:5px">
-                        ARTISTA</div>
-                    <div id="c-song" style="font-family:'Bungee';font-size:1.1em;margin-bottom:10px;text-align:center">
-                        TÍTULO</div>
-                    <div id="c-year" style="font-family:'Bungee';font-size:2.8em;color:var(--accent)">1999</div>
+                    <div id="c-artist">ARTISTA</div>
+                    <div id="c-song">TÍTULO</div>
+                    <div id="c-year">1999</div>
                 </div>
             </div>
             <div id="wait-msg">ESPERANDO SIGUIENTE TRACK...</div>

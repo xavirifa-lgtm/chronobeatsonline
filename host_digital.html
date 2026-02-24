@@ -266,11 +266,14 @@
             </div>
             <div class="validation-area">
                 <div class="val-card" id="val-card-ui" style="display:none;">
-                    <p style="font-size: 0.7em; color: var(--neon);">TRACK EN JUEGO</p>
-                    <h3 id="ui-card-title">????</h3>
-                    <p id="ui-card-info">???? - ????</p>
+                    <p style="font-size: 0.7em; color: var(--neon); margin-bottom: 5px;">CANCIÓN EN JUEGO</p>
+                    <p id="ui-card-artist" style="font-size: 0.9em; color: #aaa; margin: 0; font-weight: bold;">????</p>
+                    <h3 id="ui-card-song" style="margin: 5px 0; font-size: 1.2em;">????</h3>
+                    <div id="ui-card-year"
+                        style="font-family: 'Bungee'; font-size: 3.5em; color: var(--accent); margin-top: 5px; line-height: 1;">
+                        ????</div>
                     <button class="reveal-btn" id="btn-reveal-host" onclick="revealData()"
-                        style="display:block; margin: 10px auto;">REVELAR DATOS</button>
+                        style="display:block; margin: 15px auto;">REVELAR DATOS</button>
                     <div class="actions" id="validation-buttons"
                         style="display:none; gap: 10px; width: 100%; margin-top: 15px;">
                         <button class="btn-val btn-ok" onclick="validateResult(true)">ACERTÓ</button>
@@ -279,8 +282,9 @@
                 </div>
                 <div id="host-instructions">ESPERANDO ACCIÓN...</div>
             </div>
-            <div class="timeline-grid" id="global-timelines"></div>
         </div>
+        <div class="timeline-grid" id="global-timelines"></div>
+    </div>
     </div>
 
     <script>
@@ -372,8 +376,9 @@
             momentoDeInicio = 0;
             isPlaying = false;
             var s = songs[currentSongIdx];
-            document.getElementById('ui-card-title').innerText = "????";
-            document.getElementById('ui-card-info').innerText = "???? - ????";
+            document.getElementById('ui-card-artist').innerText = "????";
+            document.getElementById('ui-card-song').innerText = "????";
+            document.getElementById('ui-card-year').innerText = "????";
             document.getElementById('btn-reveal-host').style.display = 'block';
             document.getElementById('val-card-ui').style.display = 'block';
             document.getElementById('validation-buttons').style.display = 'none';
@@ -393,6 +398,7 @@
                         momentoDeInicio = Date.now();
                         isPlaying = true;
                         container.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + s.id + '?autoplay=1&start=' + segundosAcumulados + '" allow="autoplay"></iframe>';
+                        document.getElementById('host-instructions').innerText = "REPRODUCIENDO";
                     }
                     break;
                 case 'PAUSE':
@@ -421,6 +427,7 @@
                     momentoDeInicio = Date.now();
                     if (isPlaying) {
                         container.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + s.id + '?autoplay=1&start=' + segundosAcumulados + '" allow="autoplay"></iframe>';
+                        document.getElementById('host-instructions').innerText = "REPRODUCIENDO";
                     }
                     break;
             }
@@ -429,8 +436,9 @@
         function revealData() {
             isRevealed = true;
             var s = songs[currentSongIdx];
-            document.getElementById('ui-card-title').innerText = s.song;
-            document.getElementById('ui-card-info').innerText = s.artist + " - " + s.year;
+            document.getElementById('ui-card-artist').innerText = s.artist;
+            document.getElementById('ui-card-song').innerText = s.song;
+            document.getElementById('ui-card-year').innerText = s.year;
             document.getElementById('btn-reveal-host').style.display = 'none';
             document.getElementById('validation-buttons').style.display = 'flex';
             syncState();
