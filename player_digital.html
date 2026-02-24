@@ -53,25 +53,28 @@
             background: #1a1a1a;
             border: 2px solid #333;
             color: #fff;
-            padding: 10px;
+            padding: 12px;
             border-radius: 10px;
             width: 100%;
             max-width: 250px;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             font-family: 'Bungee';
             text-align: center;
+            font-size: 1em;
         }
 
         .btn {
             background: var(--neon);
             color: #000;
             border: none;
-            padding: 12px;
+            padding: 15px;
             border-radius: 50px;
             font-family: 'Bungee';
             width: 100%;
             max-width: 250px;
             cursor: pointer;
+            font-size: 1.1em;
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.3);
         }
 
         #game-screen {
@@ -163,7 +166,7 @@
             max-width: 320px;
             margin-bottom: 10px;
             font-family: 'Bungee';
-            font-size: 0.8em;
+            font-size: 0.75em;
             border-radius: 10px;
         }
 
@@ -218,6 +221,7 @@
             opacity: 0.4;
             font-size: 0.7em;
             text-align: center;
+            margin-top: 10px;
         }
     </style>
 </head>
@@ -227,7 +231,7 @@
         <div class="logo">CHRONOBEATS</div>
         <input type="text" id="host-id" placeholder="CÓDIGO SALA" maxlength="6">
         <input type="text" id="player-name" placeholder="TU NOMBRE">
-        <button class="btn" onclick="conectar()">ENTRAR</button>
+        <button class="btn" id="join-btn" onclick="conectar()">ENTRAR</button>
     </div>
 
     <div id="game-screen">
@@ -259,7 +263,7 @@
                 <div class="card-face card-back">
                     <div id="c-artist" style="font-size:0.6em;color:#aaa;text-transform:uppercase">ARTISTA</div>
                     <div id="c-song" style="font-family:'Bungee';font-size:1em;margin:5px 0">TÍTULO</div>
-                    <div id="c-year" style="font-family:'Bungee';font-size:2em;color:var(--accent)">1999</div>
+                    <div id="c-year" style="font-family:'Bungee';font-size:2.5em;color:var(--accent)">1999</div>
                 </div>
             </div>
             <div id="wait-msg">ESPERANDO SIGUIENTE TRACK...</div>
@@ -272,32 +276,57 @@
             var hostId = document.getElementById('host-id').value.toUpperCase();
             var name = document.getElementById('player-name').value;
             if (!hostId || !name) return alert("Rellena los datos");
+
+            document.getElementById('join-btn').disabled = true;
+            document.getElementById('join-btn').innerText = "CONECTANDO...";
+
             peer = new Peer();
             peer.on('open', function (id) {
                 myId = id;
+                console.log("Mi ID:", id);
                 conn = peer.connect("CB-HOST-" + hostId);
+
                 conn.on('open', function () {
+                    console.log("Conexión abierta con el host");
                     conn.send({ type: 'JOIN', name: name });
                     document.getElementById('login-screen').style.display = 'none';
                     document.getElementById('game-screen').style.display = 'flex';
                 });
+
                 conn.on('data', handle);
+
+                conn.on('error', function (err) {
+                    alert("Error de conexión: " + err);
+                    document.getElementById('join-btn').disabled = false;
+                    document.getElementById('join-btn').innerText = "ENTRAR";
+                });
+            });
+
+            peer.on('error', function (err) {
+                alert("Error PeerJS: " + err.type);
+                document.getElementById('join-btn').disabled = false;
+                document.getElementById('join-btn').innerText = "ENTRAR";
             });
         }
+
         function send(action, value) { if (conn) conn.send({ type: 'COMMAND', action: action, value: value }); }
+
         function handle(data) {
+            console.log("Datos recibidos:", data);
             if (data.type === 'STATE_UPDATE') {
                 document.getElementById('cur-player').innerText = data.activePlayer.name;
                 var isMyTurn = (data.activePlayer.id === myId);
+
                 document.getElementById('m-ctrl').style.display = isMyTurn ? 'grid' : 'none';
                 document.getElementById('s-ctrl').style.display = isMyTurn ? 'grid' : 'none';
                 document.getElementById('bet-btn').style.display = (!isMyTurn && !data.revealed) ? 'block' : 'none';
                 document.getElementById('wait-msg').style.display = isMyTurn ? 'none' : 'block';
+
                 if (data.revealed) {
                     document.getElementById('card').classList.add('flipped');
-                    document.getElementById('c-artist').innerText = data.currentTrack.artist;
-                    document.getElementById('c-song').innerText = data.currentTrack.song;
-                    document.getElementById('c-year').innerText = data.currentTrack.year;
+                    document.getElementById('c-artist').innerText = data.currentTrack.artist || "";
+                    document.getElementById('c-song').innerText = data.currentTrack.song || "";
+                    document.getElementById('c-year').innerText = data.currentTrack.year || "";
                 } else {
                     document.getElementById('card').classList.remove('flipped');
                 }

@@ -298,8 +298,16 @@
 
         function initPeer() {
             peer = new Peer("CB-HOST-" + roomCode);
+            peer.on('open', function (id) {
+                console.log("Host Peer Abierto:", id);
+            });
             peer.on('connection', function (conn) {
+                console.log("Nueva conexión entrante:", conn.peer);
+                conn.on('open', function () {
+                    console.log("Conexión con el player abierta");
+                });
                 conn.on('data', function (data) {
+                    console.log("Comando recibido en host:", data);
                     if (data.type === 'JOIN') {
                         players.push({ id: conn.peer, name: data.name, score: 0, cards: [] });
                         connections[conn.peer] = conn;
@@ -308,9 +316,20 @@
                         handlePlayerCommand(conn.peer, data.action, data.value);
                     }
                 });
+                conn.on('error', function (err) {
+                    console.error("Error en conexión:", err);
+                });
+            });
+            peer.on('error', function (err) {
+                if (err.type === 'unavailable-id') {
+                    alert("El ID de sala ya existe o hay un error. Probando uno nuevo...");
+                    window.location.reload();
+                } else {
+                    alert("Error PeerJS Host: " + err.type);
+                }
             });
         }
-        setTimeout(initPeer, 500);
+        initPeer();
 
         fetch('lista_final.txt').then(function (r) { return r.text() }).then(function (t) {
             songs = t.split('\n').map(function (l) {
