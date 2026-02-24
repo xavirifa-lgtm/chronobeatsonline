@@ -750,23 +750,26 @@
 
             // V25: Himno de Victoria Condicional
             var isXavi = name.toLowerCase().includes('xavi');
-            var songId = isXavi ? '04854XqcfCY' : '46RdyP12K1k'; // Queen / Los Rodríguez
+            var songId = isXavi ? '04854XqcfCY' : 's5z-V5L0eLg'; // Queen / Los Rodríguez (Mucha Suerte)
 
             // Usar el contenedor de video para sonar (oculto)
             var container = document.getElementById('player-container');
-            container.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + songId + '?autoplay=1" allow="autoplay" style="width:1px;height:1px;opacity:0;position:absolute;"></iframe>';
+            container.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + songId + '?autoplay=1&mute=0&enablejsapi=1" allow="autoplay" style="width:1px;height:1px;opacity:0;position:absolute;"></iframe>';
 
-            var duration = 15 * 1000;
-            var animationEnd = Date.now() + duration;
-            var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
-            function randomInRange(min, max) { return Math.random() * (max - min) + min; }
-            var interval = setInterval(function () {
-                var timeLeft = animationEnd - Date.now();
-                if (timeLeft <= 0) return clearInterval(interval);
-                var particleCount = 50 * (timeLeft / duration);
-                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
-                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
-            }, 250);
+            // Confeti SOLO para Xavi
+            if (isXavi) {
+                var duration = 15 * 1000;
+                var animationEnd = Date.now() + duration;
+                var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+                function randomInRange(min, max) { return Math.random() * (max - min) + min; }
+                var interval = setInterval(function () {
+                    var timeLeft = animationEnd - Date.now();
+                    if (timeLeft <= 0) return clearInterval(interval);
+                    var particleCount = 50 * (timeLeft / duration);
+                    confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+                    confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+                }, 250);
+            }
         }
 
         function syncState() {
