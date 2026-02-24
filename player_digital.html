@@ -32,7 +32,6 @@
             overflow: hidden;
         }
 
-        /* --- PANTALLA DE LOGIN --- */
         #login-screen {
             flex: 1;
             display: flex;
@@ -40,96 +39,75 @@
             align-items: center;
             justify-content: center;
             padding: 20px;
-            text-align: center;
         }
 
         .logo {
             font-family: 'Bungee';
-            font-size: 2.5em;
+            font-size: 2em;
             color: var(--neon);
             text-shadow: 0 0 20px var(--neon);
-            margin-bottom: 40px;
+            margin-bottom: 20px;
         }
 
         input {
             background: #1a1a1a;
             border: 2px solid #333;
             color: #fff;
-            padding: 15px;
+            padding: 12px;
             border-radius: 10px;
             width: 100%;
-            max-width: 300px;
-            margin-bottom: 15px;
-            font-size: 1em;
-            text-align: center;
+            max-width: 250px;
+            margin-bottom: 10px;
             font-family: 'Bungee';
-        }
-
-        input:focus {
-            border-color: var(--neon);
-            outline: none;
-            box-shadow: 0 0 15px rgba(0, 242, 255, 0.2);
+            text-align: center;
         }
 
         .btn {
             background: var(--neon);
             color: #000;
             border: none;
-            padding: 15px 40px;
+            padding: 15px;
             border-radius: 50px;
             font-family: 'Bungee';
-            font-size: 1.1em;
-            cursor: pointer;
-            transition: 0.3s;
             width: 100%;
-            max-width: 300px;
+            max-width: 250px;
+            cursor: pointer;
         }
 
-        .btn:active {
-            transform: scale(0.95);
-            opacity: 0.8;
-        }
-
-        /* --- PANTALLA DE JUEGO --- */
         #game-screen {
             display: none;
             flex: 1;
             flex-direction: column;
-            padding: 20px;
+            padding: 10px;
+            align-items: center;
+            justify-content: flex-start;
         }
 
-        /* Estado del Turno */
         #turn-status {
             font-family: 'Bungee';
             color: var(--neon);
-            text-align: center;
             margin-bottom: 5px;
-            /* Reducido */
             font-size: 0.8em;
-            letter-spacing: 1px;
         }
 
-        /* Tarjeta Digital */
         .card-container {
             flex: 1;
             perspective: 1000px;
-            position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
+            width: 100%;
             min-height: 0;
-            /* Permite que el contenedor se encoja */
+            margin-bottom: 15px;
         }
 
         .card {
-            width: 90%;
-            max-width: 250px;
-            height: 90%;
-            max-height: 350px;
+            width: 85%;
+            max-width: 220px;
+            aspect-ratio: 2/3;
             position: relative;
             transform-style: preserve-3d;
-            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            aspect-ratio: 2/3;
+            transition: transform 0.6s;
         }
 
         .card.flipped {
@@ -141,294 +119,192 @@
             width: 100%;
             height: 100%;
             backface-visibility: hidden;
+            border-radius: 15px;
+            border: 3px solid var(--neon);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            border-radius: 20px;
-            border: 3px solid var(--neon);
-            padding: 20px;
+            padding: 15px;
         }
 
         .card-front {
             background: #111;
-            box-shadow: 0 0 30px rgba(0, 242, 255, 0.1);
-        }
-
-        .card-front .logo-mini {
-            font-family: 'Bungee';
-            font-size: 2em;
-            text-align: center;
-            color: var(--neon);
-            opacity: 0.5;
         }
 
         .card-back {
-            background: linear-gradient(145deg, #1a1a1a, #0a0a0a);
+            background: #1a1a1a;
             transform: rotateY(180deg);
-            text-align: center;
             border-color: var(--accent);
-            box-shadow: 0 0 30px rgba(255, 0, 85, 0.2);
         }
 
-        .card-back .artist {
-            font-size: 0.8em;
-            text-transform: uppercase;
-            margin-bottom: 10px;
-            color: #ccc;
-        }
-
-        .card-back .song {
-            font-family: 'Bungee';
-            font-size: 1.4em;
-            color: #fff;
-            margin-bottom: 20px;
-        }
-
-        .card-back .year {
-            font-family: 'Bungee';
-            font-size: 3em;
-            color: var(--accent);
-            text-shadow: 0 0 15px var(--accent);
-        }
-
-        /* Controles de Música */
+        /* Controles - Muy compactos */
         .music-controls {
             display: none;
             grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-top: 5px;
-            padding-bottom: 10px;
-            flex-shrink: 0;
+            gap: 8px;
+            width: 100%;
+            max-width: 300px;
+            margin-bottom: 10px;
         }
 
         .skip-controls {
             display: none;
-            grid-template-columns: repeat(3, 2fr);
+            grid-template-columns: repeat(3, 1fr);
             gap: 5px;
-            margin-bottom: 15px;
-            flex-shrink: 0;
+            width: 100%;
+            max-width: 300px;
+            margin-bottom: 25px;
         }
 
-        .control-btn {
-            background: #1a1a1a;
-            border: 2px solid #333;
+        .ctrl-btn {
+            background: #222;
+            border: 2px solid #444;
             color: #fff;
-            padding: 15px 5px;
-            border-radius: 12px;
+            padding: 12px 5px;
+            border-radius: 10px;
             font-family: 'Bungee';
             font-size: 0.8em;
             cursor: pointer;
         }
 
-        .skip-btn {
+        .btn-play {
+            border-color: var(--neon);
+            color: var(--neon);
+        }
+
+        .btn-stop {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .sk-btn {
             background: #000;
-            border: 1px solid #444;
-            color: #888;
-            padding: 8px 2px;
-            border-radius: 8px;
+            border: 1px solid #333;
+            color: #666;
+            padding: 6px 2px;
+            border-radius: 6px;
             font-family: 'Bungee';
             font-size: 0.6em;
             cursor: pointer;
         }
 
-        .skip-btn.forward {
-            border-color: var(--neon);
+        .sk-fwd {
             color: var(--neon);
+            border-color: rgba(0, 242, 255, 0.4);
         }
 
-        .skip-btn.backward {
-            border-color: var(--accent);
+        .sk-back {
             color: var(--accent);
+            border-color: rgba(255, 0, 85, 0.4);
         }
 
-        .control-btn.play {
-            border-color: var(--neon);
-            color: var(--neon);
-        }
-
-        .control-btn.pause {
-            border-color: var(--gold);
-            color: var(--gold);
-        }
-
-        .control-btn.stop {
-            border-color: var(--accent);
-            color: var(--accent);
-        }
-
-        /* Botón de Apuesta */
         #bet-btn {
             display: none;
-            margin-top: 5px;
-            margin-bottom: 20px;
-            background: transparent;
+            background: none;
             border: 2px dashed var(--gold);
             color: var(--gold);
-            flex-shrink: 0;
-            padding: 10px;
-            font-size: 0.9em;
-        }
-
-        /* Indicador de Espera */
-        #waiting-msg {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            opacity: 0.5;
+            padding: 8px;
+            width: 100%;
+            max-width: 300px;
+            margin-bottom: 25px;
             font-family: 'Bungee';
             font-size: 0.8em;
+            border-radius: 10px;
         }
 
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
+        #wait-msg {
+            font-family: 'Bungee';
+            opacity: 0.4;
+            font-size: 0.7em;
+            text-align: center;
         }
     </style>
 </head>
 
 <body>
-
-    <!-- PANTALLA DE IDENTIFICACIÓN -->
     <div id="login-screen">
         <div class="logo">CHRONOBEATS</div>
-        <p style="color: #888; margin-bottom: 20px;">Introduce el código de la tablet</p>
         <input type="text" id="host-id" placeholder="CÓDIGO SALA" maxlength="6">
         <input type="text" id="player-name" placeholder="TU NOMBRE" maxlength="12">
-        <button class="btn" onclick="conectar()">UNIRSE AL BEAT</button>
+        <button class="btn" onclick="conectar()">ENTRAR</button>
     </div>
 
-    <!-- PANTALLA DE JUEGO -->
     <div id="game-screen">
-        <div id="turn-status">TURNO DE: <span id="current-player-ui">---</span></div>
-
+        <div id="turn-status">TURNO DE: <span id="cur-player">---</span></div>
         <div class="card-container">
             <div id="card" class="card">
                 <div class="card-face card-front">
-                    <div class="logo-mini">CHRONO<br>BEATS</div>
+                    <div style="font-family:'Bungee';color:var(--neon);opacity:0.3;font-size:2em;text-align:center">
+                        CHRONO<br>BEATS</div>
                 </div>
                 <div class="card-face card-back">
-                    <div class="artist" id="card-artist">ARTISTA</div>
-                    <div class="song" id="card-song">TÍTULO CANCIÓN</div>
-                    <div class="year" id="card-year">1999</div>
+                    <div id="c-artist" style="font-size:0.7em;color:#aaa;text-transform:uppercase">ARTISTA</div>
+                    <div id="c-song" style="font-family:'Bungee';font-size:1.1em;margin:10px 0">TÍTULO</div>
+                    <div id="c-year" style="font-family:'Bungee';font-size:2.5em;color:var(--accent)">1999</div>
                 </div>
             </div>
-            <div id="waiting-msg">ESPERANDO SIGUIENTE TRACK...</div>
+            <div id="wait-msg">ESPERANDO SIGUIENTE TRACK...</div>
         </div>
 
-        <div class="music-controls" id="my-controls">
-            <button class="control-btn play" onclick="sendCmd('PLAY')">PLAY</button>
-            <button class="control-btn pause" onclick="sendCmd('PAUSE')">PAUSE</button>
-            <button class="control-btn stop" onclick="sendCmd('STOP')">STOP</button>
+        <div class="music-controls" id="m-ctrl">
+            <button class="ctrl-btn btn-play" onclick="send('PLAY')">PLAY</button>
+            <button class="ctrl-btn" onclick="send('PAUSE')">PAUSE</button>
+            <button class="ctrl-btn btn-stop" onclick="send('STOP')">STOP</button>
         </div>
 
-        <div class="skip-controls" id="my-skips">
-            <button class="skip-btn backward" onclick="sendCmd('SKIP', -5)">-5S</button>
-            <button class="skip-btn backward" onclick="sendCmd('SKIP', -10)">-10S</button>
-            <button class="skip-btn backward" onclick="sendCmd('SKIP', -20)">-20S</button>
-            <button class="skip-btn forward" onclick="sendCmd('SKIP', 5)">+5S</button>
-            <button class="skip-btn forward" onclick="sendCmd('SKIP', 10)">+10S</button>
-            <button class="skip-btn forward" onclick="sendCmd('SKIP', 20)">+20S</button>
+        <div class="skip-controls" id="s-ctrl">
+            <button class="sk-btn sk-back" onclick="send('SKIP',-5)">-5s</button>
+            <button class="sk-btn sk-back" onclick="send('SKIP',-10)">-10s</button>
+            <button class="sk-btn sk-back" onclick="send('SKIP',-20)">-20s</button>
+            <button class="sk-btn sk-fwd" onclick="send('SKIP',5)">+5s</button>
+            <button class="sk-btn sk-fwd" onclick="send('SKIP',10)">+10s</button>
+            <button class="sk-btn sk-fwd" onclick="send('SKIP',20)">+20s</button>
         </div>
 
-        <button id="bet-btn" class="btn" onclick="sendCmd('BET')">💎 APOSTAR FICHA</button>
+        <button id="bet-btn" onclick="send('BET')">💎 APOSTAR FICHA</button>
     </div>
 
     <script>
-        let peer;
-        let conn;
-        let myId = "CB-" + Math.floor(Math.random() * 999);
-        let playerName = "";
-
+        var peer, conn, myId = "CB-P-" + Math.floor(Math.random() * 9999), pName = "";
         function conectar() {
-            var hostIdInput = document.getElementById('host-id');
-            var playerNameInput = document.getElementById('player-name');
-            var hostId = hostIdInput.value.trim().toUpperCase();
-            playerName = playerNameInput.value.trim();
-
-            if (!hostId || !playerName) return alert("Rellena los campos");
-
-            if (typeof Peer === 'undefined') {
-                return alert("La librería de conexión no ha cargado. Revisa tu conexión a internet.");
-            }
-
+            var h = document.getElementById('host-id').value.trim().toUpperCase();
+            pName = document.getElementById('player-name').value.trim();
+            if (!h || !pName) return alert("Faltan datos");
             peer = new Peer(myId);
-
             peer.on('open', function () {
-                conn = peer.connect("CB-HOST-" + hostId);
-
+                conn = peer.connect("CB-HOST-" + h);
                 conn.on('open', function () {
-                    conn.send({ type: 'JOIN', name: playerName });
+                    conn.send({ type: 'JOIN', name: pName });
                     document.getElementById('login-screen').style.display = 'none';
                     document.getElementById('game-screen').style.display = 'flex';
                 });
-
-                conn.on('data', function (data) {
-                    handleGameData(data);
-                });
-
-                conn.on('close', function () {
-                    alert("Conexión perdida con el Host");
-                    location.reload();
-                });
+                conn.on('data', handle);
             });
-
-            peer.on('error', function (err) {
-                alert("Error al conectar. ¿Seguro que el código es correcto?");
-                console.error(err);
-            });
+            peer.on('error', function () { alert("Error de conexión. ¿Código correcto?"); });
         }
-
-        function handleGameData(data) {
-            console.log("Msg recibido:", data);
-
+        function handle(data) {
             if (data.type === 'STATE_UPDATE') {
-                document.getElementById('current-player-ui').innerText = data.activePlayer.name;
-
-                var isMyTurn = data.activePlayer.id === myId;
-                var controls = document.getElementById('my-controls');
-                var skips = document.getElementById('my-skips');
-                var betBtn = document.getElementById('bet-btn');
-                var waiting = document.getElementById('waiting-msg');
-                var card = document.getElementById('card');
-
-                // Mostrar/Ocultar controles
-                controls.style.display = isMyTurn ? 'grid' : 'none';
-                skips.style.display = isMyTurn ? 'grid' : 'none';
-                betBtn.style.display = (!isMyTurn && data.gameState === 'PLAYING') ? 'block' : 'none';
-
-                // Manejo de la carta
+                document.getElementById('cur-player').innerText = data.activePlayer.name;
+                var isMe = data.activePlayer.id === myId;
+                document.getElementById('m-ctrl').style.display = isMe ? 'grid' : 'none';
+                document.getElementById('s-ctrl').style.display = isMe ? 'grid' : 'none';
+                document.getElementById('bet-btn').style.display = (!isMe && data.currentTrack) ? 'block' : 'none';
                 if (data.currentTrack) {
-                    waiting.style.display = 'none';
-                    card.style.display = 'block';
-                    document.getElementById('card-artist').innerText = data.currentTrack.artist;
-                    document.getElementById('card-song').innerText = data.currentTrack.song;
-                    document.getElementById('card-year').innerText = data.currentTrack.year;
-
-                    if (data.revealed) {
-                        card.classList.add('flipped');
-                    } else {
-                        card.classList.remove('flipped');
-                    }
+                    document.getElementById('wait-msg').style.display = 'none';
+                    document.getElementById('card').style.display = 'block';
+                    document.getElementById('c-artist').innerText = data.currentTrack.artist;
+                    document.getElementById('c-song').innerText = data.currentTrack.song;
+                    document.getElementById('c-year').innerText = data.currentTrack.year;
+                    if (data.revealed) document.getElementById('card').classList.add('flipped');
+                    else document.getElementById('card').classList.remove('flipped');
                 } else {
-                    card.style.display = 'none';
-                    waiting.style.display = 'block';
+                    document.getElementById('card').style.display = 'none';
+                    document.getElementById('wait-msg').style.display = 'block';
                 }
             }
         }
-
-        function sendCmd(cmd, val) {
-            if (conn && conn.open) {
-                conn.send({ type: 'COMMAND', action: cmd, value: val });
-            }
-        }
+        function send(a, v) { if (conn && conn.open) conn.send({ type: 'COMMAND', action: a, value: v }); }
     </script>
 </body>
 
