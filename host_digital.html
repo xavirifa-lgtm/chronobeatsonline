@@ -351,9 +351,10 @@
                 <div class="val-card" id="val-card-ui" style="display:none;">
                     <div class="card-details">
                         <p style="font-size: 0.6em; color: var(--neon);">CARTA EN JUEGO</p>
-                        <h3 id="ui-card-title">Título de la Canción</h3>
-                        <p id="ui-card-info">Artista - 1985</p>
+                        <h3 id="ui-card-title">????</h3>
+                        <p id="ui-card-info">???? - ????</p>
                     </div>
+                    <button class="reveal-btn" id="btn-reveal-host" onclick="revealData()">REVELAR DATOS</button>
                 </div>
 
                 <div class="actions" id="validation-buttons" style="display:none;">
@@ -449,8 +450,29 @@
             if (typeof YT === 'undefined') return;
             ytPlayer = new YT.Player('youtube-player', {
                 height: '100%', width: '100%',
-                playerVars: { 'autoplay': 0, 'controls': 0, 'showinfo': 0, 'modestbranding': 1 },
-                events: { 'onReady': function () { youtubeReady = true; } }
+                playerVars: {
+                    'autoplay': 0,
+                    'controls': 0,
+                    'showinfo': 0,
+                    'modestbranding': 1,
+                    'origin': window.location.origin,
+                    'enablejsapi': 1,
+                    'playsinline': 1
+                },
+                events: {
+                    'onReady': function () {
+                        youtubeReady = true;
+                        console.log("YouTube Player Ready");
+                    },
+                    'onStateChange': function (event) {
+                        // Si el video termina solo, mostrar botones
+                        if (event.data === YT.PlayerState.ENDED) {
+                            if (isRevealed) {
+                                document.getElementById('validation-buttons').style.display = 'flex';
+                            }
+                        }
+                    }
+                }
             });
         }
 
@@ -468,23 +490,37 @@
         }
 
         function startGame() {
-            document.getElementById('lobby').style.display = 'none';
-            document.getElementById('dashboard').style.display = 'grid';
-            nextTurn();
+            // DESBLOQUEO DE AUDIO (Indispensable para Tablets/Móviles)
+            // Intentamos reproducir y pausar inmediatamente para "despertar" el audio
+            if (ytPlayer && youtubeReady) {
+                ytPlayer.playVideo();
+                setTimeout(function () {
+                    ytPlayer.pauseVideo();
+                    document.getElementById('lobby').style.display = 'none';
+                    document.getElementById('dashboard').style.display = 'grid';
+                    nextTurn();
+                }, 500);
+            } else {
+                // Si no está listo, esperamos un poco más
+                alert("Esperando al reproductor de YouTube... Prueba en 2 segundos.");
+            }
         }
 
         function nextTurn() {
             currentSongIdx++;
             isRevealed = false;
 
-            // Actualizar UI del Host
+            // Actualizar UI del Host (Oculto al principio)
             var song = songs[currentSongIdx];
             if (!song) {
                 alert("¡Fin de la lista de canciones!");
                 return;
             }
-            document.getElementById('ui-card-title').innerText = song.song;
-            document.getElementById('ui-card-info').innerText = song.artist + " - " + song.year;
+
+            document.getElementById('ui-card-title').innerText = "????";
+            document.getElementById('ui-card-info').innerText = "???? - ????";
+            document.getElementById('btn-reveal-host').style.display = 'block';
+
             document.getElementById('val-card-ui').style.display = 'flex';
             document.getElementById('validation-buttons').style.display = 'none';
             document.getElementById('host-instructions').innerText = "EL JUGADOR ESTÁ ESCUCHANDO...";
@@ -497,25 +533,49 @@
             syncState();
         }
 
+        function revealData() {
+            isRevealed = true;
+            var song = songs[currentSongIdx];
+            document.getElementById('ui-card-title').innerText = song.song;
+            document.getElementById('ui-card-info').innerText = song.artist + " - " + song.year;
+            document.getElementById('btn-reveal-host').style.display = 'none';
+
+            // Si el video se ha parado, mostrar los botones de validación
+            if (ytPlayer.getPlayerState() === YT.PlayerState.ENDED || ytPlayer.getPlayerState() === YT.PlayerState.PAUSED || ytPlayer.getPlayerState() === -1) {
+                document.getElementById('validation-buttons').style.display = 'flex';
+            }
+
+            syncState();
+        }
+
         function handlePlayerCommand(peerId, action) {
             var activePlayer = players[activePlayerIdx];
             if (peerId !== activePlayer.id && action !== 'BET') return;
 
             switch (action) {
                 case 'PLAY':
-                    ytPlayer.playVideo();
-                    document.getElementById('player-msg').style.display = 'none';
-                    document.getElementById('playback-status').style.display = 'block';
+                    if (ytPlayer && ytPlayer.playVideo) {
+                        ytPlayer.unMute(); // Asegurar sonido
+                        ytPlayer.playVideo();
+                        document.getElementById('player-msg').style.display = 'none';
+                        document.getElementById('playback-status').style.display = 'block';
+                    }
                     break;
                 case 'PAUSE':
-                    ytPlayer.pauseVideo();
-                    document.getElementById('playback-status').style.display = 'none';
+                    if (ytPlayer && ytPlayer.pauseVideo) {
+                        ytPlayer.pauseVideo();
+                        document.getElementById('playback-status').style.display = 'none';
+                    }
                     break;
                 case 'STOP':
-                    ytPlayer.stopVideo();
-                    document.getElementById('playback-status').style.display = 'none';
-                    document.getElementById('validation-buttons').style.display = 'flex';
-                    document.getElementById('host-instructions').innerText = "¿HA ACERTADO?";
+                    if (ytPlayer && ytPlayer.stopVideo) {
+                        ytPlayer.stopVideo();
+                        document.getElementById('playback-status').style.display = 'none';
+                        if (isRevealed) {
+                            document.getElementById('validation-buttons').style.display = 'flex';
+                        }
+                        document.getElementById('host-instructions').innerText = "¿HA ACERTADO?";
+                    }
                     break;
                 case 'BET':
                     // Lógica de apuesta pendiente (restar fichas)

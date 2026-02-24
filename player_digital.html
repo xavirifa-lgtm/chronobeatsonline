@@ -26,7 +26,7 @@
             color: #fff;
             font-family: 'Montserrat', sans-serif;
             margin: 0;
-            min-height: 100vh;
+            height: 100vh;
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -116,13 +116,15 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            min-height: 0;
+            /* Permite que el contenedor se encoja */
         }
 
         .card {
-            width: 100%;
-            max-width: 280px;
-            height: 100%;
-            max-height: 400px;
+            width: 90%;
+            max-width: 250px;
+            height: 90%;
+            max-height: 350px;
             position: relative;
             transform-style: preserve-3d;
             transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -193,18 +195,20 @@
         .music-controls {
             display: none;
             grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-top: 30px;
+            gap: 10px;
+            margin-top: 10px;
+            padding-bottom: 30px;
+            flex-shrink: 0;
         }
 
         .control-btn {
             background: #1a1a1a;
             border: 2px solid #333;
             color: #fff;
-            padding: 15px;
+            padding: 20px 10px;
             border-radius: 15px;
             font-family: 'Bungee';
-            font-size: 0.8em;
+            font-size: 0.9em;
             cursor: pointer;
         }
 
@@ -226,10 +230,12 @@
         /* Botón de Apuesta */
         #bet-btn {
             display: none;
-            margin-top: 20px;
+            margin-top: 10px;
+            margin-bottom: 30px;
             background: transparent;
             border: 2px dashed var(--gold);
             color: var(--gold);
+            flex-shrink: 0;
         }
 
         /* Indicador de Espera */
