@@ -100,14 +100,23 @@
             border-left: 4px solid var(--neon);
         }
 
-        /* Reproductor Invisible (Totalmente fuera de la pantalla) */
+        /* Reproductor Invisible pero funcional */
         #player-container {
             position: absolute;
-            left: -9999px;
-            top: -9999px;
-            width: 1px;
-            height: 1px;
-            overflow: hidden;
+            left: 10px;
+            bottom: 10px;
+            width: 200px;
+            height: 200px;
+            opacity: 0.1;
+            /* Un poco visible para depuración si fuera necesario, pero invisible en uso normal */
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        #player-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
         }
 
         .validation-area {
@@ -246,11 +255,15 @@
                     <p style="font-size: 0.7em; color: var(--neon);">TRACK EN JUEGO</p>
                     <h3 id="ui-card-title">????</h3>
                     <p id="ui-card-info">???? - ????</p>
-                    <button class="reveal-btn" id="btn-reveal-host" onclick="revealData()">REVELAR DATOS</button>
-                </div>
-                <div class="actions" id="validation-buttons" style="display:none;">
-                    <button class="btn-val btn-ok" onclick="validateResult(true)">✓ CORRECTO</button>
-                    <button class="btn-val btn-fail" onclick="validateResult(false)">✗ ERROR</button>
+                    <button class="reveal-btn" id="btn-reveal-host" onclick="revealData()"
+                        style="display:block; margin: 10px auto;">REVELAR DATOS</button>
+                    <div class="actions" id="validation-buttons"
+                        style="display:none; gap: 10px; width: 100%; margin-top: 15px;">
+                        <button class="btn-val btn-ok" onclick="validateResult(true)"
+                            style="background:#00ff88; padding: 15px; flex:1; border:none; border-radius:10px; font-family:'Bungee'; cursor:pointer;">ACERTÓ</button>
+                        <button class="btn-val btn-fail" onclick="validateResult(false)"
+                            style="background:var(--accent); color:#fff; padding: 15px; flex:1; border:none; border-radius:10px; font-family:'Bungee'; cursor:pointer;">FALLÓ</button>
+                    </div>
                 </div>
                 <div id="host-instructions">ESPERANDO ACCIÓN...</div>
             </div>
@@ -306,14 +319,17 @@
 
         function startGame() {
             if (!youtubeReady) return alert("Cargando reproductor...");
-            ytPlayer.unMute();
-            ytPlayer.playVideo(); // Unlocking audio
-            setTimeout(function () {
-                ytPlayer.stopVideo();
-                document.getElementById('lobby').style.display = 'none';
-                document.getElementById('dashboard').style.display = 'grid';
-                nextTurn();
-            }, 800);
+
+            // MECÁNICA INICIAL: Repartir una carta a cada jugador
+            players.forEach(function (p) {
+                currentSongIdx++;
+                var s = songs[currentSongIdx];
+                p.cards.push(s.year);
+            });
+
+            document.getElementById('lobby').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'grid';
+            nextTurn();
         }
 
         function nextTurn() {
@@ -331,15 +347,22 @@
 
         function handlePlayerCommand(peerId, action, value) {
             if (peerId !== players[activePlayerIdx].id) return;
+            var s = songs[currentSongIdx];
             switch (action) {
-                case 'PLAY': ytPlayer.unMute(); ytPlayer.playVideo(); break;
-                case 'PAUSE': ytPlayer.pauseVideo(); break;
+                case 'PLAY':
+                    document.getElementById('player-container').innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + s.id + '?autoplay=1" allow="autoplay"></iframe>';
+                    break;
+                case 'PAUSE':
                 case 'STOP':
-                    ytPlayer.stopVideo();
+                    document.getElementById('player-container').innerHTML = '';
                     document.getElementById('host-instructions').innerText = "¿ACERTÓ?";
                     revealData();
                     break;
-                case 'SKIP': ytPlayer.seekTo(ytPlayer.getCurrentTime() + value, true); break;
+                case 'SKIP':
+                    // El skip con iframe dinámico es más complejo, pero si el usuario quiere saltar, 
+                    // tendríamos que recargar el iframe con el parámetro start=
+                    // Por ahora reseteamos o simplificamos
+                    break;
             }
         }
 

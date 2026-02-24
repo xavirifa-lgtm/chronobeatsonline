@@ -78,31 +78,31 @@
             display: none;
             flex: 1;
             flex-direction: column;
-            padding: 5px 10px;
+            padding: 5px;
             align-items: center;
-            justify-content: space-between;
+            justify-content: flex-start;
+            overflow-y: auto;
         }
 
         #turn-status {
             font-family: 'Bungee';
             color: var(--neon);
-            font-size: 0.75em;
-            margin-bottom: 2px;
+            font-size: 0.7em;
+            margin: 5px 0;
         }
 
         .card-container {
-            flex: 0 1 auto;
+            flex: 0 0 160px;
             perspective: 1000px;
             display: flex;
             align-items: center;
             justify-content: center;
             width: 100%;
-            height: 35vh;
-            min-height: 120px;
+            margin-top: 10px;
         }
 
         .card {
-            height: 90%;
+            height: 100%;
             aspect-ratio: 2/3;
             position: relative;
             transform-style: preserve-3d;
@@ -231,21 +231,8 @@
 
     <div id="game-screen">
         <div id="turn-status">TURNO DE: <span id="cur-player">---</span></div>
-        <div class="card-container">
-            <div id="card" class="card">
-                <div class="card-face card-front">
-                    <div style="font-family:'Bungee';color:var(--neon);opacity:0.3;font-size:2em;text-align:center">
-                        CHRONO<br>BEATS</div>
-                </div>
-                <div class="card-face card-back">
-                    <div id="c-artist" style="font-size:0.7em;color:#aaa;text-transform:uppercase">ARTISTA</div>
-                    <div id="c-song" style="font-family:'Bungee';font-size:1.1em;margin:10px 0">TÍTULO</div>
-                    <div id="c-year" style="font-family:'Bungee';font-size:2.5em;color:var(--accent)">1999</div>
-                </div>
-            </div>
-            <div id="wait-msg">ESPERANDO SIGUIENTE TRACK...</div>
-        </div>
 
+        <!-- CONTROLES ARRIBA -->
         <div class="music-controls" id="m-ctrl">
             <button class="ctrl-btn btn-play" onclick="send('PLAY')">PLAY</button>
             <button class="ctrl-btn" onclick="send('PAUSE')">PAUSE</button>
@@ -262,6 +249,22 @@
         </div>
 
         <button id="bet-btn" onclick="send('BET')">💎 APOSTAR FICHA</button>
+
+        <!-- CARTA ABAJO (más pequeña si es necesario) -->
+        <div class="card-container">
+            <div id="card" class="card">
+                <div class="card-face card-front">
+                    <div style="font-family:'Bungee';color:var(--neon);opacity:0.3;font-size:2em;text-align:center">
+                        CHRONO<br>BEATS</div>
+                </div>
+                <div class="card-face card-back">
+                    <div id="c-artist" style="font-size:0.6em;color:#aaa;text-transform:uppercase">ARTISTA</div>
+                    <div id="c-song" style="font-family:'Bungee';font-size:1em;margin:5px 0">TÍTULO</div>
+                    <div id="c-year" style="font-family:'Bungee';font-size:2em;color:var(--accent)">1999</div>
+                </div>
+            </div>
+            <div id="wait-msg">ESPERANDO SIGUIENTE TRACK...</div>
+        </div>
     </div>
 
     <script>
