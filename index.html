@@ -4,21 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chronobeats Online - Portal</title>
-    <!-- Fuentes oficiales -->
-    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Montserrat:wght@400;700&display=swap"
+    <title>CHRONOBEATS - HUB</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Bungee&family=Shojumaru&family=Limelight&family=Montserrat:wght@400;700&display=swap"
         rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Shojumaru&display=swap" rel="stylesheet" />
     <style>
-        :root {
-            --neon: #00f2ff;
-            --bg: #0d0d0d;
-            --accent: #ff0055;
-            --gold: #ffd700;
-        }
-
         body {
-            background: var(--bg);
+            background: #000;
             color: #fff;
             font-family: 'Montserrat', sans-serif;
             display: flex;
@@ -27,104 +19,164 @@
             justify-content: center;
             min-height: 100vh;
             margin: 0;
-            overflow: hidden;
-            padding: 20px;
+            padding: 40px 20px;
+            box-sizing: border-box;
         }
 
-        .logo {
+        .hub-title {
             font-family: 'Bungee';
             font-size: 2em;
-            color: var(--neon);
-            text-shadow: 0 0 20px var(--neon);
+            color: #fff;
+            letter-spacing: 5px;
+            margin-bottom: 50px;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
             text-align: center;
-            margin-bottom: 40px;
-            letter-spacing: 2px;
         }
 
-        .btn-container {
+        .cards-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 40px;
+            justify-content: center;
+            max-width: 1200px;
+        }
+
+        .game-card {
+            width: 300px;
+            height: 420px;
+            background: #090909;
+            border-radius: 20px;
             display: flex;
             flex-direction: column;
-            gap: 20px;
-        }
-
-        .btn {
-            display: block;
-            width: 320px;
-            padding: 22px;
-            border: 2px solid #333;
-            text-align: center;
-            color: #888;
+            align-items: center;
+            justify-content: center;
             text-decoration: none;
-            font-family: 'Bungee';
-            font-size: 0.9em;
-            border-radius: 50px;
-            text-transform: uppercase;
             transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            letter-spacing: 1px;
-            background: rgba(255, 255, 255, 0.02);
+            position: relative;
+            overflow: hidden;
+            border: 2px solid transparent;
         }
 
-        .btn:hover {
-            border-color: var(--neon);
-            color: var(--neon);
-            background: rgba(0, 242, 255, 0.05);
-            box-shadow: 0 0 30px rgba(0, 242, 255, 0.2);
-            transform: translateY(-3px) scale(1.02);
+        .game-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            opacity: 0.05;
+            background: radial-gradient(circle at center, currentColor 0%, transparent 70%);
+            transition: 0.4s;
         }
 
-        .btn-gold {
-            border-color: #444;
-            color: #aaa;
+        .game-card:hover {
+            transform: translateY(-15px) scale(1.05);
+            z-index: 10;
         }
 
-        .btn-gold:hover {
-            border-color: var(--gold);
-            color: var(--gold);
-            background: rgba(255, 215, 0, 0.05);
-            box-shadow: 0 0 30px rgba(255, 215, 0, 0.2);
+        .game-card:hover::before {
+            opacity: 0.15;
         }
 
-        .btn-anime {
-            border-color: #333;
-            color: #888;
-            font-family: 'Shojumaru';
-            text-transform: none;
+        .card-logo {
+            font-size: 2.8em;
+            text-align: center;
+            line-height: 1.1;
+            padding: 20px;
+            position: relative;
+            z-index: 2;
         }
 
-        .btn-anime:hover {
+        .card-sub {
+            font-family: 'Montserrat';
+            font-size: 0.3em;
+            color: #fff;
+            display: block;
+            margin-top: 15px;
+            letter-spacing: 2px;
+            opacity: 0.8;
+            text-shadow: none;
+        }
+
+        /* Original */
+        .card-original {
+            border-color: #00f2ff;
+            color: #00f2ff;
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.1);
+        }
+
+        .card-original:hover {
+            box-shadow: 0 10px 40px rgba(0, 242, 255, 0.4), inset 0 0 20px rgba(0, 242, 255, 0.2);
+            background: #0a1516;
+        }
+
+        .card-original .card-logo {
+            font-family: 'Bungee';
+            text-shadow: 0 0 15px #00f2ff;
+        }
+
+        /* Anime */
+        .card-anime {
             border-color: #ff00cc;
             color: #ff00cc;
-            background: rgba(255, 0, 204, 0.05);
-            box-shadow: 0 0 30px rgba(255, 0, 204, 0.2);
+            box-shadow: 0 0 20px rgba(255, 0, 204, 0.1);
         }
 
-        .section-title {
-            font-family: 'Bungee';
-            color: #555;
-            font-size: 0.8em;
-            margin-top: 20px;
-            margin-bottom: 10px;
-            text-align: center;
+        .card-anime:hover {
+            box-shadow: 0 10px 40px rgba(255, 0, 204, 0.4), inset 0 0 20px rgba(255, 0, 204, 0.2);
+            background: #160a12;
+        }
+
+        .card-anime .card-logo {
+            font-family: 'Shojumaru';
+            text-shadow: 0 0 15px #ff00cc;
+            font-size: 2.5em;
+            /* Ligeramente más pequeña por la fuente */
+        }
+
+        /* Movies */
+        .card-movies {
+            border-color: #ffaa00;
+            color: #ffaa00;
+            box-shadow: 0 0 20px rgba(255, 170, 0, 0.1);
+        }
+
+        .card-movies:hover {
+            box-shadow: 0 10px 40px rgba(255, 170, 0, 0.4), inset 0 0 20px rgba(255, 170, 0, 0.2);
+            background: #16120a;
+        }
+
+        .card-movies .card-logo {
+            font-family: 'Limelight';
+            text-shadow: 0 0 15px #ffaa00;
         }
     </style>
 </head>
 
 <body>
-    <div class="logo">CHRONOBEATS</div>
+    <div class="hub-title">CHOOSE YOUR EDITION</div>
 
-    <div class="btn-container">
-        <div class="section-title">MODO ORIGINAL</div>
-        <a href="host_digital.html" class="btn btn-gold">CENTRO DE CONTROL <span
-                style="font-size: 0.7em; opacity: 0.7;">(Tablet)</span></a>
-        <a href="player_digital.html" class="btn">MANDO JUGADOR <span
-                style="font-size: 0.7em; opacity: 0.7;">(Móvil)</span></a>
+    <div class="cards-container">
+        <a href="indexchrono.html" class="game-card card-original">
+            <div class="card-logo">
+                CHRONO<br>BEATS
+                <span class="card-sub">MODO ORIGINAL</span>
+            </div>
+        </a>
 
-        <div class="section-title" style="margin-top:40px; font-family:'Shojumaru'; color:#ff00cc; opacity:0.8;">ANIME
-            VERSION</div>
-        <a href="host_digital_anime.html" class="btn btn-anime">CENTRO DE CONTROL <span
-                style="font-size: 0.7em; opacity: 0.7; font-family:'Montserrat';">(Tablet)</span></a>
-        <a href="player_digital_anime.html" class="btn btn-anime">MANDO JUGADOR <span
-                style="font-size: 0.7em; opacity: 0.7; font-family:'Montserrat';">(Móvil)</span></a>
+        <a href="indexchronoanime.html" class="game-card card-anime">
+            <div class="card-logo">
+                CHRONO<br>BEATS
+                <span class="card-sub">ANIME VERSION</span>
+            </div>
+        </a>
+
+        <a href="indexchronomovies.html" class="game-card card-movies">
+            <div class="card-logo">
+                CHRONO<br>BEATS
+                <span class="card-sub">MOVIES & TV SHOWS</span>
+            </div>
+        </a>
     </div>
 </body>
 

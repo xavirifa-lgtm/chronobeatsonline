@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CHRONOBEATS ANIME</title>
+    <link href="https://fonts.googleapis.com/css2?family=Shojumaru&family=Montserrat:wght@400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --neon: #ff00cc;
+            --bg: #0d0d0d;
+            --gold: #00f2fe;
+        }
+
+        body {
+            background: var(--bg);
+            color: #fff;
+            font-family: 'Montserrat', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .logo {
+            font-family: 'Shojumaru';
+            font-size: 2em;
+            color: var(--neon);
+            text-shadow: 0 0 20px var(--neon);
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .btn-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .btn {
+            display: block;
+            width: 320px;
+            padding: 22px;
+            border: 2px solid #333;
+            text-align: center;
+            color: #888;
+            text-decoration: none;
+            font-family: 'Shojumaru';
+            font-size: 0.9em;
+            border-radius: 50px;
+            transition: 0.4s;
+        }
+
+        .btn:hover {
+            border-color: var(--neon);
+            color: var(--neon);
+            background: rgba(255, 0, 204, 0.05);
+            box-shadow: 0 0 30px rgba(255, 0, 204, 0.2);
+            transform: translateY(-3px);
+        }
+
+        .btn-gold {
+            border-color: #444;
+            color: #aaa;
+        }
+
+        .btn-gold:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+            background: rgba(0, 242, 254, 0.05);
+            box-shadow: 0 0 30px rgba(0, 242, 254, 0.2);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="logo">CHRONOBEATS<br><span style="font-size:0.5em; color:var(--gold);">ANIME VERSION</span></div>
+    <div class="btn-container">
+        <a href="host_digital_anime.html" class="btn btn-gold">CENTRO DE CONTROL <span
+                style="font-family:'Montserrat'; font-size: 0.7em;">(Tablet)</span></a>
+        <a href="player_digital_anime.html" class="btn">MANDO JUGADOR <span
+                style="font-family:'Montserrat'; font-size: 0.7em;">(Móvil)</span></a>
+        <a href="index.html" class="btn" style="border-color:#333; color:#555; margin-top:20px;">VOLVER AL MENÚ</a>
+    </div>
+</body>
+
+</html>
