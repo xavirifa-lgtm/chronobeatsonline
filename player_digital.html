@@ -401,6 +401,31 @@
             color: #00f2fe;
             box-shadow: 0 0 10px rgba(0, 242, 254, 0.2);
         }
+
+        #leaderboard-info {
+            font-family: 'Bungee';
+            font-size: 0.7em;
+            color: #888;
+            margin-bottom: 5px;
+            text-align: center;
+            width: 100%;
+        }
+
+        .leader-row {
+            color: var(--gold);
+            margin-bottom: 2px;
+        }
+
+        .me-row {
+            color: var(--neon);
+        }
+
+        .btn-error-track {
+            border-color: #ff3333 !important;
+            color: #ff3333 !important;
+            box-shadow: 0 0 10px rgba(255, 51, 51, 0.2) !important;
+            flex: 1;
+        }
     </style>
 </head>
 
@@ -414,6 +439,11 @@
     </div>
 
     <div id="game-screen">
+        <div id="leaderboard-info">
+            <div class="leader-row">LÍDER: <span id="lb-leader-name">---</span> (<span id="lb-leader-cards">0</span>)
+            </div>
+            <div class="me-row">YO: <span id="lb-me-cards">0</span> CARTAS</div>
+        </div>
         <h4 id="inventory-title"
             style="margin: 0 0 5px 0; font-family: 'Bungee'; font-size: 0.6em; color: #888; text-align: center;">MIS
             CARTAS</h4>
@@ -424,6 +454,8 @@
         <div class="special-actions" id="special-ctrl">
             <button class="spec-btn" id="btn-autowin" onclick="send('AUTO_WIN')">COMPRAR CARTA (3 <span
                     class="neon-chip" style="width:10px;height:10px;"></span>)</button>
+            <button class="spec-btn btn-error-track" id="btn-error-track" onclick="send('SYSTEM_ERROR_TRACK')"
+                style="display:none;">ERROR VÍDEO (GRATIS)</button>
             <button class="spec-btn" id="btn-reload" onclick="send('RELOAD_SONG')">CAMBIAR CANCIÓN (1 <span
                     class="neon-chip" style="width:10px;height:10px;"></span>)</button>
         </div>
@@ -524,6 +556,14 @@
             if (data.type === 'STATE_UPDATE') {
                 document.getElementById('cur-player').innerText = data.activePlayer.name;
 
+                if (data.leader) {
+                    document.getElementById('lb-leader-name').innerText = data.leader.name;
+                    document.getElementById('lb-leader-cards').innerText = data.leader.score;
+                }
+                if (data.myCards) {
+                    document.getElementById('lb-me-cards').innerText = data.myCards.length;
+                }
+
                 // Identificar si es mi turno usando el ID de PeerJS
                 var isMyTurn = (data.activePlayer.id === myId);
                 console.log("¿Es mi turno?", isMyTurn, "Mi ID:", myId, "ID Activo:", data.activePlayer.id);
@@ -589,6 +629,8 @@
                     specialCtrl.style.display = 'flex';
                     // COMPRAR (Solo si NO está sonando)
                     document.getElementById('btn-autowin').style.display = (!data.isPlaying) ? 'block' : 'none';
+                    // ERROR VIDEO (Solo si SI está sonando)
+                    document.getElementById('btn-error-track').style.display = (data.isPlaying) ? 'block' : 'none';
                     // CAMBIAR (Solo si SÍ está sonando y NO ha cambiado ya)
                     document.getElementById('btn-reload').style.display = (data.isPlaying && data.canReload) ? 'block' : 'none';
                 } else {

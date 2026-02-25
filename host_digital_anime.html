@@ -604,6 +604,25 @@
                         syncState();
                     }
                     break;
+                case 'SYSTEM_ERROR_TRACK':
+                    var p = players.find(function (pl) { return pl.id === peerId; });
+                    if (p && isPlaying) {
+                        isPlaying = false;
+                        container.innerHTML = '<div id="youtube-player"></div>';
+                        currentSongIdx++;
+                        segundosAcumulados = 0;
+                        momentoDeInicio = 0;
+                        isRevealed = false;
+                        document.getElementById('ui-card-artist').innerText = "????";
+                        document.getElementById('ui-card-song').innerText = "????";
+                        document.getElementById('ui-card-year').innerText = "????";
+                        document.getElementById('btn-reveal-host').style.display = 'block';
+                        document.getElementById('val-card-ui').style.display = 'block';
+                        document.getElementById('validation-buttons').style.display = 'none';
+                        document.getElementById('host-instructions').innerText = "VÍDEO ROTO. CANCIÓN CAMBIADA.";
+                        syncState();
+                    }
+                    break;
                 case 'AUTO_WIN':
                     var p = players.find(function (pl) { return pl.id === peerId; });
                     if (p && p.tokens >= 3) {
@@ -888,11 +907,22 @@
         }
 
         function syncState() {
+            var leaderName = "---";
+            var leaderScore = 0;
+            if (players.length > 0) {
+                var leader = players.reduce(function (prev, current) {
+                    return (prev.score > current.score) ? prev : current;
+                });
+                leaderName = leader.name;
+                leaderScore = leader.score;
+            }
+
             for (var id in connections) {
                 var p = players.find(p => p.id === id);
                 var state = {
                     type: 'STATE_UPDATE',
                     activePlayer: { id: players[activePlayerIdx].id, name: players[activePlayerIdx].name },
+                    leader: { name: leaderName, score: leaderScore },
                     currentTrack: songs[currentSongIdx],
                     revealed: isRevealed,
                     isPlaying: isPlaying,
