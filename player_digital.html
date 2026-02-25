@@ -438,39 +438,40 @@
         /* Hub Button */
         .btn-hub {
             position: fixed;
-            top: env(safe-area-inset-top, 20px);
+            top: calc(20px + env(safe-area-inset-top, 0px));
             left: 20px;
-            z-index: 1000;
-            width: 40px;
-            height: 40px;
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid var(--neon);
+            z-index: 10000;
+            width: 50px;
+            height: 50px;
+            background: #000;
+            border: 2px solid var(--neon, #00f2ff);
             border-radius: 50%;
-            display: flex;
+            display: flex !important;
             align-items: center;
             justify-content: center;
-            color: var(--neon);
+            color: var(--neon, #00f2ff);
             text-decoration: none;
             font-family: 'Bungee';
-            font-size: 1.2em;
-            box-shadow: 0 0 10px rgba(0, 242, 255, 0.2);
+            font-size: 1.5em;
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.5);
             transition: 0.3s;
             cursor: pointer;
         }
 
         .btn-hub:hover {
-            background: var(--neon);
+            background: var(--neon, #00f2ff);
             color: #000;
-            box-shadow: 0 0 20px var(--neon);
+            box-shadow: 0 0 30px var(--neon, #00f2ff);
+            transform: scale(1.1);
         }
 
         @media (max-width: 600px) {
             .btn-hub {
-                width: 35px;
-                height: 35px;
-                font-size: 1em;
-                left: 10px;
-                top: calc(env(safe-area-inset-top, 0px) + 10px);
+                width: 40px;
+                height: 40px;
+                font-size: 1.2em;
+                left: 15px;
+                top: calc(15px + env(safe-area-inset-top, 0px));
             }
         }
     </style>
