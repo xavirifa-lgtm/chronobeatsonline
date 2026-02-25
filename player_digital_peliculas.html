@@ -436,10 +436,50 @@
             box-shadow: 0 0 10px rgba(255, 51, 51, 0.2) !important;
             flex: 1;
         }
+
+        /* Hub Button */
+        .btn-hub {
+            position: fixed;
+            top: env(safe-area-inset-top, 20px);
+            left: 20px;
+            z-index: 1000;
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--neon);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--neon);
+            text-decoration: none;
+            font-family: 'Bungee';
+            font-size: 1.2em;
+            box-shadow: 0 0 10px rgba(0, 242, 255, 0.2);
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .btn-hub:hover {
+            background: var(--neon);
+            color: #000;
+            box-shadow: 0 0 20px var(--neon);
+        }
+
+        @media (max-width: 600px) {
+            .btn-hub {
+                width: 35px;
+                height: 35px;
+                font-size: 1em;
+                left: 10px;
+                top: calc(env(safe-area-inset-top, 0px) + 10px);
+            }
+        }
     </style>
 </head>
 
 <body>
+    <a href="index.html" class="btn-hub" title="Volver al Hub">H</a>
     <div id="login-screen">
         <div class="logo"
             style="font-family:'Limelight'; color:var(--neon); text-shadow: 0 0 10px var(--neon); text-align:center;">
