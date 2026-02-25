@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>PLAYER - CHRONOBEATS ANIME</title>
+    <link href="https://fonts.googleapis.com/css2?family=Shojumaru&family=Montserrat:wght@400;700&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <style>
+        :root {
+            --neon: #ff00cc;
+            --bg: #0d0d0d;
+            --accent: #00f2ff;
+            --gold: #ffd700;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: var(--bg);
+            color: #fff;
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        #login-screen {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .logo {
+            font-family: 'Shojumaru';
+            font-size: 2em;
+            color: var(--neon);
+            text-shadow: 0 0 20px var(--neon);
+            margin-bottom: 20px;
+        }
+
+        input {
+            background: #1a1a1a;
+            border: 2px solid #333;
+            color: #fff;
+            padding: 15px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 280px;
+            margin-bottom: 12px;
+            font-family: 'Bungee';
+            text-align: center;
+            font-size: 1.1em;
+        }
+
+        .btn {
+            background: var(--neon);
+            color: #000;
+            border: none;
+            padding: 18px;
+            border-radius: 50px;
+            font-family: 'Bungee';
+            width: 100%;
+            max-width: 280px;
+            cursor: pointer;
+            font-size: 1.2em;
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.3);
+            transition: 0.3s;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        #game-screen {
+            display: none;
+            flex: 1;
+            flex-direction: column;
+            padding: 10px;
+            align-items: center;
+            justify-content: flex-start;
+            overflow-y: auto;
+        }
+
+        #turn-status {
+            font-family: 'Bungee';
+            color: var(--neon);
+            font-size: 0.8em;
+            margin: 10px 0;
+            letter-spacing: 1px;
+        }
+
+        .music-controls {
+            display: none;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            width: 100%;
+            max-width: 340px;
+            margin-bottom: 10px;
+        }
+
+        .skip-controls {
+            display: none;
+            grid-template-rows: repeat(2, 1fr);
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            width: 100%;
+            max-width: 340px;
+            margin-bottom: 15px;
+        }
+
+        .ctrl-btn {
+            background: #1a1a1a;
+            border: 2px solid #444;
+            color: #fff;
+            padding: 15px 5px;
+            border-radius: 10px;
+            font-family: 'Bungee';
+            font-size: 0.85em;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-play {
+            border-color: var(--neon);
+            color: var(--neon);
+        }
+
+        .btn-stop {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .sk-btn {
+            background: #050505;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 12px 2px;
+            border-radius: 8px;
+            font-family: 'Bungee';
+            font-size: 0.75em;
+            cursor: pointer;
+        }
+
+        .sk-fwd {
+            color: var(--neon);
+            border-color: rgba(0, 242, 255, 0.3);
+        }
+
+        .sk-back {
+            color: var(--accent);
+            border-color: rgba(255, 0, 85, 0.3);
+        }
+
+        #bet-btn {
+            display: none;
+            background: transparent;
+            border: 2px dashed var(--gold);
+            color: var(--gold);
+            padding: 15px;
+            width: 100%;
+            max-width: 340px;
+            margin-bottom: 15px;
+            font-family: 'Bungee';
+            font-size: 0.9em;
+            border-radius: 15px;
+            cursor: pointer;
+        }
+
+        .card-container {
+            flex: 0 0 280px;
+            perspective: 1000px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            margin-top: 25px;
+        }
+
+        .card {
+            height: 100%;
+            aspect-ratio: 2/3;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .card.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 15px;
+            border: 2px solid var(--neon);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .card-front {
+            background: #111;
+            box-shadow: inset 0 0 30px rgba(0, 242, 255, 0.05);
+        }
+
+        .card-back {
+            background: #1a1a1a;
+            transform: rotateY(180deg);
+            border-color: var(--accent);
+        }
+
+        #c-artist {
+            font-size: 0.7em;
+            color: #aaa;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            line-height: 1.2;
+            font-family: 'Shojumaru';
+        }
+
+        #c-song {
+            font-family: 'Shojumaru';
+            font-size: 1em;
+            margin-bottom: 10px;
+            line-height: 1.2;
+        }
+
+        #c-year {
+            font-family: 'Bungee';
+            font-size: 4em;
+            color: var(--accent);
+            line-height: 0.9;
+        }
+
+
+        #wait-msg {
+            font-family: 'Bungee';
+            opacity: 0.4;
+            font-size: 0.8em;
+            text-align: center;
+            margin-top: 15px;
+            color: #888;
+        }
+
+        .collection-summary {
+            width: 100%;
+            max-width: 340px;
+            margin-top: 20px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+        }
+
+        .collection-summary h4 {
+            font-family: 'Bungee';
+            font-size: 0.7em;
+            margin: 0 0 10px 0;
+            color: var(--neon);
+            text-align: center;
+        }
+
+        .vertical-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .card-row {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            padding: 5px;
+            border-radius: 6px;
+            font-family: 'Bungee';
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.9em;
+            color: #fff;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+            width: 80px;
+            margin: 0 auto;
+        }
+
+        .special-actions {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            max-width: 340px;
+            margin-bottom: 10px;
+            justify-content: center;
+        }
+
+        .spec-btn {
+            background: #222;
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            padding: 10px;
+            border-radius: 8px;
+            font-family: 'Bungee';
+            font-size: 0.7em;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .chip-display {
+            font-family: 'Bungee';
+            color: var(--gold);
+            font-size: 0.9em;
+            margin-bottom: 5px;
+            text-shadow: 0 0 5px #00f2fe;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .neon-chip {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            background: #00f2fe;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #00f2fe, 0 0 15px #00f2fe;
+        }
+
+        /* Slots de apuesta */
+        .bet-slot {
+            width: 30px;
+            height: 30px;
+            background: rgba(0, 242, 254, 0.1);
+            border: 2px dashed #00f2fe;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            margin: 4px auto;
+            font-size: 0.6em;
+            color: #00f2fe;
+            font-family: 'Bungee';
+            transition: 0.3s;
+        }
+
+        .bet-slot.occupied {
+            background: #00f2fe;
+            color: #000;
+            border-style: solid;
+            box-shadow: 0 0 8px #00f2fe;
+        }
+
+        .bet-slot.my-bet {
+            background: var(--gold);
+            border-color: var(--gold);
+            color: #000;
+            box-shadow: 0 0 12px var(--gold);
+        }
+
+        .bet-slot.active-guess {
+            background: #fff;
+            border-color: #fff;
+            box-shadow: 0 0 15px #fff;
+            color: #000;
+            border-style: solid;
+        }
+
+        .bet-slot.blocked {
+            opacity: 0.3;
+            cursor: not-allowed;
+            border-color: #444;
+        }
+
+        .bet-slot:active {
+            transform: scale(0.9);
+        }
+
+        .spec-btn:disabled {
+            opacity: 0.4;
+            pointer-events: none;
+            border-color: #444;
+            color: #444;
+        }
+
+        .spec-btn#btn-reload {
+            border-color: #00f2fe;
+            color: #00f2fe;
+            box-shadow: 0 0 10px rgba(0, 242, 254, 0.2);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="login-screen">
+        <div class="logo"
+            style="font-family:'Shojumaru'; color:var(--neon); text-shadow: 0 0 10px var(--neon); text-align:center;">
+            CHRONOBEATS<br><span
+                style="font-size:0.5em; color:var(--accent); font-family:'Montserrat'; font-weight:bold;">ANIME
+                VERSION</span></div>
+        <input type="text" id="host-id" placeholder="CÓDIGO SALA" maxlength="6">
+        <input type="text" id="player-name" placeholder="TU NOMBRE">
+        <button class="btn" id="join-btn" onclick="conectar()">ENTRAR</button>
+    </div>
+
+    <div id="game-screen">
+        <h4 id="inventory-title"
+            style="margin: 0 0 5px 0; font-family: 'Bungee'; font-size: 0.6em; color: #888; text-align: center;">MIS
+            CARTAS</h4>
+        <div id="turn-status">TURNO DE: <span id="cur-player">---</span></div>
+        <div class="chip-display" id="my-tokens-ui">MIS FICHAS: <span class="neon-chip"></span><span
+                class="neon-chip"></span></div>
+
+        <div class="special-actions" id="special-ctrl">
+            <button class="spec-btn" id="btn-autowin" onclick="send('AUTO_WIN')">COMPRAR CARTA (3 <span
+                    class="neon-chip" style="width:10px;height:10px;"></span>)</button>
+            <button class="spec-btn" id="btn-reload" onclick="send('RELOAD_SONG')">CAMBIAR CANCIÓN (1 <span
+                    class="neon-chip" style="width:10px;height:10px;"></span>)</button>
+        </div>
+
+        <div class="music-controls" id="m-ctrl">
+            <button class="ctrl-btn btn-play" onclick="send('PLAY')">PLAY</button>
+            <button class="ctrl-btn" onclick="send('PAUSE')">PAUSE</button>
+            <button class="ctrl-btn btn-stop" onclick="send('STOP')">STOP</button>
+        </div>
+
+        <div class="skip-controls" id="s-ctrl">
+            <button class="sk-btn sk-fwd" onclick="send('SKIP',5)">+5s</button>
+            <button class="sk-btn sk-fwd" onclick="send('SKIP',10)">+10s</button>
+            <button class="sk-btn sk-fwd" onclick="send('SKIP',20)">+20s</button>
+            <button class="sk-btn sk-back" onclick="send('SKIP',-5)">-5s</button>
+            <button class="sk-btn sk-back" onclick="send('SKIP',-10)">-10s</button>
+            <button class="sk-btn sk-back" onclick="send('SKIP',-20)">-20s</button>
+        </div>
+
+        <div id="king-mode-ui"
+            style="display: none; width: 100%; max-width: 340px; margin-top: 10px; text-align: center; flex-direction: column; gap: 10px;">
+        </div>
+
+        <div class="card-container" id="normal-card-container">
+            <div id="card" class="card">
+                <div class="card-face card-front">
+                    <div
+                        style="font-family:'Shojumaru';color:var(--neon);opacity:0.2;font-size:1.8em;text-align:center;line-height:1.2;word-wrap:break-word;width:100%">
+                        CHRONO<br>BEATS<br><span style="font-size:0.5em;">ANIME</span></div>
+                </div>
+                <div class="card-face card-back">
+                    <div id="c-artist">ANIME</div>
+                    <div id="c-song">TIPO</div>
+                    <div id="c-year">1999</div>
+                </div>
+            </div>
+            <div id="wait-msg">ESPERANDO SIGUIENTE TRACK...</div>
+        </div>
+
+        <div class="collection-summary" id="normal-collection">
+            <h4>MIS CARTAS</h4>
+            <div id="my-cards-list" class="vertical-cards"></div>
+        </div>
+    </div>
+
+    <script>
+        var peer, conn, myId, playerName;
+        var lastState = null;
+        function conectar() {
+            var hostId = document.getElementById('host-id').value.toUpperCase().trim();
+            playerName = document.getElementById('player-name').value.trim();
+            if (!hostId || !playerName) return alert("Rellena los datos");
+
+            var btn = document.getElementById('join-btn');
+            btn.disabled = true;
+            btn.innerText = "CONECTANDO...";
+
+            peer = new Peer();
+            peer.on('open', function (id) {
+                myId = id;
+                console.log("Conectando con ID Peer:", id);
+                conn = peer.connect("CB-ANIME-HOST-" + hostId);
+
+                conn.on('open', function () {
+                    console.log("¡Conectado!");
+                    conn.send({ type: 'JOIN', name: playerName });
+                    document.getElementById('login-screen').style.display = 'none';
+                    document.getElementById('game-screen').style.display = 'flex';
+                });
+
+                conn.on('data', handle);
+
+                conn.on('close', function () {
+                    alert("Conexión cerrada. Recarga la página.");
+                    location.reload();
+                });
+            });
+
+            peer.on('error', function (err) {
+                console.error("Error PeerJS:", err);
+                alert("Error: " + err.type);
+                btn.disabled = false;
+                btn.innerText = "ENTRAR";
+            });
+        }
+
+        function send(action, value) {
+            if (conn && conn.open) {
+                conn.send({ type: 'COMMAND', action: action, value: value });
+            } else {
+                alert("Conexión perdida. Recarga la página.");
+            }
+        }
+
+        function handle(data) {
+            console.log("Evento:", data.type, data);
+            lastState = data;
+            if (data.type === 'STATE_UPDATE') {
+                document.getElementById('cur-player').innerText = data.activePlayer.name;
+
+                // Identificar si es mi turno usando el ID de PeerJS
+                var isMyTurn = (data.activePlayer.id === myId);
+                console.log("¿Es mi turno?", isMyTurn, "Mi ID:", myId, "ID Activo:", data.activePlayer.id);
+
+                var isKingMode = (data.turnPhase && data.turnPhase !== 'NORMAL');
+                var normalCardContainer = document.getElementById('normal-card-container');
+                var normalCollection = document.getElementById('normal-collection');
+                var kingModeUi = document.getElementById('king-mode-ui');
+
+                if (isKingMode) {
+                    normalCardContainer.style.display = 'none';
+                    normalCollection.style.display = 'none';
+                    kingModeUi.style.display = 'flex';
+
+                    if (data.turnPhase === 'KING_SELECTION') {
+                        if (isMyTurn) {
+                            kingModeUi.innerHTML = "<h3 style='color:var(--gold);font-family:Bungee;'>ERES EL REY</h3><p>EL RESTO DE JUGADORES ESTÁ ELIGIENDO TU CARTA...</p>";
+                        } else {
+                            var html = "<h3 style='color:var(--neon);font-family:Bungee;'>¡ELIGE LA CARTA MÁS DIFÍCIL!</h3>";
+                            if (data.kingOptions) {
+                                data.kingOptions.forEach(function (opt, idx) {
+                                    html += "<div style='background:#111; border:1px solid var(--neon); border-radius:10px; padding:10px; margin-bottom:10px; text-align:left;'>";
+                                    html += "<span style='color:#00f2fe; font-family:Shojumaru; font-size:1.2em; margin-right:10px;'>#" + (idx + 1) + "</span>";
+                                    html += "<span style='font-size:0.8em; color:#aaa; font-family:Shojumaru;'>" + opt.artist + "</span><br>";
+                                    html += "<strong style='font-family:Shojumaru;'>" + opt.song + "</strong><br>";
+                                    html += "<span style='color:var(--accent); font-family:Bungee; font-size:1.2em;'>" + opt.year + "</span>";
+                                    html += "<button class='btn' style='margin-top:10px; padding:10px; font-size:1em;' onclick=\"send('KING_SELECT_CARD', " + idx + ")\">¡ELEGIR ESTA!</button>";
+                                    html += "</div>";
+                                });
+                            }
+                            kingModeUi.innerHTML = html;
+                        }
+                    } else if (data.turnPhase === 'KING_GUESS') {
+                        if (isMyTurn) {
+                            var html = "<h3 style='color:var(--gold);font-family:Shojumaru;'>¡ADIVINA EL AÑO!</h3>";
+                            html += "<p style='font-size:0.8em;color:#aaa; font-family:Shojumaru;'>" + data.currentTrack.artist + "</p>";
+                            html += "<p style='font-family:Shojumaru;font-size:1.2em; border-bottom:1px solid #333; padding-bottom:10px;'>" + data.currentTrack.song + "</p>";
+                            html += "<p style='font-size:0.8em; color:var(--neon); margin-bottom:15px;'>(Márgen de error: +/- 2 años)</p>";
+                            html += "<input type='number' id='king-guess-input' placeholder='AÑO' style='font-size:1.5em; text-align:center;'>";
+                            html += "<button class='btn' style='margin-top:10px;' onclick=\"var y = document.getElementById('king-guess-input').value; if(y) send('KING_GUESS', y);\">CONFIRMAR AÑO</button>";
+                            kingModeUi.innerHTML = html;
+                        } else {
+                            kingModeUi.innerHTML = "<h3 style='color:var(--neon);font-family:Shojumaru;'>CARTA ENVIADA</h3><p>EL REY ESTÁ ADIVINANDO EL AÑO DE: <br><strong style='color:var(--accent); font-family:Shojumaru;'>" + data.currentTrack.artist + " - " + data.currentTrack.song + "</strong></p>";
+                        }
+                    }
+                } else {
+                    normalCardContainer.style.display = 'flex';
+                    normalCollection.style.display = 'block';
+                    kingModeUi.style.display = 'none';
+                    kingModeUi.innerHTML = '';
+                }
+
+                // Control de visibilidad de bloques de mando
+                var showMusic = isMyTurn;
+                if (data.turnPhase === 'KING_SELECTION') showMusic = false; // Nadie tiene música en este punto
+
+                document.getElementById('m-ctrl').style.display = showMusic ? 'grid' : 'none';
+                document.getElementById('s-ctrl').style.display = showMusic ? 'grid' : 'none';
+
+                // Botones Especiales (Solo mi turno y si no está revelada Y no en modo rey)
+                var specialCtrl = document.getElementById('special-ctrl');
+                if (isMyTurn && !data.revealed && (!data.turnPhase || data.turnPhase === 'NORMAL')) {
+                    specialCtrl.style.display = 'flex';
+                    // COMPRAR (Solo si NO está sonando)
+                    document.getElementById('btn-autowin').style.display = (!data.isPlaying) ? 'block' : 'none';
+                    // CAMBIAR (Solo si SÍ está sonando y NO ha cambiado ya)
+                    document.getElementById('btn-reload').style.display = (data.isPlaying && data.canReload) ? 'block' : 'none';
+                } else {
+                    specialCtrl.style.display = 'none';
+                }
+
+                // Mensaje de espera (solo si NO es mi turno en modo normal)
+                document.getElementById('wait-msg').style.display = (!isMyTurn && !isKingMode) ? 'block' : 'none';
+
+                if (data.revealed && !isKingMode) {
+                    document.getElementById('card').classList.add('flipped');
+                    document.getElementById('c-artist').innerText = data.currentTrack.artist || "";
+                    document.getElementById('c-song').innerText = data.currentTrack.song || "";
+                    document.getElementById('c-year').innerText = data.currentTrack.year || "";
+                } else {
+                    document.getElementById('card').classList.remove('flipped');
+                }
+
+                if (!isKingMode) {
+                    if (isMyTurn) {
+                        document.getElementById('inventory-title').innerText = "MIS CARTAS (MARCA TU APUESTA)";
+                    } else {
+                        document.getElementById('inventory-title').innerText = "CRONOLOGÍA DE " + data.activePlayer.name;
+                    }
+
+                    if (isMyTurn) {
+                        if (data.myCards) {
+                            var h = "";
+                            h += renderBetSlot(0, data.currentBets, data.activeGuess, true);
+                            data.myCards.forEach(function (year, idx) {
+                                h += '<div class="card-row">' + year + '</div>';
+                                h += renderBetSlot(idx + 1, data.currentBets, data.activeGuess, true);
+                            });
+                            document.getElementById('my-cards-list').innerHTML = h;
+                        }
+                    } else {
+                        if (data.activeTimeline) {
+                            var h = "";
+                            h += renderBetSlot(0, data.currentBets, data.activeGuess, false);
+                            data.activeTimeline.forEach(function (year, idx) {
+                                h += '<div class="card-row" style="border-color: #444; color: #888;">' + year + '</div>';
+                                h += renderBetSlot(idx + 1, data.currentBets, data.activeGuess, false);
+                            });
+                            document.getElementById('my-cards-list').innerHTML = h;
+                        }
+                    }
+                }
+
+                if (data.myTokens !== undefined) {
+                    var chipsHtml = "";
+                    for (var i = 0; i < data.myTokens; i++) chipsHtml += '<span class="neon-chip"></span>';
+                    document.getElementById('my-tokens-ui').innerHTML = "MIS FICHAS: " + chipsHtml;
+                    // Deshabilitar botones si no tiene fichas suficientes o si ya recargó
+                    document.getElementById('btn-autowin').disabled = (data.myTokens < 3);
+                    document.getElementById('btn-reload').disabled = (data.myTokens < 1 || data.canReload === false);
+                }
+            }
+        }
+
+        function renderBetSlot(idx, bets, activeGuess, amIActive) {
+            var occupants = [];
+            var imIn = false;
+            var isTakenByOther = false;
+            for (var pid in bets) {
+                if (bets[pid] == idx) {
+                    if (pid === myId) imIn = true;
+                    else isTakenByOther = true;
+                    occupants.push(pid === myId ? "YO" : "?");
+                }
+            }
+
+            var isGuess = (activeGuess == idx);
+            var cls = "bet-slot";
+
+            if (isGuess) cls += " active-guess";
+            if (occupants.length > 0) cls += " occupied";
+            if (imIn) cls += " my-bet";
+
+            // Bloqueo: si el hueco está pillado por el activo (y no soy yo) o por otro desafiante
+            var blockedForMe = false;
+            if (!amIActive && isGuess) blockedForMe = true;
+            if (isTakenByOther) blockedForMe = true;
+            // El activo no puede pisar a un desafiante
+            if (amIActive && isTakenByOther) blockedForMe = true;
+
+            if (blockedForMe) cls += " blocked";
+
+            var label = "";
+            if (isGuess) label = "X";
+            else if (imIn) label = "YO";
+            else if (isTakenByOther) label = "🔘";
+
+            return '<div class="' + cls + '" onclick="interactuarSlot(' + idx + ', ' + amIActive + ', ' + isGuess + ', ' + isTakenByOther + ')">' + label + '</div>';
+        }
+
+        function interactuarSlot(idx, amIActive, isGuess, isTakenByOther) {
+            if (isTakenByOther) {
+                alert("¡Este hueco ya lo ha pillado otro jugador!");
+                return;
+            }
+            if (amIActive) {
+                if (lastState && lastState.activeGuess !== null) {
+                    alert("Ya has colocado tu carta en este turno.");
+                    return;
+                }
+                send('GUESS', idx);
+            } else {
+                // REGLA: Solo se puede apostar si el jugador activo YA ha puesto su carta
+                if (lastState && lastState.activeGuess === null) {
+                    alert("Espera a que el jugador activo coloque primero su marca blanca.");
+                    return;
+                }
+                if (isGuess) {
+                    alert("¡Ese hueco ya lo ha elegido el jugador activo! Elige otro sitio para tu apuesta.");
+                    return;
+                }
+                console.log("Rival intentando apostar en:", idx);
+                send('BET', idx);
+            }
+        }
+    </script>
+</body>
+
+</html>

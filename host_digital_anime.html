@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HOST - CHRONOBEATS ANIME</title>
+    <link href="https://fonts.googleapis.com/css2?family=Shojumaru&family=Montserrat:wght@400;700&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Eliminado script de YouTube API ya que usamos inyección de iframe directa -->
+    <style>
+        :root {
+            --neon: #ff00cc;
+            --bg: #0d0d0d;
+            --accent: #00f2ff;
+            --gold: #ffd700;
+        }
+
+        body {
+            background: var(--bg);
+            color: #fff;
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .logo {
+            font-family: 'Shojumaru';
+            font-size: 2em;
+            color: var(--neon);
+            text-shadow: 0 0 20px var(--neon);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        #lobby {
+            text-align: center;
+            max-width: 600px;
+            margin: auto;
+            padding-top: 50px;
+        }
+
+        .room-code {
+            font-family: 'Bungee';
+            font-size: 4em;
+            color: var(--gold);
+            letter-spacing: 10px;
+            margin: 20px 0;
+        }
+
+        .music-controls {
+            display: none;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            width: 100%;
+            max-width: 320px;
+            margin-top: 10px;
+        }
+
+        .skip-controls {
+            display: none;
+            grid-template-rows: repeat(2, 1fr);
+            grid-template-columns: repeat(3, 1fr);
+            gap: 4px;
+            width: 100%;
+            max-width: 320px;
+            margin-top: 5px;
+        }
+
+        .player-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .player-tag {
+            background: #222;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid #444;
+            font-family: 'Bungee';
+            font-size: 0.8em;
+        }
+
+        #dashboard {
+            display: none;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        .sidebar {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 20px;
+            border-radius: 20px;
+            border: 1px solid #333;
+        }
+
+        .active-player-name {
+            font-family: 'Bungee';
+            font-size: 1.5em;
+            color: var(--neon);
+        }
+
+        .leader-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            background: #111;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .leader-item.active {
+            border-left: 4px solid var(--neon);
+        }
+
+        /* Reproductor Fuera de pantalla pero sin visibility:hidden (que bloquea autoplay) */
+        #player-container {
+            position: absolute;
+            top: -999px;
+            left: -999px;
+            opacity: 0.1;
+            /* Mínima opacidad pero técnicamente visible para el navegador */
+        }
+
+        #player-container iframe {
+            width: 1px;
+            height: 1px;
+            border: none;
+        }
+
+        .validation-area {
+            background: #111;
+            padding: 20px;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .val-card {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid var(--neon);
+            width: 100%;
+            text-align: center;
+        }
+
+        .val-card h3 {
+            font-family: 'Shojumaru';
+            font-size: 1.5em;
+            margin: 10px 0;
+        }
+
+        .reveal-btn {
+            background: var(--gold);
+            color: #000;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-family: 'Bungee';
+            cursor: pointer;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .btn-val {
+            flex: 1;
+            padding: 20px;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Bungee';
+            font-size: 1em;
+            cursor: pointer;
+        }
+
+        .btn-ok {
+            background: #00ff88;
+        }
+
+        .btn-fail {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .timeline-grid {
+            display: grid;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .player-row {
+            background: #161616;
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .slots {
+            display: flex;
+            gap: 5px;
+            overflow-x: auto;
+        }
+
+        .slot {
+            min-width: 45px;
+            height: 25px;
+            background: #222;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            color: #666;
+        }
+
+        .slot.filled {
+            background: var(--neon);
+            color: #000;
+            font-weight: bold;
+            border: 1px solid #fff;
+        }
+
+        .btn-start {
+            background: var(--neon);
+            color: #000;
+            border: none;
+            padding: 20px 60px;
+            border-radius: 50px;
+            font-family: 'Bungee';
+            font-size: 1.4em;
+            cursor: pointer;
+        }
+
+        /* Pantalla Ganador */
+        #winner-screen {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        #winner-screen h1 {
+            font-family: 'Bungee';
+            font-size: 4em;
+            color: var(--gold);
+            margin: 0;
+        }
+
+        #winner-screen h2 {
+            font-family: 'Bungee';
+            font-size: 2em;
+            color: var(--neon);
+        }
+
+        .active-player-cards {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        .mini-card {
+            background: #222;
+            border: 1px solid var(--neon);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-family: 'Bungee';
+            font-size: 0.9em;
+            color: #fff;
+        }
+
+        .neon-chip {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background: #00f2fe;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #00f2fe, 0 0 15px #00f2fe;
+            margin: 0 3px;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="winner-screen">
+        <h1>¡TENEMOS GANADOR!</h1>
+        <h2 id="winner-name">---</h2>
+        <button class="btn-start" onclick="location.reload()" style="margin-top:30px">JUGAR OTRA VEZ</button>
+    </div>
+    <div class="logo">CHRONOBEATS<br><span style="font-size:0.5em; color:var(--accent);">ANIME VERSION</span></div>
+    <div id="lobby">
+        <div class="room-code" id="join-code">------</div>
+        <div class="player-list" id="lobby-players" style="margin-bottom: 20px;"></div>
+
+        <!-- NEW MODE SELECTOR -->
+        <div id="mode-selector" style="margin-bottom: 20px;">
+            <label
+                style="font-family: 'Shojumaru'; color: var(--neon); font-size: 1.2em; display: block; margin-bottom: 10px;">MODO
+                DE JUEGO</label>
+            <select id="game-mode-select"
+                style="padding: 10px; font-family: 'Montserrat'; font-size: 1em; border-radius: 8px; background: #222; color: #fff; border: 1px solid var(--neon);">
+                <option value="normal">CLÁSICO (Gana a los 10)</option>
+                <option value="rey">MODO REY (Adivina Año Final)</option>
+            </select>
+        </div>
+
+        <button class="btn-start" onclick="startGame()" style="display:none; margin-top: 20px;" id="start-btn">EMPEZAR
+            PARTIDA</button>
+    </div>
+
+    <div id="dashboard">
+        <div class="sidebar">
+            <div style="text-align:center; margin-bottom:20px;">
+                <p style="font-size: 0.7em; color: #888;">TURNO DE:</p>
+                <div class="active-player-name" id="ui-current-player">---</div>
+            </div>
+            <div id="leaderboard-list"></div>
+
+        </div>
+        <div class="main-content">
+            <div id="player-container">
+                <div id="youtube-player"></div>
+            </div>
+            <div class="validation-area">
+                <div class="val-card" id="val-card-ui" style="display:none;">
+                    <p style="font-size: 0.7em; color: var(--neon); margin-bottom: 5px;">ANIME EN JUEGO</p>
+                    <p id="ui-card-artist"
+                        style="font-size: 0.9em; color: #aaa; margin: 0; font-weight: bold; font-family:'Shojumaru';">
+                        ????</p>
+                    <h3 id="ui-card-song" style="margin: 5px 0; font-size: 1.2em; font-family:'Shojumaru';">????</h3>
+                    <div id="ui-card-year"
+                        style="font-family: 'Bungee'; font-size: 3.5em; color: var(--accent); margin-top: 5px; line-height: 1;">
+                        ????</div>
+                    <button class="reveal-btn" id="btn-reveal-host" onclick="revealData()"
+                        style="display:block; margin: 15px auto;">REVELAR DATOS</button>
+                    <div class="actions" id="validation-buttons"
+                        style="display:none; gap: 10px; width: 100%; margin-top: 15px;">
+                        <button class="btn-val btn-ok" onclick="validateResult(true, false)">ACERTÓ</button>
+                        <button class="btn-val btn-ok" style="background:#ffd700;"
+                            onclick="validateResult(true, true)">ACERTÓ TODO + <span class="neon-chip"></span></button>
+                        <button class="btn-val btn-fail" onclick="validateResult(false, false)">FALLÓ</button>
+                    </div>
+                    <div id="challenger-validation"
+                        style="display:none; margin-top: 15px; border-top: 1px solid #333; padding-top: 15px;">
+                        <p style="font-size: 0.7em; color: var(--gold); margin-bottom: 10px;">¿ALGÚN DESAFIANTE GANÓ LA
+                            APUESTA?</p>
+                        <div id="challenger-buttons"
+                            style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;"></div>
+                        <button class="btn-val"
+                            style="background:#444; margin-top:10px; font-size: 0.6em; padding: 10px;"
+                            onclick="nextTurn()">NADIE ACERTÓ</button>
+                    </div>
+                </div>
+                <div id="host-instructions">ESPERANDO ACCIÓN...</div>
+                <div id="active-player-inventory" class="active-player-cards"></div>
+            </div>
+        </div>
+    </div>
+    <div class="timeline-grid" id="global-timelines"></div>
+    </div>
+    </div>
+
+    <script>
+        var peer, roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+        var players = [], connections = {}, songs = [], currentSongIdx = -1, activePlayerIdx = 0, isRevealed = false;
+        var currentBets = {}; // playerId -> slotIndex
+        var activeGuess = null; // slotIndex del jugador activo
+
+        // Variables de estado del Modo Rey
+        var gameMode = 'normal';
+        var turnPhase = 'NORMAL'; // 'NORMAL', 'KING_SELECTION', 'KING_GUESS'
+        var kingOptions = []; // Array de opciones para los retadores
+
+        // Seguimiento de tiempo para skips manuales
+        var segundosAcumulados = 0;
+        var momentoDeInicio = 0;
+        var isPlaying = false;
+
+        document.getElementById('join-code').innerText = roomCode;
+
+        // Eliminadas funciones de YT API
+
+        function initPeer() {
+            peer = new Peer("CB-ANIME-HOST-" + roomCode);
+            peer.on('open', function (id) {
+                console.log("Host Peer Abierto:", id);
+            });
+            peer.on('connection', function (conn) {
+                console.log("Nueva conexión entrante:", conn.peer);
+                conn.on('open', function () {
+                    console.log("Conexión con el player abierta");
+                });
+                conn.on('data', function (data) {
+                    console.log("Comando recibido en host:", data);
+                    if (data.type === 'JOIN') {
+                        // PROTECCIÓN DUPLICADOS: Buscar si el nombre ya existe
+                        var existing = players.find(function (p) { return p.name === data.name; });
+                        if (existing) {
+                            console.log("Reconexión de jugador:", data.name);
+                            existing.id = conn.peer;
+                        } else {
+                            players.push({ id: conn.peer, name: data.name, score: 1, cards: [], tokens: 2, canReload: true });
+                        }
+                        connections[conn.peer] = conn;
+                        updateLobby();
+                    } else if (data.type === 'COMMAND') {
+                        handlePlayerCommand(conn.peer, data.action, data.value);
+                    }
+                });
+                conn.on('error', function (err) {
+                    console.error("Error en conexión:", err);
+                });
+            });
+            peer.on('error', function (err) {
+                if (err.type === 'unavailable-id') {
+                    alert("El ID de sala ya existe o hay un error. Probando uno nuevo...");
+                    window.location.reload();
+                } else {
+                    alert("Error PeerJS Host: " + err.type);
+                }
+            });
+        }
+        initPeer();
+
+        fetch('lista_final_anime.txt').then(function (r) { return r.text() }).then(function (t) {
+            var lines = t.split('\n');
+            songs = lines.map(function (l, index) {
+                var p = l.split('|');
+                var m = p[3] ? p[3].match(/[?&]v=([^&#]+)|youtu\.be\/([^?&#]+)/) : null;
+                return {
+                    artist: p[0], // Anime
+                    song: p[1], // Tipo (OP/ED)
+                    year: p[2],
+                    id: m ? (m[1] || m[2]) : null,
+                    line: index + 1 // Guardar número de fila original
+                };
+            }).filter(function (s) { return s.id; }).sort(function () { return Math.random() - 0.5; });
+        });
+
+        function updateLobby() {
+            var h = ""; for (var i = 0; i < players.length; i++) h += '<div class="player-tag">' + players[i].name + '</div>';
+            document.getElementById('lobby-players').innerHTML = h;
+            if (players.length >= 1) document.getElementById('start-btn').style.display = 'inline-block';
+        }
+
+        function startGame() {
+            gameMode = document.getElementById('game-mode-select').value;
+
+            // MECÁNICA INICIAL: Repartir una carta a cada jugador
+            players.forEach(function (p) {
+                currentSongIdx++;
+                var s = songs[currentSongIdx];
+                if (s) p.cards.push(s.year);
+            });
+
+            document.getElementById('lobby').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'grid';
+            nextTurn();
+        }
+
+        function nextTurn() {
+            currentSongIdx++; isRevealed = false;
+            segundosAcumulados = 0;
+            momentoDeInicio = 0;
+            isPlaying = false;
+            currentBets = {}; // Limpiar apuestas al cambiar de turno
+            activeGuess = null; // Limpiar adivinanza
+
+            // --- INICIO MODO REY CHECK ---
+            if (gameMode === 'rey' && players[activePlayerIdx] && players[activePlayerIdx].score >= 10) {
+                turnPhase = 'KING_SELECTION';
+                kingOptions = [];
+                // Calcular un número de cartas igual a (players.length - 1)
+                var numOptions = Math.max(1, players.length - 1);
+                for (var i = 0; i < numOptions; i++) {
+                    currentSongIdx++;
+                    kingOptions.push(songs[currentSongIdx]);
+                }
+
+                document.getElementById('ui-card-artist').innerText = "ELIGIENDO CARTA...";
+                document.getElementById('ui-card-song').innerText = "ESPERANDO RIVALES";
+                document.getElementById('ui-card-year').innerText = "----";
+                document.getElementById('btn-reveal-host').style.display = 'none';
+                document.getElementById('val-card-ui').style.display = 'block';
+                document.getElementById('validation-buttons').style.display = 'none';
+                document.getElementById('challenger-validation').style.display = 'none';
+                document.getElementById('ui-current-player').innerText = players[activePlayerIdx].name + " (REY)";
+                document.getElementById('host-instructions').innerText = "ESPERANDO A QUE LOS JUGADORES ELIJAN QUÉ CARTA TE TOCA...";
+                document.getElementById('player-container').innerHTML = '';
+                syncState();
+                return;
+            } else {
+                turnPhase = 'NORMAL';
+            }
+            // --- FIN MODO REY CHECK ---
+
+            var s = songs[currentSongIdx];
+            document.getElementById('ui-card-artist').innerText = "????";
+            document.getElementById('ui-card-song').innerText = "????";
+            document.getElementById('ui-card-year').innerText = "????";
+            document.getElementById('btn-reveal-host').style.display = 'block';
+            document.getElementById('val-card-ui').style.display = 'block';
+            document.getElementById('validation-buttons').style.display = 'none';
+            document.getElementById('challenger-validation').style.display = 'none';
+            document.getElementById('ui-current-player').innerText = players[activePlayerIdx].name;
+            document.getElementById('host-instructions').innerText = "ESPERANDO ACCIÓN...";
+            document.getElementById('player-container').innerHTML = '<div id="youtube-player"></div>';
+            syncState();
+        }
+
+        function handlePlayerCommand(peerId, action, value) {
+            var activeP = players[activePlayerIdx];
+            var s = songs[currentSongIdx];
+            var container = document.getElementById('player-container');
+
+            switch (action) {
+                case 'PLAY':
+                    if (peerId !== activeP.id) return;
+                    if (!isPlaying) {
+                        momentoDeInicio = Date.now();
+                        isPlaying = true;
+                        container.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + s.id + '?autoplay=1&start=' + segundosAcumulados + '" allow="autoplay"></iframe>';
+                        document.getElementById('host-instructions').innerText = "REPRODUCIENDO";
+                        syncState();
+                    }
+                    break;
+                case 'PAUSE':
+                    if (peerId !== activeP.id) return;
+                    if (isPlaying) {
+                        var tiempoTranscurrido = Math.floor((Date.now() - momentoDeInicio) / 1000);
+                        segundosAcumulados += tiempoTranscurrido;
+                        container.innerHTML = '';
+                        isPlaying = false;
+                        document.getElementById('host-instructions').innerText = "PAUSADO";
+                        syncState();
+                    }
+                    break;
+                case 'STOP':
+                    if (peerId !== activeP.id) return;
+                    isPlaying = false;
+                    container.innerHTML = '';
+                    document.getElementById('host-instructions').innerText = "¿ACERTÓ?";
+                    revealData();
+                    syncState();
+                    break;
+                case 'SKIP':
+                    if (peerId !== activeP.id) return;
+                    if (isPlaying) {
+                        var tiempoTranscurrido = Math.floor((Date.now() - momentoDeInicio) / 1000);
+                        segundosAcumulados += tiempoTranscurrido + value;
+                    } else {
+                        segundosAcumulados += value;
+                    }
+                    if (segundosAcumulados < 0) segundosAcumulados = 0;
+                    momentoDeInicio = Date.now();
+                    if (isPlaying) {
+                        container.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + s.id + '?autoplay=1&start=' + segundosAcumulados + '" allow="autoplay"></iframe>';
+                        document.getElementById('host-instructions').innerText = "REPRODUCIENDO";
+                    }
+                    break;
+                case 'RELOAD_SONG':
+                    var p = players.find(function (pl) { return pl.id === peerId; });
+                    if (p && p.tokens >= 1 && p.canReload) {
+                        p.tokens--;
+                        p.canReload = false; // Solo uno por turno
+                        isPlaying = false;
+                        container.innerHTML = '<div id="youtube-player"></div>'; // Parar música de verdad
+                        currentSongIdx++; // Descartar y pasar a la siguiente
+                        segundosAcumulados = 0;
+                        momentoDeInicio = 0;
+                        isRevealed = false; // Resetear revelado
+                        document.getElementById('ui-card-artist').innerText = "????";
+                        document.getElementById('ui-card-song').innerText = "????";
+                        document.getElementById('ui-card-year').innerText = "????";
+                        document.getElementById('btn-reveal-host').style.display = 'block';
+                        document.getElementById('val-card-ui').style.display = 'block';
+                        document.getElementById('validation-buttons').style.display = 'none';
+                        document.getElementById('host-instructions').innerText = "CANCIÓN CAMBIADA (DALE A PLAY)";
+                        syncState();
+                    }
+                    break;
+                case 'AUTO_WIN':
+                    var p = players.find(function (pl) { return pl.id === peerId; });
+                    if (p && p.tokens >= 3) {
+                        p.tokens -= 3;
+                        validateResult(true, false);
+                    }
+                    break;
+                case 'BET':
+                    console.log("[BET] de", peerId, "en slot", value);
+                    var p = players.find(function (pl) { return pl.id === peerId; });
+                    var valNum = parseInt(value);
+                    if (isNaN(valNum)) break;
+
+                    var slotOccupied = (activeGuess == valNum);
+                    for (var pid in currentBets) { if (currentBets[pid] == valNum) slotOccupied = true; }
+
+                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 1 && currentBets[peerId] === undefined && !slotOccupied && activeGuess !== null) {
+                        console.log("[OK] Apuesta aceptada para", p.name);
+                        p.tokens--;
+                        currentBets[peerId] = valNum;
+                        syncState();
+                    } else {
+                        console.log("[FAIL] Apuesta rechazada. p:", !!p, "Tokens:", p ? p.tokens : 0, "Ya apostó?", p ? currentBets[peerId] !== undefined : false, "Slot ocupado?", slotOccupied, "Guess es", activeGuess);
+                    }
+                    break;
+                case 'GUESS':
+                    console.log("[GUESS] de", peerId, "en slot", value);
+                    var p = players.find(function (pl) { return pl.id === peerId; });
+                    var valNum = parseInt(value);
+                    if (isNaN(valNum)) break;
+
+                    var slotOccupiedByBet = false;
+                    for (var pid in currentBets) { if (currentBets[pid] == valNum) slotOccupiedByBet = true; }
+
+                    if (p && p.id === players[activePlayerIdx].id && !slotOccupiedByBet && activeGuess === null) {
+                        console.log("[OK] Marca del activo fijada en", valNum);
+                        activeGuess = valNum;
+                        syncState();
+                    } else {
+                        console.log("[FAIL] Guess rechazado. ¿Ya hay marca?", activeGuess !== null);
+                    }
+                    break;
+                case 'KING_SELECT_CARD':
+                    if (turnPhase !== 'KING_SELECTION') return;
+                    if (peerId === players[activePlayerIdx].id) return; // Rey no puede elegir
+
+                    var indexElegido = parseInt(value);
+                    if (indexElegido >= 0 && indexElegido < kingOptions.length) {
+                        var cartaElegida = kingOptions[indexElegido];
+                        songs[currentSongIdx] = cartaElegida;
+
+                        turnPhase = 'KING_GUESS';
+                        document.getElementById('ui-card-artist').innerText = cartaElegida.artist;
+                        document.getElementById('ui-card-song').innerText = cartaElegida.song;
+                        document.getElementById('ui-card-year').innerText = "????";
+                        document.getElementById('host-instructions').innerHTML = "CARTA ELEGIDA.<br>ESPERANDO A QUE EL REY INTRODUZCA EL AÑO...";
+                        document.getElementById('player-container').innerHTML = '<div id="youtube-player"></div>';
+                        syncState();
+                    }
+                    break;
+                case 'KING_GUESS':
+                    if (turnPhase !== 'KING_GUESS') return;
+                    if (peerId !== players[activePlayerIdx].id) return; // Solo Rey
+
+                    var guessedYear = parseInt(value);
+                    if (!isNaN(guessedYear)) {
+                        var s = songs[currentSongIdx];
+                        var actualYear = parseInt(s.year);
+
+                        document.getElementById('ui-card-year').innerText = actualYear;
+
+                        if (Math.abs(guessedYear - actualYear) <= 2) {
+                            showWinner(players[activePlayerIdx].name);
+                        } else {
+                            document.getElementById('host-instructions').innerHTML = "<span style='color:#ff4444; font-size:1.5em;'>¡FALLÓ!</span> El año era " + actualYear + ".";
+                            setTimeout(function () {
+                                activePlayerIdx = (activePlayerIdx + 1) % players.length;
+                                players[activePlayerIdx].canReload = true;
+                                nextTurn();
+                            }, 5000);
+                        }
+                    }
+                    break;
+            }
+            // Eliminamos el syncState duplicado que podría causar problemas de carrera
+        }
+
+        function isSlotCorrect(slotIdx, songYear, timeline) {
+            if (timeline.length === 0) return true;
+            if (slotIdx === 0) return songYear <= timeline[0];
+            if (slotIdx === timeline.length) return songYear >= timeline[timeline.length - 1];
+            // En medio
+            return (songYear >= timeline[slotIdx - 1] && songYear <= timeline[slotIdx]);
+        }
+
+        function reportSystemError() {
+            var s = songs[currentSongIdx];
+            var newYear = prompt("ERROR EN DATOS: " + s.artist + " - " + s.song + "\nIntroduce el AÑO CORRECTO para registro:");
+            if (newYear) {
+                var recipient = "xavi.rifa@gmail.com";
+                var subject = "CORRECCION CHRONOBEATS: Fila " + s.line;
+                var body = "DETECTADO ERROR EN LISTA\n\n" +
+                    "Fila: " + s.line + "\n" +
+                    "Artista: " + s.artist + "\n" +
+                    "Canción: " + s.song + "\n" +
+                    "Año en TXT: " + s.year + "\n" +
+                    "Año Correcto: " + newYear + "\n\n" +
+                    "Instrucciones: Abrir lista_final.txt en la fila " + s.line + " y corregir el año.";
+
+                var mailtoUrl = "mailto:" + recipient + "?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
+
+                console.log("!!! ERROR DE SISTEMA DETECTADO !!!");
+                console.log("Referencia: " + s.artist + " - " + s.song + " (Fila " + s.line + ")");
+                console.log("Corrección: " + s.year + " -> " + newYear);
+
+                window.location.href = mailtoUrl;
+                alert("¡Error registrado! Se ha preparado un email para " + recipient + ".\nSe descarta esta canción y repites el turno.");
+            }
+            nextTurn();
+        }
+
+        function revealData() {
+            isRevealed = true;
+            var s = songs[currentSongIdx];
+            document.getElementById('ui-card-artist').innerText = s.artist;
+            document.getElementById('ui-card-song').innerText = s.song;
+            document.getElementById('ui-card-year').innerText = s.year;
+            document.getElementById('btn-reveal-host').style.display = 'none';
+
+            // Validación automática
+            var activeP = players[activePlayerIdx];
+            var isCorrect = false;
+            if (activeGuess !== null) {
+                isCorrect = isSlotCorrect(activeGuess, s.year, activeP.cards);
+            }
+
+            document.getElementById('validation-buttons').style.display = 'flex';
+            if (isCorrect) {
+                document.getElementById('host-instructions').innerHTML = "<span style='color:#00ff00; font-size:1.5em;'>¡POSICIÓN CORRECTA! ✅</span><br>¿Detalles?";
+                document.getElementById('validation-buttons').innerHTML = `
+                    <button class="btn-val btn-ok" onclick="validateResult(true, false)">SÍ</button>
+                    <button class="btn-val btn-ok" style="background:#ffd700; color:#000;" onclick="validateResult(true, true)">SÍ (+ 🔵 FICHA)</button>
+                    <button class="btn-val btn-fail" style="background:#555;" onclick="reportSystemError()">ERROR SISTEMA</button>
+                 `;
+            } else {
+                document.getElementById('host-instructions').innerHTML = "<span style='color:#ff4444; font-size:1.5em;'>POSICIÓN INCORRECTA ❌</span><br>¿Pero acertó Algo?";
+                document.getElementById('validation-buttons').innerHTML = `
+                    <button class="btn-val btn-fail" onclick="validateResult(false, false)">NO</button>
+                    <button class="btn-val btn-ok" style="background:#00f2fe; color:#000;" onclick="validateResult(false, true)">SÍ (+ 🔵 FICHA)</button>
+                    <button class="btn-val btn-fail" style="background:#00f2fe; color:#000; font-size: 0.6em;" onclick="reportSystemError()">ERROR SISTEMA (REPETIR)</button>
+                 `;
+            }
+            syncState();
+        }
+
+        function validateResult(isCardOk, isTokenOk) {
+            if (isTokenOk && players[activePlayerIdx].tokens < 5) {
+                players[activePlayerIdx].tokens++;
+            }
+
+            if (isCardOk) {
+                players[activePlayerIdx].score++;
+                players[activePlayerIdx].cards.push(songs[currentSongIdx].year);
+                players[activePlayerIdx].cards.sort();
+                if (players[activePlayerIdx].score >= 10 && gameMode === 'normal') {
+                    showWinner(players[activePlayerIdx].name);
+                    return;
+                }
+                activePlayerIdx = (activePlayerIdx + 1) % players.length;
+                players[activePlayerIdx].canReload = true;
+                nextTurn();
+            } else {
+                // Si no hay carta para el activo, ver si hay robos
+                var challengersExist = Object.keys(currentBets).length > 0;
+                var anyChallengerCorrect = false;
+                for (var pid in currentBets) {
+                    if (isSlotCorrect(currentBets[pid], songs[currentSongIdx].year, players[activePlayerIdx].cards)) anyChallengerCorrect = true;
+                }
+
+                if (challengersExist && anyChallengerCorrect) {
+                    document.getElementById('host-instructions').innerText = "VAMOS A LAS APUESTAS...";
+                    document.getElementById('validation-buttons').style.display = 'none';
+                    document.getElementById('challenger-validation').style.display = 'block';
+                    var h = "";
+                    for (var pid in currentBets) {
+                        var p = players.find(x => x.id === pid);
+                        var s = songs[currentSongIdx];
+                        var slotCorrect = isSlotCorrect(currentBets[pid], s.year, players[activePlayerIdx].cards);
+
+                        if (p && slotCorrect) {
+                            h += '<button class="btn-val" style="background:var(--gold); color:#000; border: 2px solid #00ff00;" onclick="awardToChallenger(\'' + pid + '\')">' + p.name + ' GANÓ LA APUESTA (✅)</button>';
+                        } else if (p) {
+                            h += '<button class="btn-val" style="background:#555; color:#888; cursor:not-allowed;" disabled>' + p.name + ' FALLÓ (❌)</button>';
+                        }
+                    }
+                    document.getElementById('challenger-buttons').innerHTML = h;
+                } else {
+                    activePlayerIdx = (activePlayerIdx + 1) % players.length;
+                    players[activePlayerIdx].canReload = true; // Resetear permiso de recarga
+                    nextTurn();
+                }
+            }
+        }
+
+        function awardToChallenger(pid) {
+            var p = players.find(x => x.id === pid);
+            if (p) {
+                p.score++;
+                p.cards.push(songs[currentSongIdx].year);
+                p.cards.sort();
+                if (p.score >= 10 && gameMode === 'normal') {
+                    showWinner(p.name);
+                    return;
+                }
+            }
+            activePlayerIdx = (activePlayerIdx + 1) % players.length;
+            players[activePlayerIdx].canReload = true;
+            nextTurn();
+        }
+
+        function showWinner(name) {
+            console.log("Celebrando victoria de:", name);
+            document.getElementById('winner-name').innerText = name;
+            document.getElementById('winner-screen').style.display = 'flex';
+
+            // Limpiar confeti previo si existe
+            if (window.victoryInterval) clearInterval(window.victoryInterval);
+
+            // V26.3: Integración de IDs Verificados por el Usuario
+            var isXavi = name.toLowerCase().includes('xavi');
+            var songId = "";
+            var songTitle = "";
+
+            if (isXavi) {
+                songId = '04854XqcfCY'; // Queen - We Are The Champions
+                songTitle = "Queen - We Are The Champions";
+            } else {
+                // El "Pool de la Frikada" (V26.3 - IDs proporcionados por el usuario)
+                var frikiPool = [
+                    { id: 'wfeCIvOxXBo', t: "Rodolfo Chikilicuatre - Chiki Chiki" },
+                    { id: '5mKKc2F0GbQ', t: "El Koala - Opá" },
+                    { id: '62Z8vUIk9s8', t: "Zapato Veloz - Tractor Amarillo" },
+                    { id: 'lTxGto9ADx0', t: "Georgie Dann - La Barbacoa" },
+                    { id: 'arZZw8NyPq8', t: "Las Ketchup - Aserejé" },
+                    { id: 'd21lBEXv6RE', t: "Leonardo Dantés - Pañuelo" },
+                    { id: 'WCQuf90qf9U', t: "King África - La Bomba" },
+                    { id: 'tUHtrE533X4', t: "Mandangastyle" },
+                    { id: 'YMlDlM7lvO0', t: "Paco Pil - Viva la Fiesta" }
+                ];
+                var picked = frikiPool[Math.floor(Math.random() * frikiPool.length)];
+                songId = picked.id;
+                songTitle = picked.t;
+            }
+
+            console.log("Ganador:", name, "| Sonando:", songTitle);
+
+            // Info de depuración visual (V26.1)
+            var debugInfo = document.getElementById('debug-song-info');
+            if (!debugInfo) {
+                debugInfo = document.createElement('div');
+                debugInfo.id = 'debug-song-info';
+                debugInfo.style.cssText = 'font-size: 12px; color: #555; margin-top: 20px; font-family: monospace; z-index: 3000;';
+                document.getElementById('winner-screen').appendChild(debugInfo);
+            }
+            debugInfo.innerText = "SONANDO: " + songTitle + " (ID: " + songId + ")";
+
+            // Usar el contenedor de video para sonar (oculto)
+            var container = document.getElementById('player-container');
+            container.innerHTML = '<iframe src="https://www.youtube.com/embed/' + songId + '?autoplay=1&mute=0&enablejsapi=1&playsinline=1" allow="autoplay; encrypted-media" style="width:300px;height:200px;border:none;"></iframe>';
+
+            // Confeti (Efectos V26)
+            if (isXavi) {
+                // V26: Confeti INFINITO para Xavi
+                var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 2000 };
+                function randomInRange(min, max) { return Math.random() * (max - min) + min; }
+
+                window.victoryInterval = setInterval(function () {
+                    confetti(Object.assign({}, defaults, { particleCount: 40, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+                    confetti(Object.assign({}, defaults, { particleCount: 40, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+                }, 300);
+            }
+        }
+
+        function syncState() {
+            for (var id in connections) {
+                var p = players.find(p => p.id === id);
+                var state = {
+                    type: 'STATE_UPDATE',
+                    activePlayer: { id: players[activePlayerIdx].id, name: players[activePlayerIdx].name },
+                    currentTrack: songs[currentSongIdx],
+                    revealed: isRevealed,
+                    isPlaying: isPlaying,
+                    myCards: p ? p.cards : [],
+                    myTokens: p ? p.tokens : 0,
+                    canReload: p ? p.canReload : false,
+                    activeTimeline: players[activePlayerIdx].cards,
+                    currentBets: currentBets,
+                    activeGuess: activeGuess,
+                    gameMode: gameMode,
+                    turnPhase: turnPhase,
+                    kingOptions: kingOptions
+                };
+                connections[id].send(state);
+            }
+            updateUI();
+        }
+
+        function updateUI() {
+            var h = ""; players.slice().sort(function (a, b) { return b.score - a.score }).forEach(function (p) {
+                var chipsHtml = ""; for (var i = 0; i < p.tokens; i++) chipsHtml += '<span class="neon-chip"></span>';
+                h += '<div class="leader-item ' + (p.id === players[activePlayerIdx].id ? 'active' : '') + '"><span>' + p.name + ' (' + chipsHtml + ')</span><span class="score">' + p.score + ' p</span></div>';
+            });
+            document.getElementById('leaderboard-list').innerHTML = h;
+
+            // Mostrar cartas del jugador actual en el centro
+            var currentCardsHtml = "";
+            players[activePlayerIdx].cards.forEach(function (year) {
+                currentCardsHtml += '<div class="mini-card">' + year + '</div>';
+            });
+            document.getElementById('active-player-inventory').innerHTML = currentCardsHtml;
+
+            var timelinesHtml = ""; players.forEach(function (p) {
+                timelinesHtml += '<div class="player-row"><div style="font-size:0.6em;color:#888;">' + p.name + '</div><div class="slots">';
+                for (var k = 0; k < 10; k++) timelinesHtml += '<div class="slot ' + (p.cards[k] ? 'filled' : '') + '">' + (p.cards[k] || '') + '</div>';
+                timelinesHtml += '</div></div>';
+            });
+            document.getElementById('global-timelines').innerHTML = timelinesHtml;
+        }
+    </script>
+</body>
+
+</html>
