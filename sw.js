@@ -1,12 +1,15 @@
 ﻿const CACHE_NAME = 'chronobeats-v1';
 const ASSETS = [
-  '/',
-  '/index.html',
-  '/play.html',
-  '/digital/player_digital.html',
-  '/digital/host_digital.html',
-  '/digital/lista_final_anime.txt',
-  '/digital/lista_final_pelis.txt'
+  './',
+  './index.html',
+  './player_digital.html',
+  './host_digital.html',
+  './player_digital_anime.html',
+  './host_digital_anime.html',
+  './player_digital_peliculas.html',
+  './host_digital_peliculas.html',
+  './lista_final_anime.txt',
+  './lista_final_pelis.txt'
 ];
 
 self.addEventListener('install', (event) => {
