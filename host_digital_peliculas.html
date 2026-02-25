@@ -451,7 +451,7 @@
         }
         initPeer();
 
-        fetch('lista_final_pelis.txt').then(function (r) { return r.text() }).then(function (t) {
+        fetch('lista_final_pelis.txt?v=' + new Date().getTime()).then(function (r) { return r.text() }).then(function (t) {
             var lines = t.split('\n');
             songs = lines.map(function (l, index) {
                 var p = l.split('|');
