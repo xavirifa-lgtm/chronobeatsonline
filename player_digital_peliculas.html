@@ -7,6 +7,8 @@
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="../manifest.json">
+    <meta name="theme-color" content="#00f2ff">
     <title>PLAYER - MOVIES VERSION</title>
     <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Montserrat:wght@400;700&display=swap"
         rel="stylesheet">
@@ -759,6 +761,15 @@
                 console.log("Rival intentando apostar en:", idx);
                 send('BET', idx);
             }
+        }
+    </script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('../sw.js')
+                    .then(reg => console.log('Service Worker registrado', reg))
+                    .catch(err => console.log('Error registrando SW', err));
+            });
         }
     </script>
 </body>
