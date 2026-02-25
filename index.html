@@ -1,11 +1,14 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chronobeats Online - Portal</title>
     <!-- Fuentes oficiales -->
-    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Montserrat:wght@400;700&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Shojumaru&display=swap" rel="stylesheet" />
     <style>
         :root {
             --neon: #00f2ff;
@@ -14,16 +17,16 @@
             --gold: #ffd700;
         }
 
-        body { 
-            background: var(--bg); 
-            color: #fff; 
-            font-family: 'Montserrat', sans-serif; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            min-height: 100vh; 
-            margin: 0; 
+        body {
+            background: var(--bg);
+            color: #fff;
+            font-family: 'Montserrat', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
             overflow: hidden;
             padding: 20px;
         }
@@ -44,26 +47,26 @@
             gap: 20px;
         }
 
-        .btn { 
-            display: block; 
-            width: 320px; 
-            padding: 22px; 
-            border: 2px solid #333; 
-            text-align: center; 
-            color: #888; 
-            text-decoration: none; 
+        .btn {
+            display: block;
+            width: 320px;
+            padding: 22px;
+            border: 2px solid #333;
+            text-align: center;
+            color: #888;
+            text-decoration: none;
             font-family: 'Bungee';
             font-size: 0.9em;
-            border-radius: 50px; 
-            text-transform: uppercase; 
-            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            border-radius: 50px;
+            text-transform: uppercase;
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             letter-spacing: 1px;
             background: rgba(255, 255, 255, 0.02);
         }
 
-        .btn:hover { 
-            border-color: var(--neon); 
-            color: var(--neon); 
+        .btn:hover {
+            border-color: var(--neon);
+            color: var(--neon);
             background: rgba(0, 242, 255, 0.05);
             box-shadow: 0 0 30px rgba(0, 242, 255, 0.2);
             transform: translateY(-3px) scale(1.02);
@@ -80,15 +83,49 @@
             background: rgba(255, 215, 0, 0.05);
             box-shadow: 0 0 30px rgba(255, 215, 0, 0.2);
         }
+
+        .btn-anime {
+            border-color: #333;
+            color: #888;
+            font-family: 'Shojumaru';
+            text-transform: none;
+        }
+
+        .btn-anime:hover {
+            border-color: #ff00cc;
+            color: #ff00cc;
+            background: rgba(255, 0, 204, 0.05);
+            box-shadow: 0 0 30px rgba(255, 0, 204, 0.2);
+        }
+
+        .section-title {
+            font-family: 'Bungee';
+            color: #555;
+            font-size: 0.8em;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
     </style>
 </head>
+
 <body>
     <div class="logo">CHRONOBEATS</div>
-    
+
     <div class="btn-container">
-        <!-- Rutas relativas para misma carpeta -->
-        <a href="host_digital.html" class="btn btn-gold">CENTRO DE CONTROL <span style="font-size: 0.7em; opacity: 0.7;">(Tablet)</span></a>
-        <a href="player_digital.html" class="btn">MANDO JUGADOR <span style="font-size: 0.7em; opacity: 0.7;">(Móvil)</span></a>
+        <div class="section-title">MODO ORIGINAL</div>
+        <a href="host_digital.html" class="btn btn-gold">CENTRO DE CONTROL <span
+                style="font-size: 0.7em; opacity: 0.7;">(Tablet)</span></a>
+        <a href="player_digital.html" class="btn">MANDO JUGADOR <span
+                style="font-size: 0.7em; opacity: 0.7;">(Móvil)</span></a>
+
+        <div class="section-title" style="margin-top:40px; font-family:'Shojumaru'; color:#ff00cc; opacity:0.8;">ANIME
+            VERSION</div>
+        <a href="host_digital_anime.html" class="btn btn-anime">CENTRO DE CONTROL <span
+                style="font-size: 0.7em; opacity: 0.7; font-family:'Montserrat';">(Tablet)</span></a>
+        <a href="player_digital_anime.html" class="btn btn-anime">MANDO JUGADOR <span
+                style="font-size: 0.7em; opacity: 0.7; font-family:'Montserrat';">(Móvil)</span></a>
     </div>
 </body>
+
 </html>
