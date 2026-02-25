@@ -429,6 +429,7 @@
         var gameMode = 'normal';
         var turnPhase = 'NORMAL'; // 'NORMAL', 'KING_SELECTION', 'KING_GUESS'
         var kingOptions = []; // Array de opciones para los retadores
+        var cheatsEnabled = true;
 
         // Seguimiento de tiempo para skips manuales
         var segundosAcumulados = 0;
@@ -600,6 +601,11 @@
                     container.innerHTML = '';
                     document.getElementById('host-instructions').innerText = "¿ACERTÓ?";
                     revealData();
+                    syncState();
+                    break;
+                case 'TOGGLE_CHEAT':
+                    cheatsEnabled = !cheatsEnabled;
+                    console.log("Cheats Enabled:", cheatsEnabled);
                     syncState();
                     break;
                 case 'SKIP':
@@ -966,9 +972,8 @@
                     activeTimeline: players[activePlayerIdx].cards,
                     currentBets: currentBets,
                     activeGuess: activeGuess,
-                    gameMode: gameMode,
-                    turnPhase: turnPhase,
-                    kingOptions: kingOptions
+                    kingOptions: kingOptions,
+                    cheatsEnabled: cheatsEnabled
                 };
                 connections[id].send(state);
             }

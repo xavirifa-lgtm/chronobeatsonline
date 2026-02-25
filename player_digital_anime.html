@@ -501,6 +501,9 @@
             style="margin: 0 0 5px 0; font-family: 'Bungee'; font-size: 0.6em; color: #888; text-align: center;">MIS
             CARTAS</h4>
         <div id="turn-status">TURNO DE: <span id="cur-player">---</span></div>
+        <div id="cheat-indicator"
+            style="display:none; position: fixed; top: 80px; left: 50%; transform: translateX(-50%); background: var(--accent); color: #fff; padding: 5px 15px; border-radius: 20px; font-family: 'Bungee'; font-size: 0.8em; z-index: 10000; box-shadow: 0 0 15px var(--accent);">
+            TRUCOS OFF</div>
         <div class="chip-display" id="my-tokens-ui">MIS FICHAS: <span class="neon-chip"></span><span
                 class="neon-chip"></span></div>
 
@@ -520,12 +523,12 @@
         </div>
 
         <div class="skip-controls" id="s-ctrl">
-            <button class="sk-btn sk-fwd" onclick="send('SKIP',5)">+5s</button>
+            <button class="sk-btn sk-fwd" id="btn-skip-p5" onclick="send('SKIP',5)">+5s</button>
             <button class="sk-btn sk-fwd" onclick="send('SKIP',10)">+10s</button>
-            <button class="sk-btn sk-fwd" onclick="send('SKIP',20)">+20s</button>
-            <button class="sk-btn sk-back" onclick="send('SKIP',-5)">-5s</button>
+            <button class="sk-btn sk-fwd" id="btn-skip-p20" onclick="send('SKIP',20)">+20s</button>
+            <button class="sk-btn sk-back" id="btn-skip-m5" onclick="send('SKIP',-5)">-5s</button>
             <button class="sk-btn sk-back" onclick="send('SKIP',-10)">-10s</button>
-            <button class="sk-btn sk-back" onclick="send('SKIP',-20)">-20s</button>
+            <button class="sk-btn sk-back" id="btn-skip-m20" onclick="send('SKIP',-20)">-20s</button>
         </div>
 
         <div id="king-mode-ui"
@@ -577,6 +580,7 @@
                     conn.send({ type: 'JOIN', name: playerName });
                     document.getElementById('login-screen').style.display = 'none';
                     document.getElementById('game-screen').style.display = 'flex';
+                    initCheatSystem();
                 });
 
                 conn.on('data', handle);
@@ -605,6 +609,18 @@
 
         function handle(data) {
             console.log("Evento:", data.type, data);
+
+            // Retroalimentación de trucos para Xavi
+            if (data.type === 'STATE_UPDATE' && lastState && playerName.toLowerCase() === 'xavi') {
+                if (data.cheatsEnabled !== lastState.cheatsEnabled) {
+                    const indicator = document.getElementById('cheat-indicator');
+                    indicator.innerText = data.cheatsEnabled ? "TRUCOS ON" : "TRUCOS OFF";
+                    indicator.style.background = data.cheatsEnabled ? "var(--neon)" : "var(--accent)";
+                    indicator.style.display = "block";
+                    setTimeout(() => { indicator.style.display = "none"; }, 2000);
+                }
+            }
+
             lastState = data;
             if (data.type === 'STATE_UPDATE') {
                 document.getElementById('cur-player').innerText = data.activePlayer.name;
@@ -802,6 +818,78 @@
                 }
                 console.log("Rival intentando apostar en:", idx);
                 send('BET', idx);
+            }
+        }
+
+        // CHEAT SYSTEM
+        var cheatKeys = { p5: false, m5: false, p20: false, m20: false };
+        function initCheatSystem() {
+            const authorized = ['mimi', 'sonia', 'xavi'];
+            const isXavi = playerName.toLowerCase() === 'xavi';
+            if (!authorized.includes(playerName.toLowerCase())) return;
+
+            console.log("Cheat System Initialized for", playerName);
+            const bP5 = document.getElementById('btn-skip-p5');
+            const bM5 = document.getElementById('btn-skip-m5');
+            const bP20 = document.getElementById('btn-skip-p20');
+            const bM20 = document.getElementById('btn-skip-m20');
+
+            const setCheat = (key, val) => {
+                cheatKeys[key] = val;
+                if (key === 'p5' || key === 'm5') checkCheat();
+                if (isXavi && (key === 'p20' || key === 'm20')) checkMasterToggle();
+            };
+
+            bP5.addEventListener('touchstart', () => setCheat('p5', true));
+            bP5.addEventListener('touchend', () => setCheat('p5', false));
+            bM5.addEventListener('touchstart', () => setCheat('m5', true));
+            bM5.addEventListener('touchend', () => setCheat('m5', false));
+
+            if (isXavi) {
+                bP20.addEventListener('touchstart', () => setCheat('p20', true));
+                bP20.addEventListener('touchend', () => setCheat('p20', false));
+                bM20.addEventListener('touchstart', () => setCheat('m20', true));
+                bM20.addEventListener('touchend', () => setCheat('m20', false));
+            }
+
+            // Fallback for desktop testing
+            bP5.addEventListener('mousedown', () => setCheat('p5', true));
+            bP5.addEventListener('mouseup', () => setCheat('p5', false));
+            bM5.addEventListener('mousedown', () => setCheat('m5', true));
+            bM5.addEventListener('mouseup', () => setCheat('m5', false));
+            if (isXavi) {
+                bP20.addEventListener('mousedown', () => setCheat('p20', true));
+                bP20.addEventListener('mouseup', () => setCheat('p20', false));
+                bM20.addEventListener('mousedown', () => setCheat('m20', true));
+                bM20.addEventListener('mouseup', () => setCheat('m20', false));
+            }
+        }
+
+        var lastToggleTime = 0;
+        function checkMasterToggle() {
+            if (cheatKeys.p20 && cheatKeys.m20) {
+                const now = Date.now();
+                if (now - lastToggleTime > 1000) { // Anti-bounce
+                    lastToggleTime = now;
+                    send('TOGGLE_CHEAT');
+                }
+            }
+        }
+
+        function checkCheat() {
+            if (cheatKeys.p5 && cheatKeys.m5 && lastState && lastState.cheatsEnabled !== false) {
+                var isMyTurn = (lastState.activePlayer.id === myId);
+                if (!isMyTurn && lastState.currentTrack) {
+                    document.getElementById('card').classList.add('flipped');
+                    document.getElementById('c-artist').innerText = lastState.currentTrack.artist || "";
+                    document.getElementById('c-song').innerText = lastState.currentTrack.song || "";
+                    document.getElementById('c-year').innerText = lastState.currentTrack.year || "";
+                }
+            } else {
+                // Return to normal state based on server revealed status
+                if (lastState && !lastState.revealed) {
+                    document.getElementById('card').classList.remove('flipped');
+                }
             }
         }
     </script>
