@@ -113,6 +113,7 @@
         #game-screen {
             display: none;
             flex: 1;
+            min-height: 0;
             flex-direction: column;
             padding: 10px;
             align-items: center;
@@ -850,25 +851,32 @@
             else if (imIn) label = "YO";
             else if (isTakenByOther) label = "🔘";
 
-            return '<div class="' + cls + '" onclick="makeBet(' + idx + ')">' + label + '</div>';
+            return '<div class="' + cls + '" onclick="interactuarSlot(' + idx + ', ' + amIActive + ', ' + isGuess + ', ' + isTakenByOther + ')">' + label + '</div>';
         }
 
-        function makeBet(idx) {
-            if (!lastState) return;
-            var isMyTurn = (lastState.activePlayer.id === myId);
-
-            if (isMyTurn) {
-                if (lastState.activeGuess !== null) {
+        function interactuarSlot(idx, amIActive, isGuess, isTakenByOther) {
+            if (isTakenByOther) {
+                showCustomAlert("¡Este hueco ya lo ha pillado otro jugador!");
+                return;
+            }
+            if (amIActive) {
+                if (lastState && lastState.activeGuess !== null) {
                     showCustomAlert("Ya has marcado tu adivinanza de año. Espera la resolución.");
                     return;
                 }
                 var c = confirm("¿Marcar este hueco como tu apuesta para el año de la canción?");
                 if (c) send('GUESS', idx);
             } else {
-                if (lastState.activeGuess === null) {
-                    showCustomAlert("Espera a que el jugador marque su opción antes de apostar.");
+                // REGLA: Solo se puede apostar si el jugador activo YA ha puesto su carta
+                if (lastState && lastState.activeGuess === null) {
+                    showCustomAlert("Espera a que el jugador activo coloque primero su marca blanca.");
                     return;
                 }
+                if (isGuess) {
+                    showCustomAlert("¡Ese hueco ya lo ha elegido el jugador activo! Elige otro sitio para tu apuesta.");
+                    return;
+                }
+                console.log("Rival intentando apostar en:", idx);
                 send('BET', idx);
             }
         }

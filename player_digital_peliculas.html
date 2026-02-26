@@ -95,6 +95,7 @@
         #game-screen {
             display: none;
             flex: 1;
+            min-height: 0;
             flex-direction: column;
             padding: 10px;
             align-items: center;
@@ -836,34 +837,16 @@
 
         function interactuarSlot(idx, amIActive, isGuess, isTakenByOther) {
             if (isTakenByOther) {
-                alert("¡Este hueco ya lo ha pillado otro jugador!");
+                showCustomAlert("¡Este hueco ya lo ha pillado otro jugador!");
                 return;
             }
             if (amIActive) {
                 if (lastState && lastState.activeGuess !== null) {
-                    showCustomAlert("Ya has colocado tu carta en este turno.");
+                    showCustomAlert("Ya has marcado tu adivinanza de año. Espera la resolución.");
                     return;
                 }
-                function makeBet(idx) {
-                    if (!lastState) return;
-                    var isMyTurn = (lastState.activePlayer.id === myId);
-
-                    if (isMyTurn) {
-                        if (lastState.activeGuess !== null) {
-                            showCustomAlert("Ya has marcado tu adivinanza de año. Espera la resolución.");
-                            return;
-                        }
-                        var c = confirm("¿Marcar este hueco como tu apuesta para el año de la canción?");
-                        if (c) send('GUESS', idx);
-                    } else {
-                        if (lastState.activeGuess === null) {
-                            showCustomAlert("Espera a que el jugador marque su opción antes de apostar.");
-                            return;
-                        }
-                        send('BET', idx);
-                    }
-                }
-                makeBet(idx); // Call the new makeBet function
+                var c = confirm("¿Marcar este hueco como tu apuesta para el año de la canción?");
+                if (c) send('GUESS', idx);
             } else {
                 // REGLA: Solo se puede apostar si el jugador activo YA ha puesto su carta
                 if (lastState && lastState.activeGuess === null) {
