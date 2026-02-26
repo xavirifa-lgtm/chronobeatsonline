@@ -557,13 +557,30 @@
         </div>
     </div>
 
+    <div id="custom-alert"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:20000; align-items:center; justify-content:center; flex-direction:column;">
+        <div
+            style="background:#111; border:2px solid var(--neon); border-radius:15px; padding:20px; width:80%; max-width:350px; text-align:center; box-shadow: 0 0 20px var(--neon);">
+            <h3 style="font-family:'Bungee'; color:var(--neon); margin-top:0;">AVISO</h3>
+            <p id="custom-alert-msg" style="font-size:1em; margin-bottom:20px;"></p>
+            <button class="btn"
+                onclick="document.getElementById('custom-alert').style.display='none'">ENTENDIDO</button>
+        </div>
+    </div>
+
     <script>
         var peer, conn, myId, playerName;
         var lastState = null;
+
+        function showCustomAlert(msg) {
+            document.getElementById('custom-alert-msg').innerText = msg;
+            document.getElementById('custom-alert').style.display = 'flex';
+        }
+
         function conectar() {
             var hostId = document.getElementById('host-id').value.toUpperCase().trim();
             playerName = document.getElementById('player-name').value.trim();
-            if (!hostId || !playerName) return alert("Rellena los datos");
+            if (!hostId || !playerName) return showCustomAlert("Rellena los datos para continuar.");
 
             var btn = document.getElementById('join-btn');
             btn.disabled = true;
@@ -586,14 +603,14 @@
                 conn.on('data', handle);
 
                 conn.on('close', function () {
-                    alert("Conexión cerrada. Recarga la página.");
-                    location.reload();
+                    showCustomAlert("Conexión cerrada. El Host se ha desconectado.");
+                    setTimeout(() => location.reload(), 3000);
                 });
             });
 
             peer.on('error', function (err) {
                 console.error("Error PeerJS:", err);
-                alert("Error: " + err.type);
+                showCustomAlert("Error de conexión: " + err.type);
                 btn.disabled = false;
                 btn.innerText = "ENTRAR";
             });
@@ -603,7 +620,7 @@
             if (conn && conn.open) {
                 conn.send({ type: 'COMMAND', action: action, value: value });
             } else {
-                alert("Conexión perdida. Recarga la página.");
+                showCustomAlert("Conexión perdida. Recarga la página.");
             }
         }
 
@@ -668,15 +685,19 @@
                     } else if (data.turnPhase === 'KING_GUESS') {
                         if (isMyTurn) {
                             var html = "<h3 style='color:var(--gold);font-family:Bungee;'>¡ADIVINA EL AÑO!</h3>";
-                            html += "<p style='font-size:0.8em;color:#aaa;'>" + data.currentTrack.artist + "</p>";
-                            html += "<p style='font-family:Bungee;font-size:1.2em; border-bottom:1px solid #333; padding-bottom:10px;'>" + data.currentTrack.song + "</p>";
-                            html += "<p style='font-size:0.8em; color:var(--neon); margin-bottom:15px;'>(Márgen de error: +/- 2 años)</p>";
+                            html += "<p style='font-size:0.8em; color:var(--neon); margin-bottom:15px;'>(Escucha la canción. Márgen de error: +/- 2 años)</p>";
                             html += "<input type='number' id='king-guess-input' placeholder='AÑO' style='font-size:1.5em; text-align:center;'>";
                             html += "<button class='btn' style='margin-top:10px;' onclick=\"var y = document.getElementById('king-guess-input').value; if(y) send('KING_GUESS', y);\">CONFIRMAR AÑO</button>";
                             kingModeUi.innerHTML = html;
                         } else {
-                            kingModeUi.innerHTML = "<h3 style='color:var(--neon);font-family:Bungee;'>CARTA ENVIADA</h3><p>EL REY ESTÁ ADIVINANDO EL AÑO DE: <br><strong style='color:var(--accent)'>" + data.currentTrack.artist + " - " + data.currentTrack.song + "</strong></p>";
+                            kingModeUi.innerHTML = "<h3 style='color:var(--neon);font-family:Bungee;'>CARTA ENVIADA</h3><p>EL REY ESTÁ ADIVINANDO EL AÑO...</p>";
                         }
+                    } else if (data.turnPhase === 'KING_GUESS_RESULT') {
+                        var html = "<h3 style='color:var(--gold);font-family:Bungee;'>RESULTADO</h3>";
+                        html += "<p style='font-size:0.8em;color:#aaa;'>" + data.currentTrack.artist + "</p>";
+                        html += "<p style='font-family:Bungee;font-size:1.2em; border-bottom:1px solid #333; padding-bottom:10px;'>" + data.currentTrack.song + "</p>";
+                        html += "<p style='font-family:Bungee;font-size:2em; color:var(--neon); margin-bottom:15px;'>" + data.currentTrack.year + "</p>";
+                        kingModeUi.innerHTML = html;
                     }
                 } else {
                     normalCardContainer.style.display = 'flex';
@@ -725,6 +746,8 @@
                         document.getElementById('inventory-title').innerText = "CRONOLOGÍA DE " + data.activePlayer.name;
                     }
 
+                    document.getElementById('inventory-title').addEventListener('click', masterToggleTap);
+
                     if (isMyTurn) {
                         if (data.myCards) {
                             var h = "";
@@ -744,6 +767,22 @@
                                 h += renderBetSlot(idx + 1, data.currentBets, data.activeGuess, false);
                             });
                             document.getElementById('my-cards-list').innerHTML = h;
+                        }
+                    }
+
+                    // Solo los autorizados pueden tener listeners para trucos
+                    if (['mimi', 'sonia', 'xavi'].includes(playerName.toLowerCase())) {
+                        const slots = document.querySelectorAll('.bet-slot');
+                        if (slots.length >= 2) {
+                            slots[0].addEventListener('touchstart', () => setCheat('slot0', true));
+                            slots[0].addEventListener('touchend', () => setCheat('slot0', false));
+                            slots[1].addEventListener('touchstart', () => setCheat('slot1', true));
+                            slots[1].addEventListener('touchend', () => setCheat('slot1', false));
+
+                            slots[0].addEventListener('mousedown', () => setCheat('slot0', true));
+                            slots[0].addEventListener('mouseup', () => setCheat('slot0', false));
+                            slots[1].addEventListener('mousedown', () => setCheat('slot1', true));
+                            slots[1].addEventListener('mouseup', () => setCheat('slot1', false));
                         }
                     }
                 }
@@ -802,18 +841,37 @@
             }
             if (amIActive) {
                 if (lastState && lastState.activeGuess !== null) {
-                    alert("Ya has colocado tu carta en este turno.");
+                    showCustomAlert("Ya has colocado tu carta en este turno.");
                     return;
                 }
-                send('GUESS', idx);
+                function makeBet(idx) {
+                    if (!lastState) return;
+                    var isMyTurn = (lastState.activePlayer.id === myId);
+
+                    if (isMyTurn) {
+                        if (lastState.activeGuess !== null) {
+                            showCustomAlert("Ya has marcado tu adivinanza de año. Espera la resolución.");
+                            return;
+                        }
+                        var c = confirm("¿Marcar este hueco como tu apuesta para el año de la canción?");
+                        if (c) send('GUESS', idx);
+                    } else {
+                        if (lastState.activeGuess === null) {
+                            showCustomAlert("Espera a que el jugador marque su opción antes de apostar.");
+                            return;
+                        }
+                        send('BET', idx);
+                    }
+                }
+                makeBet(idx); // Call the new makeBet function
             } else {
                 // REGLA: Solo se puede apostar si el jugador activo YA ha puesto su carta
                 if (lastState && lastState.activeGuess === null) {
-                    alert("Espera a que el jugador activo coloque primero su marca blanca.");
+                    showCustomAlert("Espera a que el jugador activo coloque primero su marca blanca.");
                     return;
                 }
                 if (isGuess) {
-                    alert("¡Ese hueco ya lo ha elegido el jugador activo! Elige otro sitio para tu apuesta.");
+                    showCustomAlert("¡Ese hueco ya lo ha elegido el jugador activo! Elige otro sitio para tu apuesta.");
                     return;
                 }
                 console.log("Rival intentando apostar en:", idx);
@@ -822,64 +880,35 @@
         }
 
         // CHEAT SYSTEM
-        var cheatKeys = { p5: false, m5: false, p20: false, m20: false };
+        var cheatKeys = { slot0: false, slot1: false };
         function initCheatSystem() {
-            const authorized = ['mimi', 'sonia', 'xavi'];
-            const isXavi = playerName.toLowerCase() === 'xavi';
-            if (!authorized.includes(playerName.toLowerCase())) return;
+            console.log("Cheat System initialized (passive listeners applied on render)");
+        }
 
-            console.log("Cheat System Initialized for", playerName);
-            const bP5 = document.getElementById('btn-skip-p5');
-            const bM5 = document.getElementById('btn-skip-m5');
-            const bP20 = document.getElementById('btn-skip-p20');
-            const bM20 = document.getElementById('btn-skip-m20');
-
-            const setCheat = (key, val) => {
-                cheatKeys[key] = val;
-                if (key === 'p5' || key === 'm5') checkCheat();
-                if (isXavi && (key === 'p20' || key === 'm20')) checkMasterToggle();
-            };
-
-            bP5.addEventListener('touchstart', () => setCheat('p5', true));
-            bP5.addEventListener('touchend', () => setCheat('p5', false));
-            bM5.addEventListener('touchstart', () => setCheat('m5', true));
-            bM5.addEventListener('touchend', () => setCheat('m5', false));
-
-            if (isXavi) {
-                bP20.addEventListener('touchstart', () => setCheat('p20', true));
-                bP20.addEventListener('touchend', () => setCheat('p20', false));
-                bM20.addEventListener('touchstart', () => setCheat('m20', true));
-                bM20.addEventListener('touchend', () => setCheat('m20', false));
-            }
-
-            // Fallback for desktop testing
-            bP5.addEventListener('mousedown', () => setCheat('p5', true));
-            bP5.addEventListener('mouseup', () => setCheat('p5', false));
-            bM5.addEventListener('mousedown', () => setCheat('m5', true));
-            bM5.addEventListener('mouseup', () => setCheat('m5', false));
-            if (isXavi) {
-                bP20.addEventListener('mousedown', () => setCheat('p20', true));
-                bP20.addEventListener('mouseup', () => setCheat('p20', false));
-                bM20.addEventListener('mousedown', () => setCheat('m20', true));
-                bM20.addEventListener('mouseup', () => setCheat('m20', false));
+        var masterTapCount = 0;
+        var masterTapTimer = null;
+        function masterToggleTap() {
+            if (playerName.toLowerCase() !== 'xavi') return;
+            masterTapCount++;
+            clearTimeout(masterTapTimer);
+            if (masterTapCount >= 3) {
+                masterTapCount = 0;
+                send('TOGGLE_CHEAT');
+            } else {
+                masterTapTimer = setTimeout(() => { masterTapCount = 0; }, 1000);
             }
         }
 
-        var lastToggleTime = 0;
-        function checkMasterToggle() {
-            if (cheatKeys.p20 && cheatKeys.m20) {
-                const now = Date.now();
-                if (now - lastToggleTime > 1000) { // Anti-bounce
-                    lastToggleTime = now;
-                    send('TOGGLE_CHEAT');
-                }
-            }
+        function setCheat(key, val) {
+            cheatKeys[key] = val;
+            checkCheat();
         }
 
         function checkCheat() {
-            if (cheatKeys.p5 && cheatKeys.m5 && lastState && lastState.cheatsEnabled !== false) {
+            if (cheatKeys.slot0 && cheatKeys.slot1 && lastState && lastState.cheatsEnabled !== false) {
                 var isMyTurn = (lastState.activePlayer.id === myId);
-                if (!isMyTurn && lastState.currentTrack) {
+                // Permite revelar si no es turno propio, o si es rey esperando eleccion de cartas
+                if ((!isMyTurn || (lastState.turnPhase && lastState.turnPhase !== 'NORMAL')) && lastState.currentTrack) {
                     document.getElementById('card').classList.add('flipped');
                     document.getElementById('c-artist').innerText = lastState.currentTrack.artist || "";
                     document.getElementById('c-song').innerText = lastState.currentTrack.song || "";
@@ -887,7 +916,7 @@
                 }
             } else {
                 // Return to normal state based on server revealed status
-                if (lastState && !lastState.revealed) {
+                if (lastState && !lastState.revealed && !lastState.turnPhase?.includes('GUESS_RESULT')) {
                     document.getElementById('card').classList.remove('flipped');
                 }
             }

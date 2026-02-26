@@ -425,7 +425,7 @@
 
         // Variables de estado del Modo Rey
         var gameMode = 'normal';
-        var turnPhase = 'NORMAL'; // 'NORMAL', 'KING_SELECTION', 'KING_GUESS'
+        var turnPhase = 'NORMAL'; // 'NORMAL', 'KING_SELECTION', 'KING_GUESS', 'KING_GUESS_RESULT'
         var kingOptions = []; // Array de opciones para los retadores
         var cheatsEnabled = true;
 
@@ -730,17 +730,27 @@
                         var actualYear = parseInt(s.year);
 
                         document.getElementById('ui-card-year').innerText = actualYear;
-
-                        if (Math.abs(guessedYear - actualYear) <= 2) {
-                            showWinner(players[activePlayerIdx].name);
+                        
+                        var won = Math.abs(guessedYear - actualYear) <= 2;
+                        
+                        if (won) {
+                            document.getElementById('host-instructions').innerHTML = "<span style='color:#00ff00; font-size:1.5em;'>¡EL REY ACERTÓ!</span> El año era " + actualYear + ".";
                         } else {
                             document.getElementById('host-instructions').innerHTML = "<span style='color:#ff4444; font-size:1.5em;'>¡FALLÓ!</span> El año era " + actualYear + ".";
-                            setTimeout(function () {
+                        }
+
+                        turnPhase = 'KING_GUESS_RESULT';
+                        syncState();
+
+                        setTimeout(function () {
+                            if (won && activePlayerIdx < players.length) {
+                                showWinner(players[activePlayerIdx].name);
+                            } else {
                                 activePlayerIdx = (activePlayerIdx + 1) % players.length;
                                 players[activePlayerIdx].canReload = true;
                                 nextTurn();
-                            }, 5000);
-                        }
+                            }
+                        }, 5000);
                     }
                     break;
             }
