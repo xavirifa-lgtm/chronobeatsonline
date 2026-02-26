@@ -461,6 +461,7 @@
                         if (existing) {
                             console.log("Reconexión de jugador:", data.name);
                             existing.id = conn.peer;
+                            syncState(); // Force state sync to reconnecting player
                         } else {
                             players.push({ id: conn.peer, name: data.name, score: 1, cards: [], tokens: 2, canReload: true });
                         }

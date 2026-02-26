@@ -686,6 +686,8 @@
 
             lastState = data;
             if (data.type === 'STATE_UPDATE') {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('game-screen').style.display = 'flex';
                 document.getElementById('cur-player').innerText = data.activePlayer.name;
 
                 if (data.leader) {
