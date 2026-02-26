@@ -932,16 +932,6 @@
 
             console.log("Ganador:", name, "| Sonando:", songTitle);
 
-            // Info de depuración visual (V26.1)
-            var debugInfo = document.getElementById('debug-song-info');
-            if (!debugInfo) {
-                debugInfo = document.createElement('div');
-                debugInfo.id = 'debug-song-info';
-                debugInfo.style.cssText = 'font-size: 12px; color: #555; margin-top: 20px; font-family: monospace; z-index: 3000;';
-                document.getElementById('winner-screen').appendChild(debugInfo);
-            }
-            debugInfo.innerText = "SONANDO: " + songTitle + " (ID: " + songId + ")";
-
             // Usar el contenedor de video para sonar (oculto)
             var container = document.getElementById('player-container');
             container.innerHTML = '<iframe src="https://www.youtube.com/embed/' + songId + '?autoplay=1&mute=0&enablejsapi=1&playsinline=1" allow="autoplay; encrypted-media" style="width:300px;height:200px;border:none;"></iframe>';

@@ -618,6 +618,7 @@
                     if (isPlaying) {
                         container.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + s.id + '?autoplay=1&start=' + segundosAcumulados + '" allow="autoplay"></iframe>';
                         document.getElementById('host-instructions').innerText = "REPRODUCIENDO";
+                        syncState();
                     }
                     break;
                 case 'RELOAD_SONG':
@@ -730,9 +731,9 @@
                         var actualYear = parseInt(s.year);
 
                         document.getElementById('ui-card-year').innerText = actualYear;
-                        
+
                         var won = Math.abs(guessedYear - actualYear) <= 2;
-                        
+
                         if (won) {
                             document.getElementById('host-instructions').innerHTML = "<span style='color:#00ff00; font-size:1.5em;'>¡EL REY ACERTÓ!</span> El año era " + actualYear + ".";
                         } else {
@@ -925,16 +926,6 @@
             }
 
             console.log("Ganador:", name, "| Sonando:", songTitle);
-
-            // Info de depuración visual (V26.1)
-            var debugInfo = document.getElementById('debug-song-info');
-            if (!debugInfo) {
-                debugInfo = document.createElement('div');
-                debugInfo.id = 'debug-song-info';
-                debugInfo.style.cssText = 'font-size: 12px; color: #555; margin-top: 20px; font-family: monospace; z-index: 3000;';
-                document.getElementById('winner-screen').appendChild(debugInfo);
-            }
-            debugInfo.innerText = "SONANDO: " + songTitle + " (ID: " + songId + ")";
 
             // Usar el contenedor de video para sonar (oculto)
             var container = document.getElementById('player-container');
