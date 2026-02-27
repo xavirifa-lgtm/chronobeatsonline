@@ -741,56 +741,110 @@
             overlay.style.display = 'flex';
 
             try {
-                // Escalar imagen a 512px para que Gemini tenga suficiente detalle
-                const scaledDataUrl = await new Promise(resolve => {
-                    const img = new Image();
-                    img.onload = function () {
-                        const MAX = 512;
-                        const scale = Math.min(MAX / img.width, MAX / img.height, 1);
-                        const canvas = document.createElement('canvas');
-                        canvas.width = Math.round(img.width * scale);
-                        canvas.height = Math.round(img.height * scale);
-                        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-                        resolve(canvas.toDataURL('image/jpeg', 0.85));
-                    };
-                    img.src = playerAvatarDataUrl;
-                });
+                // --- FILTRO CÓMIC AVANZADO LOCAL ---
+                const img = new Image();
+                img.src = playerAvatarDataUrl;
+                await new Promise(r => img.onload = r);
 
-                const base64Data = scaledDataUrl.split(',')[1];
-                const mimeType = 'image/jpeg';
+                const canvas = document.createElement('canvas');
+                // Tamaño óptimo para rendimiento en móviles y grosor de línea
+                const MAX_SIZE = 400;
+                let width = img.width;
+                let height = img.height;
+                if (width > height && width > MAX_SIZE) {
+                    height *= MAX_SIZE / width;
+                    width = MAX_SIZE;
+                } else if (height > MAX_SIZE) {
+                    width *= MAX_SIZE / height;
+                    height = MAX_SIZE;
+                }
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
 
-                // Llamar a nuestra propia API segura en Vercel
-                const res = await fetch('https://chronobeats-api.vercel.app/api/toonify', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        imageBase64: base64Data,
-                        mimeType: mimeType
-                    })
-                });
+                const imageData = ctx.getImageData(0, 0, width, height);
+                const data = imageData.data;
+                const edgeData = new Uint8ClampedArray(data.length);
+                const grayscale = new Uint8ClampedArray(width * height);
 
-                if (!res.ok) {
-                    const errorData = await res.json().catch(() => ({}));
-                    throw new Error(errorData.error || 'Vercel API error ' + res.status);
+                // Paso 1: Posterización (color plano de cómic) y escala de grises
+                const levels = 6; // Menos niveles = más efecto dibujo
+                const step = 255 / (levels - 1);
+
+                for (let i = 0; i < data.length; i += 4) {
+                    const r = data[i];
+                    const g = data[i + 1];
+                    const b = data[i + 2];
+
+                    // Grises para detectar los bordes luego
+                    grayscale[i / 4] = 0.299 * r + 0.587 * g + 0.114 * b;
+
+                    // Cuantizar color e inflar la saturación levemente
+                    data[i] = Math.min(255, Math.round((Math.round(r / step) * step) * 1.15));
+                    data[i + 1] = Math.min(255, Math.round((Math.round(g / step) * step) * 1.1));
+                    data[i + 2] = Math.min(255, Math.round((Math.round(b / step) * step) * 1.15));
                 }
 
-                const result = await res.json();
-                const parts = result.candidates?.[0]?.content?.parts || [];
-                const imgPart = parts.find(p => p.inlineData);
+                // Paso 2: Detección de trazos negros (Operador de Sobel)
+                const sobelThreshold = 45;
+                for (let y = 1; y < height - 1; y++) {
+                    for (let x = 1; x < width - 1; x++) {
+                        const idx = y * width + x;
 
-                if (imgPart) {
-                    playerAvatarDataUrl = `data:${imgPart.inlineData.mimeType};base64,${imgPart.inlineData.data}`;
-                    document.getElementById('avatar-preview').src = playerAvatarDataUrl;
-                    localStorage.setItem('cb_player_avatar', playerAvatarDataUrl);
-                } else {
-                    // Si no hay imagen, mostrar qué devolvió Gemini exactamente
-                    alert("Respuesta Gemini: " + JSON.stringify(result));
+                        const tl = grayscale[idx - width - 1];
+                        const tc = grayscale[idx - width];
+                        const tr = grayscale[idx - width + 1];
+                        const cl = grayscale[idx - 1];
+                        const cr = grayscale[idx + 1];
+                        const bl = grayscale[idx + width - 1];
+                        const bc = grayscale[idx + width];
+                        const br = grayscale[idx + width + 1];
+
+                        const gx = -tl + tr - 2 * cl + 2 * cr - bl + br;
+                        const gy = -tl - 2 * tc - tr + bl + 2 * bc + br;
+                        const magnitude = Math.sqrt(gx * gx + gy * gy);
+
+                        const pIdx = idx * 4;
+                        if (magnitude > sobelThreshold) {
+                            // Pintar trazo negro
+                            edgeData[pIdx] = 0;
+                            edgeData[pIdx + 1] = 0;
+                            edgeData[pIdx + 2] = 0;
+                            edgeData[pIdx + 3] = 255;
+                        } else {
+                            // Pintar color de fondo posterizado
+                            edgeData[pIdx] = data[pIdx];
+                            edgeData[pIdx + 1] = data[pIdx + 1];
+                            edgeData[pIdx + 2] = data[pIdx + 2];
+                            edgeData[pIdx + 3] = 255;
+                        }
+                    }
                 }
+
+                // Volcar resultado final en el array original
+                for (let i = 0; i < data.length; i++) {
+                    data[i] = edgeData[i];
+                }
+                ctx.putImageData(imageData, 0, 0);
+
+                // Paso 3: Engrosar un poco la tinta negra (opcional pero queda bien)
+                ctx.globalAlpha = 0.5;
+                ctx.globalCompositeOperation = 'darken';
+                ctx.drawImage(canvas, 1, 0);
+                //ctx.drawImage(canvas, 0, 1);
+
+                playerAvatarDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+                document.getElementById('avatar-preview').src = playerAvatarDataUrl;
+                localStorage.setItem('cb_player_avatar', playerAvatarDataUrl);
+                // --- FIN FILTRO LOCAL ---
+
+                // Simular un poco de tiempo mágico visual
+                await new Promise(r => setTimeout(r, 600));
 
             } catch (err) {
-                console.error('Gemini toon error:', err);
-                // Mostrar alerta directa para asegurar que el usuario ve el error
-                alert("Error de Gemini: " + err.message);
+                console.error('Local filter error:', err);
+                alert("Error al aplicar filtro: " + err.message);
             } finally {
                 overlay.style.display = 'none';
             }
