@@ -799,14 +799,10 @@
 
             } catch (err) {
                 console.error('Gemini toon error:', err);
-                // Mostrar error brevemente para diagnóstico
-                const loadingText = overlay.querySelector('p');
-                if (loadingText) loadingText.textContent = 'Error: ' + err.message;
-                await new Promise(r => setTimeout(r, 4000));
+                // Mostrar alerta directa para asegurar que el usuario ve el error
+                alert("Error de Gemini: " + err.message);
             } finally {
                 overlay.style.display = 'none';
-                const loadingText2 = overlay.querySelector('p');
-                if (loadingText2) loadingText2.textContent = 'TRANSFORMANDO SELFIE... 🪄✨';
             }
         }
 
