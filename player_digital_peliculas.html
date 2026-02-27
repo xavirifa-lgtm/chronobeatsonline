@@ -763,17 +763,28 @@
                     const eventSource = new EventSource(BASE + "/gradio_api/call/generate/" + event_id);
                     const timeout = setTimeout(() => { eventSource.close(); reject(new Error("Timeout IA")); }, 60000);
 
+                    eventSource.addEventListener('complete', function (e) {
+                        try {
+                            const dataArr = JSON.parse(e.data);
+                            const url = dataArr[0] && (dataArr[0].url || dataArr[0]);
+                            if (url) { clearTimeout(timeout); eventSource.close(); resolve(url); }
+                            else { clearTimeout(timeout); eventSource.close(); reject(new Error("Sin URL")); }
+                        } catch (parseErr) { clearTimeout(timeout); eventSource.close(); reject(parseErr); }
+                    });
+
+                    eventSource.addEventListener('error', function (e) {
+                        clearTimeout(timeout); eventSource.close(); reject(new Error("Error IA"));
+                    });
+
                     eventSource.onmessage = function (e) {
                         if (e.data && e.data.startsWith('[')) {
                             try {
                                 const dataArr = JSON.parse(e.data);
-                                if (dataArr[0] && dataArr[0].url) {
-                                    clearTimeout(timeout); eventSource.close(); resolve(dataArr[0].url);
-                                }
+                                const url = dataArr[0] && (dataArr[0].url || dataArr[0]);
+                                if (url) { clearTimeout(timeout); eventSource.close(); resolve(url); }
                             } catch (parseErr) { }
                         }
                     };
-                    eventSource.onerror = function () { clearTimeout(timeout); eventSource.close(); reject(new Error("Error en EventSource")); };
                 });
 
                 const imgRes = await fetch(resultUrl);
