@@ -798,6 +798,11 @@
                 document.getElementById('avatar-preview').src = playerAvatarDataUrl;
                 localStorage.setItem('cb_player_avatar', playerAvatarDataUrl);
 
+                // Notify host immediately if already connected
+                if (window.conn && window.conn.open) {
+                    window.conn.send({ type: 'AVATAR_UPDATE', name: playerName, avatar: playerAvatarDataUrl });
+                }
+
                 await new Promise(r => setTimeout(r, 400));
 
             } catch (err) {

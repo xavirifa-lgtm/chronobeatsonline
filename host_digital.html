@@ -462,12 +462,19 @@
                         if (existing) {
                             console.log("Reconexión de jugador:", data.name);
                             existing.id = conn.peer;
+                            existing.avatar = data.avatar || existing.avatar; // Actualizar avatar si cambió
                             syncState(); // Force state sync to reconnecting player
                         } else {
                             players.push({ id: conn.peer, name: data.name, avatar: data.avatar || null, score: 1, cards: [], tokens: 2, canReload: true });
                         }
                         connections[conn.peer] = conn;
                         updateLobby();
+                    } else if (data.type === 'AVATAR_UPDATE') {
+                        var existing = players.find(function (p) { return p.name === data.name; });
+                        if (existing) {
+                            existing.avatar = data.avatar;
+                            updateLobby();
+                        }
                     } else if (data.type === 'COMMAND') {
                         handlePlayerCommand(conn.peer, data.action, data.value);
                     }
