@@ -777,14 +777,19 @@
 
                 const finalApiUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(promptText)}?seed=${seed}&width=${width}&height=${height}&model=${model}&nologo=true`;
 
-                // Esperar a que la textura se descargue
+                // Descargar la textura de Pollinations usando fetch y transformarla a URL local (Blob)
+                // para evitar problemas de CORS y bloqueos de canvas al combinar
+                const texResponse = await fetch(finalApiUrl);
+                if (!texResponse.ok) throw new Error("Error HTTP de Pollinations Textures: " + texResponse.status);
+                const texBlob = await texResponse.blob();
+                const texObjectUrl = URL.createObjectURL(texBlob);
+
                 const aiTextureImg = new Image();
-                aiTextureImg.crossOrigin = "Anonymous";
-                aiTextureImg.src = finalApiUrl;
+                aiTextureImg.src = texObjectUrl;
 
                 await new Promise((resolve, reject) => {
                     aiTextureImg.onload = resolve;
-                    aiTextureImg.onerror = () => reject(new Error("No se pudo conectar a Pollinations Textures"));
+                    aiTextureImg.onerror = () => reject(new Error("No se pudo cargar la imagen Textura localmente"));
                 });
 
                 // Combinamos la foto original posterizada localmente con los colores vibrantes del Anime generado

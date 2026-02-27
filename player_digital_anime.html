@@ -778,10 +778,14 @@
 
                 const finalApiUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(promptText)}?seed=${seed}&width=${width}&height=${height}&model=${model}&nologo=true`;
 
-                // Esperar a que la textura se descargue
+                // Descargar la textura usando fetch para Blob URL y evitar CORS canvas
+                const texResponse = await fetch(finalApiUrl);
+                if (!texResponse.ok) throw new Error("Error HTTP de Pollinations Textures: " + texResponse.status);
+                const texBlob = await texResponse.blob();
+                const texObjectUrl = URL.createObjectURL(texBlob);
+
                 const aiTextureImg = new Image();
-                aiTextureImg.crossOrigin = "Anonymous";
-                aiTextureImg.src = finalApiUrl;
+                aiTextureImg.src = texObjectUrl;
 
                 await new Promise((resolve, reject) => {
                     aiTextureImg.onload = resolve;
