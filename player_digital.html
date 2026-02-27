@@ -792,6 +792,9 @@
                     playerAvatarDataUrl = `data:${imgPart.inlineData.mimeType};base64,${imgPart.inlineData.data}`;
                     document.getElementById('avatar-preview').src = playerAvatarDataUrl;
                     localStorage.setItem('cb_player_avatar', playerAvatarDataUrl);
+                } else {
+                    // Si no hay imagen, mostrar qué devolvió Gemini exactamente
+                    alert("Respuesta Gemini: " + JSON.stringify(result));
                 }
 
             } catch (err) {
