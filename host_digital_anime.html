@@ -343,6 +343,7 @@
     <a href="index.html" class="btn-hub" title="Volver al Hub">H</a>
     <div id="winner-screen">
         <h1>¡TENEMOS GANADOR!</h1>
+        <div id="winner-avatar-img" style="margin: 20px 0;"></div>
         <h2 id="winner-name">---</h2>
         <button class="btn-start" onclick="location.reload()" style="margin-top:30px">JUGAR OTRA VEZ</button>
     </div>
@@ -912,6 +913,18 @@
         function showWinner(name) {
             console.log("Celebrando victoria de:", name);
             document.getElementById('winner-name').innerText = name;
+
+            // Mostrar avatar del ganador
+            var winner = players.find(p => p.name === name);
+            var avatarHtml = '';
+            if (winner && winner.avatar) {
+                avatarHtml = '<img src="' + winner.avatar + '" style="width:200px; height:200px; border-radius:50%; border: 5px solid var(--neon); box-shadow: 0 0 30px var(--neon); object-fit: cover;">';
+            } else {
+                var initial = name.charAt(0).toUpperCase();
+                avatarHtml = '<div style="width:150px; height:150px; border-radius:50%; background:#222; border:5px solid var(--neon); color:var(--neon); display:inline-flex; align-items:center; justify-content:center; font-family:\'Bungee\'; font-size:4em; box-shadow: 0 0 30px var(--neon);">' + initial + '</div>';
+            }
+            document.getElementById('winner-avatar-img').innerHTML = avatarHtml;
+
             document.getElementById('winner-screen').style.display = 'flex';
 
             // Limpiar confeti previo si existe
