@@ -757,61 +757,79 @@
                 });
 
                 // Prompts y configuración para Pollinations (Estilo Anime 2D plano)
-                const prompt = encodeURIComponent("2d flat anime style illustration of a person's face, studio ghibli style, clean lines, vibrant colors, comic book art, beautiful, highly detailed, expressive eyes");
+                const promptText = "2d flat anime style portrait of a person's face, studio ghibli style, clean lines, vibrant colors, beautiful, highly detailed, expressive eyes";
+
+                // Usar el endpoint directo de imágenes de Pollinations con un seed aleatorio
+                const seed = Math.floor(Math.random() * 1000000);
                 const width = 512;
                 const height = 512;
-                const seed = Math.floor(Math.random() * 100000); // Generar nueva cada vez
                 const model = 'flux-anime';
 
-                // Llamada Image-to-Image usando la URL mágica de Pollinations
-                const response = await fetch("https://text.pollinations.ai/openai", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        model: "flux-anime",
-                        messages: [
-                            {
-                                role: "user",
-                                content: [
-                                    { type: "text", text: "Create an anime style portrait illustration of this face. Clean flat colors, high quality, expressive eyes." },
-                                    { type: "image_url", image_url: { url: scaledDataUrl } }
-                                ]
-                            }
-                        ]
-                    })
+                // Para usar Image-to-Image con Pollinations vía GET, pasamos img2img=true o simplemente mandamos la imagen al promt.
+                // Sin embargo Pollinations Free Image API no acepta subida de imágenes via POST actualmente de forma oficial para img2img.
+                // Como workaround gratuito total, pasaremos a generar un avatar Anime que se parezca 
+                // pero si queremos que use *nuestra* foto base en JS sin servidor, la única forma 100% fiable
+                // sin backend y gratis es combinar nuestro filtro local CON IA, o volver a un filtro local avanzado.
+
+                // --- NUEVO ENFOQUE: Híbrido ---
+                // Vamos a descargar primero una imagen de textura/estilo cómic base generada por IA
+                // Y luego la combinamos de forma matemática en el Canvas sobre la foto recortada del usuario para darle aspecto anime
+
+                const finalApiUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(promptText)}?seed=${seed}&width=${width}&height=${height}&model=${model}&nologo=true`;
+
+                // Esperar a que la textura se descargue
+                const aiTextureImg = new Image();
+                aiTextureImg.crossOrigin = "Anonymous";
+                aiTextureImg.src = finalApiUrl;
+
+                await new Promise((resolve, reject) => {
+                    aiTextureImg.onload = resolve;
+                    aiTextureImg.onerror = () => reject(new Error("No se pudo conectar a Pollinations Textures"));
                 });
 
-                if (!response.ok) {
-                    throw new Error("Error en servidor Pollinations: " + response.status);
+                // Combinamos la foto original posterizada localmente con los colores vibrantes del Anime generado
+                const canvas = document.createElement('canvas');
+                const MAX_SIZE = 400;
+                let cWidth = img.width;
+                let cHeight = img.height;
+                if (cWidth > cHeight && cWidth > MAX_SIZE) {
+                    cHeight *= MAX_SIZE / cWidth;
+                    cWidth = MAX_SIZE;
+                } else if (cHeight > MAX_SIZE) {
+                    cWidth *= MAX_SIZE / cHeight;
+                    cHeight = MAX_SIZE;
                 }
 
-                // Pollinations image responses are sometimes direct streams or markdown URLs. 
-                const data = await response.json();
-                let outputContent = data.choices && data.choices[0] && data.choices[0].message.content;
+                canvas.width = cWidth;
+                canvas.height = cHeight;
+                const ctx = canvas.getContext('2d');
 
-                // Extraer la URL de la imagen del markdown que devuelve: ![image](https://pollinations.ai/p/...)
-                let imgUrlMatch = outputContent.match(/!\[.*?\]\((.*?)\)/);
+                // Dibujar foto base del usuario
+                ctx.filter = 'contrast(1.2) saturate(0.8)';
+                ctx.drawImage(img, 0, 0, cWidth, cHeight);
+                ctx.filter = 'none';
 
-                if (imgUrlMatch && imgUrlMatch[1]) {
-                    let finalImageUrl = imgUrlMatch[1];
+                // Dibujar Textura Anime encima en modo hard-light/overlay para teñirla de estilo Anime
+                ctx.globalCompositeOperation = 'soft-light';
+                ctx.globalAlpha = 0.5;
+                ctx.drawImage(aiTextureImg, 0, 0, cWidth, cHeight);
 
-                    // Descargar la imagen real a Base64 para guardarla en localStorage 
-                    const blobRes = await fetch(finalImageUrl);
-                    const blob = await blobRes.blob();
-                    const base64Avatar = await new Promise((resolve) => {
-                        const reader = new FileReader();
-                        reader.onloadend = () => resolve(reader.result);
-                        reader.readAsDataURL(blob);
-                    });
+                ctx.globalCompositeOperation = 'color';
+                ctx.globalAlpha = 0.6;
+                ctx.drawImage(aiTextureImg, 0, 0, cWidth, cHeight);
 
-                    playerAvatarDataUrl = base64Avatar;
-                    document.getElementById('avatar-preview').src = playerAvatarDataUrl;
-                    localStorage.setItem('cb_player_avatar', playerAvatarDataUrl);
-                } else {
-                    throw new Error("Pollinations no devolvió una imagen válida. Respuesta: " + outputContent);
-                }
+                // Añadir viñeta
+                ctx.globalCompositeOperation = 'multiply';
+                ctx.globalAlpha = 0.3;
+                const grd = ctx.createRadialGradient(cWidth / 2, cHeight / 2, cWidth * 0.2, cWidth / 2, cHeight / 2, cWidth * 0.8);
+                grd.addColorStop(0, "white");
+                grd.addColorStop(1, "black");
+                ctx.fillStyle = grd;
+                ctx.fillRect(0, 0, cWidth, cHeight);
+
+                playerAvatarDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+                document.getElementById('avatar-preview').src = playerAvatarDataUrl;
+                localStorage.setItem('cb_player_avatar', playerAvatarDataUrl);
 
             } catch (err) {
                 console.error('Pollinations toon error:', err);
