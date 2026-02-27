@@ -765,9 +765,6 @@
             overlay.style.display = 'flex';
 
             try {
-                const GEMINI_KEY = 'AIzaSyAlUiYabLQq_het_lvqDRG_HMSeWUkTQos';
-                const MODEL = 'gemini-2.5-flash-image';
-
                 const scaledDataUrl = await new Promise(resolve => {
                     const img = new Image();
                     img.onload = function () {
@@ -785,24 +782,19 @@
                 const base64Data = scaledDataUrl.split(',')[1];
                 const mimeType = 'image/jpeg';
 
-                const res = await fetch(
-                    `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${GEMINI_KEY}`,
-                    {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            contents: [{
-                                parts: [
-                                    { inline_data: { mime_type: mimeType, data: base64Data } },
-                                    { text: 'Transforma esta foto en un avatar de personaje de dibujos animados colorido y divertido. Estilo cartoon con contornos negros bien marcados, colores vivos y planos, aspecto de ilustración animada. Mantén el parecido con la persona pero que quede claramente como un personaje de dibujos.' }
-                                ]
-                            }],
-                            generationConfig: { responseModalities: ['IMAGE'] }
-                        })
-                    }
-                );
+                const res = await fetch('https://chronobeats-api.vercel.app/api/toonify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        imageBase64: base64Data,
+                        mimeType: mimeType
+                    })
+                });
 
-                if (!res.ok) throw new Error('Gemini error ' + res.status);
+                if (!res.ok) {
+                    const errorData = await res.json().catch(() => ({}));
+                    throw new Error(errorData.error || 'Vercel API error ' + res.status);
+                }
 
                 const result = await res.json();
                 const parts = result.candidates?.[0]?.content?.parts || [];
