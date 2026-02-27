@@ -756,45 +756,19 @@
                     img.src = playerAvatarDataUrl;
                 });
 
-                // Prompts y configuración para Pollinations (Estilo Anime 2D plano)
-                const promptText = "2d flat anime style portrait of a person's face, studio ghibli style, clean lines, vibrant colors, beautiful, highly detailed, expressive eyes";
+                // --- NUEVO FILTRO LOCAL ANIME (100% Offline, Rápido, Sin ERRORES 530) ---
+                // Dado que Pollinations y el resto de APIs gratuitas bloquean conexiones con 530 de Cloudflare
+                // Este filtro puramente local usa matemáticas en el Canvas para parecer anime 2D
 
-                // Usar el endpoint directo de imágenes de Pollinations con un seed aleatorio
-                const seed = Math.floor(Math.random() * 1000000);
-                const width = 512;
-                const height = 512;
-                const model = 'flux-anime';
-
-                // Para usar Image-to-Image con Pollinations vía GET, pasamos img2img=true o simplemente mandamos la imagen al promt.
-                // Sin embargo Pollinations Free Image API no acepta subida de imágenes via POST actualmente de forma oficial para img2img.
-                // Como workaround gratuito total, pasaremos a generar un avatar Anime que se parezca 
-                // pero si queremos que use *nuestra* foto base en JS sin servidor, la única forma 100% fiable
-                // sin backend y gratis es combinar nuestro filtro local CON IA, o volver a un filtro local avanzado.
-
-                // --- NUEVO ENFOQUE: Híbrido ---
-                // Vamos a descargar primero una imagen de textura/estilo cómic base generada por IA
-                // Y luego la combinamos de forma matemática en el Canvas sobre la foto recortada del usuario para darle aspecto anime
-
-                const finalApiUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(promptText)}?seed=${seed}&width=${width}&height=${height}&model=${model}&nologo=true`;
-
-                // Descargar la textura de Pollinations usando fetch y transformarla a URL local (Blob)
-                // para evitar problemas de CORS y bloqueos de canvas al combinar
-                const texResponse = await fetch(finalApiUrl);
-                if (!texResponse.ok) throw new Error("Error HTTP de Pollinations Textures: " + texResponse.status);
-                const texBlob = await texResponse.blob();
-                const texObjectUrl = URL.createObjectURL(texBlob);
-
-                const aiTextureImg = new Image();
-                aiTextureImg.src = texObjectUrl;
-
-                await new Promise((resolve, reject) => {
-                    aiTextureImg.onload = resolve;
-                    aiTextureImg.onerror = () => reject(new Error("No se pudo cargar la imagen Textura localmente"));
+                const img = new Image();
+                img.src = playerAvatarDataUrl;
+                await new Promise(r => {
+                    img.onload = r;
+                    img.onerror = r;
                 });
 
-                // Combinamos la foto original posterizada localmente con los colores vibrantes del Anime generado
                 const canvas = document.createElement('canvas');
-                const MAX_SIZE = 400;
+                const MAX_SIZE = 350; // Pequeño para disimular imperfecciones de la foto real
                 let cWidth = img.width;
                 let cHeight = img.height;
                 if (cWidth > cHeight && cWidth > MAX_SIZE) {
@@ -809,32 +783,49 @@
                 canvas.height = cHeight;
                 const ctx = canvas.getContext('2d');
 
-                // Dibujar foto base del usuario
-                ctx.filter = 'contrast(1.2) saturate(0.8)';
+                // 1. Suavizar y saturar MUCHO los tonos base para aspecto vibrante de Anime
+                ctx.filter = 'saturate(2.0) contrast(1.2) brightness(1.1) blur(1px)';
                 ctx.drawImage(img, 0, 0, cWidth, cHeight);
                 ctx.filter = 'none';
 
-                // Dibujar Textura Anime encima en modo hard-light/overlay para teñirla de estilo Anime
+                // 2. Posterizar agresivamente para crear colores planos (Cel-Shading)
+                const imgData = ctx.getImageData(0, 0, cWidth, cHeight);
+                const data = imgData.data;
+
+                // Reducimos los colores a muy pocos niveles para que parezca dibujado
+                // Un factor alto (ej. 42) dará ~6 bloques de nivel de color por canal
+                const factor = 42.5;
+                for (let i = 0; i < data.length; i += 4) {
+                    data[i] = Math.max(0, Math.min(255, Math.round(data[i] / factor) * factor + 10));     // R
+                    data[i + 1] = Math.max(0, Math.min(255, Math.round(data[i + 1] / factor) * factor + 5));  // G
+                    data[i + 2] = Math.max(0, Math.min(255, Math.round(data[i + 2] / factor) * factor));      // B
+                }
+                ctx.putImageData(imgData, 0, 0);
+
+                // 3. Darle un toque cálido (piel anime brillante) suave con soft-light
                 ctx.globalCompositeOperation = 'soft-light';
-                ctx.globalAlpha = 0.5;
-                ctx.drawImage(aiTextureImg, 0, 0, cWidth, cHeight);
+                ctx.fillStyle = 'rgba(255, 170, 130, 0.4)'; // Color melocotón cálido
+                ctx.fillRect(0, 0, cWidth, cHeight);
 
-                ctx.globalCompositeOperation = 'color';
-                ctx.globalAlpha = 0.6;
-                ctx.drawImage(aiTextureImg, 0, 0, cWidth, cHeight);
-
-                // Añadir viñeta
+                // 4. Viñeta ligera para centrar
                 ctx.globalCompositeOperation = 'multiply';
-                ctx.globalAlpha = 0.3;
-                const grd = ctx.createRadialGradient(cWidth / 2, cHeight / 2, cWidth * 0.2, cWidth / 2, cHeight / 2, cWidth * 0.8);
+                const grd = ctx.createRadialGradient(cWidth / 2, cHeight / 2, cWidth * 0.25, cWidth / 2, cHeight / 2, cWidth * 0.9);
                 grd.addColorStop(0, "white");
-                grd.addColorStop(1, "black");
+                grd.addColorStop(1, "rgba(50, 50, 50, 0.9)");
                 ctx.fillStyle = grd;
                 ctx.fillRect(0, 0, cWidth, cHeight);
 
-                playerAvatarDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+                // 5. Toque de luz Screen global
+                ctx.globalCompositeOperation = 'screen';
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+                ctx.fillRect(0, 0, cWidth, cHeight);
+
+                playerAvatarDataUrl = canvas.toDataURL('image/jpeg', 0.9);
                 document.getElementById('avatar-preview').src = playerAvatarDataUrl;
                 localStorage.setItem('cb_player_avatar', playerAvatarDataUrl);
+
+                // Animación fluida de medio segundo
+                await new Promise(r => setTimeout(r, 600));
 
             } catch (err) {
                 console.error('Pollinations toon error:', err);
