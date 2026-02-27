@@ -796,9 +796,14 @@
 
             } catch (err) {
                 console.error('Gemini toon error:', err);
-                // Si falla, nos quedamos con la foto original
+                // Mostrar error brevemente para diagnóstico
+                const loadingText = overlay.querySelector('p');
+                if (loadingText) loadingText.textContent = 'Error: ' + err.message;
+                await new Promise(r => setTimeout(r, 4000));
             } finally {
                 overlay.style.display = 'none';
+                const loadingText2 = overlay.querySelector('p');
+                if (loadingText2) loadingText2.textContent = 'TRANSFORMANDO SELFIE... 🪄✨';
             }
         }
 
