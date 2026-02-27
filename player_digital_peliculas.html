@@ -746,9 +746,7 @@
             overlay.style.display = 'flex';
 
             try {
-                // --- NUEVO FILTRO LOCAL ANIME (100% Offline, Rápido, Sin ERRORES 530) ---
-                // Dado que Pollinations y el resto de APIs gratuitas bloquean conexiones con 530 de Cloudflare
-                // Este filtro puramente local usa matemáticas en el Canvas para parecer anime 2D
+                // --- FILTRO DE COLOR DEL TEMA PELÍCULAS (NARANJA/ÁMBAR) ---
 
                 const img = new Image();
                 img.src = playerAvatarDataUrl;
@@ -758,7 +756,7 @@
                 });
 
                 const canvas = document.createElement('canvas');
-                const MAX_SIZE = 350; // Pequeño para disimular imperfecciones de la foto real
+                const MAX_SIZE = 400;
                 let cWidth = img.width;
                 let cHeight = img.height;
                 if (cWidth > cHeight && cWidth > MAX_SIZE) {
@@ -773,49 +771,34 @@
                 canvas.height = cHeight;
                 const ctx = canvas.getContext('2d');
 
-                // 1. Suavizar y saturar MUCHO los tonos base para aspecto vibrante de Anime
-                ctx.filter = 'saturate(2.0) contrast(1.2) brightness(1.1) blur(1px)';
+                // 1. Dibujar en escala de grises y alto contraste
+                ctx.filter = 'grayscale(100%) contrast(1.4) brightness(1.2)';
                 ctx.drawImage(img, 0, 0, cWidth, cHeight);
                 ctx.filter = 'none';
 
-                // 2. Posterizar agresivamente para crear colores planos (Cel-Shading)
-                const imgData = ctx.getImageData(0, 0, cWidth, cHeight);
-                const data = imgData.data;
-
-                // Reducimos los colores a muy pocos niveles para que parezca dibujado
-                // Un factor alto (ej. 42) dará ~6 bloques de nivel de color por canal
-                const factor = 42.5;
-                for (let i = 0; i < data.length; i += 4) {
-                    data[i] = Math.max(0, Math.min(255, Math.round(data[i] / factor) * factor + 10));     // R
-                    data[i + 1] = Math.max(0, Math.min(255, Math.round(data[i + 1] / factor) * factor + 5));  // G
-                    data[i + 2] = Math.max(0, Math.min(255, Math.round(data[i + 2] / factor) * factor));      // B
-                }
-                ctx.putImageData(imgData, 0, 0);
-
-                // 3. Darle un toque cálido (piel anime brillante) suave con soft-light
-                ctx.globalCompositeOperation = 'soft-light';
-                ctx.fillStyle = 'rgba(255, 170, 130, 0.4)'; // Color melocotón cálido
+                // 2. Teñir con el color Naranja/Ámbar del tema Películas
+                ctx.globalCompositeOperation = 'color';
+                ctx.fillStyle = 'rgba(255, 120, 0, 0.8)';
                 ctx.fillRect(0, 0, cWidth, cHeight);
 
-                // 4. Viñeta ligera para centrar
+                // Mezclar un poco de luz (Tono neón vibrante)
+                ctx.globalCompositeOperation = 'overlay';
+                ctx.fillStyle = 'rgba(255, 120, 0, 0.3)';
+                ctx.fillRect(0, 0, cWidth, cHeight);
+
+                // 3. Viñeta oscura
                 ctx.globalCompositeOperation = 'multiply';
-                const grd = ctx.createRadialGradient(cWidth / 2, cHeight / 2, cWidth * 0.25, cWidth / 2, cHeight / 2, cWidth * 0.9);
+                const grd = ctx.createRadialGradient(cWidth / 2, cHeight / 2, cWidth * 0.3, cWidth / 2, cHeight / 2, cWidth * 0.9);
                 grd.addColorStop(0, "white");
-                grd.addColorStop(1, "rgba(50, 50, 50, 0.9)");
+                grd.addColorStop(1, "rgba(10, 10, 10, 0.9)");
                 ctx.fillStyle = grd;
-                ctx.fillRect(0, 0, cWidth, cHeight);
-
-                // 5. Toque de luz Screen global
-                ctx.globalCompositeOperation = 'screen';
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
                 ctx.fillRect(0, 0, cWidth, cHeight);
 
                 playerAvatarDataUrl = canvas.toDataURL('image/jpeg', 0.9);
                 document.getElementById('avatar-preview').src = playerAvatarDataUrl;
                 localStorage.setItem('cb_player_avatar', playerAvatarDataUrl);
 
-                // Animación fluida de medio segundo
-                await new Promise(r => setTimeout(r, 600));
+                await new Promise(r => setTimeout(r, 400));
 
             } catch (err) {
                 console.error('Gemini toon error:', err);
