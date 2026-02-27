@@ -765,65 +765,48 @@
             overlay.style.display = 'flex';
 
             try {
-                const BASE = "https://akhaliq-animeganv2.hf.space";
+                const GEMINI_KEY = 'AIzaSyAlUiYabLQq_het_lvqDRG_HMSeWUkTQos';
+                const MODEL = 'gemini-2.0-flash-preview-image-generation';
 
-                const postRes = await fetch(BASE + "/gradio_api/call/generate", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        data: [{ url: playerAvatarDataUrl }, "Version 1"]
-                    })
-                });
+                const base64Data = playerAvatarDataUrl.split(',')[1];
+                const mimeType = playerAvatarDataUrl.split(';')[0].split(':')[1];
 
-                if (!postRes.ok) throw new Error("Error iniciando IA: " + postRes.status);
-                const { event_id } = await postRes.json();
+                const res = await fetch(
+                    `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${GEMINI_KEY}`,
+                    {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{
+                                parts: [
+                                    { inline_data: { mime_type: mimeType, data: base64Data } },
+                                    { text: 'Transforma esta foto en un avatar de personaje de dibujos animados colorido y divertido. Estilo cartoon con contornos negros bien marcados, colores vivos y planos, aspecto de ilustración animada. Mantén el parecido con la persona pero que quede claramente como un personaje de dibujos.' }
+                                ]
+                            }],
+                            generationConfig: { responseModalities: ['IMAGE'] }
+                        })
+                    }
+                );
 
-                const resultUrl = await new Promise((resolve, reject) => {
-                    const eventSource = new EventSource(BASE + "/gradio_api/call/generate/" + event_id);
-                    const timeout = setTimeout(() => { eventSource.close(); reject(new Error("Timeout IA")); }, 60000);
+                if (!res.ok) throw new Error('Gemini error ' + res.status);
 
-                    eventSource.addEventListener('complete', function (e) {
-                        try {
-                            const dataArr = JSON.parse(e.data);
-                            const url = dataArr[0] && (dataArr[0].url || dataArr[0]);
-                            if (url) { clearTimeout(timeout); eventSource.close(); resolve(url); }
-                            else { clearTimeout(timeout); eventSource.close(); reject(new Error("Sin URL")); }
-                        } catch (parseErr) { clearTimeout(timeout); eventSource.close(); reject(parseErr); }
-                    });
+                const result = await res.json();
+                const parts = result.candidates?.[0]?.content?.parts || [];
+                const imgPart = parts.find(p => p.inlineData);
 
-                    eventSource.addEventListener('error', function (e) {
-                        clearTimeout(timeout); eventSource.close(); reject(new Error("Error IA"));
-                    });
-
-                    eventSource.onmessage = function (e) {
-                        if (e.data && e.data.startsWith('[')) {
-                            try {
-                                const dataArr = JSON.parse(e.data);
-                                const url = dataArr[0] && (dataArr[0].url || dataArr[0]);
-                                if (url) { clearTimeout(timeout); eventSource.close(); resolve(url); }
-                            } catch (parseErr) { }
-                        }
-                    };
-                });
-
-                const imgRes = await fetch(resultUrl);
-                const blob = await imgRes.blob();
-                const base64 = await new Promise(resolve => {
-                    const reader = new FileReader();
-                    reader.onload = () => resolve(reader.result);
-                    reader.readAsDataURL(blob);
-                });
-
-                playerAvatarDataUrl = base64;
-                document.getElementById('avatar-preview').src = playerAvatarDataUrl;
-                localStorage.setItem('cb_player_avatar', playerAvatarDataUrl);
+                if (imgPart) {
+                    playerAvatarDataUrl = `data:${imgPart.inlineData.mimeType};base64,${imgPart.inlineData.data}`;
+                    document.getElementById('avatar-preview').src = playerAvatarDataUrl;
+                    localStorage.setItem('cb_player_avatar', playerAvatarDataUrl);
+                }
 
             } catch (err) {
-                console.error("AI Error:", err);
+                console.error('Gemini toon error:', err);
             } finally {
                 overlay.style.display = 'none';
             }
         }
+
 
 
         function showCustomAlert(msg) {
