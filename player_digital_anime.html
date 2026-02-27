@@ -765,32 +765,55 @@
             overlay.style.display = 'flex';
 
             try {
-                const response = await fetch("https://akhaliq-animeganv2.hf.space/run/generate", {
+                const BASE = "https://akhaliq-animeganv2.hf.space";
+
+                const postRes = await fetch(BASE + "/gradio_api/call/generate", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
-                        data: [
-                            playerAvatarDataUrl,
-                            "Version 2" // Recomendado para mejores resultados
-                        ]
+                        data: [{ url: playerAvatarDataUrl }, "Version 2"]
                     })
                 });
 
-                if (!response.ok) throw new Error("Error en la IA");
+                if (!postRes.ok) throw new Error("Error iniciando IA: " + postRes.status);
+                const { event_id } = await postRes.json();
 
-                const result = await response.json();
-                if (result.data && result.data[0]) {
-                    playerAvatarDataUrl = result.data[0];
-                    document.getElementById('avatar-preview').src = playerAvatarDataUrl;
-                    localStorage.setItem('cb_player_avatar', playerAvatarDataUrl);
-                }
+                const resultUrl = await new Promise((resolve, reject) => {
+                    const eventSource = new EventSource(BASE + "/gradio_api/call/generate/" + event_id);
+                    const timeout = setTimeout(() => { eventSource.close(); reject(new Error("Timeout IA")); }, 60000);
+
+                    eventSource.onmessage = function (e) {
+                        if (e.data && e.data.startsWith('[')) {
+                            try {
+                                const dataArr = JSON.parse(e.data);
+                                if (dataArr[0] && dataArr[0].url) {
+                                    clearTimeout(timeout); eventSource.close(); resolve(dataArr[0].url);
+                                }
+                            } catch (parseErr) { }
+                        }
+                    };
+                    eventSource.onerror = function () { clearTimeout(timeout); eventSource.close(); reject(new Error("Error en EventSource")); };
+                });
+
+                const imgRes = await fetch(resultUrl);
+                const blob = await imgRes.blob();
+                const base64 = await new Promise(resolve => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.readAsDataURL(blob);
+                });
+
+                playerAvatarDataUrl = base64;
+                document.getElementById('avatar-preview').src = playerAvatarDataUrl;
+                localStorage.setItem('cb_player_avatar', playerAvatarDataUrl);
+
             } catch (err) {
                 console.error("AI Error:", err);
-                // Si falla la IA, nos quedamos con la foto original, no bloqueamos al usuario
             } finally {
                 overlay.style.display = 'none';
             }
         }
+
 
         function showCustomAlert(msg) {
             document.getElementById('custom-alert-msg').innerText = msg;
