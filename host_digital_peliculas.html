@@ -451,7 +451,7 @@
             peer = new Peer("CB-MOVIES-HOST-" + roomCode);
             peer.on('open', function (id) {
                 console.log("Host Peer Abierto:", id);
-                document.getElementById('live-room-code').innerText = id;
+                document.getElementById('live-room-code').innerText = roomCode;
                 document.getElementById('live-room-code').style.display = 'block';
             });
             peer.on('connection', function (conn) {

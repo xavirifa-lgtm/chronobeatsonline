@@ -620,6 +620,7 @@
 
         function conectar() {
             var hostId = document.getElementById('host-id').value.toUpperCase().trim();
+            hostId = hostId.replace('CB-HOST-', '').replace('CB-ANIME-HOST-', '').replace('CB-MOVIES-HOST-', '');
             playerName = document.getElementById('player-name').value.trim();
             if (!hostId || !playerName) return showCustomAlert("Rellena los datos para continuar.");
 
