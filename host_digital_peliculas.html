@@ -469,7 +469,7 @@
                             existing.id = conn.peer;
                             syncState(); // Force state sync to reconnecting player
                         } else {
-                            players.push({ id: conn.peer, name: data.name, score: 1, cards: [], tokens: 2, canReload: true });
+                            players.push({ id: conn.peer, name: data.name, avatar: data.avatar || null, score: 1, cards: [], tokens: 2, canReload: true });
                         }
                         connections[conn.peer] = conn;
                         updateLobby();
@@ -508,7 +508,17 @@
         });
 
         function updateLobby() {
-            var h = ""; for (var i = 0; i < players.length; i++) h += '<div class="player-tag">' + players[i].name + '</div>';
+            var h = "";
+            for (var i = 0; i < players.length; i++) {
+                var avatarHtml = '';
+                if (players[i].avatar) {
+                    avatarHtml = '<img src="' + players[i].avatar + '" style="width:30px; height:30px; border-radius:50%; vertical-align:middle; margin-right:8px; border:2px solid var(--neon);">';
+                } else {
+                    var initial = players[i].name.charAt(0).toUpperCase();
+                    avatarHtml = '<div style="width:30px; height:30px; border-radius:50%; background:#222; border:2px solid var(--neon); color:var(--neon); display:inline-flex; align-items:center; justify-content:center; font-family:\'Bungee\'; vertical-align:middle; margin-right:8px;">' + initial + '</div>';
+                }
+                h += '<div class="player-tag" style="display:flex; align-items:center;">' + avatarHtml + players[i].name + '</div>';
+            }
             document.getElementById('lobby-players').innerHTML = h;
             if (players.length >= 1) document.getElementById('start-btn').style.display = 'inline-block';
         }
@@ -993,7 +1003,13 @@
         function updateUI() {
             var h = ""; players.slice().sort(function (a, b) { return b.score - a.score }).forEach(function (p) {
                 var chipsHtml = ""; for (var i = 0; i < p.tokens; i++) chipsHtml += '<span class="neon-chip"></span>';
-                h += '<div class="leader-item ' + (p.id === players[activePlayerIdx].id ? 'active' : '') + '"><span>' + p.name + ' (' + chipsHtml + ')</span><span class="score">' + p.score + ' p</span></div>';
+
+                var avatarHtml = '';
+                if (p.avatar) {
+                    avatarHtml = '<img src="' + p.avatar + '" style="width:25px; height:25px; border-radius:50%; vertical-align:middle; margin-right:8px; border:1px solid ' + (p.id === players[activePlayerIdx].id ? 'var(--neon)' : '#555') + ';">';
+                }
+
+                h += '<div class="leader-item ' + (p.id === players[activePlayerIdx].id ? 'active' : '') + '" style="align-items:center;"><span>' + avatarHtml + p.name + ' (' + chipsHtml + ')</span><span class="score">' + p.score + ' p</span></div>';
             });
             document.getElementById('leaderboard-list').innerHTML = h;
 

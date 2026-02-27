@@ -492,6 +492,21 @@
             style="font-family:'Limelight'; color:var(--neon); text-shadow: 0 0 10px var(--neon); text-align:center;">
             CHRONOBEATS<br><span style="font-size:0.4em; color:var(--gold); font-family:'Montserrat';">MOVIES
                 VERSION</span></div>
+
+        <div id="avatar-container" onclick="document.getElementById('avatar-input').click()"
+            style="display:flex; flex-direction:column; align-items:center; margin-bottom:15px;">
+            <img id="avatar-preview" src="" alt="Avatar"
+                style="display:none; width:100px; height:100px; border-radius:50%; object-fit:cover; border: 3px solid var(--neon); box-shadow: 0 0 15px var(--neon);">
+            <div id="avatar-placeholder"
+                style="width:100px; height:100px; border-radius:50%; border: 3px dashed var(--neon); display:flex; align-items:center; justify-content:center; color:var(--neon); font-size:2.5em; font-family:'Bungee'; background:rgba(255,170,0,0.05); box-shadow: inset 0 0 10px rgba(255,170,0,0.1); cursor:pointer;">
+                +
+            </div>
+            <div style="font-size: 0.7em; color: #888; font-family: 'Bungee'; margin-top: 10px;">TU AVATAR (OPCIONAL)
+            </div>
+        </div>
+        <input type="file" id="avatar-input" accept="image/*" capture="user" style="display:none;"
+            onchange="handleAvatarSelect(event)">
+
         <input type="text" id="host-id" placeholder="CÓDIGO SALA" maxlength="6">
         <input type="text" id="player-name" placeholder="TU NOMBRE">
         <button class="btn" id="join-btn" onclick="conectar()">ENTRAR</button>
@@ -592,6 +607,68 @@
     <script>
         var peer, conn, myId, playerName;
         var lastState = null;
+        var playerAvatarDataUrl = null;
+
+        // Cargar datos guardados al iniciar
+        window.addEventListener('load', function () {
+            var savedName = localStorage.getItem('cb_player_name');
+            if (savedName) {
+                document.getElementById('player-name').value = savedName;
+            }
+            var savedAvatar = localStorage.getItem('cb_player_avatar');
+            if (savedAvatar) {
+                playerAvatarDataUrl = savedAvatar;
+                document.getElementById('avatar-preview').src = savedAvatar;
+                document.getElementById('avatar-preview').style.display = 'block';
+                document.getElementById('avatar-placeholder').style.display = 'none';
+            }
+        });
+
+        function handleAvatarSelect(event) {
+            var file = event.target.files[0];
+            if (!file) return;
+
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                var img = new Image();
+                img.onload = function () {
+                    // Comprimir la imagen usando canvas
+                    var canvas = document.createElement('canvas');
+                    var MAX_SIZE = 150;
+                    var width = img.width;
+                    var height = img.height;
+
+                    if (width > height) {
+                        if (width > MAX_SIZE) {
+                            height *= MAX_SIZE / width;
+                            width = MAX_SIZE;
+                        }
+                    } else {
+                        if (height > MAX_SIZE) {
+                            width *= MAX_SIZE / height;
+                            height = MAX_SIZE;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    var ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    // Convertir a base64 calidad 0.7
+                    playerAvatarDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+
+                    document.getElementById('avatar-preview').src = playerAvatarDataUrl;
+                    document.getElementById('avatar-preview').style.display = 'block';
+                    document.getElementById('avatar-placeholder').style.display = 'none';
+
+                    // Guardar en localStorage
+                    localStorage.setItem('cb_player_avatar', playerAvatarDataUrl);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
 
         function showCustomAlert(msg) {
             document.getElementById('custom-alert-msg').innerText = msg;
@@ -629,6 +706,9 @@
             playerName = document.getElementById('player-name').value.trim();
             if (!hostId || !playerName) return showCustomAlert("Rellena los datos para continuar.");
 
+            // Guardar nombre en localStorage
+            localStorage.setItem('cb_player_name', playerName);
+
             var btn = document.getElementById('join-btn');
             btn.disabled = true;
             btn.innerText = "CONECTANDO...";
@@ -641,7 +721,7 @@
 
                 conn.on('open', function () {
                     console.log("¡Conectado!");
-                    conn.send({ type: 'JOIN', name: playerName });
+                    conn.send({ type: 'JOIN', name: playerName, avatar: playerAvatarDataUrl });
                     document.getElementById('login-screen').style.display = 'none';
                     document.getElementById('game-screen').style.display = 'flex';
                     initCheatSystem();
