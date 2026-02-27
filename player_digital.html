@@ -742,11 +742,25 @@
 
             try {
                 const GEMINI_KEY = 'AIzaSyAlUiYabLQq_het_lvqDRG_HMSeWUkTQos';
-                const MODEL = 'gemini-2.0-flash-preview-image-generation';
+                const MODEL = 'gemini-2.5-flash-image';
 
-                // Extraer base64 sin el prefijo data:...
-                const base64Data = playerAvatarDataUrl.split(',')[1];
-                const mimeType = playerAvatarDataUrl.split(';')[0].split(':')[1];
+                // Escalar imagen a 512px para que Gemini tenga suficiente detalle
+                const scaledDataUrl = await new Promise(resolve => {
+                    const img = new Image();
+                    img.onload = function () {
+                        const MAX = 512;
+                        const scale = Math.min(MAX / img.width, MAX / img.height, 1);
+                        const canvas = document.createElement('canvas');
+                        canvas.width = Math.round(img.width * scale);
+                        canvas.height = Math.round(img.height * scale);
+                        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                        resolve(canvas.toDataURL('image/jpeg', 0.85));
+                    };
+                    img.src = playerAvatarDataUrl;
+                });
+
+                const base64Data = scaledDataUrl.split(',')[1];
+                const mimeType = 'image/jpeg';
 
                 const res = await fetch(
                     `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${GEMINI_KEY}`,
