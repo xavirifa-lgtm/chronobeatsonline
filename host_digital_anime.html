@@ -367,15 +367,43 @@
             </select>
         </div>
 
+        <div id="joputismo-container-lobby" style="margin-bottom: 20px;">
+            <label
+                style="font-family: 'Bungee'; color: #ff0055; font-size: 1.2em; display: block; margin-bottom: 10px;">NIVEL
+                DE JOPUTISMO</label>
+            <select id="joputismo-select-lobby" onchange="setJoputismo(this.value)"
+                style="padding: 10px; font-family: 'Montserrat'; font-size: 1em; border-radius: 8px; background: #222; color: #fff; border: 1px solid #ff0055;">
+                <option value="0">LOSER (Modo Pacífico)</option>
+                <option value="1">HE-MAN (Nivel Estratégico)</option>
+                <option value="2">SUPERMAN (Guerra Total)</option>
+            </select>
+        </div>
+
         <button class="btn-start" onclick="startGame()" style="display:none; margin-top: 20px;" id="start-btn">EMPEZAR
             PARTIDA</button>
     </div>
 
+    <!-- AUDIO JOPUTISMO YOUTUBE -->
+    <div id="joputismo-audio-player" style="display:none;"></div>
+
     <div id="dashboard">
         <div class="sidebar">
-            <div style="text-align:center; margin-bottom:20px;">
+            <div style="text-align:center; margin-bottom:10px;">
                 <p style="font-size: 0.7em; color: #888;">TURNO DE:</p>
                 <div class="active-player-name" id="ui-current-player">---</div>
+            </div>
+
+            <div
+                style="margin-bottom: 20px; text-align: center; border-top: 1px solid #333; padding-top: 10px; border-bottom: 1px solid #333; padding-bottom: 15px;">
+                <label
+                    style="font-family: 'Bungee'; color: #ff0055; font-size: 0.6em; display: block; margin-bottom: 5px;">NIVEL
+                    DE JOPUTISMO</label>
+                <select id="joputismo-select-game" onchange="setJoputismo(this.value)"
+                    style="width: 100%; padding: 5px; font-family: 'Montserrat'; font-size: 0.8em; border-radius: 5px; background: #111; color: #ff0055; border: 1px solid #ff0055;">
+                    <option value="0">LOSER</option>
+                    <option value="1">HE-MAN</option>
+                    <option value="2">SUPERMAN</option>
+                </select>
             </div>
             <div id="leaderboard-list"></div>
 
@@ -446,6 +474,7 @@
         var panicTimer = 0;
         var panicActive = false;
         var panicInterval = null;
+        var joputismoLevel = 0; // 0: LOSER, 1: HE-MAN, 2: SUPERMAN
         var isFogActive = false;
         var scavengerTimer = 0;
         var scavengerInterval = null;
@@ -535,6 +564,43 @@
             }
             document.getElementById('lobby-players').innerHTML = h;
             if (players.length >= 1) document.getElementById('start-btn').style.display = 'inline-block';
+        }
+
+        var joputismoAudioTimeout = null;
+
+        function setJoputismo(level) {
+            joputismoLevel = parseInt(level);
+            var selectLobby = document.getElementById('joputismo-select-lobby');
+            if (selectLobby) selectLobby.value = joputismoLevel;
+            var selectGame = document.getElementById('joputismo-select-game');
+            if (selectGame) selectGame.value = joputismoLevel;
+
+            var themeContainer = document.getElementById('joputismo-audio-player');
+            if (themeContainer) {
+                if (joputismoAudioTimeout) {
+                    clearTimeout(joputismoAudioTimeout);
+                    joputismoAudioTimeout = null;
+                }
+
+                if (joputismoLevel === 1) {
+                    // He-Man Hey-ea-ea meme
+                    themeContainer.innerHTML = '<iframe width="1" height="1" src="https://www.youtube-nocookie.com/embed/ZZ5LpwO-An4?autoplay=1" allow="autoplay" style="display:none;"></iframe>';
+                } else if (joputismoLevel === 2) {
+                    // Superman theme
+                    themeContainer.innerHTML = '<iframe width="1" height="1" src="https://www.youtube-nocookie.com/embed/e9vrfEoc8_g?autoplay=1" allow="autoplay" style="display:none;"></iframe>';
+                } else {
+                    themeContainer.innerHTML = '';
+                }
+
+                // Stop after 10 seconds
+                if (joputismoLevel > 0) {
+                    joputismoAudioTimeout = setTimeout(function () {
+                        var tc = document.getElementById('joputismo-audio-player');
+                        if (tc) tc.innerHTML = '';
+                    }, 10000);
+                }
+            }
+            syncState();
         }
 
         function startGame() {
@@ -1236,7 +1302,7 @@
                     }
                     document.getElementById('challenger-buttons').innerHTML = h;
                 } else {
-                    var canScavenge = players.some(function (pl) { return pl.id !== players[activePlayerIdx].id && pl.tokens >= 2; });
+                    var canScavenge = (joputismoLevel >= 1) && players.some(function (pl) { return pl.id !== players[activePlayerIdx].id && pl.tokens >= 2; });
                     if (canScavenge) {
                         turnPhase = 'SCAVENGER';
                         scavengerTimer = 5;
@@ -1373,6 +1439,7 @@
                     panicActive: panicActive,
                     panicTimer: panicTimer,
                     isFogActive: isFogActive,
+                    joputismoLevel: joputismoLevel,
                     scavengerTimer: scavengerTimer,
                     bettingAgainst: bettingAgainst,
                     myCards: p ? p.cards : [],

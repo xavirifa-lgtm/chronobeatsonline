@@ -412,6 +412,26 @@
             color: #444;
         }
 
+        #sabotage-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        #sabotage-grid .spec-btn {
+            margin-top: 0 !important;
+            padding: 12px 5px;
+            font-size: 0.7em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 5px;
+            text-align: center;
+        }
+
         .spec-btn#btn-reload {
             border-color: #00f2fe;
             color: #00f2fe;
@@ -633,50 +653,49 @@
             <p
                 style="width: 100%; text-align: center; color: var(--gold); font-size: 0.7em; margin: 0 0 5px 0; font-family: 'Bungee';">
                 SABOTAJES</p>
-            <button class="spec-btn" id="btn-sabotage-mute"
-                style="background:var(--bg); border-color:#ff0055; color:#ff0055;" onclick="send('SABOTAGE_MUTE')">
-                MUTE 15s (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)
-            </button>
-            <button class="spec-btn" id="btn-sabotage-buzzer"
-                style="background:var(--bg); border-color:#00ff00; color:#00ff00; margin-top:10px;"
-                onclick="send('SABOTAGE_BUZZER')">
-                ¡ZUMBIDO! (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)
-            </button>
-            <button class="spec-btn" id="btn-sabotage-veto"
-                style="background:var(--bg); border-color:#ff8800; color:#ff8800; margin-top:10px;"
-                onclick="send('SABOTAGE_VETO')">
-                VETO RECARGA (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)
-            </button>
-            <button class="spec-btn" id="btn-sabotage-panic"
-                style="background:var(--bg); border-color:#ff0000; color:#ff0000; margin-top:10px;"
-                onclick="send('SABOTAGE_PANIC')">
-                PÁNICO 10s (2 <span class="neon-chip" style="width:10px;height:10px;"></span>)
-            </button>
-            <button class="spec-btn" id="btn-sabotage-fog"
-                style="background:var(--bg); border-color:#aaaaaa; color:#aaaaaa; margin-top:10px;"
-                onclick="send('SABOTAGE_FOG')">
-                NIEBLA TEMPORAL (2 <span class="neon-chip" style="width:10px;height:10px;"></span>)
-            </button>
-            <button class="spec-btn" id="btn-sabotage-bet"
-                style="background:var(--bg); border-color:#00f2fe; color:#00f2fe; margin-top:10px;"
-                onclick="send('BET_AGAINST_ACTIVE')">
-                ¡NI DE COÑA! (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)
-            </button>
-            <button class="spec-btn" id="btn-sabotage-blackhole"
-                style="background:var(--bg); border-color:#9900ff; color:#9900ff; margin-top:10px;"
-                onclick="send('SABOTAGE_BLACKHOLE')">
-                AGUJERO NEGRO (5 <span class="neon-chip" style="width:10px;height:10px;"></span>)
-            </button>
-            <button class="spec-btn" id="btn-sabotage-steal-token"
-                style="background:var(--bg); border-color:#ffff00; color:#ffff00; margin-top:10px;"
-                onclick="send('SABOTAGE_STEAL_TOKEN')">
-                ROBAR FICHA (3 <span class="neon-chip" style="width:10px;height:10px;"></span>)
-            </button>
-            <button class="spec-btn" id="btn-sabotage-steal-turn"
-                style="background:var(--bg); border-color:#ff00ff; color:#ff00ff; margin-top:10px;"
-                onclick="send('SABOTAGE_STEAL_TURN')">
-                ROBO DE TURNO (4 <span class="neon-chip" style="width:10px;height:10px;"></span>)
-            </button>
+            <div id="sabotage-grid">
+                <!-- Nivel 0 -->
+                <button class="spec-btn" id="btn-sabotage-mute"
+                    style="background:var(--bg); border-color:#ff0055; color:#ff0055;"
+                    onclick="send('SABOTAGE_MUTE')">MUTE 15s (1 <span class="neon-chip"
+                        style="width:10px;height:10px;"></span>)</button>
+                <button class="spec-btn" id="btn-sabotage-bet"
+                    style="background:var(--bg); border-color:#00f2fe; color:#00f2fe;"
+                    onclick="send('BET_AGAINST_ACTIVE')">¡NI DE COÑA! (1 <span class="neon-chip"
+                        style="width:10px;height:10px;"></span>)</button>
+
+                <!-- Nivel 1 -->
+                <button class="spec-btn" id="btn-sabotage-buzzer"
+                    style="background:var(--bg); border-color:#00ff00; color:#00ff00;"
+                    onclick="send('SABOTAGE_BUZZER')">¡ZUMBIDO! (1 <span class="neon-chip"
+                        style="width:10px;height:10px;"></span>)</button>
+                <button class="spec-btn" id="btn-sabotage-veto"
+                    style="background:var(--bg); border-color:#ff8800; color:#ff8800;"
+                    onclick="send('SABOTAGE_VETO')">VETO RECARGA (1 <span class="neon-chip"
+                        style="width:10px;height:10px;"></span>)</button>
+                <button class="spec-btn" id="btn-sabotage-panic"
+                    style="background:var(--bg); border-color:#ff0000; color:#ff0000;"
+                    onclick="send('SABOTAGE_PANIC')">PÁNICO 10s (2 <span class="neon-chip"
+                        style="width:10px;height:10px;"></span>)</button>
+                <button class="spec-btn" id="btn-sabotage-fog"
+                    style="background:var(--bg); border-color:#aaaaaa; color:#aaaaaa;"
+                    onclick="send('SABOTAGE_FOG')">NIEBLA TIEMPO (2 <span class="neon-chip"
+                        style="width:10px;height:10px;"></span>)</button>
+
+                <!-- Nivel 2 -->
+                <button class="spec-btn" id="btn-sabotage-steal-token"
+                    style="background:var(--bg); border-color:#ffff00; color:#ffff00;"
+                    onclick="send('SABOTAGE_STEAL_TOKEN')">ROBAR FICHA (3 <span class="neon-chip"
+                        style="width:10px;height:10px;"></span>)</button>
+                <button class="spec-btn" id="btn-sabotage-steal-turn"
+                    style="background:var(--bg); border-color:#ff00ff; color:#ff00ff;"
+                    onclick="send('SABOTAGE_STEAL_TURN')">ROBAR TURNO (4 <span class="neon-chip"
+                        style="width:10px;height:10px;"></span>)</button>
+                <button class="spec-btn" id="btn-sabotage-blackhole"
+                    style="background:var(--bg); border-color:#9900ff; color:#9900ff; grid-column: span 2;"
+                    onclick="send('SABOTAGE_BLACKHOLE')">AGUJERO NEGRO (5 <span class="neon-chip"
+                        style="width:10px;height:10px;"></span>)</button>
+            </div>
         </div>
 
         <div id="king-mode-ui"
@@ -1081,7 +1100,22 @@
                     document.getElementById('btn-reload').style.display = (data.isPlaying && data.canReload) ? 'block' : 'none';
                 } else {
                     specialCtrl.style.display = 'none';
-                    sabotageCtrl.style.display = (!isMyTurn && data.isPlaying && (!data.turnPhase || data.turnPhase === 'NORMAL') && !data.revealed) ? 'flex' : 'none';
+                    sabotageCtrl.style.display = (!isMyTurn && data.isPlaying && (!data.turnPhase || data.turnPhase === 'NORMAL') && !data.revealed) ? 'block' : 'none';
+
+                    let jLevel = data.joputismoLevel || 0;
+                    document.getElementById('btn-sabotage-mute').style.display = 'flex';
+                    document.getElementById('btn-sabotage-bet').style.display = 'flex';
+
+                    let disp1 = jLevel >= 1 ? 'flex' : 'none';
+                    if (document.getElementById('btn-sabotage-buzzer')) document.getElementById('btn-sabotage-buzzer').style.display = disp1;
+                    if (document.getElementById('btn-sabotage-veto')) document.getElementById('btn-sabotage-veto').style.display = disp1;
+                    if (document.getElementById('btn-sabotage-panic')) document.getElementById('btn-sabotage-panic').style.display = disp1;
+                    if (document.getElementById('btn-sabotage-fog')) document.getElementById('btn-sabotage-fog').style.display = disp1;
+
+                    let disp2 = jLevel >= 2 ? 'flex' : 'none';
+                    if (document.getElementById('btn-sabotage-steal-token')) document.getElementById('btn-sabotage-steal-token').style.display = disp2;
+                    if (document.getElementById('btn-sabotage-steal-turn')) document.getElementById('btn-sabotage-steal-turn').style.display = disp2;
+                    if (document.getElementById('btn-sabotage-blackhole')) document.getElementById('btn-sabotage-blackhole').style.display = disp2;
                 }
 
                 // Mensaje de espera (solo si NO es mi turno en modo normal)
