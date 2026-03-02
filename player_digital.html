@@ -541,6 +541,17 @@
 </head>
 
 <body>
+    <div id="panic-overlay"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,0,0,0.85); z-index:9999; flex-direction:column; justify-content:center; align-items:center; text-align:center;">
+        <h1 style="color:white; font-family:'Bungee'; font-size:3em; margin:0; text-shadow:0 0 20px black;">¡PÁNICO!
+        </h1>
+        <div id="panic-timer"
+            style="color:white; font-family:'Bungee'; font-size:8em; margin:0; line-height:1; text-shadow:0 0 20px black;">
+            10</div>
+        <p style="color:white; font-family:'Bungee'; font-size:1.5em; text-shadow:0 0 10px black;">¡COLOCA TU CARTA
+            RÁPIDO!</p>
+    </div>
+
     <div id="ai-loading-overlay">
         <div class="spinner"></div>
         <div style="font-size: 1.2em;">TRANSFORMANDO<br>SELFIE... 🪄✨</div>
@@ -611,6 +622,56 @@
             <button class="sk-btn sk-back" id="btn-skip-m5" onclick="send('SKIP',-5)">-5s</button>
             <button class="sk-btn sk-back" onclick="send('SKIP',-10)">-10s</button>
             <button class="sk-btn sk-back" id="btn-skip-m20" onclick="send('SKIP',-20)">-20s</button>
+        </div>
+
+        <div class="special-actions" id="sabotage-ctrl" style="display:none; margin-top:10px;">
+            <p
+                style="width: 100%; text-align: center; color: var(--gold); font-size: 0.7em; margin: 0 0 5px 0; font-family: 'Bungee';">
+                SABOTAJES</p>
+            <button class="spec-btn" id="btn-sabotage-mute"
+                style="background:var(--bg); border-color:#ff0055; color:#ff0055;" onclick="send('SABOTAGE_MUTE')">
+                MUTE 15s (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)
+            </button>
+            <button class="spec-btn" id="btn-sabotage-buzzer"
+                style="background:var(--bg); border-color:#00ff00; color:#00ff00; margin-top:10px;"
+                onclick="send('SABOTAGE_BUZZER')">
+                ¡ZUMBIDO! (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)
+            </button>
+            <button class="spec-btn" id="btn-sabotage-veto"
+                style="background:var(--bg); border-color:#ff8800; color:#ff8800; margin-top:10px;"
+                onclick="send('SABOTAGE_VETO')">
+                VETO RECARGA (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)
+            </button>
+            <button class="spec-btn" id="btn-sabotage-panic"
+                style="background:var(--bg); border-color:#ff0000; color:#ff0000; margin-top:10px;"
+                onclick="send('SABOTAGE_PANIC')">
+                PÁNICO 10s (2 <span class="neon-chip" style="width:10px;height:10px;"></span>)
+            </button>
+            <button class="spec-btn" id="btn-sabotage-fog"
+                style="background:var(--bg); border-color:#aaaaaa; color:#aaaaaa; margin-top:10px;"
+                onclick="send('SABOTAGE_FOG')">
+                NIEBLA TEMPORAL (2 <span class="neon-chip" style="width:10px;height:10px;"></span>)
+            </button>
+            <button class="spec-btn" id="btn-sabotage-bet"
+                style="background:var(--bg); border-color:#00f2fe; color:#00f2fe; margin-top:10px;"
+                onclick="send('BET_AGAINST_ACTIVE')">
+                ¡NI DE COÑA! (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)
+            </button>
+            <button class="spec-btn" id="btn-sabotage-blackhole"
+                style="background:var(--bg); border-color:#9900ff; color:#9900ff; margin-top:10px;"
+                onclick="send('SABOTAGE_BLACKHOLE')">
+                AGUJERO NEGRO (5 <span class="neon-chip" style="width:10px;height:10px;"></span>)
+            </button>
+            <button class="spec-btn" id="btn-sabotage-steal-token"
+                style="background:var(--bg); border-color:#ffff00; color:#ffff00; margin-top:10px;"
+                onclick="send('SABOTAGE_STEAL_TOKEN')">
+                ROBAR FICHA (3 <span class="neon-chip" style="width:10px;height:10px;"></span>)
+            </button>
+            <button class="spec-btn" id="btn-sabotage-steal-turn"
+                style="background:var(--bg); border-color:#ff00ff; color:#ff00ff; margin-top:10px;"
+                onclick="send('SABOTAGE_STEAL_TURN')">
+                ROBO DE TURNO (4 <span class="neon-chip" style="width:10px;height:10px;"></span>)
+            </button>
         </div>
 
         <div id="king-mode-ui"
@@ -920,6 +981,11 @@
         function handle(data) {
             console.log("Evento:", data.type, data);
 
+            if (data.type === 'BET_RESULT') {
+                showCustomAlert(data.msg);
+                return;
+            }
+
             // Retroalimentación de trucos para Xavi
             if (data.type === 'STATE_UPDATE' && lastState && playerName.toLowerCase() === 'xavi') {
                 if (data.cheatsEnabled !== lastState.cheatsEnabled) {
@@ -1010,8 +1076,10 @@
 
                 // Botones Especiales (Solo mi turno y si no está revelada Y no en modo rey)
                 var specialCtrl = document.getElementById('special-ctrl');
+                var sabotageCtrl = document.getElementById('sabotage-ctrl');
                 if (isMyTurn && !data.revealed && (!data.turnPhase || data.turnPhase === 'NORMAL')) {
                     specialCtrl.style.display = 'flex';
+                    sabotageCtrl.style.display = 'none';
                     // COMPRAR (Solo si NO está sonando)
                     document.getElementById('btn-autowin').style.display = (!data.isPlaying) ? 'block' : 'none';
                     // ERROR VIDEO (Solo si SI está sonando)
@@ -1020,6 +1088,7 @@
                     document.getElementById('btn-reload').style.display = (data.isPlaying && data.canReload) ? 'block' : 'none';
                 } else {
                     specialCtrl.style.display = 'none';
+                    sabotageCtrl.style.display = (!isMyTurn && data.isPlaying && (!data.turnPhase || data.turnPhase === 'NORMAL') && !data.revealed) ? 'flex' : 'none';
                 }
 
                 // Mensaje de espera (solo si NO es mi turno en modo normal)
@@ -1046,7 +1115,8 @@
                             var h = "";
                             h += renderBetSlot(0, data.currentBets, data.activeGuess, true);
                             data.myCards.forEach(function (year, idx) {
-                                h += '<div class="card-row">' + year + '</div>';
+                                var displayYear = (data.isFogActive) ? "????" : year;
+                                h += '<div class="card-row">' + displayYear + '</div>';
                                 h += renderBetSlot(idx + 1, data.currentBets, data.activeGuess, true);
                             });
                             document.getElementById('my-cards-list').innerHTML = h;
@@ -1072,6 +1142,46 @@
                     // Deshabilitar botones si no tiene fichas suficientes o si ya recargó
                     document.getElementById('btn-autowin').disabled = (data.myTokens < 3);
                     document.getElementById('btn-reload').disabled = (data.myTokens < 1 || data.canReload === false);
+                    document.getElementById('btn-sabotage-mute').disabled = (data.myTokens < 1);
+                    document.getElementById('btn-sabotage-buzzer').disabled = (data.myTokens < 1);
+                    document.getElementById('btn-sabotage-veto').disabled = (data.myTokens < 1);
+                    document.getElementById('btn-sabotage-panic').disabled = (data.myTokens < 2 || data.panicActive);
+                    document.getElementById('btn-sabotage-fog').disabled = (data.myTokens < 2 || data.isFogActive);
+
+                    var btnStealToken = document.getElementById('btn-sabotage-steal-token');
+                    if (btnStealToken) btnStealToken.disabled = (data.myTokens < 3);
+
+                    var btnStealTurn = document.getElementById('btn-sabotage-steal-turn');
+                    if (btnStealTurn) btnStealTurn.disabled = (data.myTokens < 4);
+
+                    var btnBlackhole = document.getElementById('btn-sabotage-blackhole');
+                    if (btnBlackhole) btnBlackhole.disabled = (data.myTokens < 5);
+
+                    // Panic Overlay Check
+                    var isMyTurn = (data.activePlayer && data.activePlayer.id === myId);
+                    var panicOverlay = document.getElementById('panic-overlay');
+                    if (data.panicActive && isMyTurn) {
+                        panicOverlay.style.display = 'flex';
+                        document.getElementById('panic-timer').innerText = data.panicTimer;
+                        if (data.panicTimer <= 3) document.getElementById('panic-timer').style.color = '#ff0000';
+                        else document.getElementById('panic-timer').style.color = 'white';
+                    } else {
+                        panicOverlay.style.display = 'none';
+                        document.getElementById('panic-timer').style.color = 'white';
+                    }
+
+                    var btnSabotageBet = document.getElementById('btn-sabotage-bet');
+                    if (btnSabotageBet) {
+                        var alreadyBet = data.bettingAgainst && data.bettingAgainst.includes(myId);
+                        btnSabotageBet.disabled = (data.myTokens < 1 || alreadyBet);
+                        if (alreadyBet) {
+                            btnSabotageBet.style.opacity = '0.5';
+                            btnSabotageBet.innerText = "APUESTA HECHA";
+                        } else {
+                            btnSabotageBet.style.opacity = '1';
+                            btnSabotageBet.innerHTML = '¡NI DE COÑA! (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)';
+                        }
+                    }
                 }
             }
         }
@@ -1126,6 +1236,12 @@
                     if (confirmed) send('GUESS', idx);
                 });
             } else {
+                if (lastState && lastState.turnPhase === 'SCAVENGER') {
+                    showCustomConfirm("¿Intentar robar esta carta como CARROÑA (Coste: 2 Fichas)?", function (confirmed) {
+                        if (confirmed) send('SABOTAGE_SCAVENGER', idx);
+                    });
+                    return;
+                }
                 // REGLA: Solo se puede apostar si el jugador activo YA ha puesto su carta
                 if (lastState && lastState.activeGuess === null) {
                     showCustomAlert("Espera a que el jugador activo coloque primero su apuesta.");
@@ -1136,7 +1252,7 @@
                     return;
                 }
                 console.log("Rival intentando apostar en:", idx);
-                showCustomConfirm("¿Seguro que quieres jugar en este hueco?", function (confirmed) {
+                showCustomConfirm("¿Seguro que quieres RETAR A DUELO en este hueco (Coste: 2 Fichas)?", function (confirmed) {
                     if (confirmed) send('BET', idx);
                 });
             }

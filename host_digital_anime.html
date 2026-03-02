@@ -428,6 +428,7 @@
         var players = [], connections = {}, songs = [], currentSongIdx = -1, activePlayerIdx = 0, isRevealed = false;
         var currentBets = {}; // playerId -> slotIndex
         var activeGuess = null; // slotIndex del jugador activo
+        var bettingAgainst = []; // IDs de los jugadores que han apostado contra el jugador activo
 
         // Variables de estado del Modo Rey
         var gameMode = 'normal';
@@ -439,6 +440,15 @@
         var segundosAcumulados = 0;
         var momentoDeInicio = 0;
         var isPlaying = false;
+        var isMuted = false;
+        var muteTimeRemaining = 0;
+        var muteIntervalTimer = null;
+        var panicTimer = 0;
+        var panicActive = false;
+        var panicInterval = null;
+        var isFogActive = false;
+        var scavengerTimer = 0;
+        var scavengerInterval = null;
 
         document.getElementById('join-code').innerText = roomCode;
 
@@ -467,7 +477,7 @@
                             existing.avatar = data.avatar || existing.avatar; // Actualizar avatar
                             syncState(); // Force state sync to reconnecting player
                         } else {
-                            players.push({ id: conn.peer, name: data.name, avatar: data.avatar || null, score: 1, cards: [], tokens: 2, canReload: true });
+                            players.push({ id: conn.peer, name: data.name, avatar: data.avatar || null, score: 1, cards: [], tokens: 5, canReload: true });
                         }
                         connections[conn.peer] = conn;
                         updateLobby();
@@ -549,6 +559,19 @@
             isPlaying = false;
             currentBets = {}; // Limpiar apuestas al cambiar de turno
             activeGuess = null; // Limpiar adivinanza
+            bettingAgainst = []; // Limpiar apuestas de "ni de coña"
+
+            isMuted = false;
+            muteTimeRemaining = 0;
+            if (muteIntervalTimer) { clearInterval(muteIntervalTimer); muteIntervalTimer = null; }
+
+            panicActive = false;
+            panicTimer = 0;
+            if (panicInterval) { clearInterval(panicInterval); panicInterval = null; }
+
+            isFogActive = false;
+            scavengerTimer = 0;
+            if (scavengerInterval) { clearInterval(scavengerInterval); scavengerInterval = null; }
 
             // --- INICIO MODO REY CHECK ---
             if (gameMode === 'rey' && players[activePlayerIdx] && players[activePlayerIdx].score >= 10) {
@@ -592,6 +615,26 @@
             syncState();
         }
 
+        function playBuzzerWebAudio() {
+            try {
+                var ctx = new (window.AudioContext || window.webkitAudioContext)();
+                var osc = ctx.createOscillator();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(150, ctx.currentTime);
+                osc.frequency.linearRampToValueAtTime(100, ctx.currentTime + 2);
+                var gain = ctx.createGain();
+                gain.gain.setValueAtTime(0, ctx.currentTime);
+                gain.gain.linearRampToValueAtTime(1, ctx.currentTime + 0.1);
+                gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 3);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 3);
+            } catch (e) {
+                console.error("Audio API error:", e);
+            }
+        }
+
         function handlePlayerCommand(peerId, action, value) {
             var activeP = players[activePlayerIdx];
             var s = songs[currentSongIdx];
@@ -603,8 +646,8 @@
                     if (!isPlaying) {
                         momentoDeInicio = Date.now();
                         isPlaying = true;
-                        container.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + s.id + '?autoplay=1&start=' + segundosAcumulados + '" allow="autoplay"></iframe>';
-                        document.getElementById('host-instructions').innerText = "REPRODUCIENDO";
+                        container.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + s.id + '?autoplay=1&start=' + segundosAcumulados + (isMuted ? '&mute=1' : '') + '" allow="autoplay"></iframe>';
+                        document.getElementById('host-instructions').innerText = "REPRODUCIENDO" + (isMuted ? " (MUTE)" : "");
                         syncState();
                     }
                     break;
@@ -627,6 +670,41 @@
                     revealData();
                     syncState();
                     break;
+                case 'SABOTAGE_MUTE':
+                    var p = players.find(function (pl) { return pl.id === peerId; });
+                    if (p && p.tokens >= 1 && p.id !== players[activePlayerIdx].id && isPlaying) {
+                        p.tokens--;
+                        muteTimeRemaining += 15000;
+
+                        if (!isMuted) {
+                            isMuted = true;
+                            var tiempoTranscurrido = Math.floor((Date.now() - momentoDeInicio) / 1000);
+                            segundosAcumulados += tiempoTranscurrido;
+                            momentoDeInicio = Date.now();
+                            container.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + s.id + '?autoplay=1&start=' + segundosAcumulados + '&mute=1" allow="autoplay"></iframe>';
+                            document.getElementById('host-instructions').innerText = "REPRODUCIENDO (MUTE)";
+
+                            muteIntervalTimer = setInterval(function () {
+                                if (isPlaying) muteTimeRemaining -= 1000;
+                                if (muteTimeRemaining <= 0) {
+                                    clearInterval(muteIntervalTimer);
+                                    muteIntervalTimer = null;
+                                    muteTimeRemaining = 0;
+                                    if (isMuted && isPlaying) {
+                                        isMuted = false;
+                                        var t2 = Math.floor((Date.now() - momentoDeInicio) / 1000);
+                                        segundosAcumulados += t2;
+                                        momentoDeInicio = Date.now();
+                                        container.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + s.id + '?autoplay=1&start=' + segundosAcumulados + '" allow="autoplay"></iframe>';
+                                        document.getElementById('host-instructions').innerText = "REPRODUCIENDO";
+                                        syncState();
+                                    }
+                                }
+                            }, 1000);
+                        }
+                        syncState();
+                    }
+                    break;
                 case 'TOGGLE_CHEAT':
                     cheatsEnabled = !cheatsEnabled;
                     console.log("Cheats Enabled:", cheatsEnabled);
@@ -643,8 +721,8 @@
                     if (segundosAcumulados < 0) segundosAcumulados = 0;
                     momentoDeInicio = Date.now();
                     if (isPlaying) {
-                        container.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + s.id + '?autoplay=1&start=' + segundosAcumulados + '" allow="autoplay"></iframe>';
-                        document.getElementById('host-instructions').innerText = "REPRODUCIENDO";
+                        container.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + s.id + '?autoplay=1&start=' + segundosAcumulados + (isMuted ? '&mute=1' : '') + '" allow="autoplay"></iframe>';
+                        document.getElementById('host-instructions').innerText = "REPRODUCIENDO" + (isMuted ? " (MUTE)" : "");
                     }
                     break;
                 case 'RELOAD_SONG':
@@ -703,13 +781,208 @@
                     var slotOccupied = (activeGuess == valNum);
                     for (var pid in currentBets) { if (currentBets[pid] == valNum) slotOccupied = true; }
 
-                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 1 && currentBets[peerId] === undefined && !slotOccupied && activeGuess !== null) {
-                        console.log("[OK] Apuesta aceptada para", p.name);
-                        p.tokens--;
+                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 2 && currentBets[peerId] === undefined && !slotOccupied && activeGuess !== null) {
+                        console.log("[OK] Apuesta (Duelo) aceptada para", p.name);
+                        p.tokens -= 2;
                         currentBets[peerId] = valNum;
                         syncState();
-                    } else {
                         console.log("[FAIL] Apuesta rechazada. p:", !!p, "Tokens:", p ? p.tokens : 0, "Ya apostó?", p ? currentBets[peerId] !== undefined : false, "Slot ocupado?", slotOccupied, "Guess es", activeGuess);
+                    }
+                    break;
+                case 'BET_AGAINST_ACTIVE':
+                    var p = players.find(function (pl) { return pl.id === peerId; });
+                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 1 && !bettingAgainst.includes(peerId) && isPlaying && !isRevealed && (!turnPhase || turnPhase === 'NORMAL')) {
+                        p.tokens--;
+                        bettingAgainst.push(peerId);
+
+                        // Mostrar mensaje flotante en el host
+                        var oldText = document.getElementById('host-instructions').innerText;
+                        document.getElementById('host-instructions').innerHTML = "<span style='color:#ff0055; font-size:1.2em;'>¡" + p.name + " DUDA DE QUE LO SEPA!</span>";
+                        setTimeout(function () {
+                            if (!isRevealed) document.getElementById('host-instructions').innerText = (isMuted ? "REPRODUCIENDO (MUTE)" : "REPRODUCIENDO");
+                        }, 3000);
+
+                        syncState();
+                    }
+                    break;
+                case 'SABOTAGE_PANIC':
+                    var p = players.find(function (pl) { return pl.id === peerId; });
+                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 2 && !panicActive && isPlaying && !isRevealed && (!turnPhase || turnPhase === 'NORMAL')) {
+                        p.tokens -= 2;
+                        panicActive = true;
+                        panicTimer = 10;
+
+                        var oldText = document.getElementById('host-instructions').innerText;
+                        document.getElementById('host-instructions').innerHTML = "<span style='color:#ff0000; font-size:1.5em; font-family:Bungee;'>¡" + p.name + " HA LANZADO UN ATAQUE DE PÁNICO!</span>";
+                        setTimeout(function () {
+                            if (!isRevealed && panicActive) document.getElementById('host-instructions').innerText = (isMuted ? "REPRODUCIENDO (MUTE)" : "REPRODUCIENDO");
+                        }, 3000);
+
+                        panicInterval = setInterval(function () {
+                            panicTimer--;
+                            if (panicTimer <= 0) {
+                                clearInterval(panicInterval);
+                                panicInterval = null;
+                                panicTimer = 0;
+                                panicActive = false;
+
+                                // Forzar fallo
+                                isRevealed = true;
+                                isPlaying = false;
+                                document.getElementById('player-container').innerHTML = '';
+                                document.getElementById('host-instructions').innerHTML = "<span style='color:#ff4444; font-size:1.5em;'>¡TIEMPO AGOTADO! ❌</span><br>Turno perdido por pánico.";
+                                document.getElementById('btn-reveal-host').style.display = 'none';
+                                document.getElementById('val-card-ui').style.display = 'block';
+                                document.getElementById('validation-buttons').style.display = 'none';
+                                syncState();
+                                setTimeout(function () {
+                                    activePlayerIdx = (activePlayerIdx + 1) % players.length;
+                                    players[activePlayerIdx].canReload = true;
+                                    nextTurn();
+                                }, 4000);
+                            } else {
+                                syncState();
+                            }
+                        }, 1000);
+                        syncState();
+                    }
+                    break;
+                case 'SABOTAGE_BUZZER':
+                    var p = players.find(function (pl) { return pl.id === peerId; });
+                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 1 && isPlaying && !isRevealed && (!turnPhase || turnPhase === 'NORMAL')) {
+                        p.tokens -= 1;
+                        playBuzzerWebAudio();
+                        syncState();
+                    }
+                    break;
+                case 'SABOTAGE_FOG':
+                    var p = players.find(function (pl) { return pl.id === peerId; });
+                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 2 && !isFogActive && (!turnPhase || turnPhase === 'NORMAL')) {
+                        p.tokens -= 2;
+                        isFogActive = true;
+
+                        document.getElementById('host-instructions').innerHTML = "<span style='color:#aaaaaa; font-size:1.5em; font-family:Bungee;'>¡" + p.name + " HA LANZADO NIEBLA TEMPORAL!</span>";
+                        setTimeout(function () {
+                            if (!isRevealed && !panicActive) document.getElementById('host-instructions').innerText = (isMuted ? "REPRODUCIENDO (MUTE)" : "REPRODUCIENDO");
+                        }, 3000);
+
+                        syncState();
+                    }
+                    break;
+                case 'SABOTAGE_VETO':
+                    var p = players.find(function (pl) { return pl.id === peerId; });
+                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 1 && players[activePlayerIdx].canReload && (!turnPhase || turnPhase === 'NORMAL')) {
+                        p.tokens -= 1;
+                        players[activePlayerIdx].canReload = false;
+
+                        document.getElementById('host-instructions').innerHTML = "<span style='color:#ff8800; font-size:1.5em; font-family:Bungee;'>¡" + p.name + " HA VETADO LA RECARGA!</span>";
+                        setTimeout(function () {
+                            if (!isRevealed && !panicActive) document.getElementById('host-instructions').innerText = (isMuted ? "REPRODUCIENDO (MUTE)" : "REPRODUCIENDO");
+                        }, 3000);
+
+                        syncState();
+                    }
+                    break;
+                case 'SABOTAGE_SCAVENGER':
+                    if (turnPhase === 'SCAVENGER') {
+                        var p = players.find(function (pl) { return pl.id === peerId; });
+                        var valNum = parseInt(value);
+                        if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 2) {
+                            var isOk = isSlotCorrect(valNum, songs[currentSongIdx].year, players[activePlayerIdx].cards);
+                            p.tokens -= 2;
+                            if (isOk) {
+                                if (scavengerInterval) clearInterval(scavengerInterval);
+                                scavengerInterval = null;
+                                turnPhase = 'NORMAL';
+                                document.getElementById('host-instructions').innerHTML = "<span style='color:#00ff00; font-size:1.5em; font-family:Bungee;'>¡" + p.name + " SE LLEVÓ LA CARROÑA!</span>";
+                                document.getElementById('challenger-buttons').innerHTML = "";
+                                p.score++;
+                                p.cards.push(songs[currentSongIdx].year);
+                                p.cards.sort();
+                                syncState();
+                                setTimeout(function () {
+                                    if (p.score >= 10 && gameMode === 'normal') {
+                                        showWinner(p.name);
+                                        return;
+                                    }
+                                    activePlayerIdx = (activePlayerIdx + 1) % players.length;
+                                    players[activePlayerIdx].canReload = true;
+                                    nextTurn();
+                                }, 3000);
+                            } else {
+                                if (connections[p.id]) {
+                                    connections[p.id].send({ type: 'BET_RESULT', msg: "¡FALLO EN CARROÑA! Pierdes 2 fichas." });
+                                }
+                                syncState();
+                            }
+                        }
+                    }
+                    break;
+                case 'SABOTAGE_STEAL_TURN':
+                    var p = players.find(function (pl) { return pl.id === peerId; });
+                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 4 && isPlaying && !isRevealed) {
+                        p.tokens -= 4;
+                        var oldActive = players[activePlayerIdx];
+                        activePlayerIdx = players.indexOf(p);
+
+                        // Clear bets and guesses because turn changes
+                        currentBets = {};
+                        activeGuess = null;
+                        bettingAgainst = [];
+
+                        document.getElementById('host-instructions').innerHTML = "<span style='color:#00f2fe; font-size:1.5em; font-family:Bungee;'>¡" + p.name + " HA ROBADO EL TURNO A " + oldActive.name + "!</span>";
+                        setTimeout(function () {
+                            if (!isRevealed && !panicActive) document.getElementById('host-instructions').innerText = (isMuted ? "REPRODUCIENDO (MUTE)" : "REPRODUCIENDO");
+                        }, 4000);
+
+                        syncState();
+                    }
+                    break;
+                case 'SABOTAGE_BLACKHOLE':
+                    var p = players.find(function (pl) { return pl.id === peerId; });
+                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 5 && (!turnPhase || turnPhase === 'NORMAL')) {
+                        var validTargets = players.filter(function (t) { return t.id !== p.id && t.score > 1; });
+                        if (validTargets.length > 0) {
+                            p.tokens -= 5;
+                            var target = validTargets[Math.floor(Math.random() * validTargets.length)];
+                            target.score -= 1;
+                            var cardIdx = Math.floor(Math.random() * target.cards.length);
+                            target.cards.splice(cardIdx, 1);
+
+                            document.getElementById('host-instructions').innerHTML = "<span style='color:#9900ff; font-size:1.5em; font-family:Bungee;'>¡" + p.name + " CREÓ UN AGUJERO NEGRO Y DESTRUYÓ UNA CARTA DE " + target.name + "!</span>";
+                            setTimeout(function () {
+                                if (!isRevealed && !panicActive) document.getElementById('host-instructions').innerText = (isMuted ? "REPRODUCIENDO (MUTE)" : "REPRODUCIENDO");
+                            }, 4000);
+                            syncState();
+                        }
+                    }
+                    break;
+                case 'SABOTAGE_STEAL_TOKEN':
+                    var p = players.find(function (pl) { return pl.id === peerId; });
+                    if (p && p.tokens >= 3) {
+                        var possibleTargets = players.filter(function (pt) { return pt.id !== peerId && pt.tokens > 0; });
+                        if (possibleTargets.length > 0) {
+                            p.tokens -= 3; // Pay the cost
+                            var target = possibleTargets[Math.floor(Math.random() * possibleTargets.length)];
+                            target.tokens -= 1;
+                            p.tokens += 1;
+
+                            // Send target an alert
+                            var tConn = connections[target.id];
+                            if (tConn) {
+                                tConn.send({
+                                    type: 'BET_RESULT',
+                                    message: "¡" + p.name + " TE HA ROBADO 1 FICHA! 🥷"
+                                });
+                            }
+
+                            document.getElementById('host-instructions').innerHTML = "<span style='color:#ffff00; font-size:1.2em;'>¡" + p.name + " HA ROBADO A " + target.name + "!</span>";
+                            setTimeout(function () {
+                                if (!isRevealed && !panicActive) document.getElementById('host-instructions').innerText = (isMuted ? "REPRODUCIENDO (MUTE)" : "REPRODUCIENDO");
+                            }, 3000);
+
+                            syncState();
+                        }
                     }
                     break;
                 case 'GUESS':
@@ -857,6 +1130,75 @@
                 players[activePlayerIdx].tokens++;
             }
 
+            // RESOLVER APUESTAS "NI DE COÑA"
+            if (bettingAgainst && bettingAgainst.length > 0) {
+                if (isCardOk) {
+                    // El jugador activo ACIERTA: los que apostaron pierden.
+                    var losesPhrases = [
+                        "Has dudado de un puto experto... y has perdido.",
+                        "¿Ni de coña? Ni de coña vas a recuperar esa ficha, pringao.",
+                        "Para la próxima te callas. El maestro sabe lo que hace.",
+                        "A llorar a la llorería. Esa ficha es historia.",
+                        "Has apostado contra Dios y te has quemado.",
+                        "¿Te creías muy listo, eh? Pues toma zasca en toda la boca.",
+                        "Poca fe para tanta ignorancia. Ficha perdida.",
+                        "Silencio en la sala. Ha hablado el puto amo del tiempo.",
+                        "Tu envidia alimenta su victoria. Menos 1 ficha para ti.",
+                        "¿En serio pensabas que iba a fallar? Qué pardillo.",
+                        "Nunca apuestes contra el jefe, novato.",
+                        "Te has comido el amago entero. Despídete de la ficha.",
+                        "Mucha boquita pero poca ficha te queda.",
+                        "Con esa intuición de mierda normal que pierdas fichas.",
+                        "Vaya patinazo. Esa masterclass te ha costado una ficha.",
+                        "Has ido a por lana y has salido trasquilado.",
+                        "Te ha retratado. Sigue mirando y aprende.",
+                        "Ni de coña tienes tú tanto nivel. Ficha al pozo.",
+                        "Acaso pensabas que dudar del amo del juego te iba a salir gratis?",
+                        "Te pones chulito y te quedas sin blanca. Clásico.",
+                        "Esa ficha era tuya, ahora es solo un mal recuerdo.",
+                        "¿Querías sangre? Toma dos tazas de humillación.",
+                        "Le has tirado un órdago y te ha sacado la chorra.",
+                        "El rey no se mancha las manos con plebeyos como tú.",
+                        "Has tropezado con la piedra de su sabiduría.",
+                        "Ficha denegada por listillo. A tu cueva.",
+                        "Te la ha clavado por la escuadra. A pastar.",
+                        "Tu intento de sabotaje da más pena que otra cosa.",
+                        "Otra fichita pal bote. Gracias por la donación, pringao.",
+                        "Te iba a devolver la ficha por pena, pero mejor me la quedo.",
+                        "Cárgate de paciencia, porque de fichas vas justito.",
+                        "El oráculo musical ataca de nuevo. Tú agacha la cabeza.",
+                        "Ni con un DeLorean aciertas tú tantas veces. Asúmelo.",
+                        "Ojo al dato: acabas de perder una ficha contra el mejor.",
+                        "Sigue apostando en contra, a ver si así te arruinas antes.",
+                        "Dudar de un dios solo trae castigos divinos en forma de fichas.",
+                        "¿Te sobra el dinero? Porque las fichas azules parece que las regalas.",
+                        "Has intentado hacerle el lío al máster y has cobrado tú.",
+                        "Por favor, un aplauso para el que acaba de perder otra ficha absurda.",
+                        "El rey manda, tú pagas la entrada al espectáculo.",
+                        "La próxima vez guarda la ficha, que igual te hace falta para no dar pena.",
+                        "Que ponga la música y tú pones las fichas perdidas. Trato justo."
+                    ];
+                    bettingAgainst.forEach(function (pid) {
+                        if (connections[pid]) {
+                            var msg = losesPhrases[Math.floor(Math.random() * losesPhrases.length)];
+                            connections[pid].send({ type: 'BET_RESULT', msg: "JAJAJAJA...\n\n" + msg });
+                        }
+                    });
+                } else {
+                    // El jugador activo FALLA: los que apostaron ganan +3 fichas.
+                    bettingAgainst.forEach(function (pid) {
+                        var p = players.find(x => x.id === pid);
+                        if (p) {
+                            p.tokens += 3;
+                            if (p.tokens > 5) p.tokens = 5; // Limite de 5 fichas
+                            if (connections[pid]) {
+                                connections[pid].send({ type: 'BET_RESULT', msg: "¡SABÍAS QUE IBA A FALLAR Y HAS GANADO!\n\nRecompensa: +3 FICHAS AZULES." });
+                            }
+                        }
+                    });
+                }
+            }
+
             if (isCardOk) {
                 players[activePlayerIdx].score++;
                 players[activePlayerIdx].cards.push(songs[currentSongIdx].year);
@@ -894,9 +1236,33 @@
                     }
                     document.getElementById('challenger-buttons').innerHTML = h;
                 } else {
-                    activePlayerIdx = (activePlayerIdx + 1) % players.length;
-                    players[activePlayerIdx].canReload = true; // Resetear permiso de recarga
-                    nextTurn();
+                    var canScavenge = players.some(function (pl) { return pl.id !== players[activePlayerIdx].id && pl.tokens >= 2; });
+                    if (canScavenge) {
+                        turnPhase = 'SCAVENGER';
+                        scavengerTimer = 5;
+                        document.getElementById('host-instructions').innerText = "¡CARROÑA DISPONIBLE! (5s)";
+                        document.getElementById('validation-buttons').style.display = 'none';
+                        document.getElementById('challenger-validation').style.display = 'block';
+                        document.getElementById('challenger-buttons').innerHTML = "<div style='color:#fff;font-size:1.5em;'>RIVALES: ¡A CARROÑEAR!</div>";
+                        syncState();
+
+                        scavengerInterval = setInterval(function () {
+                            scavengerTimer--;
+                            document.getElementById('host-instructions').innerText = "¡CARROÑA DISPONIBLE! (" + scavengerTimer + "s)";
+                            if (scavengerTimer <= 0) {
+                                clearInterval(scavengerInterval);
+                                scavengerInterval = null;
+                                turnPhase = 'NORMAL';
+                                activePlayerIdx = (activePlayerIdx + 1) % players.length;
+                                players[activePlayerIdx].canReload = true;
+                                nextTurn();
+                            }
+                        }, 1000);
+                    } else {
+                        activePlayerIdx = (activePlayerIdx + 1) % players.length;
+                        players[activePlayerIdx].canReload = true; // Resetear permiso de recarga
+                        nextTurn();
+                    }
                 }
             }
         }
@@ -1002,6 +1368,13 @@
                     currentTrack: songs[currentSongIdx],
                     revealed: isRevealed,
                     isPlaying: isPlaying,
+                    isMuted: isMuted,
+                    muteTimeRemaining: muteTimeRemaining,
+                    panicActive: panicActive,
+                    panicTimer: panicTimer,
+                    isFogActive: isFogActive,
+                    scavengerTimer: scavengerTimer,
+                    bettingAgainst: bettingAgainst,
                     myCards: p ? p.cards : [],
                     myTokens: p ? p.tokens : 0,
                     canReload: p ? p.canReload : false,
