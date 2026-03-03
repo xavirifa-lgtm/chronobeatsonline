@@ -1139,6 +1139,11 @@
                 case 'REMOTE_SYSTEM_ERROR':
                     reportSystemError();
                     break;
+                case 'REMOTE_JOPUTISMO':
+                    if (turnPhase === 'LOBBY' || players.length === 0) {
+                        setJoputismo(parseInt(value));
+                    }
+                    break;
             }
             // Eliminamos el syncState duplicado que podría causar problemas de carrera
         }

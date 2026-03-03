@@ -427,7 +427,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            flex-direction: column;
+            flex-direction: row;
+            flex-wrap: wrap;
             gap: 5px;
             text-align: center;
         }
@@ -699,7 +700,7 @@
                         style="width:10px;height:10px;"></span>)</button>
                 <button class="spec-btn" id="btn-sabotage-veto"
                     style="background:var(--bg); border-color:#ff8800; color:#ff8800;"
-                    onclick="send('SABOTAGE_VETO')">VETO RECARGA (1 <span class="neon-chip"
+                    onclick="send('SABOTAGE_VETO')">VETO CAMBIAR (1 <span class="neon-chip"
                         style="width:10px;height:10px;"></span>)</button>
                 <button class="spec-btn" id="btn-sabotage-panic"
                     style="background:var(--bg); border-color:#ff0000; color:#ff0000;"
@@ -1056,8 +1057,17 @@
 
                     // Render Contextual Buttons
                     if (data.judgeId === 'ALL') {
-                        rContainer.innerHTML = `<button class="btn" style="background:#ff00ff; color:white; border-color:#ff00ff; padding:20px; font-size:1.2em;" onclick="send('REMOTE_START_GAME'); toggleRemote();">▶ INICIAR PARTIDA</button>`;
-                    } else if (data.turnPhase && data.turnPhase !== 'NORMAL') {
+                        var currJop = data.joputismoLevel || 0;
+                        var jstr = "";
+                        jstr += "<h4 style='color:var(--neon); font-family:Bungee; font-size:1em; margin-bottom:5px; margin-top:0'>NIVEL JOPUTISMO:</h4>";
+                        jstr += "<div style='display:flex; gap:5px; margin-bottom: 20px; justify-content:center;'>";
+                        jstr += "<button class='btn' style='padding:10px; font-size:0.8em; flex:1; " + (currJop === 0 ? "background:var(--neon);color:#000;" : "background:#222;color:#888") + "' onclick=\"send('REMOTE_JOPUTISMO', 0)\">LOSER</button>";
+                        jstr += "<button class='btn' style='padding:10px; font-size:0.8em; flex:1; " + (currJop === 1 ? "background:var(--neon);color:#000;" : "background:#222;color:#888") + "' onclick=\"send('REMOTE_JOPUTISMO', 1)\">HE-MAN</button>";
+                        jstr += "<button class='btn' style='padding:10px; font-size:0.8em; flex:1; " + (currJop === 2 ? "background:var(--neon);color:#000;" : "background:#222;color:#888") + "' onclick=\"send('REMOTE_JOPUTISMO', 2)\">SUPERMAN</button>";
+                        jstr += "</div>";
+
+                        rContainer.innerHTML = jstr + `<button class="btn" style="background:#ff00ff; color:white; border-color:#ff00ff; padding:20px; font-size:1.2em;" onclick="send('REMOTE_START_GAME'); toggleRemote();">▶ INICIAR PARTIDA</button>`;
+                    } else if (data.turnPhase && data.turnPhase !== 'NORMAL' && data.turnPhase !== 'SCAVENGER') {
                         rContainer.innerHTML = `<p style="color:#888;">Controles no disponibles durante evento especial.</p>`;
                     } else {
                         if (!data.revealed) {
