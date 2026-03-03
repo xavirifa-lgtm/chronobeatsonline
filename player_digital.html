@@ -561,6 +561,34 @@
 </head>
 
 <body>
+    <!-- MANDO DEL HOST (REMOTE) -->
+    <div id="fab-remote" onclick="toggleRemote()"
+        style="display:none; position:fixed; top:20px; right:20px; width:50px; height:50px; background:#111; border:2px solid #555; border-radius:50%; z-index:9000; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 0 10px rgba(0,0,0,0.5); font-size:1.5em; filter:grayscale(100%); transition:0.3s; opacity:0.5; pointer-events:none;">
+        📺
+    </div>
+
+    <div id="remote-overlay"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:9500; align-items:center; justify-content:center; flex-direction:column; padding:20px; text-align:center;">
+        <h2 style="font-family:'Bungee'; color:var(--neon); margin-bottom:10px; font-size:2em;">📺 MANDO HOST</h2>
+        <p style="color:#aaa; font-family:'Montserrat'; margin-bottom:30px; font-size:0.9em; max-width:80%;">CONTROLA LA
+            PARTIDA DESDE TU MÓVIL</p>
+
+        <div id="remote-controls-container"
+            style="display:flex; flex-direction:column; gap:15px; width:100%; max-width:300px;">
+            <!-- INJECTED BY JS -->
+        </div>
+
+        <button class="btn" onclick="toggleRemote()"
+            style="margin-top:40px; background:#333; color:white; border-color:#555;">CERRAR MANDO</button>
+    </div>
+
+    <script>
+        function toggleRemote() {
+            var el = document.getElementById('remote-overlay');
+            el.style.display = (el.style.display === 'none' || el.style.display === '') ? 'flex' : 'none';
+        }
+    </script>
+
     <div id="panic-overlay"
         style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,0,0,0.85); z-index:9999; flex-direction:column; justify-content:center; align-items:center; text-align:center;">
         <h1 style="color:white; font-family:'Bungee'; font-size:3em; margin:0; text-shadow:0 0 20px black;">¡PÁNICO!
@@ -680,7 +708,7 @@
                 <!-- Nivel 2 -->
                 <button class="spec-btn" id="btn-sabotage-steal-token"
                     style="background:var(--bg); border-color:#ffff00; color:#ffff00;"
-                    onclick="send('SABOTAGE_STEAL_TOKEN')">ROBAR FICHA (3 <span class="neon-chip"
+                    onclick="send('SABOTAGE_STEAL_TOKEN')">ROBAR FICHA (4 <span class="neon-chip"
                         style="width:10px;height:10px;"></span>)</button>
                 <button class="spec-btn" id="btn-sabotage-steal-turn"
                     style="background:var(--bg); border-color:#ff00ff; color:#ff00ff;"
@@ -1020,7 +1048,47 @@
             if (data.type === 'STATE_UPDATE') {
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('game-screen').style.display = 'flex';
-                document.getElementById('cur-player').innerText = data.activePlayer.name;
+                document.getElementById('cur-player').innerText = data.activePlayer && data.activePlayer.name ? data.activePlayer.name : "---";
+
+                // LOGICA DEL MANDO HOST
+                var fab = document.getElementById('fab-remote');
+                var rContainer = document.getElementById('remote-controls-container');
+                if (data.judgeId === 'ALL' || data.judgeId === myId) {
+                    fab.style.display = 'flex';
+                    fab.style.filter = 'none';
+                    fab.style.opacity = '1';
+                    fab.style.pointerEvents = 'auto';
+                    fab.style.borderColor = 'var(--neon)';
+                    fab.style.boxShadow = '0 0 15px var(--neon)';
+
+                    // Render Contextual Buttons
+                    if (data.judgeId === 'ALL') {
+                        rContainer.innerHTML = `<button class="btn" style="background:#ff00ff; color:white; border-color:#ff00ff; padding:20px; font-size:1.2em;" onclick="send('REMOTE_START_GAME'); toggleRemote();">▶ INICIAR PARTIDA</button>`;
+                    } else if (data.turnPhase && data.turnPhase !== 'NORMAL') {
+                        rContainer.innerHTML = `<p style="color:#888;">Controles no disponibles durante evento especial.</p>`;
+                    } else {
+                        if (!data.revealed) {
+                            rContainer.innerHTML = `<button class="btn" style="background:var(--neon); color:#000; padding:20px; font-size:1.2em;" onclick="send('REMOTE_REVEAL'); toggleRemote();">👀 REVELAR CARTA</button>
+                            <button class="btn" style="background:#555; color:white; border-color:#555; margin-top:20px;" onclick="send('REMOTE_SYSTEM_ERROR'); toggleRemote();">ERROR DE SISTEMA (REPETIR)</button>`;
+                        } else {
+                            rContainer.innerHTML = `
+                                <button class="btn" style="background:#00ff00; color:#000; padding:15px; margin-bottom:10px;" onclick="send('REMOTE_CORRECT'); toggleRemote();">✅ SÍ (Acertó y gana carta)</button>
+                                <button class="btn" style="background:#ffd700; color:#000; padding:15px; margin-bottom:10px;" onclick="send('REMOTE_CORRECT_TOKEN'); toggleRemote();">🔵 SÍ (+ Ficha Azul)</button>
+                                <button class="btn" style="background:#ff4444; color:#fff; padding:15px; margin-bottom:10px;" onclick="send('REMOTE_INCORRECT'); toggleRemote();">❌ NO (Falló todo)</button>
+                                <button class="btn" style="background:#00f2fe; color:#000; padding:15px; margin-bottom:10px;" onclick="send('REMOTE_INCORRECT_TOKEN'); toggleRemote();">🔵 NO (+ Ficha Consolación)</button>
+                                <button class="btn" style="background:#555; color:white; border-color:#555; margin-top:20px;" onclick="send('REMOTE_SYSTEM_ERROR'); toggleRemote();">ERROR SISTEMA</button>
+                            `;
+                        }
+                    }
+                } else {
+                    fab.style.display = 'flex';
+                    fab.style.filter = 'grayscale(100%)';
+                    fab.style.opacity = '0.3';
+                    fab.style.pointerEvents = 'none';
+                    fab.style.borderColor = '#555';
+                    fab.style.boxShadow = 'none';
+                    document.getElementById('remote-overlay').style.display = 'none';
+                }
 
                 if (data.leader) {
                     document.getElementById('lb-leader-name').innerText = data.leader.name;
@@ -1034,7 +1102,7 @@
                 var isMyTurn = (data.activePlayer.id === myId);
                 console.log("¿Es mi turno?", isMyTurn, "Mi ID:", myId, "ID Activo:", data.activePlayer.id);
 
-                var isKingMode = (data.turnPhase && data.turnPhase !== 'NORMAL');
+                var isKingMode = (data.turnPhase && data.turnPhase !== 'NORMAL' && data.turnPhase !== 'SCAVENGER');
                 var normalCardContainer = document.getElementById('normal-card-container');
                 var normalCollection = document.getElementById('normal-collection');
                 var kingModeUi = document.getElementById('king-mode-ui');
@@ -1124,7 +1192,7 @@
                     if (document.getElementById('btn-sabotage-fog')) { document.getElementById('btn-sabotage-fog').style.display = disp1; document.getElementById('btn-sabotage-fog').disabled = (data.myTokens < 2); }
 
                     let disp2 = jLevel >= 2 ? 'flex' : 'none';
-                    if (document.getElementById('btn-sabotage-steal-token')) { document.getElementById('btn-sabotage-steal-token').style.display = disp2; document.getElementById('btn-sabotage-steal-token').disabled = (data.myTokens < 3); }
+                    if (document.getElementById('btn-sabotage-steal-token')) { document.getElementById('btn-sabotage-steal-token').style.display = disp2; document.getElementById('btn-sabotage-steal-token').disabled = (data.myTokens < 4); }
                     if (document.getElementById('btn-sabotage-steal-turn')) { document.getElementById('btn-sabotage-steal-turn').style.display = disp2; document.getElementById('btn-sabotage-steal-turn').disabled = (data.myTokens < 4); }
                     if (document.getElementById('btn-sabotage-blackhole')) { document.getElementById('btn-sabotage-blackhole').style.display = disp2; document.getElementById('btn-sabotage-blackhole').disabled = (data.myTokens < 5); }
                 }
@@ -1196,7 +1264,7 @@
                     document.getElementById('btn-sabotage-fog').disabled = (data.myTokens < 2 || data.isFogActive);
 
                     var btnStealToken = document.getElementById('btn-sabotage-steal-token');
-                    if (btnStealToken) btnStealToken.disabled = (data.myTokens < 3);
+                    if (btnStealToken) btnStealToken.disabled = (data.myTokens < 4);
 
                     var btnStealTurn = document.getElementById('btn-sabotage-steal-turn');
                     if (btnStealTurn) btnStealTurn.disabled = (data.myTokens < 4);
@@ -1207,10 +1275,20 @@
                     if (data.panicActive && isMyTurn) {
                         panicOverlay.style.display = 'flex';
                         document.getElementById('panic-timer').innerText = data.panicTimer;
-                        if (data.panicTimer <= 3) document.getElementById('panic-timer').style.color = '#ff0000';
-                        else document.getElementById('panic-timer').style.color = 'white';
+                        if (data.panicTimer > 5) {
+                            panicOverlay.style.background = 'rgba(255,0,0,0.85)';
+                            panicOverlay.style.pointerEvents = 'auto';
+                            document.getElementById('panic-timer').style.color = 'white';
+                        } else {
+                            panicOverlay.style.background = 'transparent';
+                            panicOverlay.style.pointerEvents = 'none';
+                            if (data.panicTimer <= 3) document.getElementById('panic-timer').style.color = '#ff0000';
+                            else document.getElementById('panic-timer').style.color = 'white';
+                        }
                     } else {
                         panicOverlay.style.display = 'none';
+                        panicOverlay.style.background = 'rgba(255,0,0,0.85)';
+                        panicOverlay.style.pointerEvents = 'auto';
                         document.getElementById('panic-timer').style.color = 'white';
                     }
 

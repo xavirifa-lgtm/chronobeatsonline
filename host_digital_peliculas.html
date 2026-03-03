@@ -506,13 +506,15 @@
                         var existing = players.find(function (p) { return p.name === data.name; });
                         if (existing) {
                             console.log("Reconexión de jugador:", data.name);
+                            delete connections[existing.id];
                             existing.id = conn.peer;
                             existing.avatar = data.avatar || existing.avatar; // Actualizar avatar
+                            connections[conn.peer] = conn;
                             syncState(); // Force state sync to reconnecting player
                         } else {
                             players.push({ id: conn.peer, name: data.name, avatar: data.avatar || null, score: 1, cards: [], tokens: 5, canReload: true });
+                            connections[conn.peer] = conn;
                         }
-                        connections[conn.peer] = conn;
                         updateLobby();
                     } else if (data.type === 'AVATAR_UPDATE') {
                         var existing = players.find(function (p) { return p.name === data.name; });
@@ -586,12 +588,16 @@
                     joputismoAudioTimeout = null;
                 }
 
-                if (joputismoLevel === 1) {
-                    // Trololo meme
-                    themeContainer.innerHTML = '<iframe width="1" height="1" src="https://www.youtube-nocookie.com/embed/oavMtUWDBTM?autoplay=1&start=16" allow="autoplay" style="display:none;"></iframe>';
-                } else if (joputismoLevel === 2) {
-                    // Superman theme - desde el principio
-                    themeContainer.innerHTML = '<iframe width="1" height="1" src="https://www.youtube-nocookie.com/embed/e9vrfEoc8_g?autoplay=1" allow="autoplay" style="display:none;"></iframe>';
+                if (document.getElementById('lobby').style.display !== 'none') {
+                    if (joputismoLevel === 1) {
+                        // Trololo meme
+                        themeContainer.innerHTML = '<iframe width="1" height="1" src="https://www.youtube-nocookie.com/embed/oavMtUWDBTM?autoplay=1&start=16" allow="autoplay" style="display:none;"></iframe>';
+                    } else if (joputismoLevel === 2) {
+                        // Superman theme - desde el principio
+                        themeContainer.innerHTML = '<iframe width="1" height="1" src="https://www.youtube-nocookie.com/embed/e9vrfEoc8_g?autoplay=1" allow="autoplay" style="display:none;"></iframe>';
+                    } else {
+                        themeContainer.innerHTML = '';
+                    }
                 } else {
                     themeContainer.innerHTML = '';
                 }
@@ -925,7 +931,7 @@
                         p.tokens -= 2;
                         isFogActive = true;
 
-                        document.getElementById('host-instructions').innerHTML = "<span style='color:#aaaaaa; font-size:1.5em; font-family:Bungee;'>¡" + p.name + " HA LANZADO NIEBLA TEMPORAL!</span>";
+                        document.getElementById('host-instructions').innerHTML = "<span style='color:#aaaaaa; font-size:1.5em; font-family:Bungee;'>¡JAJAJA! ¡" + p.name + " HA LANZADO NIEBLA TEMPORAL!</span>";
                         setTimeout(function () {
                             if (!isRevealed && !panicActive) document.getElementById('host-instructions').innerText = (isMuted ? "REPRODUCIENDO (MUTE)" : "REPRODUCIENDO");
                         }, 3000);
@@ -1023,10 +1029,10 @@
                     break;
                 case 'SABOTAGE_STEAL_TOKEN':
                     var p = players.find(function (pl) { return pl.id === peerId; });
-                    if (p && p.tokens >= 3) {
+                    if (p && p.tokens >= 4) {
                         var possibleTargets = players.filter(function (pt) { return pt.id !== peerId && pt.tokens > 0; });
                         if (possibleTargets.length > 0) {
-                            p.tokens -= 3; // Pay the cost
+                            p.tokens -= 4; // Pay the cost
                             var target = possibleTargets[Math.floor(Math.random() * possibleTargets.length)];
                             target.tokens -= 1;
                             p.tokens += 1;
@@ -1036,7 +1042,7 @@
                             if (tConn) {
                                 tConn.send({
                                     type: 'BET_RESULT',
-                                    message: "¡" + p.name + " TE HA ROBADO 1 FICHA! 🥷"
+                                    msg: "¡" + p.name + " TE HA ROBADO 1 FICHA! 🥷"
                                 });
                             }
 
@@ -1116,6 +1122,27 @@
                             }
                         }, 5000);
                     }
+                    break;
+                case 'REMOTE_START_GAME':
+                    startGame();
+                    break;
+                case 'REMOTE_REVEAL':
+                    revealData();
+                    break;
+                case 'REMOTE_CORRECT':
+                    validateResult(true, false);
+                    break;
+                case 'REMOTE_CORRECT_TOKEN':
+                    validateResult(true, true);
+                    break;
+                case 'REMOTE_INCORRECT':
+                    validateResult(false, false);
+                    break;
+                case 'REMOTE_INCORRECT_TOKEN':
+                    validateResult(false, true);
+                    break;
+                case 'REMOTE_SYSTEM_ERROR':
+                    reportSystemError();
                     break;
             }
             // Eliminamos el syncState duplicado que podría causar problemas de carrera
@@ -1423,11 +1450,18 @@
                 leaderScore = leader.score;
             }
 
+            var currentJudgeId = 'ALL';
+            if (document.getElementById('lobby').style.display === 'none' && players.length > 0) {
+                var judgeIdx = (activePlayerIdx + 1) % players.length;
+                currentJudgeId = players[judgeIdx].id;
+            }
+
             for (var id in connections) {
                 var p = players.find(p => p.id === id);
                 var state = {
                     type: 'STATE_UPDATE',
-                    activePlayer: { id: players[activePlayerIdx].id, name: players[activePlayerIdx].name },
+                    activePlayer: { id: players[activePlayerIdx] ? players[activePlayerIdx].id : null, name: players[activePlayerIdx] ? players[activePlayerIdx].name : null },
+                    judgeId: currentJudgeId,
                     leader: { name: leaderName, score: leaderScore },
                     currentTrack: songs[currentSongIdx],
                     revealed: isRevealed,
@@ -1443,7 +1477,7 @@
                     myCards: p ? p.cards : [],
                     myTokens: p ? p.tokens : 0,
                     canReload: p ? p.canReload : false,
-                    activeTimeline: players[activePlayerIdx].cards,
+                    activeTimeline: players[activePlayerIdx] ? players[activePlayerIdx].cards : [],
                     currentBets: currentBets,
                     activeGuess: activeGuess,
                     kingOptions: kingOptions,
@@ -1471,13 +1505,13 @@
             // Mostrar cartas del jugador actual en el centro
             var currentCardsHtml = "";
             players[activePlayerIdx].cards.forEach(function (year) {
-                currentCardsHtml += '<div class="mini-card">' + year + '</div>';
+                currentCardsHtml += '<div class="mini-card">' + (isFogActive ? '????' : year) + '</div>';
             });
             document.getElementById('active-player-inventory').innerHTML = currentCardsHtml;
 
             var timelinesHtml = ""; players.forEach(function (p) {
                 timelinesHtml += '<div class="player-row"><div style="font-size:0.6em;color:#888;">' + p.name + '</div><div class="slots">';
-                for (var k = 0; k < 10; k++) timelinesHtml += '<div class="slot ' + (p.cards[k] ? 'filled' : '') + '">' + (p.cards[k] || '') + '</div>';
+                for (var k = 0; k < 10; k++) timelinesHtml += '<div class="slot ' + (p.cards[k] ? 'filled' : '') + '">' + (p.cards[k] ? (isFogActive ? '????' : p.cards[k]) : '') + '</div>';
                 timelinesHtml += '</div></div>';
             });
             document.getElementById('global-timelines').innerHTML = timelinesHtml;
