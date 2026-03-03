@@ -1117,23 +1117,36 @@
                     sabotageCtrl.style.display = (!isMyTurn && data.isPlaying && (!data.turnPhase || data.turnPhase === 'NORMAL') && !data.revealed) ? 'block' : 'none';
 
                     let jLevel = data.joputismoLevel || 0;
-                    document.getElementById('btn-sabotage-mute').style.display = 'flex';
-                    document.getElementById('btn-sabotage-bet').style.display = 'flex';
+
+                    var btnMute = document.getElementById('btn-sabotage-mute');
+                    if (btnMute) { btnMute.style.display = 'flex'; btnMute.disabled = (data.myTokens < 1); }
+
+                    var btnBet = document.getElementById('btn-sabotage-bet');
+                    if (btnBet) btnBet.style.display = 'flex';
 
                     let disp1 = jLevel >= 1 ? 'flex' : 'none';
-                    if (document.getElementById('btn-sabotage-buzzer')) document.getElementById('btn-sabotage-buzzer').style.display = disp1;
-                    if (document.getElementById('btn-sabotage-veto')) document.getElementById('btn-sabotage-veto').style.display = disp1;
-                    if (document.getElementById('btn-sabotage-panic')) document.getElementById('btn-sabotage-panic').style.display = disp1;
-                    if (document.getElementById('btn-sabotage-fog')) document.getElementById('btn-sabotage-fog').style.display = disp1;
+                    if (document.getElementById('btn-sabotage-buzzer')) { document.getElementById('btn-sabotage-buzzer').style.display = disp1; document.getElementById('btn-sabotage-buzzer').disabled = (data.myTokens < 1); }
+                    if (document.getElementById('btn-sabotage-veto')) { document.getElementById('btn-sabotage-veto').style.display = disp1; document.getElementById('btn-sabotage-veto').disabled = (data.myTokens < 1); }
+                    if (document.getElementById('btn-sabotage-panic')) { document.getElementById('btn-sabotage-panic').style.display = disp1; document.getElementById('btn-sabotage-panic').disabled = (data.myTokens < 2); }
+                    if (document.getElementById('btn-sabotage-fog')) { document.getElementById('btn-sabotage-fog').style.display = disp1; document.getElementById('btn-sabotage-fog').disabled = (data.myTokens < 2); }
 
                     let disp2 = jLevel >= 2 ? 'flex' : 'none';
-                    if (document.getElementById('btn-sabotage-steal-token')) document.getElementById('btn-sabotage-steal-token').style.display = disp2;
-                    if (document.getElementById('btn-sabotage-steal-turn')) document.getElementById('btn-sabotage-steal-turn').style.display = disp2;
-                    if (document.getElementById('btn-sabotage-blackhole')) document.getElementById('btn-sabotage-blackhole').style.display = disp2;
+                    if (document.getElementById('btn-sabotage-steal-token')) { document.getElementById('btn-sabotage-steal-token').style.display = disp2; document.getElementById('btn-sabotage-steal-token').disabled = (data.myTokens < 3); }
+                    if (document.getElementById('btn-sabotage-steal-turn')) { document.getElementById('btn-sabotage-steal-turn').style.display = disp2; document.getElementById('btn-sabotage-steal-turn').disabled = (data.myTokens < 4); }
+                    if (document.getElementById('btn-sabotage-blackhole')) { document.getElementById('btn-sabotage-blackhole').style.display = disp2; document.getElementById('btn-sabotage-blackhole').disabled = (data.myTokens < 5); }
                 }
 
-                // Mensaje de espera (solo si NO es mi turno en modo normal)
-                document.getElementById('wait-msg').style.display = (!isMyTurn && !isKingMode) ? 'block' : 'none';
+                var wm = document.getElementById('wait-msg');
+                if (!isMyTurn && !isKingMode) {
+                    wm.style.display = 'block';
+                    if (data.turnPhase === 'SCAVENGER') {
+                        wm.innerHTML = "<span style='color:var(--gold); font-size: 1.2em;'>¡CARROÑA DISPONIBLE! (5s)<br>Haz clic en un hueco de la cronología para robar la carta.</span>";
+                    } else {
+                        wm.innerText = "ESPERANDO SIGUIENTE TRACK...";
+                    }
+                } else {
+                    wm.style.display = 'none';
+                }
 
                 if (data.revealed && !isKingMode) {
                     document.getElementById('card').classList.add('flipped');
@@ -1194,9 +1207,6 @@
 
                     var btnStealTurn = document.getElementById('btn-sabotage-steal-turn');
                     if (btnStealTurn) btnStealTurn.disabled = (data.myTokens < 4);
-
-                    var btnBlackhole = document.getElementById('btn-sabotage-blackhole');
-                    if (btnBlackhole) btnBlackhole.disabled = (data.myTokens < 5);
 
                     // Panic Overlay Check
                     var isMyTurn = (data.activePlayer && data.activePlayer.id === myId);
@@ -1360,6 +1370,26 @@
                 });
             }
         }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var msgs = {
+                'btn-sabotage-buzzer': '¡Zumbido enviado al DJ!',
+                'btn-sabotage-veto': '¡Has vetado su recarga!',
+                'btn-sabotage-panic': '¡Ataque de Pánico enviado!',
+                'btn-sabotage-fog': '¡Niebla Temporal enviada!',
+                'btn-sabotage-steal-token': '¡Has robado una ficha (al azar)!',
+                'btn-sabotage-steal-turn': '¡Has robado el turno!',
+                'btn-sabotage-blackhole': '¡Agujero Negro lanzado!'
+            };
+            for (var id in msgs) {
+                var b = document.getElementById(id);
+                if (b) {
+                    b.addEventListener('click', (function (msg) {
+                        return function () { showCustomAlert(msg); }
+                    })(msgs[id]));
+                }
+            }
+        });
     </script>
     <script>
         if ('serviceWorker' in navigator) {

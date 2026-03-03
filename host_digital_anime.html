@@ -374,7 +374,7 @@
             <select id="joputismo-select-lobby" onchange="setJoputismo(this.value)"
                 style="padding: 10px; font-family: 'Montserrat'; font-size: 1em; border-radius: 8px; background: #222; color: #fff; border: 1px solid #ff0055;">
                 <option value="0">LOSER (Modo Pacífico)</option>
-                <option value="1">HE-MAN (Nivel Estratégico)</option>
+                <option value="1">TROLL (Nivel Cabrón)</option>
                 <option value="2">SUPERMAN (Guerra Total)</option>
             </select>
         </div>
@@ -401,7 +401,7 @@
                 <select id="joputismo-select-game" onchange="setJoputismo(this.value)"
                     style="width: 100%; padding: 5px; font-family: 'Montserrat'; font-size: 0.8em; border-radius: 5px; background: #111; color: #ff0055; border: 1px solid #ff0055;">
                     <option value="0">LOSER</option>
-                    <option value="1">HE-MAN</option>
+                    <option value="1">TROLL</option>
                     <option value="2">SUPERMAN</option>
                 </select>
             </div>
@@ -583,27 +583,22 @@
                 }
 
                 if (joputismoLevel === 1) {
-                    // He-Man Hey-ea-ea meme
-                    themeContainer.innerHTML = '<iframe width="1" height="1" src="https://www.youtube-nocookie.com/embed/ZZ5LpwO-An4?autoplay=1" allow="autoplay" style="display:none;"></iframe>';
+                    // Trololo meme
+                    themeContainer.innerHTML = '<iframe width="1" height="1" src="https://www.youtube-nocookie.com/embed/oavMtUWDBTM?autoplay=1&start=16" allow="autoplay" style="display:none;"></iframe>';
                 } else if (joputismoLevel === 2) {
-                    // Superman theme
+                    // Superman theme - desde el principio
                     themeContainer.innerHTML = '<iframe width="1" height="1" src="https://www.youtube-nocookie.com/embed/e9vrfEoc8_g?autoplay=1" allow="autoplay" style="display:none;"></iframe>';
                 } else {
                     themeContainer.innerHTML = '';
-                }
-
-                // Stop after 10 seconds
-                if (joputismoLevel > 0) {
-                    joputismoAudioTimeout = setTimeout(function () {
-                        var tc = document.getElementById('joputismo-audio-player');
-                        if (tc) tc.innerHTML = '';
-                    }, 10000);
                 }
             }
             syncState();
         }
 
         function startGame() {
+            var tc = document.getElementById('joputismo-audio-player');
+            if (tc) tc.innerHTML = '';
+
             gameMode = document.getElementById('game-mode-select').value;
 
             // MECÁNICA INICIAL: Repartir una carta a cada jugador
