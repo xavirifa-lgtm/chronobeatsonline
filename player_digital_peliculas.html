@@ -565,10 +565,64 @@
 </head>
 
 <body>
+    <!-- FAB REGLAMENTO -->
+    <div id="fab-rules" onclick="toggleRules()"
+        style="display:flex; position:fixed; top:20px; left:20px; width:50px; height:50px; background:#111; border:2px solid var(--neon); border-radius:50%; z-index:9000; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 0 10px rgba(0,242,255,0.5); font-size:1.5em; transition:0.3s; color:var(--neon); font-family:'Bungee';">
+        ?
+    </div>
+
     <!-- MANDO DEL HOST (REMOTE) -->
     <div id="fab-remote" onclick="toggleRemote()"
         style="display:none; position:fixed; top:20px; right:20px; width:50px; height:50px; background:#111; border:2px solid #555; border-radius:50%; z-index:9000; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 0 10px rgba(0,0,0,0.5); font-size:1.5em; filter:grayscale(100%); transition:0.3s; opacity:0.5; pointer-events:none;">
         📺
+    </div>
+
+    <div id="rules-overlay"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:9500; align-items:center; justify-content:flex-start; flex-direction:column; padding:20px; text-align:left; overflow-y:auto;">
+        <h2
+            style="font-family:'Bungee'; color:var(--neon); margin-bottom:10px; font-size:2em; text-align:center; width:100%; margin-top:20px;">
+            📖 REGLAS</h2>
+        <div
+            style="color:#ddd; font-family:'Montserrat'; font-size:0.9em; max-width:400px; width:100%; line-height:1.5;">
+            <p><strong style="color:var(--neon);">OBJETIVO:</strong> Coloca las canciones en el orden correcto en tu
+                cronología. Quien llegue a 10 gana.</p>
+            <p><strong style="color:var(--neon);">TURNO NORMAL:</strong> Escucha la canción, márcate un tanto
+                colocándola en tu cronología.</p>
+            <p><strong style="color:var(--gold);">FICHAS AZULES (🔵):</strong> Sirven para sabotear. Se ganan si el Host
+                te da la razón, o si aciertas en un Duelo.</p>
+            <p><strong style="color:var(--accent);">DUELOS (¡NI DE COÑA!):</strong> Cuesta 1🔵. ¿Crees que el jugador
+                activo la ha cagado y sabes el hueco real? Rétale. Si él falla y tú acertaste el hueco real, tú te
+                llevas la carta. Si él acierta, palmas 1🔵 extra por listo.</p>
+
+            <h3
+                style="color:var(--neon); font-family:'Bungee'; margin-top:20px; border-bottom:1px solid #333; padding-bottom:5px;">
+                JOPUTISMO 1 (HE-MAN)</h3>
+            <ul style="padding-left:15px; margin-top:10px;">
+                <li style="margin-bottom:8px;"><strong style="color:#00ff00;">¡ZUMBIDO! (1🔵):</strong> Despista con un
+                    ruido molesto.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#ff8800;">VETO CAMBIAR (1🔵):</strong> Le quita al
+                    activo la recarga (no puede cambiar de canción esa ronda).</li>
+                <li style="margin-bottom:8px;"><strong style="color:#ff0000;">PÁNICO 10s (2🔵):</strong> ¡Rápido! El
+                    activo solo tiene 10 segundos para poner su carta.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#aaaaaa;">NIEBLA TIEMPO (2🔵):</strong> Borra los
+                    años de su pantalla en ese turno.</li>
+            </ul>
+
+            <h3
+                style="color:var(--neon); font-family:'Bungee'; margin-top:20px; border-bottom:1px solid #333; padding-bottom:5px;">
+                JOPUTISMO 2 (SUPERMAN)</h3>
+            <ul style="padding-left:15px; margin-top:10px;">
+                <li style="margin-bottom:8px;"><strong style="color:#ffff00;">ROBAR FICHA (4🔵):</strong> Le quitas 1
+                    ficha a un pringado al azar.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#ff00ff;">ROBAR TURNO (4🔵):</strong> Interrumpe al
+                    activo de inmediato y te quedas con su turno actual.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#00f2fe; text-shadow:0 0 5px white;">AGUJERO NEGRO
+                        (5🔵):</strong> Borra la última carta de su cronología. Adiós punto.</li>
+            </ul>
+        </div>
+        <button class="btn" onclick="toggleRules()"
+            style="margin-top:30px; margin-bottom: 40px; background:#333; color:white; border-color:#555; width:100%; max-width:300px; padding:15px;">CERRAR
+            REGLAMENTO</button>
     </div>
 
     <div id="remote-overlay"
@@ -587,6 +641,10 @@
     </div>
 
     <script>
+        function toggleRules() {
+            var el = document.getElementById('rules-overlay');
+            el.style.display = (el.style.display === 'none' || el.style.display === '') ? 'flex' : 'none';
+        }
         function toggleRemote() {
             var el = document.getElementById('remote-overlay');
             el.style.display = (el.style.display === 'none' || el.style.display === '') ? 'flex' : 'none';
@@ -1067,7 +1125,7 @@
                         jstr += "</div>";
 
                         rContainer.innerHTML = jstr + `<button class="btn" style="background:#ff00ff; color:white; border-color:#ff00ff; padding:20px; font-size:1.2em;" onclick="send('REMOTE_START_GAME'); toggleRemote();">▶ INICIAR PARTIDA</button>`;
-                    } else if (data.turnPhase && data.turnPhase !== 'NORMAL' && data.turnPhase !== 'SCAVENGER') {
+                    } else if (data.turnPhase && data.turnPhase !== 'NORMAL') {
                         rContainer.innerHTML = `<p style="color:#888;">Controles no disponibles durante evento especial.</p>`;
                     } else {
                         if (!data.revealed) {
@@ -1105,7 +1163,7 @@
                 var isMyTurn = (data.activePlayer.id === myId);
                 console.log("¿Es mi turno?", isMyTurn, "Mi ID:", myId, "ID Activo:", data.activePlayer.id);
 
-                var isKingMode = (data.turnPhase && data.turnPhase !== 'NORMAL' && data.turnPhase !== 'SCAVENGER');
+                var isKingMode = (data.turnPhase && data.turnPhase !== 'NORMAL');
                 var normalCardContainer = document.getElementById('normal-card-container');
                 var normalCollection = document.getElementById('normal-collection');
                 var kingModeUi = document.getElementById('king-mode-ui');
@@ -1203,11 +1261,7 @@
                 var wm = document.getElementById('wait-msg');
                 if (!isMyTurn && !isKingMode) {
                     wm.style.display = 'block';
-                    if (data.turnPhase === 'SCAVENGER') {
-                        wm.innerHTML = "<span style='color:var(--gold); font-size: 1.2em;'>¡CARROÑA DISPONIBLE! (5s)<br>Haz clic en un hueco de la cronología para robar la carta.</span>";
-                    } else {
-                        wm.innerText = "ESPERANDO SIGUIENTE TRACK...";
-                    }
+                    wm.innerText = "ESPERANDO SIGUIENTE TRACK...";
                 } else {
                     wm.style.display = 'none';
                 }
@@ -1361,12 +1415,6 @@
                     if (confirmed) send('GUESS', idx);
                 });
             } else {
-                if (lastState && lastState.turnPhase === 'SCAVENGER') {
-                    showCustomConfirm("¿Intentar robar esta carta como CARROÑA (Coste: 2 Fichas)?", function (confirmed) {
-                        if (confirmed) send('SABOTAGE_SCAVENGER', idx);
-                    });
-                    return;
-                }
                 // REGLA: Solo se puede apostar si el jugador activo YA ha puesto su carta
                 if (lastState && lastState.activeGuess === null) {
                     showCustomAlert("Espera a que el jugador activo coloque primero su apuesta.");

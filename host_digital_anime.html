@@ -476,8 +476,6 @@
         var panicInterval = null;
         var joputismoLevel = 0; // 0: LOSER, 1: HE-MAN, 2: SUPERMAN
         var isFogActive = false;
-        var scavengerTimer = 0;
-        var scavengerInterval = null;
 
         document.getElementById('join-code').innerText = roomCode;
 
@@ -637,8 +635,6 @@
             if (panicInterval) { clearInterval(panicInterval); panicInterval = null; }
 
             isFogActive = false;
-            scavengerTimer = 0;
-            if (scavengerInterval) { clearInterval(scavengerInterval); scavengerInterval = null; }
 
             // --- INICIO MODO REY CHECK ---
             if (gameMode === 'rey' && players[activePlayerIdx] && players[activePlayerIdx].score >= 10) {
@@ -948,41 +944,6 @@
                         }, 3000);
 
                         syncState();
-                    }
-                    break;
-                case 'SABOTAGE_SCAVENGER':
-                    if (turnPhase === 'SCAVENGER') {
-                        var p = players.find(function (pl) { return pl.id === peerId; });
-                        var valNum = parseInt(value);
-                        if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 2) {
-                            var isOk = isSlotCorrect(valNum, songs[currentSongIdx].year, players[activePlayerIdx].cards);
-                            p.tokens -= 2;
-                            if (isOk) {
-                                if (scavengerInterval) clearInterval(scavengerInterval);
-                                scavengerInterval = null;
-                                turnPhase = 'NORMAL';
-                                document.getElementById('host-instructions').innerHTML = "<span style='color:#00ff00; font-size:1.5em; font-family:Bungee;'>¡" + p.name + " SE LLEVÓ LA CARROÑA!</span>";
-                                document.getElementById('challenger-buttons').innerHTML = "";
-                                p.score++;
-                                p.cards.push(songs[currentSongIdx].year);
-                                p.cards.sort();
-                                syncState();
-                                setTimeout(function () {
-                                    if (p.score >= 10 && gameMode === 'normal') {
-                                        showWinner(p.name);
-                                        return;
-                                    }
-                                    activePlayerIdx = (activePlayerIdx + 1) % players.length;
-                                    players[activePlayerIdx].canReload = true;
-                                    nextTurn();
-                                }, 3000);
-                            } else {
-                                if (connections[p.id]) {
-                                    connections[p.id].send({ type: 'BET_RESULT', msg: "¡FALLO EN CARROÑA! Pierdes 2 fichas." });
-                                }
-                                syncState();
-                            }
-                        }
                     }
                     break;
                 case 'SABOTAGE_STEAL_TURN':
@@ -1329,33 +1290,9 @@
                     }
                     document.getElementById('challenger-buttons').innerHTML = h;
                 } else {
-                    var canScavenge = (joputismoLevel >= 1) && players.some(function (pl) { return pl.id !== players[activePlayerIdx].id && pl.tokens >= 2; });
-                    if (canScavenge) {
-                        turnPhase = 'SCAVENGER';
-                        scavengerTimer = 5;
-                        document.getElementById('host-instructions').innerText = "¡CARROÑA DISPONIBLE! (5s)";
-                        document.getElementById('validation-buttons').style.display = 'none';
-                        document.getElementById('challenger-validation').style.display = 'block';
-                        document.getElementById('challenger-buttons').innerHTML = "<div style='color:#fff;font-size:1.5em;'>RIVALES: ¡A CARROÑEAR!</div>";
-                        syncState();
-
-                        scavengerInterval = setInterval(function () {
-                            scavengerTimer--;
-                            document.getElementById('host-instructions').innerText = "¡CARROÑA DISPONIBLE! (" + scavengerTimer + "s)";
-                            if (scavengerTimer <= 0) {
-                                clearInterval(scavengerInterval);
-                                scavengerInterval = null;
-                                turnPhase = 'NORMAL';
-                                activePlayerIdx = (activePlayerIdx + 1) % players.length;
-                                players[activePlayerIdx].canReload = true;
-                                nextTurn();
-                            }
-                        }, 1000);
-                    } else {
-                        activePlayerIdx = (activePlayerIdx + 1) % players.length;
-                        players[activePlayerIdx].canReload = true; // Resetear permiso de recarga
-                        nextTurn();
-                    }
+                    activePlayerIdx = (activePlayerIdx + 1) % players.length;
+                    players[activePlayerIdx].canReload = true; // Resetear permiso de recarga
+                    nextTurn();
                 }
             }
         }
@@ -1474,7 +1411,6 @@
                     panicTimer: panicTimer,
                     isFogActive: isFogActive,
                     joputismoLevel: joputismoLevel,
-                    scavengerTimer: scavengerTimer,
                     bettingAgainst: bettingAgainst,
                     myCards: p ? p.cards : [],
                     myTokens: p ? p.tokens : 0,
