@@ -497,7 +497,7 @@
                     console.log("Comando recibido en host:", data);
                     if (data.type === 'JOIN') {
                         // PROTECCIÓN DUPLICADOS: Buscar si el nombre ya existe
-                        var existing = players.find(function (p) { return p.name === data.name; });
+                        var existing = players.find(function (p) { return p.name.toLowerCase() === data.name.toLowerCase(); });
                         if (existing) {
                             console.log("Reconexión de jugador:", data.name);
                             delete connections[existing.id];
@@ -511,7 +511,7 @@
                         }
                         updateLobby();
                     } else if (data.type === 'AVATAR_UPDATE') {
-                        var existing = players.find(function (p) { return p.name === data.name; });
+                        var existing = players.find(function (p) { return p.name.toLowerCase() === data.name.toLowerCase(); });
                         if (existing) {
                             existing.avatar = data.avatar;
                             updateLobby();
@@ -536,7 +536,7 @@
         initPeer();
 
         fetch('lista_final_anime.txt?v=' + new Date().getTime()).then(function (r) { return r.text() }).then(function (t) {
-            var lines = t.split('\n');
+            var lines = t.replace(/\r/g, '').split('\n');
             songs = lines.map(function (l, index) {
                 var p = l.split('|');
                 var m = p[3] ? p[3].match(/[?&]v=([^&#]+)|youtu\.be\/([^?&#]+)/) : null;
@@ -932,6 +932,31 @@
                         syncState();
                     }
                     break;
+                case 'SABOTAGE_FORCE_SKIP':
+                    var p = players.find(function (pl) { return pl.id === peerId; });
+                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 1 && activeGuess === null && isPlaying && !isRevealed && (!turnPhase || turnPhase === 'NORMAL')) {
+                        p.tokens -= 1;
+                        isPlaying = false;
+                        container.innerHTML = '<div id="youtube-player"></div>';
+                        currentSongIdx++;
+                        segundosAcumulados = 0;
+                        momentoDeInicio = 0;
+                        isRevealed = false;
+                        document.getElementById('ui-card-artist').innerText = "????";
+                        document.getElementById('ui-card-song').innerText = "????";
+                        document.getElementById('ui-card-year').innerText = "????";
+                        document.getElementById('btn-reveal-host').style.display = 'block';
+                        document.getElementById('val-card-ui').style.display = 'block';
+                        document.getElementById('validation-buttons').style.display = 'none';
+
+                        document.getElementById('host-instructions').innerHTML = "<span style='color:#ff00ff; font-size:1.5em; font-family:Bungee;'>¡" + p.name + " HA OBLIGADO A CAMBIAR LA CANCIÓN!</span>";
+                        setTimeout(function () {
+                            if (!isRevealed && !panicActive) document.getElementById('host-instructions').innerText = "CANCIÓN CAMBIADA (DALE A PLAY)";
+                        }, 4000);
+
+                        syncState();
+                    }
+                    break;
                 case 'SABOTAGE_VETO':
                     var p = players.find(function (pl) { return pl.id === peerId; });
                     if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 1 && players[activePlayerIdx].canReload && (!turnPhase || turnPhase === 'NORMAL')) {
@@ -1040,8 +1065,8 @@
                         songs[currentSongIdx] = cartaElegida;
 
                         turnPhase = 'KING_GUESS';
-                        document.getElementById('ui-card-artist').innerText = cartaElegida.artist;
-                        document.getElementById('ui-card-song').innerText = cartaElegida.song;
+                        document.getElementById('ui-card-artist').innerText = "????";
+                        document.getElementById('ui-card-song').innerText = "????";
                         document.getElementById('ui-card-year').innerText = "????";
                         document.getElementById('host-instructions').innerHTML = "CARTA ELEGIDA.<br>ESPERANDO A QUE EL REY INTRODUZCA EL AÑO...";
                         document.getElementById('player-container').innerHTML = '<div id="youtube-player"></div>';
@@ -1057,28 +1082,25 @@
                         var s = songs[currentSongIdx];
                         var actualYear = parseInt(s.year);
 
+                        document.getElementById('ui-card-artist').innerText = s.artist;
+                        document.getElementById('ui-card-song').innerText = s.song;
                         document.getElementById('ui-card-year').innerText = actualYear;
 
                         var won = Math.abs(guessedYear - actualYear) <= 2;
 
+                        var resultHtml = "";
                         if (won) {
-                            document.getElementById('host-instructions').innerHTML = "<span style='color:#00ff00; font-size:1.5em;'>¡EL REY ACERTÓ!</span> El año era " + actualYear + ".";
+                            resultHtml = "<span style='color:#00ff00; font-size:1.5em;'>¡EL REY ACERTÓ!</span><br>Dijo " + guessedYear + ". (El año era " + actualYear + ").";
                         } else {
-                            document.getElementById('host-instructions').innerHTML = "<span style='color:#ff4444; font-size:1.5em;'>¡FALLÓ!</span> El año era " + actualYear + ".";
+                            resultHtml = "<span style='color:#ff4444; font-size:1.5em;'>¡FALLÓ!</span><br>Dijo " + guessedYear + ". (El año era " + actualYear + ").";
                         }
+                        resultHtml += "<br><br><button class='btn' style='background:var(--neon); color:#000; padding:15px; font-size:1.2em; pointer-events:auto; position:relative; z-index:9999;' onclick='resolveKingMode(" + won + ")'>ACEPTAR RESULTADO</button>";
+
+                        document.getElementById('host-instructions').innerHTML = resultHtml;
+                        document.getElementById('host-instructions').style.pointerEvents = 'auto'; // Permitir click en el div global si está bloqueado
 
                         turnPhase = 'KING_GUESS_RESULT';
                         syncState();
-
-                        setTimeout(function () {
-                            if (won && activePlayerIdx < players.length) {
-                                showWinner(players[activePlayerIdx].name);
-                            } else {
-                                activePlayerIdx = (activePlayerIdx + 1) % players.length;
-                                players[activePlayerIdx].canReload = true;
-                                nextTurn();
-                            }
-                        }, 5000);
                     }
                     break;
                 case 'REMOTE_START_GAME':
@@ -1117,6 +1139,17 @@
             if (slotIdx === timeline.length) return songYear >= timeline[timeline.length - 1];
             // En medio
             return (songYear >= timeline[slotIdx - 1] && songYear <= timeline[slotIdx]);
+        }
+
+        function resolveKingMode(won) {
+            document.getElementById('host-instructions').innerHTML = "CARGANDO SIGUIENTE FASE...";
+            if (won && activePlayerIdx < players.length) {
+                showWinner(players[activePlayerIdx].name);
+            } else {
+                activePlayerIdx = (activePlayerIdx + 1) % players.length;
+                players[activePlayerIdx].canReload = true;
+                nextTurn();
+            }
         }
 
         function reportSystemError() {
@@ -1422,7 +1455,13 @@
                     cheatsEnabled: cheatsEnabled,
                     turnPhase: turnPhase
                 };
-                connections[id].send(state);
+                try {
+                    if (connections[id] && connections[id].open) {
+                        connections[id].send(state);
+                    }
+                } catch (e) {
+                    console.warn("No se pudo enviar estado a", id, e);
+                }
             }
             updateUI();
         }

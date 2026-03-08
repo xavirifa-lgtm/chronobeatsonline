@@ -567,7 +567,7 @@
 <body>
     <!-- FAB REGLAMENTO -->
     <div id="fab-rules" onclick="toggleRules()"
-        style="display:flex; position:fixed; top:20px; left:20px; width:50px; height:50px; background:#111; border:2px solid var(--neon); border-radius:50%; z-index:9000; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 0 10px rgba(0,242,255,0.5); font-size:1.5em; transition:0.3s; color:var(--neon); font-family:'Bungee';">
+        style="display:flex; position:fixed; bottom:20px; right:20px; width:50px; height:50px; background:#111; border:2px solid var(--neon); border-radius:50%; z-index:9000; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 0 10px rgba(0,242,255,0.5); font-size:1.5em; transition:0.3s; color:var(--neon); font-family:'Bungee';">
         ?
     </div>
 
@@ -596,12 +596,16 @@
 
             <h3
                 style="color:var(--neon); font-family:'Bungee'; margin-top:20px; border-bottom:1px solid #333; padding-bottom:5px;">
-                JOPUTISMO 1 (HE-MAN)</h3>
+                JOPUTISMO 1 (TROLL)</h3>
             <ul style="padding-left:15px; margin-top:10px;">
+                <li style="margin-bottom:8px;"><strong style="color:#00bdff;">MUTEAR (1🔵):</strong> Quita el sonido de
+                    su canción durante 5 segundos.</li>
                 <li style="margin-bottom:8px;"><strong style="color:#00ff00;">¡ZUMBIDO! (1🔵):</strong> Despista con un
                     ruido molesto.</li>
                 <li style="margin-bottom:8px;"><strong style="color:#ff8800;">VETO CAMBIAR (1🔵):</strong> Le quita al
                     activo la recarga (no puede cambiar de canción esa ronda).</li>
+                <li style="margin-bottom:8px;"><strong style="color:#ff00ff;">FORZAR SALTO (1🔵):</strong> Obliga al
+                    activo a pasar de canción automáticamente.</li>
                 <li style="margin-bottom:8px;"><strong style="color:#ff0000;">PÁNICO 10s (2🔵):</strong> ¡Rápido! El
                     activo solo tiene 10 segundos para poner su carta.</li>
                 <li style="margin-bottom:8px;"><strong style="color:#aaaaaa;">NIEBLA TIEMPO (2🔵):</strong> Borra los
@@ -759,6 +763,10 @@
                 <button class="spec-btn" id="btn-sabotage-veto"
                     style="background:var(--bg); border-color:#ff8800; color:#ff8800;"
                     onclick="send('SABOTAGE_VETO')">VETO CAMBIAR (1 <span class="neon-chip"
+                        style="width:10px;height:10px;"></span>)</button>
+                <button class="spec-btn" id="btn-sabotage-skip"
+                    style="background:var(--bg); border-color:#ff00ff; color:#ff00ff;"
+                    onclick="send('SABOTAGE_FORCE_SKIP')">FORZAR SALTO (1 <span class="neon-chip"
                         style="width:10px;height:10px;"></span>)</button>
                 <button class="spec-btn" id="btn-sabotage-panic"
                     style="background:var(--bg); border-color:#ff0000; color:#ff0000;"
@@ -1120,7 +1128,7 @@
                         jstr += "<h4 style='color:var(--neon); font-family:Bungee; font-size:1em; margin-bottom:5px; margin-top:0'>NIVEL JOPUTISMO:</h4>";
                         jstr += "<div style='display:flex; gap:5px; margin-bottom: 20px; justify-content:center;'>";
                         jstr += "<button class='btn' style='padding:10px; font-size:0.8em; flex:1; " + (currJop === 0 ? "background:var(--neon);color:#000;" : "background:#222;color:#888") + "' onclick=\"send('REMOTE_JOPUTISMO', 0)\">LOSER</button>";
-                        jstr += "<button class='btn' style='padding:10px; font-size:0.8em; flex:1; " + (currJop === 1 ? "background:var(--neon);color:#000;" : "background:#222;color:#888") + "' onclick=\"send('REMOTE_JOPUTISMO', 1)\">HE-MAN</button>";
+                        jstr += "<button class='btn' style='padding:10px; font-size:0.8em; flex:1; " + (currJop === 1 ? "background:var(--neon);color:#000;" : "background:#222;color:#888") + "' onclick=\"send('REMOTE_JOPUTISMO', 1)\">TROLL</button>";
                         jstr += "<button class='btn' style='padding:10px; font-size:0.8em; flex:1; " + (currJop === 2 ? "background:var(--neon);color:#000;" : "background:#222;color:#888") + "' onclick=\"send('REMOTE_JOPUTISMO', 2)\">SUPERMAN</button>";
                         jstr += "</div>";
 
@@ -1194,7 +1202,7 @@
                     } else if (data.turnPhase === 'KING_GUESS') {
                         if (isMyTurn) {
                             var html = "<h3 style='color:var(--gold);font-family:Bungee;'>¡ADIVINA EL AÑO!</h3>";
-                            html += "<p style='font-size:0.8em; color:var(--neon); margin-bottom:15px;'>(Escucha la canción. Márgen de error: +/- 2 años)</p>";
+                            html += "<p style='font-size:0.8em; color:var(--neon); margin-bottom:15px;'>(Escucha la canción. Margen de error: +/- 2 años)</p>";
                             html += "<input type='number' id='king-guess-input' placeholder='AÑO' style='font-size:1.5em; text-align:center;'>";
                             html += "<button class='btn' style='margin-top:10px;' onclick=\"var y = document.getElementById('king-guess-input').value; if(y) send('KING_GUESS', y);\">CONFIRMAR AÑO</button>";
                             kingModeUi.innerHTML = html;
@@ -1311,20 +1319,25 @@
                     var chipsHtml = "";
                     for (var i = 0; i < data.myTokens; i++) chipsHtml += '<span class="neon-chip"></span>';
                     document.getElementById('my-tokens-ui').innerHTML = "MIS FICHAS: " + chipsHtml;
-                    // Deshabilitar botones si no tiene fichas suficientes o si ya recargó
-                    document.getElementById('btn-autowin').disabled = (data.myTokens < 3);
-                    document.getElementById('btn-reload').disabled = (data.myTokens < 1 || data.canReload === false);
-                    document.getElementById('btn-sabotage-mute').disabled = (data.myTokens < 1);
-                    document.getElementById('btn-sabotage-buzzer').disabled = (data.myTokens < 1);
-                    document.getElementById('btn-sabotage-veto').disabled = (data.myTokens < 1);
-                    document.getElementById('btn-sabotage-panic').disabled = (data.myTokens < 2 || data.panicActive);
-                    document.getElementById('btn-sabotage-fog').disabled = (data.myTokens < 2 || data.isFogActive);
+                    var isActionLocked = (data.activeGuess !== null);
+
+                    document.getElementById('btn-autowin').disabled = (data.myTokens < 3 || isActionLocked);
+                    document.getElementById('btn-reload').disabled = (data.myTokens < 1 || data.canReload === false || isActionLocked);
+                    document.getElementById('btn-sabotage-mute').disabled = (data.myTokens < 1 || isActionLocked);
+                    document.getElementById('btn-sabotage-buzzer').disabled = (data.myTokens < 1 || isActionLocked);
+                    document.getElementById('btn-sabotage-veto').disabled = (data.myTokens < 1 || isActionLocked);
+
+                    var btnSkip = document.getElementById('btn-sabotage-skip');
+                    if (btnSkip) btnSkip.disabled = (data.myTokens < 1 || isActionLocked);
+
+                    document.getElementById('btn-sabotage-panic').disabled = (data.myTokens < 2 || data.panicActive || isActionLocked);
+                    document.getElementById('btn-sabotage-fog').disabled = (data.myTokens < 2 || data.isFogActive || isActionLocked);
 
                     var btnStealToken = document.getElementById('btn-sabotage-steal-token');
-                    if (btnStealToken) btnStealToken.disabled = (data.myTokens < 4);
+                    if (btnStealToken) btnStealToken.disabled = (data.myTokens < 4 || isActionLocked);
 
                     var btnStealTurn = document.getElementById('btn-sabotage-steal-turn');
-                    if (btnStealTurn) btnStealTurn.disabled = (data.myTokens < 4);
+                    if (btnStealTurn) btnStealTurn.disabled = (data.myTokens < 4 || isActionLocked);
 
                     // Panic Overlay Check
                     var isMyTurn = (data.activePlayer && data.activePlayer.id === myId);
@@ -1353,9 +1366,9 @@
                     if (btnSabotageBet) {
                         var alreadyBet = data.bettingAgainst && data.bettingAgainst.includes(myId);
                         btnSabotageBet.disabled = (data.myTokens < 1 || alreadyBet);
-                        if (alreadyBet) {
+                        if (alreadyBet || data.myTokens < 1) {
                             btnSabotageBet.style.opacity = '0.5';
-                            btnSabotageBet.innerText = "APUESTA HECHA";
+                            if (alreadyBet) btnSabotageBet.innerText = "APUESTA HECHA";
                         } else {
                             btnSabotageBet.style.opacity = '1';
                             btnSabotageBet.innerHTML = '¡NI DE COÑA! (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)';
