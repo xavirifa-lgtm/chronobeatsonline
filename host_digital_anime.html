@@ -506,11 +506,13 @@
         function initPeer() {
             peer = new Peer("CB-ANIME-HOST-" + roomCode, {
                 config: {
-                    'iceServers': [
+                                        'iceServers': [
                         { urls: 'stun:stun.l.google.com:19302' },
                         { urls: 'stun:stun1.l.google.com:19302' },
+                        { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
                         { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' },
-                        { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' }
+                        { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
+                        { urls: 'turn:openrelay.metered.ca:80?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' }
                     ]
                 }
             });
@@ -1535,40 +1537,7 @@
                 timelinesHtml += '</div></div>';
             });
             document.getElementById('global-timelines').innerHTML = timelinesHtml;
-        }
-            ,
-                body: JSON.stringify({ url: url, tipo: listType })
-            }).then(function(r){ return r.json()}).then(function(data){
-                alert('URL reportada como rota. Gasta un Token de Recarga si tienes para saltarla.');
-                var btn = document.getElementById('btn-report-error');
-                if(btn) btn.style.display = 'none';
-            }).catch(function(e){
-                console.error(e);
-                alert('Aviso guardado.');
-            });
-        }
-    </script>
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log('Service Worker registrado', reg))
-                    .catch(err => console.log('Error registrando SW', err));
-            });
-        }
-            ,
-                body: JSON.stringify({ url: url, tipo: listType })
-            }).then(function(r){ return r.json()}).then(function(data){
-                alert('URL reportada como rota. Gasta un Token de Recarga si tienes para saltarla.');
-                var btn = document.getElementById('btn-report-error');
-                if(btn) btn.style.display = 'none';
-            }).catch(function(e){
-                console.error(e);
-                alert('Aviso guardado.');
-            });
-        }
-    </script>
-    <script>
+        }    
         function reportBrokenLink() {
             var s = songs[currentSongIdx];
             if (!s || !s.id) return;
@@ -1589,6 +1558,14 @@
             });
         }
     </script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('Service Worker registrado', reg))
+                    .catch(err => console.log('Error registrando SW', err));
+            });
+        }
+    </script>
 </body>
-
 </html>
