@@ -16,7 +16,7 @@
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
         :root {
-            --neon: #00f2ff;
+            --neon: #00ff00;
             --bg: #0d0d0d;
             --accent: #ff0055;
             --gold: #ffd700;
@@ -1120,6 +1120,7 @@
 
             lastState = data;
             if (data.type === 'STATE_UPDATE') {
+                if (data.currentColor) document.documentElement.style.setProperty('--neon', data.currentColor);
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('game-screen').style.display = 'flex';
                 document.getElementById('cur-player').innerText = data.activePlayer && data.activePlayer.name ? data.activePlayer.name : "---";
@@ -1299,7 +1300,10 @@
 
                 if (!isKingMode) {
                     if (isMyTurn) {
-                        document.getElementById('inventory-title').innerText = "MIS CARTAS (MARCA TU APUESTA)";
+                        var guessLabel = "ADIVINA EL GRUPO";
+                        if (data.currentType === 'anime') guessLabel = "ADIVINA LA SERIE";
+                        if (data.currentType === 'movies') guessLabel = "ADIVINA LA PELÍCULA";
+                        document.getElementById('inventory-title').innerText = guessLabel + " (MARCA TU APUESTA)";
                     } else {
                         document.getElementById('inventory-title').innerText = "CRONOLOGÍA DE " + data.activePlayer.name;
                     }

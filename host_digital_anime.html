@@ -544,6 +544,7 @@
 
         fetch('lista_final_anime.txt?v=' + new Date().getTime()).then(function (r) { return r.text() }).then(function (t) {
             var lines = t.replace(/\r/g, '').split('\n');
+            var uniqueIds = new Set();
             songs = lines.map(function (l, index) {
                 var p = l.split('|');
                 var m = p[3] ? p[3].match(/[?&]v=([^&#]+)|youtu\.be\/([^?&#]+)/) : null;
@@ -554,7 +555,11 @@
                     id: m ? (m[1] || m[2]) : null,
                     line: index + 1 // Guardar número de fila original
                 };
-            }).filter(function (s) { return s.id; }).sort(function () { return Math.random() - 0.5; });
+            }).filter(function (s) {
+                if (!s.id || uniqueIds.has(s.id)) return false;
+                uniqueIds.add(s.id);
+                return true;
+            }).sort(function () { return Math.random() - 0.5; });
         });
 
         function updateLobby() {

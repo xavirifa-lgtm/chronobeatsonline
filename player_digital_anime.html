@@ -1314,22 +1314,28 @@
                     if (isMyTurn) {
                         if (data.myCards) {
                             var h = "";
+                            var isSingleCard = (data.myCards.length === 1);
+                            if (isSingleCard) h += '<div style="font-size:0.8em; color:var(--neon); text-align:center; font-family:\'Bungee\'; margin-bottom:5px;">↑ ANTES ↑</div>';
                             h += renderBetSlot(0, data.currentBets, data.activeGuess, true);
                             data.myCards.forEach(function (year, idx) {
                                 var displayYear = (data.isFogActive) ? "????" : year;
                                 h += '<div class="card-row">' + displayYear + '</div>';
                                 h += renderBetSlot(idx + 1, data.currentBets, data.activeGuess, true);
                             });
+                            if (isSingleCard) h += '<div style="font-size:0.8em; color:var(--neon); text-align:center; font-family:\'Bungee\'; margin-top:5px;">↓ DESPUÉS ↓</div>';
                             document.getElementById('my-cards-list').innerHTML = h;
                         }
                     } else {
                         if (data.activeTimeline) {
                             var h = "";
+                            var isSingleCard = (data.activeTimeline.length === 1);
+                            if (isSingleCard) h += '<div style="font-size:0.8em; color:var(--neon); text-align:center; font-family:\'Bungee\'; margin-bottom:5px;">↑ ANTES ↑</div>';
                             h += renderBetSlot(0, data.currentBets, data.activeGuess, false);
                             data.activeTimeline.forEach(function (year, idx) {
                                 h += '<div class="card-row" style="border-color: #444; color: #888;">' + year + '</div>';
                                 h += renderBetSlot(idx + 1, data.currentBets, data.activeGuess, false);
                             });
+                            if (isSingleCard) h += '<div style="font-size:0.8em; color:var(--neon); text-align:center; font-family:\'Bungee\'; margin-top:5px;">↓ DESPUÉS ↓</div>';
                             document.getElementById('my-cards-list').innerHTML = h;
                         }
                     }

@@ -1,4 +1,4 @@
-﻿const CACHE_NAME = 'chronobeats-v49';
+﻿const CACHE_NAME = 'chronobeats-v51';
 const ASSETS = [
   './',
   './index.html',
@@ -8,6 +8,9 @@ const ASSETS = [
   './host_digital_anime.html',
   './player_digital_peliculas.html',
   './host_digital_peliculas.html',
+  './indexchronomix.html',
+  './player_digital_mix.html',
+  './host_digital_mix.html',
   './lista_final_anime.txt',
   './lista_final_pelis.txt',
   './manifest.json',
