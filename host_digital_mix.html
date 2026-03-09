@@ -561,6 +561,7 @@
             var rawSongs = [];
             var uniqueIds = new Set();
             results.forEach(function (res) {
+                var categorySongs = [];
                 var lines = res.text.replace(/\r/g, '').split('\n');
                 lines.forEach(function (l, index) {
                     var p = l.split('|');
@@ -569,7 +570,7 @@
                         var currentId = (m[1] || m[2]);
                         if (!uniqueIds.has(currentId)) {
                             uniqueIds.add(currentId);
-                            rawSongs.push({
+                            categorySongs.push({
                                 artist: p[0],
                                 song: p[1],
                                 year: p[2],
@@ -581,6 +582,16 @@
                         }
                     }
                 });
+
+                // Shuffle the songs inside this category before taking a chunk
+                for (let i = categorySongs.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [categorySongs[i], categorySongs[j]] = [categorySongs[j], categorySongs[i]];
+                }
+
+                // Take a maximum of 60 songs from this category to equalize proportions
+                var selectedSongs = categorySongs.slice(0, 60);
+                rawSongs = rawSongs.concat(selectedSongs);
             });
             // Fisher-Yates shuffle
             for (let i = rawSongs.length - 1; i > 0; i--) {
