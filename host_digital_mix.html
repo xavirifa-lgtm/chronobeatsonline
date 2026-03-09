@@ -484,7 +484,9 @@
                 config: {
                     'iceServers': [
                         { urls: 'stun:stun.l.google.com:19302' },
-                        { urls: 'stun:stun1.l.google.com:19302' }
+                        { urls: 'stun:stun1.l.google.com:19302' },
+                        { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
+                        { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' }
                     ]
                 }
             });
@@ -559,7 +561,7 @@
             var rawSongs = [];
             var uniqueIds = new Set();
             results.forEach(function (res) {
-                var lines = res.text.replace(/\\r/g, '').split('\\n');
+                var lines = res.text.replace(/\r/g, '').split('\n');
                 lines.forEach(function (l, index) {
                     var p = l.split('|');
                     var m = p[3] ? p[3].match(/[?&]v=([^&#]+)|youtu\.be\/([^?&#]+)/) : null;
@@ -580,7 +582,12 @@
                     }
                 });
             });
-            songs = rawSongs.sort(function () { return Math.random() - 0.5; });
+            // Fisher-Yates shuffle
+            for (let i = rawSongs.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [rawSongs[i], rawSongs[j]] = [rawSongs[j], rawSongs[i]];
+            }
+            songs = rawSongs;
         });
 
         function updateLobby() {

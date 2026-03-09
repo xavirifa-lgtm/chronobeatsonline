@@ -484,7 +484,9 @@
                 config: {
                     'iceServers': [
                         { urls: 'stun:stun.l.google.com:19302' },
-                        { urls: 'stun:stun1.l.google.com:19302' }
+                        { urls: 'stun:stun1.l.google.com:19302' },
+                        { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
+                        { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' }
                     ]
                 }
             });
@@ -541,7 +543,7 @@
         initPeer();
 
         fetch('lista_final.txt?v=' + new Date().getTime()).then(function (r) { return r.text() }).then(function (t) {
-            var lines = t.replace(/\\r/g, '').split('\\n');
+            var lines = t.replace(/\r/g, '').split('\n');
             var uniqueIds = new Set();
             songs = lines.map(function (l, index) {
                 var p = l.split('|');

@@ -486,7 +486,9 @@
                 config: {
                     'iceServers': [
                         { urls: 'stun:stun.l.google.com:19302' },
-                        { urls: 'stun:stun1.l.google.com:19302' }
+                        { urls: 'stun:stun1.l.google.com:19302' },
+                        { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
+                        { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' }
                     ]
                 }
             });
@@ -559,7 +561,12 @@
                 if (!s.id || uniqueIds.has(s.id)) return false;
                 uniqueIds.add(s.id);
                 return true;
-            }).sort(function () { return Math.random() - 0.5; });
+            });
+            // Fisher-Yates shuffle
+            for (let i = songs.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [songs[i], songs[j]] = [songs[j], songs[i]];
+            }
         });
 
         function updateLobby() {

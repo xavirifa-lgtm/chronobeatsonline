@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CHRONOBEATS MIX MODE</title>
-    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Montserrat:wght@400;700&display=swap"
+    <link
+        href="https://fonts.googleapis.com/css2?family=Bungee&family=Montserrat:wght@400;700&family=Orbitron:wght@400;700&display=swap"
         rel="stylesheet">
     <style>
         :root {
@@ -56,6 +57,7 @@
             transition: 0.4s;
             cursor: pointer;
             background: transparent;
+            box-sizing: border-box;
         }
 
         .btn:hover {
@@ -119,9 +121,10 @@
             text-align: center;
             color: #ddd;
             text-decoration: none;
-            font-family: 'Montserrat';
+            font-family: 'Orbitron', 'Montserrat', sans-serif;
             font-weight: 700;
-            font-size: 1em;
+            font-size: 1.1em;
+            letter-spacing: 1.5px;
             border-radius: 10px;
             transition: 0.3s;
             margin-bottom: 15px;
@@ -157,10 +160,10 @@
     <div id="mix-selector-modal">
         <div class="mix-modal-content">
             <h2>ELIJA LAS LISTAS A MEZCLAR</h2>
-            <button class="mix-option" onclick="startHost('orig,anime,movies')">🌟 MIX TOTAL (Las 3 listas) 🌟</button>
-            <button class="mix-option" onclick="startHost('orig,anime')">Clásico + Anime</button>
-            <button class="mix-option" onclick="startHost('orig,movies')">Clásico + Películas</button>
-            <button class="mix-option" onclick="startHost('anime,movies')">Anime + Películas</button>
+            <button class="mix-option" onclick="startHost('orig,anime,movies')">MIX TOTAL</button>
+            <button class="mix-option" onclick="startHost('orig,anime')">CLÁSICO + ANIME</button>
+            <button class="mix-option" onclick="startHost('orig,movies')">CLÁSICO + PELIS</button>
+            <button class="mix-option" onclick="startHost('anime,movies')">ANIME + PELIS</button>
             <div class="mix-close" onclick="closeMixSelector()">Cancelar</div>
         </div>
     </div>
