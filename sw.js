@@ -1,4 +1,4 @@
-﻿const CACHE_NAME = 'chronobeats-v47';
+﻿const CACHE_NAME = 'chronobeats-v48';
 const ASSETS = [
   './',
   './index.html',
