@@ -10,8 +10,30 @@
     <title>HOST - CHRONOBEATS DIGITAL</title>
     <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Montserrat:wght@400;700&display=swap"
         rel="stylesheet">
-    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js">        ,
+                body: JSON.stringify({ url: url, tipo: listType })
+            }).then(function(r){ return r.json()}).then(function(data){
+                alert('URL reportada como rota. Gasta un Token de Recarga si tienes para saltarla.');
+                var btn = document.getElementById('btn-report-error');
+                if(btn) btn.style.display = 'none';
+            }).catch(function(e){
+                console.error(e);
+                alert('Aviso guardado.');
+            });
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js">        ,
+                body: JSON.stringify({ url: url, tipo: listType })
+            }).then(function(r){ return r.json()}).then(function(data){
+                alert('URL reportada como rota. Gasta un Token de Recarga si tienes para saltarla.');
+                var btn = document.getElementById('btn-report-error');
+                if(btn) btn.style.display = 'none';
+            }).catch(function(e){
+                console.error(e);
+                alert('Aviso guardado.');
+            });
+        }
+    </script>
     <!-- Eliminado script de YouTube API ya que usamos inyecci√≥n de iframe directa -->
     <style>
         :root {
@@ -485,8 +507,8 @@
                     'iceServers': [
                         { urls: 'stun:stun.l.google.com:19302' },
                         { urls: 'stun:stun1.l.google.com:19302' },
-                        { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
-                        { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' }
+                        { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' },
+                        { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' }
                     ]
                 }
             });
@@ -560,6 +582,7 @@
         Promise.all(fetchPromises).then(function (results) {
             var rawSongs = [];
             var uniqueIds = new Set();
+            var playedIds = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]');
             results.forEach(function (res) {
                 var categorySongs = [];
                 var lines = res.text.replace(/\r/g, '').split('\n');
@@ -568,7 +591,7 @@
                     var m = p[3] ? p[3].match(/[?&]v=([^&#]+)|youtu\.be\/([^?&#]+)/) : null;
                     if (m) {
                         var currentId = (m[1] || m[2]);
-                        if (!uniqueIds.has(currentId)) {
+                        if (!uniqueIds.has(currentId) || playedIds.includes(currentId)) {
                             uniqueIds.add(currentId);
                             categorySongs.push({
                                 artist: p[0],
@@ -593,6 +616,7 @@
                 var selectedSongs = categorySongs.slice(0, 60);
                 rawSongs = rawSongs.concat(selectedSongs);
             });
+            if(rawSongs.length < 15) { localStorage.removeItem('CB_PlayedSongs'); alert('°Enhorabuena! HabÈis reventado la base de datos entera. Se ha reseteado la memoria de canciones vistas para esta sala para que pod·is seguir jugando. Recargando partida...'); window.location.reload(); return; }
             // Fisher-Yates shuffle
             for (let i = rawSongs.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -658,7 +682,7 @@
 
             // MEC√ÅNICA INICIAL: Repartir una carta a cada jugador
             players.forEach(function (p) {
-                currentSongIdx++;
+                currentSongIdx++; if(songs[currentSongIdx] && songs[currentSongIdx].id) { var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]'); if(!_pl.includes(songs[currentSongIdx].id)){ _pl.push(songs[currentSongIdx].id); localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl)); } }
                 var s = songs[currentSongIdx];
                 if (s) p.cards.push(s.year);
             });
@@ -669,11 +693,11 @@
         }
 
         function nextTurn() {
-            currentSongIdx++; isRevealed = false;
+            currentSongIdx++; if(songs[currentSongIdx] && songs[currentSongIdx].id) { var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]'); if(!_pl.includes(songs[currentSongIdx].id)){ _pl.push(songs[currentSongIdx].id); localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl)); } } isRevealed = false;
             segundosAcumulados = 0;
             momentoDeInicio = 0;
             isPlaying = false;
-            currentBets = {}; // Limpiar apuestas al cambiar de turno
+            currentBets = {}; var rb=document.getElementById('btn-report-error'); if(rb) rb.style.display='block'; al cambiar de turno
             activeGuess = null; // Limpiar adivinanza
             bettingAgainst = []; // Limpiar apuestas de "ni de co√±a"
 
@@ -694,7 +718,7 @@
                 // Calcular un n√∫mero de cartas igual a (players.length - 1)
                 var numOptions = Math.max(1, players.length - 1);
                 for (var i = 0; i < numOptions; i++) {
-                    currentSongIdx++;
+                    currentSongIdx++; if(songs[currentSongIdx] && songs[currentSongIdx].id) { var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]'); if(!_pl.includes(songs[currentSongIdx].id)){ _pl.push(songs[currentSongIdx].id); localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl)); } }
                     kingOptions.push(songs[currentSongIdx]);
                 }
 
@@ -853,7 +877,7 @@
                         p.canReload = false; // Solo uno por turno
                         isPlaying = false;
                         container.innerHTML = '<div id="youtube-player"></div>'; // Parar m√∫sica de verdad
-                        currentSongIdx++; // Descartar y pasar a la siguiente
+                        currentSongIdx++; if(songs[currentSongIdx] && songs[currentSongIdx].id) { var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]'); if(!_pl.includes(songs[currentSongIdx].id)){ _pl.push(songs[currentSongIdx].id); localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl)); } } // Descartar y pasar a la siguiente
                         segundosAcumulados = 0;
                         momentoDeInicio = 0;
                         isRevealed = false; // Resetear revelado
@@ -872,7 +896,7 @@
                     if (p && isPlaying) {
                         isPlaying = false;
                         container.innerHTML = '<div id="youtube-player"></div>';
-                        currentSongIdx++;
+                        currentSongIdx++; if(songs[currentSongIdx] && songs[currentSongIdx].id) { var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]'); if(!_pl.includes(songs[currentSongIdx].id)){ _pl.push(songs[currentSongIdx].id); localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl)); } }
                         segundosAcumulados = 0;
                         momentoDeInicio = 0;
                         isRevealed = false;
@@ -996,7 +1020,7 @@
                         p.tokens -= 1;
                         isPlaying = false;
                         container.innerHTML = '<div id="youtube-player"></div>';
-                        currentSongIdx++;
+                        currentSongIdx++; if(songs[currentSongIdx] && songs[currentSongIdx].id) { var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]'); if(!_pl.includes(songs[currentSongIdx].id)){ _pl.push(songs[currentSongIdx].id); localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl)); } }
                         segundosAcumulados = 0;
                         momentoDeInicio = 0;
                         isRevealed = false;
@@ -1554,6 +1578,17 @@
             });
             document.getElementById('global-timelines').innerHTML = timelinesHtml;
         }
+            ,
+                body: JSON.stringify({ url: url, tipo: listType })
+            }).then(function(r){ return r.json()}).then(function(data){
+                alert('URL reportada como rota. Gasta un Token de Recarga si tienes para saltarla.');
+                var btn = document.getElementById('btn-report-error');
+                if(btn) btn.style.display = 'none';
+            }).catch(function(e){
+                console.error(e);
+                alert('Aviso guardado.');
+            });
+        }
     </script>
     <script>
         if ('serviceWorker' in navigator) {
@@ -1561,6 +1596,38 @@
                 navigator.serviceWorker.register('./sw.js')
                     .then(reg => console.log('Service Worker registrado', reg))
                     .catch(err => console.log('Error registrando SW', err));
+            });
+        }
+            ,
+                body: JSON.stringify({ url: url, tipo: listType })
+            }).then(function(r){ return r.json()}).then(function(data){
+                alert('URL reportada como rota. Gasta un Token de Recarga si tienes para saltarla.');
+                var btn = document.getElementById('btn-report-error');
+                if(btn) btn.style.display = 'none';
+            }).catch(function(e){
+                console.error(e);
+                alert('Aviso guardado.');
+            });
+        }
+    </script>
+    <script>
+        function reportBrokenLink() {
+            var s = songs[currentSongIdx];
+            if (!s || !s.id) return;
+            var url = 'https://www.youtube.com/watch?v=' + s.id;
+            var listType = s.type ? s.type : 'General';
+            
+            fetch('reporte_error.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url: url, tipo: listType })
+            }).then(function(r){ return r.json()}).then(function(data){
+                alert('URL reportada como rota. Gasta un Token de Recarga si tienes para saltarla.');
+                var btn = document.getElementById('btn-report-error');
+                if(btn) btn.style.display = 'none';
+            }).catch(function(e){
+                console.error(e);
+                alert('Aviso guardado.');
             });
         }
     </script>
