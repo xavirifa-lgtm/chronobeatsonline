@@ -504,13 +504,14 @@
         function initPeer() {
             peer = new Peer("CB-HOST-" + roomCode, {
                 config: {
-                                        'iceServers': [
+                                                            'iceServers': [
                         { urls: 'stun:stun.l.google.com:19302' },
                         { urls: 'stun:stun1.l.google.com:19302' },
+                        { urls: 'stun:global.stun.twilio.com:3478' },
+                        { urls: 'stun:stun.cloudflare.com:3478' },
                         { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
                         { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' },
-                        { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
-                        { urls: 'turn:openrelay.metered.ca:80?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' }
+                        { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' }
                     ]
                 }
             });
@@ -659,7 +660,7 @@
             segundosAcumulados = 0;
             momentoDeInicio = 0;
             isPlaying = false;
-            currentBets = {}; var rb=document.getElementById('btn-report-error'); if(rb) rb.style.display='block'; al cambiar de turno
+            currentBets = {}; var rb=document.getElementById('btn-report-error'); if(rb) rb.style.display='block'; // al cambiar de turno
             activeGuess = null; // Limpiar adivinanza
             bettingAgainst = []; // Limpiar apuestas de "ni de coña"
 
