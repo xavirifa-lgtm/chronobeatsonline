@@ -783,14 +783,42 @@
                         style="width:10px;height:10px;"></span>)</button>
                 <button class="spec-btn" id="btn-sabotage-blackhole"
                     style="background:var(--bg); border-color:#9900ff; color:#9900ff; grid-column: span 2;"
-                    onclick="send('SABOTAGE_BLACKHOLE')">AGUJERO NEGRO (5 <span class="neon-chip" </button>
-                        <button class="spec-btn" id="btn-duel-select"
-                            onclick="document.getElementById('duel-player-select').style.display='flex';"
-                            style="background:var(--gold); color:#000; font-weight:bold;">
-                            RETAR A DUELO A MUERTE (2 <span class="neon-chip"
-                                style="display:inline-block; width:10px; height:10px; background:var(--neon); border-radius:50%; margin:0 2px;"></span>)
-                        </button>
+                    onclick="send('SABOTAGE_BLACKHOLE')">AGUJERO NEGRO (5 <span class="neon-chip"
                         style="width:10px;height:10px;"></span>)</button>
+                <button class="spec-btn" id="btn-duel-select"
+                    onclick="document.getElementById('duel-player-select').style.display='flex';"
+                    style="background:var(--gold); color:#000; font-weight:bold;">
+                    RETAR A DUELO A MUERTE (2 <span class="neon-chip"
+                        style="display:inline-block; width:10px; height:10px; background:var(--neon); border-radius:50%; margin:0 2px;"></span>)
+                </button>
+            </div>
+        </div>
+        <div id="tab-nav" style="display:flex; width:100%; gap:5px; margin-top:15px; margin-bottom:5px;">
+            <button class="nav-btn"
+                onclick="document.getElementById('sabotage-ctrl').style.display='none'; document.getElementById('market-ctrl').style.display='none'; document.getElementById('normal-card-container').style.display='block'; document.getElementById('normal-collection').style.display='block'; this.style.opacity='1'; document.getElementById('nav-sabotage').style.opacity='0.5'; document.getElementById('nav-market').style.opacity='0.5';"
+                style="flex:1; background:var(--accent); color:#fff; border-radius:10px; padding:10px; font-weight:bold; font-size:0.8em; border:none; opacity:1;">JUEGO</button>
+            <button class="nav-btn" id="nav-sabotage"
+                onclick="document.getElementById('normal-card-container').style.display='none'; document.getElementById('normal-collection').style.display='none'; document.getElementById('market-ctrl').style.display='none'; document.getElementById('sabotage-ctrl').style.display='block'; this.style.opacity='1'; this.previousElementSibling.style.opacity='0.5'; document.getElementById('nav-market').style.opacity='0.5';"
+                style="flex:1; background:#cc0000; color:#fff; border-radius:10px; padding:10px; font-weight:bold; font-size:0.8em; border:none; opacity:0.5;">SABOTAJE</button>
+            <button class="nav-btn" id="nav-market"
+                onclick="document.getElementById('normal-card-container').style.display='none'; document.getElementById('normal-collection').style.display='none'; document.getElementById('sabotage-ctrl').style.display='none'; document.getElementById('market-ctrl').style.display='block'; this.style.opacity='1'; document.getElementById('nav-sabotage').style.opacity='0.5'; this.previousElementSibling.previousElementSibling.style.opacity='0.5';"
+                style="flex:1; background:#330066; color:#fff; border-radius:10px; padding:10px; font-weight:bold; font-size:0.8em; border:none; opacity:0.5;">MERCADO</button>
+        </div>
+
+        <div class="special-actions" id="market-ctrl" style="display:none; margin-top:10px;">
+            <p
+                style="width: 100%; text-align: center; color: var(--gold); font-size: 0.7em; margin: 0 0 5px 0; font-family: 'Bungee';">
+                MERCADO NEGRO</p>
+            <div id="market-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                <button class="spec-btn" id="btn-market-wildcard" onclick="send('MARKET_WILDCARD')"
+                    style="background:#5c00e6;">COMODIN 50/50 (1 <span class="neon-chip"
+                        style="width:10px;height:10px;"></span>)</button>
+                <button class="spec-btn" id="btn-market-decade" onclick="send('MARKET_DECADE')"
+                    style="background:#005ce6;">PISTA DECADA (1 <span class="neon-chip"
+                        style="width:10px;height:10px;"></span>)</button>
+                <button class="spec-btn" id="btn-market-shield" onclick="send('MARKET_SHIELD')"
+                    style="background:#cc7a00; grid-column:1 / -1; color:#000;">ESCUDO PASIVO (3 <span class="neon-chip"
+                        style="width:10px;height:10px;background:var(--neon);"></span>)</button>
             </div>
         </div>
 
