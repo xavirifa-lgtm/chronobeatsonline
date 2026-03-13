@@ -1,668 +1,4 @@
-<!DOCTYPE html>
-<html lang="es">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icon-192.png">
-    <meta name="theme-color" content="#00f2ff">
-    <title>PLAYER - ANIME VERSION</title>
-    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Montserrat:wght@400;700&display=swap"
-        rel="stylesheet">
-    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-    <style>
-        :root {
-            --neon: #ff00cc;
-            --bg: #0d0d0d;
-            --accent: #00f2ff;
-            --gold: #ffd700;
-        }
-
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            background: var(--bg);
-            color: #fff;
-            font-family: 'Montserrat', sans-serif;
-            margin: 0;
-            height: 100vh;
-            height: 100dvh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-            padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 35px);
-        }
-
-        #login-screen {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .logo {
-            font-family: 'Shojumaru';
-            font-size: 2em;
-            color: var(--neon);
-            text-shadow: 0 0 20px var(--neon);
-            margin-bottom: 20px;
-        }
-
-        input {
-            background: #1a1a1a;
-            border: 2px solid #333;
-            color: #fff;
-            padding: 15px;
-            border-radius: 12px;
-            width: 100%;
-            max-width: 280px;
-            margin-bottom: 12px;
-            font-family: 'Bungee';
-            text-align: center;
-            font-size: 1.1em;
-        }
-
-        .btn {
-            background: var(--neon);
-            color: #000;
-            border: none;
-            padding: 18px;
-            border-radius: 50px;
-            font-family: 'Bungee';
-            width: 100%;
-            max-width: 280px;
-            cursor: pointer;
-            font-size: 1.2em;
-            box-shadow: 0 0 20px rgba(0, 242, 255, 0.3);
-            transition: 0.3s;
-        }
-
-        .btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 15px var(--neon);
-        }
-
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        #wait-msg {
-            display: none;
-            background: rgba(0, 0, 0, 0.8);
-            border: 2px solid var(--neon);
-            border-radius: 15px;
-            padding: 15px;
-            margin: 20px 0;
-            text-align: center;
-            font-family: 'Bungee', cursive;
-            color: var(--neon);
-            box-shadow: 0 0 15px var(--neon);
-        }
-
-        /* CARD FLIP CSS */
-        #game-screen {
-            display: none;
-            flex: 1;
-            min-height: 0;
-            flex-direction: column;
-            padding: 10px;
-            align-items: center;
-            justify-content: flex-start;
-            overflow-y: auto;
-        }
-
-        #turn-status {
-            font-family: 'Bungee';
-            color: var(--neon);
-            font-size: 0.8em;
-            margin: 10px 0;
-            letter-spacing: 1px;
-        }
-
-        .music-controls {
-            display: none;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            width: 100%;
-            max-width: 340px;
-            margin-bottom: 10px;
-        }
-
-        .skip-controls {
-            display: none;
-            grid-template-rows: repeat(2, 1fr);
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            width: 100%;
-            max-width: 340px;
-            margin-bottom: 15px;
-        }
-
-        .ctrl-btn {
-            background: #1a1a1a;
-            border: 2px solid #444;
-            color: #fff;
-            padding: 15px 5px;
-            border-radius: 10px;
-            font-family: 'Bungee';
-            font-size: 0.85em;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .btn-play {
-            border-color: var(--neon);
-            color: var(--neon);
-        }
-
-        .btn-stop {
-            border-color: var(--accent);
-            color: var(--accent);
-        }
-
-        .sk-btn {
-            background: #050505;
-            border: 1px solid #333;
-            color: #fff;
-            padding: 12px 2px;
-            border-radius: 8px;
-            font-family: 'Bungee';
-            font-size: 0.75em;
-            cursor: pointer;
-        }
-
-        .sk-fwd {
-            color: var(--neon);
-            border-color: rgba(0, 242, 255, 0.3);
-        }
-
-        .sk-back {
-            color: var(--accent);
-            border-color: rgba(255, 0, 85, 0.3);
-        }
-
-        #bet-btn {
-            display: none;
-            background: transparent;
-            border: 2px dashed var(--gold);
-            color: var(--gold);
-            padding: 15px;
-            width: 100%;
-            max-width: 340px;
-            margin-bottom: 15px;
-            font-family: 'Bungee';
-            font-size: 0.9em;
-            border-radius: 15px;
-            cursor: pointer;
-        }
-
-        .card-container {
-            flex: 0 0 280px;
-            perspective: 1000px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            margin-top: 25px;
-        }
-
-        .card {
-            height: 100%;
-            aspect-ratio: 2/3;
-            position: relative;
-            transform-style: preserve-3d;
-            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .card.flipped {
-            transform: rotateY(180deg);
-        }
-
-        .card-face {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            backface-visibility: hidden;
-            border-radius: 15px;
-            border: 2px solid var(--neon);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 15px;
-            text-align: center;
-        }
-
-        .card-front {
-            background: #111;
-            box-shadow: inset 0 0 30px rgba(0, 242, 255, 0.05);
-        }
-
-        .card-back {
-            background: #1a1a1a;
-            transform: rotateY(180deg);
-            border-color: var(--accent);
-        }
-
-        #c-artist {
-            font-size: 0.7em;
-            color: #aaa;
-            text-transform: uppercase;
-            margin-bottom: 5px;
-            line-height: 1.2;
-            font-family: 'Shojumaru';
-        }
-
-        #c-song {
-            font-family: 'Shojumaru';
-            font-size: 1em;
-            margin-bottom: 10px;
-            line-height: 1.2;
-        }
-
-        #c-year {
-            font-family: 'Bungee';
-            font-size: 4em;
-            color: var(--accent);
-            line-height: 0.9;
-        }
-
-
-        #wait-msg {
-            font-family: 'Bungee';
-            opacity: 0.4;
-            font-size: 0.8em;
-            text-align: center;
-            margin-top: 15px;
-            color: #888;
-        }
-
-        .collection-summary {
-            width: 100%;
-            max-width: 340px;
-            margin-top: 20px;
-            margin-top: auto;
-            background: #1a1a1a;
-            padding: 15px;
-            border-radius: 12px;
-            text-align: center;
-            flex-shrink: 0;
-        }
-
-        .collection-summary h4 {
-            font-family: 'Bungee';
-            font-size: 0.7em;
-            margin: 0 0 10px 0;
-            color: var(--neon);
-            text-align: center;
-        }
-
-        .vertical-cards {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            align-items: center;
-        }
-
-        .card-row {
-            background: #1a1a1a;
-            border: 1px solid #333;
-            padding: 5px;
-            border-radius: 6px;
-            font-family: 'Bungee';
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 0.9em;
-            color: #fff;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-            width: 80px;
-            margin: 0 auto;
-        }
-
-        .special-actions {
-            display: flex;
-            gap: 10px;
-            width: 100%;
-            max-width: 340px;
-            margin-bottom: 10px;
-            justify-content: center;
-        }
-
-        .spec-btn {
-            background: #222;
-            border: 1px solid var(--gold);
-            color: var(--gold);
-            padding: 10px;
-            border-radius: 8px;
-            font-family: 'Bungee';
-            font-size: 0.7em;
-            cursor: pointer;
-            flex: 1;
-        }
-
-        .chip-display {
-            font-family: 'Bungee';
-            color: var(--gold);
-            font-size: 0.9em;
-            margin-bottom: 5px;
-            text-shadow: 0 0 5px #00f2fe;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 5px;
-        }
-
-        .neon-chip {
-            display: inline-block;
-            width: 12px;
-            height: 12px;
-            background: #00f2fe;
-            border-radius: 50%;
-            box-shadow: 0 0 8px #00f2fe, 0 0 15px #00f2fe;
-        }
-
-        /* Slots de apuesta */
-        .bet-slot {
-            width: 30px;
-            height: 30px;
-            background: rgba(0, 242, 254, 0.1);
-            border: 2px dashed #00f2fe;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            margin: 4px auto;
-            font-size: 0.6em;
-            color: #00f2fe;
-            font-family: 'Bungee';
-            transition: 0.3s;
-        }
-
-        .bet-slot.occupied {
-            background: #00f2fe;
-            color: #000;
-            border-style: solid;
-            box-shadow: 0 0 8px #00f2fe;
-        }
-
-        .bet-slot.my-bet {
-            background: var(--gold);
-            border-color: var(--gold);
-            color: #000;
-            box-shadow: 0 0 12px var(--gold);
-        }
-
-        .bet-slot.active-guess {
-            background: #fff;
-            border-color: #fff;
-            box-shadow: 0 0 15px #fff;
-            color: #000;
-            border-style: solid;
-        }
-
-        .bet-slot.blocked {
-            opacity: 0.3;
-            cursor: not-allowed;
-            border-color: #444;
-        }
-
-        .bet-slot:active {
-            transform: scale(0.9);
-        }
-
-        .spec-btn:disabled {
-            opacity: 0.4;
-            pointer-events: none;
-            border-color: #444;
-            color: #444;
-        }
-
-        #sabotage-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            width: 100%;
-            margin-top: 10px;
-        }
-
-        #sabotage-grid .spec-btn {
-            margin-top: 0 !important;
-            padding: 12px 5px;
-            font-size: 0.7em;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: row;
-            flex-wrap: wrap;
-            gap: 5px;
-            text-align: center;
-        }
-
-        .spec-btn#btn-reload {
-            border-color: #00f2fe;
-            color: #00f2fe;
-            box-shadow: 0 0 10px rgba(0, 242, 254, 0.2);
-        }
-
-        #leaderboard-info {
-            font-family: 'Shojumaru';
-            font-size: 0.7em;
-            color: #888;
-            margin-bottom: 5px;
-            text-align: center;
-            width: 100%;
-        }
-
-        .leader-row {
-            color: var(--gold);
-            margin-bottom: 2px;
-        }
-
-        .me-row {
-            color: var(--neon);
-        }
-
-        .btn-error-track {
-            border-color: #ff3333 !important;
-            color: #ff3333 !important;
-            box-shadow: 0 0 10px rgba(255, 51, 51, 0.2) !important;
-            flex: 1;
-        }
-
-        /* Hub Button */
-        .btn-hub {
-            position: fixed;
-            top: calc(20px + env(safe-area-inset-top, 0px));
-            left: 20px;
-            z-index: 10000;
-            width: 50px;
-            height: 50px;
-            background: #000;
-            border: 2px solid var(--neon, #ff00cc);
-            border-radius: 50%;
-            display: flex !important;
-            align-items: center;
-            justify-content: center;
-            color: var(--neon, #ff00cc);
-            text-decoration: none;
-            font-family: 'Bungee';
-            font-size: 1.5em;
-            box-shadow: 0 0 15px rgba(255, 0, 204, 0.5);
-            transition: 0.3s;
-            cursor: pointer;
-        }
-
-        .btn-hub:hover {
-            background: var(--neon, #ff00cc);
-            color: #000;
-            box-shadow: 0 0 30px var(--neon, #ff00cc);
-            transform: scale(1.1);
-        }
-
-        @media (max-width: 600px) {
-            .btn-hub {
-                width: 40px;
-                height: 40px;
-                font-size: 1.2em;
-                left: 15px;
-                top: calc(15px + env(safe-area-inset-top, 0px));
-            }
-        }
-
-        @keyframes pulse-neon {
-            0% {
-                box-shadow: 0 0 5px var(--neon);
-                border-color: var(--neon);
-            }
-
-            50% {
-                box-shadow: 0 0 20px var(--neon);
-                border-color: #fff;
-            }
-
-            100% {
-                box-shadow: 0 0 5px var(--neon);
-                border-color: var(--neon);
-            }
-        }
-
-        .pulse {
-            animation: pulse-neon 2s infinite;
-        }
-
-        #ai-loading-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            z-index: 10000;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            font-family: 'Bungee';
-            color: var(--neon);
-        }
-
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid rgba(255, 0, 204, 0.1);
-            border-top: 5px solid var(--neon);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
-        }
-
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-    </style>
-</head>
-
-<body>
-    <!-- FAB REGLAMENTO -->
-    <div id="fab-rules" onclick="toggleRules()"
-        style="display:flex; position:fixed; bottom:20px; right:20px; width:50px; height:50px; background:#111; border:2px solid var(--neon); border-radius:50%; z-index:9000; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 0 10px rgba(0,242,255,0.5); font-size:1.5em; transition:0.3s; color:var(--neon); font-family:'Bungee';">
-        ?
-    </div>
-
-    <!-- MANDO DEL HOST (REMOTE) -->
-    <div id="fab-remote" onclick="toggleRemote()"
-        style="display:none; position:fixed; top:20px; right:20px; width:50px; height:50px; background:#111; border:2px solid #555; border-radius:50%; z-index:9000; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 0 10px rgba(0,0,0,0.5); font-size:1.5em; filter:grayscale(100%); transition:0.3s; opacity:0.5; pointer-events:none;">
-        📺
-    </div>
-
-    <div id="rules-overlay"
-        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:9500; align-items:center; justify-content:flex-start; flex-direction:column; padding:20px; text-align:left; overflow-y:auto;">
-        <h2
-            style="font-family:'Bungee'; color:var(--neon); margin-bottom:10px; font-size:2em; text-align:center; width:100%; margin-top:20px;">
-            📖 REGLAS</h2>
-        <div
-            style="color:#ddd; font-family:'Montserrat'; font-size:0.9em; max-width:400px; width:100%; line-height:1.5;">
-            <p><strong style="color:var(--neon);">OBJETIVO:</strong> Coloca las canciones en el orden correcto en tu
-                cronología. Quien llegue a 10 gana.</p>
-            <p><strong style="color:var(--neon);">TURNO NORMAL:</strong> Escucha la canción, márcate un tanto
-                colocándola en tu cronología.</p>
-            <p><strong style="color:var(--gold);">FICHAS AZULES (🔵):</strong> Sirven para sabotear. Se ganan si el Host
-                te da la razón, o si aciertas en un Duelo.</p>
-            <p><strong style="color:var(--accent);">DUELOS (¡NI DE COÑA!):</strong> Cuesta 1🔵. ¿Crees que el jugador
-                activo la ha cagado y sabes el hueco real? Rétale. Si él falla y tú acertaste el hueco real, tú te
-                llevas la carta. Si él acierta, palmas 1🔵 extra por listo.</p>
-
-            <h3
-                style="color:var(--neon); font-family:'Bungee'; margin-top:20px; border-bottom:1px solid #333; padding-bottom:5px;">
-                JOPUTISMO 1 (TROLL)</h3>
-            <ul style="padding-left:15px; margin-top:10px;">
-                <li style="margin-bottom:8px;"><strong style="color:#00bdff;">MUTEAR (1🔵):</strong> Quita el sonido de
-                    su canción durante 5 segundos.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#00ff00;">¡ZUMBIDO! (1🔵):</strong> Despista con un
-                    ruido molesto.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#ff8800;">VETO CAMBIAR (1🔵):</strong> Le quita al
-                    activo la recarga (no puede cambiar de canción esa ronda).</li>
-                <li style="margin-bottom:8px;"><strong style="color:#ff00ff;">FORZAR SALTO (1🔵):</strong> Obliga al
-                    activo a pasar de canción automáticamente.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#ff0000;">PÁNICO 10s (2🔵):</strong> ¡Rápido! El
-                    activo solo tiene 10 segundos para poner su carta.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#aaaaaa;">NIEBLA TIEMPO (2🔵):</strong> Borra los
-                    años de su pantalla en ese turno.</li>
-            </ul>
-
-            <h3
-                style="color:var(--neon); font-family:'Bungee'; margin-top:20px; border-bottom:1px solid #333; padding-bottom:5px;">
-                JOPUTISMO 2 (SUPERMAN)</h3>
-            <ul style="padding-left:15px; margin-top:10px;">
-                <li style="margin-bottom:8px;"><strong style="color:#ffff00;">ROBAR FICHA (4🔵):</strong> Le quitas 1
-                    ficha a un pringado al azar.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#ff00ff;">ROBAR TURNO (4🔵):</strong> Interrumpe al
-                    activo de inmediato y te quedas con su turno actual.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#00f2fe; text-shadow:0 0 5px white;">AGUJERO NEGRO
-                        (5🔵):</strong> Borra la última carta de su cronología. Adiós punto.</li>
-            </ul>
-        </div>
-        <button class="btn" onclick="toggleRules()"
-            style="margin-top:30px; margin-bottom: 40px; background:#333; color:white; border-color:#555; width:100%; max-width:300px; padding:15px;">CERRAR
-            REGLAMENTO</button>
-    </div>
-
-    <div id="remote-overlay"
-        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:9500; align-items:center; justify-content:center; flex-direction:column; padding:20px; text-align:center;">
-        <h2 style="font-family:'Bungee'; color:var(--neon); margin-bottom:10px; font-size:2em;">📺 MANDO HOST</h2>
-        <p style="color:#aaa; font-family:'Montserrat'; margin-bottom:30px; font-size:0.9em; max-width:80%;">CONTROLA LA
-            PARTIDA DESDE TU MÓVIL</p>
-
-        <div id="remote-controls-container"
-            style="display:flex; flex-direction:column; gap:15px; width:100%; max-width:300px;">
-            <!-- INJECTED BY JS -->
-        </div>
-
-        <button class="btn" onclick="toggleRemote()"
-            style="margin-top:40px; background:#333; color:white; border-color:#555;">CERRAR MANDO</button>
-    </div>
-
-    <script>
         function toggleRules() {
             var el = document.getElementById('rules-overlay');
             el.style.display = (el.style.display === 'none' || el.style.display === '') ? 'flex' : 'none';
@@ -671,206 +7,8 @@
             var el = document.getElementById('remote-overlay');
             el.style.display = (el.style.display === 'none' || el.style.display === '') ? 'flex' : 'none';
         }
-    </script>
+    
 
-    <div id="panic-overlay"
-        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,0,0,0.85); z-index:9999; flex-direction:column; justify-content:center; align-items:center; text-align:center;">
-        <h1 style="color:white; font-family:'Bungee'; font-size:3em; margin:0; text-shadow:0 0 20px black;">¡PÁNICO!
-        </h1>
-        <div id="panic-timer"
-            style="color:white; font-family:'Bungee'; font-size:8em; margin:0; line-height:1; text-shadow:0 0 20px black;">
-            10</div>
-        <p style="color:white; font-family:'Bungee'; font-size:1.5em; text-shadow:0 0 10px black;">¡COLOCA TU CARTA
-            RÁPIDO!</p>
-    </div>
-
-    <div id="ai-loading-overlay">
-        <div class="spinner"></div>
-        <div style="font-size: 1.2em;">TRANSFORMANDO<br>SELFIE... 🪄✨</div>
-        <div style="font-size: 0.6em; margin-top: 15px; color: #888; font-family: 'Montserrat';">Esto puede tardar unos
-            segundos</div>
-    </div>
-    <a href="index.html" class="btn-hub" title="Volver al Hub">H</a>
-    <div id="login-screen">
-        <div class="logo"
-            style="font-family:'Shojumaru'; color:var(--neon); text-shadow: 0 0 10px var(--neon); text-align:center;">
-            CHRONOBEATS<br><span
-                style="font-size:0.5em; color:var(--accent); font-family:'Montserrat'; font-weight:bold;">ANIME
-                VERSION</span></div>
-
-        <div id="avatar-container" onclick="document.getElementById('avatar-input').click()"
-            style="display:flex; flex-direction:column; align-items:center; margin-bottom:15px; cursor:pointer;">
-            <img id="avatar-preview" src="" alt="Avatar"
-                style="display:none; width:100px; height:100px; border-radius:50%; object-fit:cover; border: 3px solid var(--neon); box-shadow: 0 0 15px var(--neon);">
-            <div id="avatar-placeholder" class="pulse"
-                style="width:100px; height:100px; border-radius:50%; border: 3px dashed var(--neon); display:flex; align-items:center; justify-content:center; color:var(--neon); font-size:2.5em; font-family:'Bungee'; background:rgba(255,0,204,0.05); transition: 0.3s;">
-                +
-            </div>
-            <div
-                style="font-size: 0.7em; color: var(--neon); font-family: 'Bungee'; margin-top: 10px; text-shadow: 0 0 5px var(--neon);">
-                ¡HAZTE UN SELFIE!
-            </div>
-        </div>
-        <input type="file" id="avatar-input" accept="image/*" capture="user" style="display:none;"
-            onchange="handleAvatarSelect(event)">
-
-        <input type="text" id="host-id" placeholder="CÓDIGO SALA" maxlength="6">
-        <input type="text" id="player-name" placeholder="TU NOMBRE">
-        <button class="btn" id="join-btn" onclick="conectar()">ENTRAR</button>
-    </div>
-
-    <div id="game-screen">
-        <div id="leaderboard-info">
-            <div class="leader-row">LÍDER: <span id="lb-leader-name">---</span> (<span id="lb-leader-cards">0</span>)
-            </div>
-            <div class="me-row">YO: <span id="lb-me-cards">0</span> CARTAS</div>
-        </div>
-        <h4 id="inventory-title"
-            style="margin: 0 0 5px 0; font-family: 'Bungee'; font-size: 0.6em; color: #888; text-align: center;">MIS
-            CARTAS</h4>
-        <div id="turn-status">TURNO DE: <span id="cur-player">---</span></div>
-        <div id="cheat-indicator"
-            style="display:none; position: fixed; top: 80px; left: 50%; transform: translateX(-50%); background: var(--accent); color: #fff; padding: 5px 15px; border-radius: 20px; font-family: 'Bungee'; font-size: 0.8em; z-index: 10000; box-shadow: 0 0 15px var(--accent);">
-            TRUCOS OFF</div>
-        <div class="chip-display" id="my-tokens-ui">MIS FICHAS: <span class="neon-chip"></span><span
-                class="neon-chip"></span></div>
-
-        <div class="special-actions" id="special-ctrl">
-            <button class="spec-btn" id="btn-autowin" onclick="send('AUTO_WIN')">COMPRAR CARTA (3 <span
-                    class="neon-chip" style="width:10px;height:10px;"></span>)</button>
-            <button class="spec-btn btn-error-track" id="btn-error-track" onclick="send('SYSTEM_ERROR_TRACK')"
-                style="display:none;">ERROR TARJETA</button>
-            <button class="spec-btn" id="btn-reload" onclick="send('RELOAD_SONG')">CAMBIAR CANCIÓN (1 <span
-                    class="neon-chip" style="width:10px;height:10px;"></span>)</button>
-        </div>
-
-        <div class="music-controls" id="m-ctrl">
-            <button class="ctrl-btn btn-play" onclick="send('PLAY')">PLAY</button>
-            <button class="ctrl-btn" onclick="send('PAUSE')">PAUSE</button>
-            <button class="ctrl-btn btn-stop" onclick="send('STOP')">STOP</button>
-        </div>
-
-        <div class="skip-controls" id="s-ctrl">
-            <button class="sk-btn sk-fwd" id="btn-skip-p5" onclick="send('SKIP',5)">+5s</button>
-            <button class="sk-btn sk-fwd" onclick="send('SKIP',10)">+10s</button>
-            <button class="sk-btn sk-fwd" id="btn-skip-p20" onclick="send('SKIP',20)">+20s</button>
-            <button class="sk-btn sk-back" id="btn-skip-m5" onclick="send('SKIP',-5)">-5s</button>
-            <button class="sk-btn sk-back" onclick="send('SKIP',-10)">-10s</button>
-            <button class="sk-btn sk-back" id="btn-skip-m20" onclick="send('SKIP',-20)">-20s</button>
-        </div>
-
-        <div class="special-actions" id="sabotage-ctrl" style="display:none; margin-top:10px;">
-            <p
-                style="width: 100%; text-align: center; color: var(--gold); font-size: 0.7em; margin: 0 0 5px 0; font-family: 'Bungee';">
-                SABOTAJES</p>
-            <div id="sabotage-grid">
-                <!-- Nivel 0 -->
-                <button class="spec-btn" id="btn-sabotage-mute"
-                    style="background:var(--bg); border-color:#ff0055; color:#ff0055;"
-                    onclick="send('SABOTAGE_MUTE')">MUTE 15s (1 <span class="neon-chip"
-                        style="width:10px;height:10px;"></span>)</button>
-                <button class="spec-btn" id="btn-sabotage-bet"
-                    style="background:var(--bg); border-color:#00f2fe; color:#00f2fe;"
-                    onclick="send('BET_AGAINST_ACTIVE')">¡NI DE COÑA! (1 <span class="neon-chip"
-                        style="width:10px;height:10px;"></span>)</button>
-
-                <!-- Nivel 1 -->
-                <button class="spec-btn" id="btn-sabotage-buzzer"
-                    style="background:var(--bg); border-color:#00ff00; color:#00ff00;"
-                    onclick="send('SABOTAGE_BUZZER')">¡ZUMBIDO! (1 <span class="neon-chip"
-                        style="width:10px;height:10px;"></span>)</button>
-                <button class="spec-btn" id="btn-sabotage-veto"
-                    style="background:var(--bg); border-color:#ff8800; color:#ff8800;"
-                    onclick="send('SABOTAGE_VETO')">VETO CAMBIAR (1 <span class="neon-chip"
-                        style="width:10px;height:10px;"></span>)</button>
-                <button class="spec-btn" id="btn-sabotage-skip"
-                    style="background:var(--bg); border-color:#ff00ff; color:#ff00ff;"
-                    onclick="send('SABOTAGE_FORCE_SKIP')">FORZAR SALTO (2 <span class="neon-chip"
-                        style="width:10px;height:10px;"></span>)</button>
-                <button class="spec-btn" id="btn-sabotage-panic"
-                    style="background:var(--bg); border-color:#ff0000; color:#ff0000;"
-                    onclick="send('SABOTAGE_PANIC')">PÁNICO 10s (2 <span class="neon-chip"
-                        style="width:10px;height:10px;"></span>)</button>
-                <button class="spec-btn" id="btn-sabotage-fog"
-                    style="background:var(--bg); border-color:#aaaaaa; color:#aaaaaa;"
-                    onclick="send('SABOTAGE_FOG')">NIEBLA TIEMPO (2 <span class="neon-chip"
-                        style="width:10px;height:10px;"></span>)</button>
-
-                <!-- Nivel 2 -->
-                <button class="spec-btn" id="btn-sabotage-steal-token"
-                    style="background:var(--bg); border-color:#ffff00; color:#ffff00;"
-                    onclick="send('SABOTAGE_STEAL_TOKEN')">ROBAR FICHA (4 <span class="neon-chip"
-                        style="width:10px;height:10px;"></span>)</button>
-                <button class="spec-btn" id="btn-sabotage-steal-turn"
-                    style="background:var(--bg); border-color:#ff00ff; color:#ff00ff;"
-                    onclick="send('SABOTAGE_STEAL_TURN')">ROBAR TURNO (4 <span class="neon-chip"
-                        style="width:10px;height:10px;"></span>)</button>
-                <button class="spec-btn" id="btn-sabotage-blackhole"
-                    style="background:var(--bg); border-color:#9900ff; color:#9900ff; grid-column: span 2;"
-                    onclick="send('SABOTAGE_BLACKHOLE')">AGUJERO NEGRO (5 <span class="neon-chip" </button>
-                        <button class="spec-btn" id="btn-duel-select"
-                            onclick="document.getElementById('duel-player-select').style.display='flex';"
-                            style="background:var(--gold); color:#000; font-weight:bold;">
-                            RETAR A DUELO A MUERTE (2 <span class="neon-chip"
-                                style="display:inline-block; width:10px; height:10px; background:var(--neon); border-radius:50%; margin:0 2px;"></span>)
-                        </button>
-                        style="width:10px;height:10px;"></span>)</button>
-            </div>
-        </div>
-
-        <div id="king-mode-ui"
-            style="display: none; width: 100%; max-width: 340px; margin-top: 10px; text-align: center; flex-direction: column; gap: 10px;">
-        </div>
-
-        <div class="card-container" id="normal-card-container">
-            <div id="card" class="card">
-                <div class="card-face card-front">
-                    <div
-                        style="font-family:'Shojumaru';color:var(--neon);opacity:0.2;font-size:1.8em;text-align:center;line-height:1.2;word-wrap:break-word;width:100%">
-                        CHRONO<br>BEATS<br><span style="font-size:0.5em;">ANIME</span></div>
-                </div>
-                <div class="card-face card-back">
-                    <div id="c-artist">ANIME</div>
-                    <div id="c-song">TIPO</div>
-                    <div id="c-year">1999</div>
-                </div>
-            </div>
-            <div id="wait-msg">ESPERANDO SIGUIENTE TRACK...</div>
-        </div>
-
-        <div class="collection-summary" id="normal-collection">
-            <h4>MIS CARTAS</h4>
-            <div id="my-cards-list" class="vertical-cards"></div>
-        </div>
-    </div>
-
-    <div id="custom-alert"
-        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:20000; align-items:center; justify-content:center; flex-direction:column;">
-        <div
-            style="background:#111; border:2px solid var(--neon); border-radius:15px; padding:20px; width:80%; max-width:350px; text-align:center; box-shadow: 0 0 20px var(--neon);">
-            <h3 style="font-family:'Bungee'; color:var(--neon); margin-top:0;">AVISO</h3>
-            <p id="custom-alert-msg" style="font-size:1em; margin-bottom:20px;"></p>
-            <button class="btn"
-                onclick="document.getElementById('custom-alert').style.display='none'">ENTENDIDO</button>
-        </div>
-    </div>
-
-    <div id="custom-confirm"
-        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:20000; align-items:center; justify-content:center; flex-direction:column;">
-        <div
-            style="background:#111; border:2px solid var(--gold); border-radius:15px; padding:20px; width:80%; max-width:350px; text-align:center; box-shadow: 0 0 20px var(--gold);">
-            <h3 style="font-family:'Bungee'; color:var(--gold); margin-top:0;">CONFIRMAR</h3>
-            <p id="custom-confirm-msg" style="font-size:1em; margin-bottom:20px;"></p>
-            <div style="display:flex; gap:10px; justify-content:center;">
-                <button class="btn" id="custom-confirm-yes"
-                    style="background:var(--gold); color:#000; box-shadow:0 0 10px var(--gold); flex:1; padding:15px 5px;">SÍ</button>
-                <button class="btn" id="custom-confirm-no"
-                    style="background:transparent; border:2px solid #888; color:#888; box-shadow:none; flex:1; padding:15px 5px;">NO</button>
-            </div>
-        </div>
-    </div>
-
-    <script>
         var peer, conn, myId, playerName;
         var lastState = null;
         var playerAvatarDataUrl = null;
@@ -946,7 +84,22 @@
             overlay.style.display = 'flex';
 
             try {
-                // --- FILTRO DE COLOR DEL TEMA ANIME (ROSA NEÓN) ---
+                // Escalar imagen a 512px para Pollinations (optimizar subida)
+                const scaledDataUrl = await new Promise(resolve => {
+                    const img = new Image();
+                    img.onload = function () {
+                        const MAX = 512;
+                        const scale = Math.min(MAX / img.width, MAX / img.height, 1);
+                        const canvas = document.createElement('canvas');
+                        canvas.width = Math.round(img.width * scale);
+                        canvas.height = Math.round(img.height * scale);
+                        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                        resolve(canvas.toDataURL('image/jpeg', 0.85));
+                    };
+                    img.src = playerAvatarDataUrl;
+                });
+
+                // --- FILTRO DE COLOR NEÓN DEL TEMA NORMAL (AZUL/CYAN) ---
 
                 const img = new Image();
                 img.src = playerAvatarDataUrl;
@@ -976,14 +129,14 @@
                 ctx.drawImage(img, 0, 0, cWidth, cHeight);
                 ctx.filter = 'none';
 
-                // 2. Teñir con el color Rosa del tema Anime
+                // 2. Teñir con el color Azul Cyan del tema Normal
                 ctx.globalCompositeOperation = 'color';
-                ctx.fillStyle = 'rgba(255, 50, 150, 0.8)';
+                ctx.fillStyle = 'rgba(0, 200, 255, 0.8)';
                 ctx.fillRect(0, 0, cWidth, cHeight);
 
                 // Mezclar un poco de luz (Tono neón vibrante)
                 ctx.globalCompositeOperation = 'overlay';
-                ctx.fillStyle = 'rgba(255, 50, 150, 0.3)';
+                ctx.fillStyle = 'rgba(0, 200, 255, 0.3)';
                 ctx.fillRect(0, 0, cWidth, cHeight);
 
                 // 3. Viñeta oscura
@@ -1006,15 +159,12 @@
                 await new Promise(r => setTimeout(r, 400));
 
             } catch (err) {
-                console.error('Gemini toon error:', err);
+                console.error('Pollinations toon error:', err);
+                alert("Error creando versión cómic: " + err.message);
             } finally {
                 overlay.style.display = 'none';
             }
-        }
-
-
-
-        function showCustomAlert(msg) {
+        } function showCustomAlert(msg) {
             document.getElementById('custom-alert-msg').innerText = msg;
             document.getElementById('custom-alert').style.display = 'flex';
         }
@@ -1074,7 +224,7 @@
 
             peer = new Peer({
                 config: {
-                    'iceServers': [
+                                                            'iceServers': [
                         { urls: 'stun:stun.l.google.com:19302' },
                         { urls: 'stun:stun1.l.google.com:19302' },
                         { urls: 'stun:global.stun.twilio.com:3478' },
@@ -1088,7 +238,7 @@
             peer.on('open', function (id) {
                 myId = id;
                 console.log("Conectando con ID Peer:", id);
-                conn = peer.connect("CB-ANIME-HOST-" + hostId);
+                conn = peer.connect("CB-HOST-" + hostId);
 
                 conn.on('open', function () {
                     console.log("¡Conectado!");
@@ -1125,6 +275,11 @@
         function handle(data) {
             console.log("Evento:", data.type, data);
 
+            if (data.type === 'BET_RESULT') {
+                showCustomAlert(data.msg);
+                return;
+            }
+
             // Retroalimentación de trucos para Xavi
             if (data.type === 'STATE_UPDATE' && lastState && playerName.toLowerCase() === 'xavi') {
                 if (data.cheatsEnabled !== lastState.cheatsEnabled) {
@@ -1137,30 +292,30 @@
             }
 
             lastState = data;
-            if (data.type === 'SABOTAGE_MESSAGE') {
+                        if (data.type === 'SABOTAGE_MESSAGE') {
                 showCustomAlert(data.message);
                 return;
             }
 
-            if (data.type === 'STATE_UPDATE') {
+                                                if (data.type === 'STATE_UPDATE') {
                 // Populate Duel List
-                if (data.players) {
+                if(data.players) {
                     var duelListHtml = "";
-                    data.players.forEach(function (p) {
-                        if (p.id !== myId) {
-                            duelListHtml += '<button class="btn" style="background:#222; border:1px solid var(--neon);" onclick="send(\'SABOTAGE_DUEL\', \'' + p.id + '\'); document.getElementById(\'duel-player-select\').style.display=\'none\';">Duelo vs ' + p.name + '</button>';
+                    data.players.forEach(function(p) {
+                        if(p.id !== myId) {
+                            duelListHtml += '<button class="btn" style="background:#222; border:1px solid var(--neon);" onclick="send(''SABOTAGE_DUEL'', \'' + p.id + '\'); document.getElementById(''duel-player-select'').style.display=''none'';">Duelo vs ' + p.name + '</button>';
                         }
                     });
                     var listContainer = document.getElementById('duel-player-list');
-                    if (listContainer) listContainer.innerHTML = duelListHtml;
+                    if(listContainer) listContainer.innerHTML = duelListHtml;
                     var bombListHtml = "";
-                    data.players.forEach(function (p) {
-                        if (p.id !== myId) {
-                            bombListHtml += '<button class="btn" style="background:#550000; border:1px solid #ff3333;" onclick="send(\'SABOTAGE_BOMB\', \'' + p.id + '\'); document.getElementById(\'bomb-player-select\').style.display=\'none\';">Pasar a ' + p.name + '</button>';
+                    data.players.forEach(function(p) {
+                        if(p.id !== myId) {
+                            bombListHtml += '<button class="btn" style="background:#550000; border:1px solid #ff3333;" onclick="send(''SABOTAGE_BOMB'', \'' + p.id + '\'); document.getElementById(''bomb-player-select'').style.display=''none'';">Pasar a ' + p.name + '</button>';
                         }
                     });
                     var bombContainer = document.getElementById('bomb-player-list');
-                    if (bombContainer) bombContainer.innerHTML = bombListHtml;
+                    if(bombContainer) bombContainer.innerHTML = bombListHtml;
                 }
                 const leapBtn = document.getElementById('leap-container');
                 if (leapBtn) {
@@ -1172,8 +327,8 @@
                         if (activeP && activeP.name && myNameBlock.includes(activeP.name)) {
                             amIActive = true;
                         }
-                    } catch (e) { }
-
+                    } catch(e) {}
+                    
                     var tokensBlock = document.getElementById('token-container').innerText;
                     var hasTokens = tokensBlock.includes("1") || tokensBlock.includes("2") || tokensBlock.includes("3") || tokensBlock.includes("4") || tokensBlock.includes("5") || tokensBlock.includes("6") || tokensBlock.includes("7") || tokensBlock.includes("8") || tokensBlock.includes("9");
 
@@ -1445,7 +600,6 @@
                         document.getElementById('panic-timer').style.color = 'white';
                     }
 
-
                     var btnSabotageBet = document.getElementById('btn-sabotage-bet');
                     if (btnSabotageBet) {
                         var alreadyBet = data.bettingAgainst && data.bettingAgainst.includes(myId);
@@ -1608,8 +762,8 @@
                 }
             }
         });
-    </script>
-    <script>
+    
+
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
@@ -1617,18 +771,5 @@
                     .catch(err => console.log('Error registrando SW', err));
             });
         }
-    </script>
-    <!-- Modal Seleccion de Duelo -->
-    <div id="duel-player-select"
-        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:10000; align-items:center; justify-content:center; flex-direction:column; padding:20px; box-sizing:border-box;">
-        <h2 style="color:var(--gold); font-family:'Bungee'; text-align:center;">ELIGE TU RIVAL</h2>
-        <div id="duel-player-list"
-            style="width:100%; max-width:400px; display:flex; flex-direction:column; gap:10px; margin-top:20px;">
-            <!-- Rellenado dinamicamente -->
-        </div>
-        <button class="btn" onclick="document.getElementById('duel-player-select').style.display='none';"
-            style="margin-top:20px; background:#444;">CANCELAR</button>
-    </div>
-</body>
+    
 
-</html>
