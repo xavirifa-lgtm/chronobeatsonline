@@ -765,6 +765,11 @@
             var container = document.getElementById('player-container');
 
             switch (action) {
+                case 'REMOTE_START_GAME':
+                    if (document.getElementById('lobby').style.display !== 'none') {
+                        startGame();
+                    }
+                    break;
                 case 'PLAY':
                     if (peerId !== activeP.id) return;
                     if (!isPlaying) {
