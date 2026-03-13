@@ -1,1131 +1,748 @@
 
-        var peer, roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-        var players = [], connections = {}, songs = [], currentSongIdx = -1, activePlayerIdx = 0, isRevealed = false;
-        var currentBets = {}; // playerId -> slotIndex
-        var activeGuess = null; // slotIndex del jugador activo
-        var bettingAgainst = []; // IDs de los jugadores que han apostado contra el jugador activo
+        function toggleRules() {
+            var el = document.getElementById('rules-overlay');
+            el.style.display = (el.style.display === 'none' || el.style.display === '') ? 'flex' : 'none';
+        }
+        function toggleRemote() {
+            var el = document.getElementById('remote-overlay');
+            el.style.display = (el.style.display === 'none' || el.style.display === '') ? 'flex' : 'none';
+        }
+    
 
-        // Variables de estado del Modo Rey
-        var gameMode = 'normal';
-        var turnPhase = 'NORMAL'; // 'NORMAL', 'KING_SELECTION', 'KING_GUESS', 'KING_GUESS_RESULT'
-        var kingOptions = []; // Array de opciones para los retadores
-        var cheatsEnabled = true;
+        var peer, conn, myId, playerName;
+        var lastState = null;
+        var playerAvatarDataUrl = null;
 
-        // Seguimiento de tiempo para skips manuales
-        var segundosAcumulados = 0;
-        var momentoDeInicio = 0;
-        var isPlaying = false;
-        var isMuted = false;
-        var muteTimeRemaining = 0;
-        var muteIntervalTimer = null;
-        var panicTimer = 0;
-        var panicActive = false;
-        var panicInterval = null;
-        var joputismoLevel = 0; // 0: LOSER, 1: HE-MAN, 2: SUPERMAN
-        var isFogActive = false;
+        // Cargar datos guardados al iniciar
+        window.addEventListener('load', function () {
+            var savedName = localStorage.getItem('cb_player_name');
+            if (savedName) {
+                document.getElementById('player-name').value = savedName;
+            }
+            var savedAvatar = localStorage.getItem('cb_player_avatar');
+            if (savedAvatar) {
+                playerAvatarDataUrl = savedAvatar;
+                document.getElementById('avatar-preview').src = savedAvatar;
+                document.getElementById('avatar-preview').style.display = 'block';
+                document.getElementById('avatar-placeholder').style.display = 'none';
+            }
+        });
 
-        document.getElementById('join-code').innerText = roomCode;
+        function handleAvatarSelect(event) {
+            var file = event.target.files[0];
+            if (!file) return;
 
-        // Eliminadas funciones de YT API
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                var img = new Image();
+                img.onload = function () {
+                    // Comprimir la imagen usando canvas
+                    var canvas = document.createElement('canvas');
+                    var MAX_SIZE = 150;
+                    var width = img.width;
+                    var height = img.height;
 
-        function initPeer() {
-            peer = new Peer("CB-HOST-" + roomCode, {
+                    if (width > height) {
+                        if (width > MAX_SIZE) {
+                            height *= MAX_SIZE / width;
+                            width = MAX_SIZE;
+                        }
+                    } else {
+                        if (height > MAX_SIZE) {
+                            width *= MAX_SIZE / height;
+                            height = MAX_SIZE;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    var ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    // Convertir a base64 calidad 0.7
+                    playerAvatarDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+
+                    document.getElementById('avatar-preview').src = playerAvatarDataUrl;
+                    document.getElementById('avatar-preview').style.display = 'block';
+                    document.getElementById('avatar-placeholder').style.display = 'none';
+
+                    // Guardar en localStorage
+                    localStorage.setItem('cb_player_avatar', playerAvatarDataUrl);
+
+                    // Transformar a Toon automáticamente
+                    toonifyAvatar();
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function toonifyAvatar() {
+            if (!playerAvatarDataUrl) return;
+
+            const overlay = document.getElementById('ai-loading-overlay');
+            overlay.style.display = 'flex';
+
+            try {
+                // Escalar imagen a 512px para Pollinations (optimizar subida)
+                const scaledDataUrl = await new Promise(resolve => {
+                    const img = new Image();
+                    img.onload = function () {
+                        const MAX = 512;
+                        const scale = Math.min(MAX / img.width, MAX / img.height, 1);
+                        const canvas = document.createElement('canvas');
+                        canvas.width = Math.round(img.width * scale);
+                        canvas.height = Math.round(img.height * scale);
+                        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                        resolve(canvas.toDataURL('image/jpeg', 0.85));
+                    };
+                    img.src = playerAvatarDataUrl;
+                });
+
+                // --- FILTRO DE COLOR NEÓN DEL TEMA NORMAL (AZUL/CYAN) ---
+
+                const img = new Image();
+                img.src = playerAvatarDataUrl;
+                await new Promise(r => {
+                    img.onload = r;
+                    img.onerror = r;
+                });
+
+                const canvas = document.createElement('canvas');
+                const MAX_SIZE = 400;
+                let cWidth = img.width;
+                let cHeight = img.height;
+                if (cWidth > cHeight && cWidth > MAX_SIZE) {
+                    cHeight *= MAX_SIZE / cWidth;
+                    cWidth = MAX_SIZE;
+                } else if (cHeight > MAX_SIZE) {
+                    cWidth *= MAX_SIZE / cHeight;
+                    cHeight = MAX_SIZE;
+                }
+
+                canvas.width = cWidth;
+                canvas.height = cHeight;
+                const ctx = canvas.getContext('2d');
+
+                // 1. Dibujar en escala de grises y alto contraste
+                ctx.filter = 'grayscale(100%) contrast(1.4) brightness(1.2)';
+                ctx.drawImage(img, 0, 0, cWidth, cHeight);
+                ctx.filter = 'none';
+
+                // 2. Teñir con el color Azul Cyan del tema Normal
+                ctx.globalCompositeOperation = 'color';
+                ctx.fillStyle = 'rgba(0, 200, 255, 0.8)';
+                ctx.fillRect(0, 0, cWidth, cHeight);
+
+                // Mezclar un poco de luz (Tono neón vibrante)
+                ctx.globalCompositeOperation = 'overlay';
+                ctx.fillStyle = 'rgba(0, 200, 255, 0.3)';
+                ctx.fillRect(0, 0, cWidth, cHeight);
+
+                // 3. Viñeta oscura
+                ctx.globalCompositeOperation = 'multiply';
+                const grd = ctx.createRadialGradient(cWidth / 2, cHeight / 2, cWidth * 0.3, cWidth / 2, cHeight / 2, cWidth * 0.9);
+                grd.addColorStop(0, "white");
+                grd.addColorStop(1, "rgba(10, 10, 10, 0.9)");
+                ctx.fillStyle = grd;
+                ctx.fillRect(0, 0, cWidth, cHeight);
+
+                playerAvatarDataUrl = canvas.toDataURL('image/jpeg', 0.9);
+                document.getElementById('avatar-preview').src = playerAvatarDataUrl;
+                localStorage.setItem('cb_player_avatar', playerAvatarDataUrl);
+
+                // Notify host immediately if already connected
+                if (window.conn && window.conn.open) {
+                    window.conn.send({ type: 'AVATAR_UPDATE', name: playerName, avatar: playerAvatarDataUrl });
+                }
+
+                await new Promise(r => setTimeout(r, 400));
+
+            } catch (err) {
+                console.error('Pollinations toon error:', err);
+                alert("Error creando versión cómic: " + err.message);
+            } finally {
+                overlay.style.display = 'none';
+            }
+        } function showCustomAlert(msg) {
+            document.getElementById('custom-alert-msg').innerText = msg;
+            document.getElementById('custom-alert').style.display = 'flex';
+        }
+
+        function showCustomConfirm(msg, callback) {
+            document.getElementById('custom-confirm-msg').innerText = msg;
+            var confirmDialog = document.getElementById('custom-confirm');
+            var btnYes = document.getElementById('custom-confirm-yes');
+            var btnNo = document.getElementById('custom-confirm-no');
+
+            // Remove previous event listeners
+            var newBtnYes = btnYes.cloneNode(true);
+            var newBtnNo = btnNo.cloneNode(true);
+            btnYes.parentNode.replaceChild(newBtnYes, btnYes);
+            btnNo.parentNode.replaceChild(newBtnNo, btnNo);
+
+            newBtnYes.addEventListener('click', function () {
+                confirmDialog.style.display = 'none';
+                callback(true);
+            });
+
+            newBtnNo.addEventListener('click', function () {
+                confirmDialog.style.display = 'none';
+                callback(false);
+            });
+
+            confirmDialog.style.display = 'flex';
+        }
+
+        function conectar() {
+            var hostId = document.getElementById('host-id').value.toUpperCase().trim();
+            hostId = hostId.replace('CB-HOST-', '').replace('CB-ANIME-HOST-', '').replace('CB-MOVIES-HOST-', '');
+            playerName = document.getElementById('player-name').value.trim();
+            if (!hostId || !playerName) return showCustomAlert("Rellena los datos para continuar.");
+
+            // Si no tiene avatar, preguntarle una vez
+            if (!playerAvatarDataUrl) {
+                showCustomConfirm("¿Quieres hacerte un selfie para tu avatar antes de entrar?", function (confirmed) {
+                    if (confirmed) {
+                        document.getElementById('avatar-input').click();
+                    } else {
+                        realizarConexion(hostId);
+                    }
+                });
+            } else {
+                realizarConexion(hostId);
+            }
+        }
+
+        function realizarConexion(hostId) {
+            // Guardar nombre en localStorage
+            localStorage.setItem('cb_player_name', playerName);
+
+            var btn = document.getElementById('join-btn');
+            btn.disabled = true;
+            btn.innerText = "CONECTANDO...";
+
+            peer = new Peer({
                 config: {
-                                        'iceServers': [
+                                                            'iceServers': [
                         { urls: 'stun:stun.l.google.com:19302' },
                         { urls: 'stun:stun1.l.google.com:19302' },
+                        { urls: 'stun:global.stun.twilio.com:3478' },
+                        { urls: 'stun:stun.cloudflare.com:3478' },
                         { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
                         { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' },
-                        { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
-                        { urls: 'turn:openrelay.metered.ca:80?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' }
+                        { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' }
                     ]
                 }
             });
             peer.on('open', function (id) {
-                console.log("Host Peer Abierto:", id);
-                document.getElementById('live-room-code').innerText = roomCode;
-                document.getElementById('live-room-code').style.display = 'block';
-            });
-            peer.on('connection', function (conn) {
-                console.log("Nueva conexión entrante:", conn.peer);
+                myId = id;
+                console.log("Conectando con ID Peer:", id);
+                conn = peer.connect("CB-HOST-" + hostId);
+
                 conn.on('open', function () {
-                    console.log("Conexión con el player abierta");
+                    console.log("¡Conectado!");
+                    conn.send({ type: 'JOIN', name: playerName, avatar: playerAvatarDataUrl });
+                    document.getElementById('login-screen').style.display = 'none';
+                    document.getElementById('game-screen').style.display = 'flex';
+                    initCheatSystem();
                 });
-                conn.on('data', function (data) {
-                    console.log("Comando recibido en host:", data);
-                    if (data.type === 'JOIN') {
-                        // PROTECCIÓN DUPLICADOS: Buscar si el nombre ya existe
-                        var existing = players.find(function (p) { return p.name.toLowerCase() === data.name.toLowerCase(); });
-                        if (existing) {
-                            console.log("Reconexión de jugador:", data.name);
-                            delete connections[existing.id];
-                            existing.id = conn.peer;
-                            existing.avatar = data.avatar || existing.avatar; // Actualizar avatar si cambió
-                            connections[conn.peer] = conn;
-                            syncState(); // Force state sync to reconnecting player
-                        } else {
-                            players.push({ id: conn.peer, name: data.name, avatar: data.avatar || null, score: 1, cards: [], tokens: 5, canReload: true });
-                            connections[conn.peer] = conn;
-                        }
-                        updateLobby();
-                    } else if (data.type === 'AVATAR_UPDATE') {
-                        var existing = players.find(function (p) { return p.name.toLowerCase() === data.name.toLowerCase(); });
-                        if (existing) {
-                            existing.avatar = data.avatar;
-                            updateLobby();
-                        }
-                    } else if (data.type === 'COMMAND') {
-                        handlePlayerCommand(conn.peer, data.action, data.value);
-                    }
-                });
-                conn.on('error', function (err) {
-                    console.error("Error en conexión:", err);
+
+                conn.on('data', handle);
+
+                conn.on('close', function () {
+                    showCustomAlert("Conexión cerrada. El Host se ha desconectado.");
+                    setTimeout(() => location.reload(), 3000);
                 });
             });
+
             peer.on('error', function (err) {
-                if (err.type === 'unavailable-id') {
-                    alert("El ID de sala ya existe o hay un error. Probando uno nuevo...");
-                    window.location.reload();
-                } else {
-                    alert("Error PeerJS Host: " + err.type);
-                }
+                console.error("Error PeerJS:", err);
+                showCustomAlert("Error de conexión: " + err.type);
+                btn.disabled = false;
+                btn.innerText = "ENTRAR";
             });
         }
-        initPeer();
 
-        var urlParams = new URLSearchParams(window.location.search);
-        var mixParam = urlParams.get('mix') || 'orig,anime,movies';
-        var mixTypes = mixParam.split(',');
-        var fetchPromises = [];
-
-        if (mixTypes.includes('orig')) {
-            fetchPromises.push(fetch('lista_final.txt?v=' + new Date().getTime()).then(function (r) { return r.text() }).then(function (t) { return { text: t, type: 'orig', color: '#00f2ff' } }));
-        }
-        if (mixTypes.includes('anime')) {
-            fetchPromises.push(fetch('lista_final_anime.txt?v=' + new Date().getTime()).then(function (r) { return r.text() }).then(function (t) { return { text: t, type: 'anime', color: '#ff00cc' } }));
-        }
-        if (mixTypes.includes('movies')) {
-            fetchPromises.push(fetch('lista_final_pelis.txt?v=' + new Date().getTime()).then(function (r) { return r.text() }).then(function (t) { return { text: t, type: 'movies', color: '#ffaa00' } }));
-        }
-
-        Promise.all(fetchPromises).then(function (results) {
-            var rawSongs = [];
-            var uniqueIds = new Set();
-            var playedIds = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]');
-            results.forEach(function (res) {
-                var categorySongs = [];
-                var lines = res.text.replace(/\r/g, '').split('\n');
-                lines.forEach(function (l, index) {
-                    var p = l.split('|');
-                    var m = p[3] ? p[3].match(/[?&]v=([^&#]+)|youtu\.be\/([^?&#]+)/) : null;
-                    if (m) {
-                        var currentId = (m[1] || m[2]);
-                        if (!uniqueIds.has(currentId) && !playedIds.includes(currentId)) {
-                            uniqueIds.add(currentId);
-                            categorySongs.push({
-                                artist: p[0],
-                                song: p[1],
-                                year: p[2],
-                                id: currentId,
-                                line: index + 1,
-                                type: res.type,
-                                color: res.color
-                            });
-                        }
-                    }
-                });
-
-                // Shuffle the songs inside this category before taking a chunk
-                for (let i = categorySongs.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [categorySongs[i], categorySongs[j]] = [categorySongs[j], categorySongs[i]];
-                }
-
-                // Take a maximum of 60 songs from this category to equalize proportions
-                var selectedSongs = categorySongs.slice(0, 60);
-                rawSongs = rawSongs.concat(selectedSongs);
-            });
-            if(rawSongs.length < 15) { localStorage.removeItem('CB_PlayedSongs'); alert('�Enhorabuena! Hab�is reventado la base de datos entera. Se ha reseteado la memoria de canciones vistas para esta sala para que pod�is seguir jugando. Recargando partida...'); window.location.reload(); return; }
-            // Fisher-Yates shuffle
-            for (let i = rawSongs.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [rawSongs[i], rawSongs[j]] = [rawSongs[j], rawSongs[i]];
-            }
-            songs = rawSongs;
-        });
-
-        function updateLobby() {
-            var h = "";
-            for (var i = 0; i < players.length; i++) {
-                var avatarHtml = '';
-                if (players[i].avatar) {
-                    avatarHtml = '<img src="' + players[i].avatar + '" style="width:30px; height:30px; border-radius:50%; vertical-align:middle; margin-right:8px; border:2px solid var(--neon);">';
-                } else {
-                    var initial = players[i].name.charAt(0).toUpperCase();
-                    avatarHtml = '<div style="width:30px; height:30px; border-radius:50%; background:#222; border:2px solid var(--neon); color:var(--neon); display:inline-flex; align-items:center; justify-content:center; font-family:\'Bungee\'; vertical-align:middle; margin-right:8px;">' + initial + '</div>';
-                }
-                h += '<div class="player-tag" style="display:flex; align-items:center;">' + avatarHtml + players[i].name + '</div>';
-            }
-            document.getElementById('lobby-players').innerHTML = h;
-            if (players.length >= 1) document.getElementById('start-btn').style.display = 'inline-block';
-        }
-
-        var joputismoAudioTimeout = null;
-
-        function setJoputismo(level) {
-            joputismoLevel = parseInt(level);
-            var selectLobby = document.getElementById('joputismo-select-lobby');
-            if (selectLobby) selectLobby.value = joputismoLevel;
-            var selectGame = document.getElementById('joputismo-select-game');
-            if (selectGame) selectGame.value = joputismoLevel;
-
-            var themeContainer = document.getElementById('joputismo-audio-player');
-            if (themeContainer) {
-                if (joputismoAudioTimeout) {
-                    clearTimeout(joputismoAudioTimeout);
-                    joputismoAudioTimeout = null;
-                }
-
-                if (document.getElementById('lobby').style.display !== 'none') {
-                    if (joputismoLevel === 1) {
-                        // Trololo meme
-                        themeContainer.innerHTML = '<iframe width="1" height="1" src="https://www.youtube-nocookie.com/embed/oavMtUWDBTM?autoplay=1&start=16" allow="autoplay" style="display:none;"></iframe>';
-                    } else if (joputismoLevel === 2) {
-                        // Superman theme - desde el principio
-                        themeContainer.innerHTML = '<iframe width="1" height="1" src="https://www.youtube-nocookie.com/embed/e9vrfEoc8_g?autoplay=1" allow="autoplay" style="display:none;"></iframe>';
-                    } else {
-                        themeContainer.innerHTML = '';
-                    }
-                } else {
-                    themeContainer.innerHTML = '';
-                }
-            }
-            syncState();
-        }
-
-        function startGame() {
-            var tc = document.getElementById('joputismo-audio-player');
-            if (tc) tc.innerHTML = '';
-
-            gameMode = document.getElementById('game-mode-select').value;
-
-            // MECÁNICA INICIAL: Repartir una carta a cada jugador
-            players.forEach(function (p) {
-                currentSongIdx++; if(songs[currentSongIdx] && songs[currentSongIdx].id) { var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]'); if(!_pl.includes(songs[currentSongIdx].id)){ _pl.push(songs[currentSongIdx].id); localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl)); } }
-                var s = songs[currentSongIdx];
-                if (s) p.cards.push(s.year);
-            });
-
-            document.getElementById('lobby').style.display = 'none';
-            document.getElementById('dashboard').style.display = 'grid';
-            nextTurn();
-        }
-
-        function nextTurn() {
-            currentSongIdx++; if(songs[currentSongIdx] && songs[currentSongIdx].id) { var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]'); if(!_pl.includes(songs[currentSongIdx].id)){ _pl.push(songs[currentSongIdx].id); localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl)); } } isRevealed = false;
-            segundosAcumulados = 0;
-            momentoDeInicio = 0;
-            isPlaying = false;
-            currentBets = {}; var rb=document.getElementById('btn-report-error'); if(rb) rb.style.display='block'; // al cambiar de turno
-            activeGuess = null; // Limpiar adivinanza
-            bettingAgainst = []; // Limpiar apuestas de "ni de coña"
-
-            isMuted = false;
-            muteTimeRemaining = 0;
-            if (muteIntervalTimer) { clearInterval(muteIntervalTimer); muteIntervalTimer = null; }
-
-            panicActive = false;
-            panicTimer = 0;
-            if (panicInterval) { clearInterval(panicInterval); panicInterval = null; }
-
-            isFogActive = false;
-
-            // --- INICIO MODO REY CHECK ---
-            if (gameMode === 'rey' && players[activePlayerIdx] && players[activePlayerIdx].score >= 10) {
-                turnPhase = 'KING_SELECTION';
-                kingOptions = [];
-                // Calcular un número de cartas igual a (players.length - 1)
-                var numOptions = Math.max(1, players.length - 1);
-                for (var i = 0; i < numOptions; i++) {
-                    currentSongIdx++; if(songs[currentSongIdx] && songs[currentSongIdx].id) { var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]'); if(!_pl.includes(songs[currentSongIdx].id)){ _pl.push(songs[currentSongIdx].id); localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl)); } }
-                    kingOptions.push(songs[currentSongIdx]);
-                }
-
-                document.getElementById('ui-card-artist').innerText = "ELIGIENDO CARTA...";
-                document.getElementById('ui-card-song').innerText = "ESPERANDO RIVALES";
-                document.getElementById('ui-card-year').innerText = "----";
-                document.getElementById('btn-reveal-host').style.display = 'none';
-                document.getElementById('val-card-ui').style.display = 'block';
-                document.getElementById('validation-buttons').style.display = 'none';
-                document.getElementById('challenger-validation').style.display = 'none';
-                document.getElementById('ui-current-player').innerText = players[activePlayerIdx].name + " (REY)";
-                document.getElementById('host-instructions').innerText = "ESPERANDO A QUE LOS JUGADORES ELIJAN QUÉ CARTA TE TOCA...";
-                document.getElementById('player-container').innerHTML = '';
-                syncState();
-                return;
+        function send(action, value) {
+            if (conn && conn.open) {
+                conn.send({ type: 'COMMAND', action: action, value: value });
             } else {
-                turnPhase = 'NORMAL';
-            }
-            // --- FIN MODO REY CHECK ---
-
-            var s = songs[currentSongIdx];
-            if (s && s.color) document.documentElement.style.setProperty('--neon', s.color);
-
-            var typeText = "????";
-            if (s && s.type === 'anime') typeText = "ADIVINA LA SERIE";
-            else if (s && s.type === 'movies') typeText = "ADIVINA LA PELÍCULA";
-            else typeText = "ADIVINA EL GRUPO";
-
-            document.getElementById('ui-card-artist').innerText = typeText;
-            document.getElementById('ui-card-song').innerText = "????";
-            document.getElementById('ui-card-year').innerText = "????";
-            document.getElementById('btn-reveal-host').style.display = 'block';
-            document.getElementById('val-card-ui').style.display = 'block';
-            document.getElementById('validation-buttons').style.display = 'none';
-            document.getElementById('challenger-validation').style.display = 'none';
-            document.getElementById('ui-current-player').innerText = players[activePlayerIdx].name;
-            document.getElementById('host-instructions').innerText = "ESPERANDO ACCIÓN...";
-            document.getElementById('player-container').innerHTML = '<div id="youtube-player"></div>';
-            syncState();
-        }
-
-        function playBuzzerWebAudio() {
-            try {
-                var ctx = new (window.AudioContext || window.webkitAudioContext)();
-                var osc = ctx.createOscillator();
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(150, ctx.currentTime);
-                osc.frequency.linearRampToValueAtTime(100, ctx.currentTime + 2);
-                var gain = ctx.createGain();
-                gain.gain.setValueAtTime(0, ctx.currentTime);
-                gain.gain.linearRampToValueAtTime(1, ctx.currentTime + 0.1);
-                gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 3);
-                osc.connect(gain);
-                gain.connect(ctx.destination);
-                osc.start();
-                osc.stop(ctx.currentTime + 3);
-            } catch (e) {
-                console.error("Audio API error:", e);
+                showCustomAlert("Conexión perdida. Recarga la página.");
             }
         }
 
-        function handlePlayerCommand(peerId, action, value) {
-            var activeP = players[activePlayerIdx];
-            var s = songs[currentSongIdx];
-            var container = document.getElementById('player-container');
+        function handle(data) {
+            console.log("Evento:", data.type, data);
 
-            switch (action) {
-                case 'PLAY':
-                    if (peerId !== activeP.id) return;
-                    if (!isPlaying) {
-                        momentoDeInicio = Date.now();
-                        isPlaying = true;
-                        container.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + s.id + '?autoplay=1&start=' + segundosAcumulados + (isMuted ? '&mute=1' : '') + '" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen style="width:100%; height:100%; border:none;"></iframe>';
-                        document.getElementById('host-instructions').innerText = "REPRODUCIENDO" + (isMuted ? " (MUTE)" : "");
-                        syncState();
-                    }
-                    break;
-                case 'PAUSE':
-                    if (peerId !== activeP.id) return;
-                    if (isPlaying) {
-                        var tiempoTranscurrido = Math.floor((Date.now() - momentoDeInicio) / 1000);
-                        segundosAcumulados += tiempoTranscurrido;
-                        container.innerHTML = '';
-                        isPlaying = false;
-                        document.getElementById('host-instructions').innerText = "PAUSADO";
-                        syncState();
-                    }
-                    break;
-                case 'STOP':
-                    if (peerId !== activeP.id) return;
-                    isPlaying = false;
-                    container.innerHTML = '';
-                    document.getElementById('host-instructions').innerText = "¿ACERTÓ?";
-                    revealData();
-                    syncState();
-                    break;
-                case 'SABOTAGE_MUTE':
-                    var p = players.find(function (pl) { return pl.id === peerId; });
-                    if (p && p.tokens >= 1 && p.id !== players[activePlayerIdx].id && isPlaying) {
-                        p.tokens--;
-                        muteTimeRemaining += 15000;
+            if (data.type === 'BET_RESULT') {
+                showCustomAlert(data.msg);
+                return;
+            }
 
-                        if (!isMuted) {
-                            isMuted = true;
-                            var tiempoTranscurrido = Math.floor((Date.now() - momentoDeInicio) / 1000);
-                            segundosAcumulados += tiempoTranscurrido;
-                            momentoDeInicio = Date.now();
-                            container.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + s.id + '?autoplay=1&start=' + segundosAcumulados + '&mute=1" allow="autoplay"></iframe>';
-                            document.getElementById('host-instructions').innerText = "REPRODUCIENDO (MUTE)";
+            // Retroalimentación de trucos para Xavi
+            if (data.type === 'STATE_UPDATE' && lastState && playerName.toLowerCase() === 'xavi') {
+                if (data.cheatsEnabled !== lastState.cheatsEnabled) {
+                    const indicator = document.getElementById('cheat-indicator');
+                    indicator.innerText = data.cheatsEnabled ? "TRUCOS ON" : "TRUCOS OFF";
+                    indicator.style.background = data.cheatsEnabled ? "var(--neon)" : "var(--accent)";
+                    indicator.style.display = "block";
+                    setTimeout(() => { indicator.style.display = "none"; }, 2000);
+                }
+            }
 
-                            muteIntervalTimer = setInterval(function () {
-                                if (isPlaying) muteTimeRemaining -= 1000;
-                                if (muteTimeRemaining <= 0) {
-                                    clearInterval(muteIntervalTimer);
-                                    muteIntervalTimer = null;
-                                    muteTimeRemaining = 0;
-                                    if (isMuted && isPlaying) {
-                                        isMuted = false;
-                                        var t2 = Math.floor((Date.now() - momentoDeInicio) / 1000);
-                                        segundosAcumulados += t2;
-                                        momentoDeInicio = Date.now();
-                                        container.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + s.id + '?autoplay=1&start=' + segundosAcumulados + '" allow="autoplay"></iframe>';
-                                        document.getElementById('host-instructions').innerText = "REPRODUCIENDO";
-                                        syncState();
-                                    }
-                                }
-                            }, 1000);
+            lastState = data;
+                        if (data.type === 'SABOTAGE_MESSAGE') {
+                showCustomAlert(data.message);
+                return;
+            }
+
+                                    if (data.type === 'STATE_UPDATE') {
+                const leapBtn = document.getElementById('leap-container');
+                if (leapBtn) {
+                    var amIActive = false;
+                    try {
+                        var myNameBlock = document.getElementById('player-name').innerText;
+                        var pData = data.players || [];
+                        var activeP = pData[data.activePlayerIdx] || pData[0];
+                        if (activeP && activeP.name && myNameBlock.includes(activeP.name)) {
+                            amIActive = true;
                         }
-                        syncState();
-                    }
-                    break;
-                case 'TOGGLE_CHEAT':
-                    cheatsEnabled = !cheatsEnabled;
-                    syncState();
-                    break;
-                case 'SKIP':
-                    if (peerId !== activeP.id) return;
-                    if (isPlaying) {
-                        var tiempoTranscurrido = Math.floor((Date.now() - momentoDeInicio) / 1000);
-                        segundosAcumulados += tiempoTranscurrido + value;
+                    } catch(e) {}
+                    
+                    var tokensBlock = document.getElementById('token-container').innerText;
+                    var hasTokens = tokensBlock.includes("1") || tokensBlock.includes("2") || tokensBlock.includes("3") || tokensBlock.includes("4") || tokensBlock.includes("5") || tokensBlock.includes("6") || tokensBlock.includes("7") || tokensBlock.includes("8") || tokensBlock.includes("9");
+
+                    if (data.isLeapOfFaithWindow && !amIActive && hasTokens) {
+                        leapBtn.style.display = 'block';
                     } else {
-                        segundosAcumulados += value;
+                        leapBtn.style.display = 'none';
                     }
-                    if (segundosAcumulados < 0) segundosAcumulados = 0;
-                    momentoDeInicio = Date.now();
-                    if (isPlaying) {
-                        container.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + s.id + '?autoplay=1&start=' + segundosAcumulados + (isMuted ? '&mute=1' : '') + '" allow="autoplay"></iframe>';
-                        document.getElementById('host-instructions').innerText = "REPRODUCIENDO" + (isMuted ? " (MUTE)" : "");
-                        syncState();
-                    }
-                    break;
-                case 'RELOAD_SONG':
-                    var p = players.find(function (pl) { return pl.id === peerId; });
-                    if (p && p.tokens >= 1 && p.canReload) {
-                        p.tokens--;
-                        p.canReload = false; // Solo uno por turno
-                        isPlaying = false;
-                        container.innerHTML = '<div id="youtube-player"></div>'; // Parar música de verdad
-                        currentSongIdx++; if(songs[currentSongIdx] && songs[currentSongIdx].id) { var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]'); if(!_pl.includes(songs[currentSongIdx].id)){ _pl.push(songs[currentSongIdx].id); localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl)); } } // Descartar y pasar a la siguiente
-                        segundosAcumulados = 0;
-                        momentoDeInicio = 0;
-                        isRevealed = false; // Resetear revelado
-                        document.getElementById('ui-card-artist').innerText = "????";
-                        document.getElementById('ui-card-song').innerText = "????";
-                        document.getElementById('ui-card-year').innerText = "????";
-                        document.getElementById('btn-reveal-host').style.display = 'block';
-                        document.getElementById('val-card-ui').style.display = 'block';
-                        document.getElementById('validation-buttons').style.display = 'none';
-                        document.getElementById('host-instructions').innerText = "CANCIÓN CAMBIADA (DALE A PLAY)";
-                        syncState();
-                    }
-                    break;
-                case 'SYSTEM_ERROR_TRACK':
-                    var p = players.find(function (pl) { return pl.id === peerId; });
-                    if (p && isPlaying) {
-                        isPlaying = false;
-                        container.innerHTML = '<div id="youtube-player"></div>';
-                        currentSongIdx++; if(songs[currentSongIdx] && songs[currentSongIdx].id) { var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]'); if(!_pl.includes(songs[currentSongIdx].id)){ _pl.push(songs[currentSongIdx].id); localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl)); } }
-                        segundosAcumulados = 0;
-                        momentoDeInicio = 0;
-                        isRevealed = false;
-                        document.getElementById('ui-card-artist').innerText = "????";
-                        document.getElementById('ui-card-song').innerText = "????";
-                        document.getElementById('ui-card-year').innerText = "????";
-                        document.getElementById('btn-reveal-host').style.display = 'block';
-                        document.getElementById('val-card-ui').style.display = 'block';
-                        document.getElementById('validation-buttons').style.display = 'none';
-                        document.getElementById('host-instructions').innerText = "VÍDEO ROTO. CANCIÓN CAMBIADA.";
-                        syncState();
-                    }
-                    break;
-                case 'AUTO_WIN':
-                    var p = players.find(function (pl) { return pl.id === peerId; });
-                    if (p && p.tokens >= 3) {
-                        p.tokens -= 3;
-                        validateResult(true, false);
-                    }
-                    break;
-                case 'BET':
-                    console.log("[BET] de", peerId, "en slot", value);
-                    var p = players.find(function (pl) { return pl.id === peerId; });
-                    var valNum = parseInt(value);
-                    if (isNaN(valNum)) break;
+                }
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('game-screen').style.display = 'flex';
+                document.getElementById('cur-player').innerText = data.activePlayer && data.activePlayer.name ? data.activePlayer.name : "---";
 
-                    var slotOccupied = (activeGuess == valNum);
-                    for (var pid in currentBets) { if (currentBets[pid] == valNum) slotOccupied = true; }
+                // LOGICA DEL MANDO HOST
+                var fab = document.getElementById('fab-remote');
+                var rContainer = document.getElementById('remote-controls-container');
+                if (data.judgeId === 'ALL' || data.judgeId === myId) {
+                    fab.style.display = 'flex';
+                    fab.style.filter = 'none';
+                    fab.style.opacity = '1';
+                    fab.style.pointerEvents = 'auto';
+                    fab.style.borderColor = 'var(--neon)';
+                    fab.style.boxShadow = '0 0 15px var(--neon)';
 
-                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 2 && currentBets[peerId] === undefined && !slotOccupied && activeGuess !== null) {
-                        console.log("[OK] Apuesta (Duelo) aceptada para", p.name);
-                        p.tokens -= 2;
-                        currentBets[peerId] = valNum;
-                        syncState();
-                        console.log("[FAIL] Apuesta rechazada. p:", !!p, "Tokens:", p ? p.tokens : 0, "Ya apostó?", p ? currentBets[peerId] !== undefined : false, "Slot ocupado?", slotOccupied, "Guess es", activeGuess);
-                    }
-                    break;
-                case 'BET_AGAINST_ACTIVE':
-                    var p = players.find(function (pl) { return pl.id === peerId; });
-                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 1 && !bettingAgainst.includes(peerId) && isPlaying && !isRevealed && (!turnPhase || turnPhase === 'NORMAL')) {
-                        p.tokens--;
-                        bettingAgainst.push(peerId);
+                    // Render Contextual Buttons
+                    if (data.judgeId === 'ALL') {
+                        var currJop = data.joputismoLevel || 0;
+                        var jstr = "";
+                        jstr += "<h4 style='color:var(--neon); font-family:Bungee; font-size:1em; margin-bottom:5px; margin-top:0'>NIVEL JOPUTISMO:</h4>";
+                        jstr += "<div style='display:flex; gap:5px; margin-bottom: 20px; justify-content:center;'>";
+                        jstr += "<button class='btn' style='padding:10px; font-size:0.8em; flex:1; " + (currJop === 0 ? "background:var(--neon);color:#000;" : "background:#222;color:#888") + "' onclick=\"send('REMOTE_JOPUTISMO', 0)\">LOSER</button>";
+                        jstr += "<button class='btn' style='padding:10px; font-size:0.8em; flex:1; " + (currJop === 1 ? "background:var(--neon);color:#000;" : "background:#222;color:#888") + "' onclick=\"send('REMOTE_JOPUTISMO', 1)\">TROLL</button>";
+                        jstr += "<button class='btn' style='padding:10px; font-size:0.8em; flex:1; " + (currJop === 2 ? "background:var(--neon);color:#000;" : "background:#222;color:#888") + "' onclick=\"send('REMOTE_JOPUTISMO', 2)\">SUPERMAN</button>";
+                        jstr += "</div>";
 
-                        // Mostrar mensaje flotante en el host
-                        var oldText = document.getElementById('host-instructions').innerText;
-                        document.getElementById('host-instructions').innerHTML = "<span style='color:#ff0055; font-size:1.2em;'>¡" + p.name + " DUDA DE QUE LO SEPA!</span>";
-                        setTimeout(function () {
-                            if (!isRevealed) document.getElementById('host-instructions').innerText = (isMuted ? "REPRODUCIENDO (MUTE)" : "REPRODUCIENDO");
-                        }, 3000);
-
-                        syncState();
-                    }
-                    break;
-                case 'SABOTAGE_PANIC':
-                    var p = players.find(function (pl) { return pl.id === peerId; });
-                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 2 && !panicActive && isPlaying && !isRevealed && (!turnPhase || turnPhase === 'NORMAL')) {
-                        p.tokens -= 2;
-                        panicActive = true;
-                        panicTimer = 10;
-
-                        var oldText = document.getElementById('host-instructions').innerText;
-                        document.getElementById('host-instructions').innerHTML = "<span style='color:#ff0000; font-size:1.5em; font-family:Bungee;'>¡" + p.name + " HA LANZADO UN ATAQUE DE PÁNICO!</span>";
-                        setTimeout(function () {
-                            if (!isRevealed && panicActive) document.getElementById('host-instructions').innerText = (isMuted ? "REPRODUCIENDO (MUTE)" : "REPRODUCIENDO");
-                        }, 3000);
-
-                        panicInterval = setInterval(function () {
-                            panicTimer--;
-                            if (panicTimer <= 0) {
-                                clearInterval(panicInterval);
-                                panicInterval = null;
-                                panicTimer = 0;
-                                panicActive = false;
-
-                                // Forzar fallo
-                                isRevealed = true;
-                                isPlaying = false;
-                                document.getElementById('player-container').innerHTML = '';
-                                document.getElementById('host-instructions').innerHTML = "<span style='color:#ff4444; font-size:1.5em;'>¡TIEMPO AGOTADO! ❌</span><br>Turno perdido por pánico.";
-                                document.getElementById('btn-reveal-host').style.display = 'none';
-                                document.getElementById('val-card-ui').style.display = 'block';
-                                document.getElementById('validation-buttons').style.display = 'none';
-                                syncState();
-                                setTimeout(function () {
-                                    activePlayerIdx = (activePlayerIdx + 1) % players.length;
-                                    players[activePlayerIdx].canReload = true;
-                                    nextTurn();
-                                }, 4000);
-                            } else {
-                                syncState();
-                            }
-                        }, 1000);
-                        syncState();
-                    }
-                    break;
-                case 'SABOTAGE_BUZZER':
-                    var p = players.find(function (pl) { return pl.id === peerId; });
-                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 1 && isPlaying && !isRevealed && (!turnPhase || turnPhase === 'NORMAL')) {
-                        p.tokens -= 1;
-                        playBuzzerWebAudio();
-                        syncState();
-                    }
-                    break;
-                case 'SABOTAGE_FOG':
-                    var p = players.find(function (pl) { return pl.id === peerId; });
-                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 2 && !isFogActive && (!turnPhase || turnPhase === 'NORMAL')) {
-                        p.tokens -= 2;
-                        isFogActive = true;
-
-                        document.getElementById('host-instructions').innerHTML = "<span style='color:#aaaaaa; font-size:1.5em; font-family:Bungee;'>¡JAJAJA! ¡" + p.name + " HA LANZADO NIEBLA TEMPORAL!</span>";
-                        setTimeout(function () {
-                            if (!isRevealed && !panicActive) document.getElementById('host-instructions').innerText = (isMuted ? "REPRODUCIENDO (MUTE)" : "REPRODUCIENDO");
-                        }, 3000);
-
-                        syncState();
-                    }
-                    break;
-                case 'SABOTAGE_FORCE_SKIP':
-                    var p = players.find(function (pl) { return pl.id === peerId; });
-                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 1 && activeGuess === null && isPlaying && !isRevealed && (!turnPhase || turnPhase === 'NORMAL')) {
-                        p.tokens -= 1;
-                        isPlaying = false;
-                        container.innerHTML = '<div id="youtube-player"></div>';
-                        currentSongIdx++; if(songs[currentSongIdx] && songs[currentSongIdx].id) { var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]'); if(!_pl.includes(songs[currentSongIdx].id)){ _pl.push(songs[currentSongIdx].id); localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl)); } }
-                        segundosAcumulados = 0;
-                        momentoDeInicio = 0;
-                        isRevealed = false;
-                        document.getElementById('ui-card-artist').innerText = "????";
-                        document.getElementById('ui-card-song').innerText = "????";
-                        document.getElementById('ui-card-year').innerText = "????";
-                        document.getElementById('btn-reveal-host').style.display = 'block';
-                        document.getElementById('val-card-ui').style.display = 'block';
-                        document.getElementById('validation-buttons').style.display = 'none';
-
-                        document.getElementById('host-instructions').innerHTML = "<span style='color:#ff00ff; font-size:1.5em; font-family:Bungee;'>¡" + p.name + " HA OBLIGADO A CAMBIAR LA CANCIÓN!</span>";
-                        setTimeout(function () {
-                            if (!isRevealed && !panicActive) document.getElementById('host-instructions').innerText = "CANCIÓN CAMBIADA (DALE A PLAY)";
-                        }, 4000);
-
-                        syncState();
-                    }
-                    break;
-                case 'SABOTAGE_VETO':
-                    var p = players.find(function (pl) { return pl.id === peerId; });
-                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 1 && players[activePlayerIdx].canReload && (!turnPhase || turnPhase === 'NORMAL')) {
-                        p.tokens -= 1;
-                        players[activePlayerIdx].canReload = false;
-
-                        document.getElementById('host-instructions').innerHTML = "<span style='color:#ff8800; font-size:1.5em; font-family:Bungee;'>¡" + p.name + " HA VETADO LA RECARGA!</span>";
-                        setTimeout(function () {
-                            if (!isRevealed && !panicActive) document.getElementById('host-instructions').innerText = (isMuted ? "REPRODUCIENDO (MUTE)" : "REPRODUCIENDO");
-                        }, 3000);
-
-                        syncState();
-                    }
-                    break;
-                case 'SABOTAGE_STEAL_TURN':
-                    var p = players.find(function (pl) { return pl.id === peerId; });
-                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 4 && isPlaying && !isRevealed) {
-                        p.tokens -= 4;
-                        var oldActive = players[activePlayerIdx];
-                        activePlayerIdx = players.indexOf(p);
-
-                        // Clear bets and guesses because turn changes
-                        currentBets = {};
-                        activeGuess = null;
-                        bettingAgainst = [];
-
-                        document.getElementById('host-instructions').innerHTML = "<span style='color:#00f2fe; font-size:1.5em; font-family:Bungee;'>¡" + p.name + " HA ROBADO EL TURNO A " + oldActive.name + "!</span>";
-                        setTimeout(function () {
-                            if (!isRevealed && !panicActive) document.getElementById('host-instructions').innerText = (isMuted ? "REPRODUCIENDO (MUTE)" : "REPRODUCIENDO");
-                        }, 4000);
-
-                        syncState();
-                    }
-                    break;
-                case 'SABOTAGE_BLACKHOLE':
-                    var p = players.find(function (pl) { return pl.id === peerId; });
-                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 5 && (!turnPhase || turnPhase === 'NORMAL')) {
-                        var validTargets = players.filter(function (t) { return t.id !== p.id && t.score > 1; });
-                        if (validTargets.length > 0) {
-                            p.tokens -= 5;
-                            var target = validTargets[Math.floor(Math.random() * validTargets.length)];
-                            target.score -= 1;
-                            var cardIdx = Math.floor(Math.random() * target.cards.length);
-                            target.cards.splice(cardIdx, 1);
-
-                            document.getElementById('host-instructions').innerHTML = "<span style='color:#9900ff; font-size:1.5em; font-family:Bungee;'>¡" + p.name + " CREÓ UN AGUJERO NEGRO Y DESTRUYÓ UNA CARTA DE " + target.name + "!</span>";
-                            setTimeout(function () {
-                                if (!isRevealed && !panicActive) document.getElementById('host-instructions').innerText = (isMuted ? "REPRODUCIENDO (MUTE)" : "REPRODUCIENDO");
-                            }, 4000);
-                            syncState();
+                        rContainer.innerHTML = jstr + `<button class="btn" style="background:#ff00ff; color:white; border-color:#ff00ff; padding:20px; font-size:1.2em;" onclick="send('REMOTE_START_GAME'); toggleRemote();">▶ INICIAR PARTIDA</button>`;
+                    } else if (data.turnPhase && data.turnPhase !== 'NORMAL') {
+                        rContainer.innerHTML = `<p style="color:#888;">Controles no disponibles durante evento especial.</p>`;
+                    } else {
+                        if (!data.revealed) {
+                            rContainer.innerHTML = `<button class="btn" style="background:var(--neon); color:#000; padding:20px; font-size:1.2em;" onclick="send('REMOTE_REVEAL'); toggleRemote();">👀 REVELAR CARTA</button>
+                            <button class="btn" style="background:#555; color:white; border-color:#555; margin-top:20px;" onclick="send('REMOTE_SYSTEM_ERROR'); toggleRemote();">ERROR DE SISTEMA (REPETIR)</button>`;
+                        } else {
+                            rContainer.innerHTML = `
+                                <button class="btn" style="background:#00ff00; color:#000; padding:15px; margin-bottom:10px;" onclick="send('REMOTE_CORRECT'); toggleRemote();">✅ SÍ (Acertó y gana carta)</button>
+                                <button class="btn" style="background:#ffd700; color:#000; padding:15px; margin-bottom:10px;" onclick="send('REMOTE_CORRECT_TOKEN'); toggleRemote();">🔵 SÍ (+ Ficha Azul)</button>
+                                <button class="btn" style="background:#ff4444; color:#fff; padding:15px; margin-bottom:10px;" onclick="send('REMOTE_INCORRECT'); toggleRemote();">❌ NO (Falló todo)</button>
+                                <button class="btn" style="background:#00f2fe; color:#000; padding:15px; margin-bottom:10px;" onclick="send('REMOTE_INCORRECT_TOKEN'); toggleRemote();">🔵 NO (+ Ficha Consolación)</button>
+                                <button class="btn" style="background:#555; color:white; border-color:#555; margin-top:20px;" onclick="send('REMOTE_SYSTEM_ERROR'); toggleRemote();">ERROR SISTEMA</button>
+                            `;
                         }
                     }
-                    break;
-                case 'SABOTAGE_STEAL_TOKEN':
-                    var p = players.find(function (pl) { return pl.id === peerId; });
-                    if (p && p.tokens >= 4) {
-                        var possibleTargets = players.filter(function (pt) { return pt.id !== peerId && pt.tokens > 0; });
-                        if (possibleTargets.length > 0) {
-                            p.tokens -= 4; // Pay the cost
-                            var target = possibleTargets[Math.floor(Math.random() * possibleTargets.length)];
-                            target.tokens -= 1;
-                            p.tokens += 1;
+                } else {
+                    fab.style.display = 'flex';
+                    fab.style.filter = 'grayscale(100%)';
+                    fab.style.opacity = '0.3';
+                    fab.style.pointerEvents = 'none';
+                    fab.style.borderColor = '#555';
+                    fab.style.boxShadow = 'none';
+                    document.getElementById('remote-overlay').style.display = 'none';
+                }
 
-                            // Send target an alert
-                            var tConn = connections[target.id];
-                            if (tConn) {
-                                tConn.send({
-                                    type: 'BET_RESULT',
-                                    msg: "¡" + p.name + " TE HA ROBADO 1 FICHA! 🥷"
+                if (data.leader) {
+                    document.getElementById('lb-leader-name').innerText = data.leader.name;
+                    document.getElementById('lb-leader-cards').innerText = data.leader.score;
+                }
+                if (data.myCards) {
+                    document.getElementById('lb-me-cards').innerText = data.myCards.length;
+                }
+
+                // Identificar si es mi turno usando el ID de PeerJS
+                var isMyTurn = (data.activePlayer.id === myId);
+                console.log("¿Es mi turno?", isMyTurn, "Mi ID:", myId, "ID Activo:", data.activePlayer.id);
+
+                var isKingMode = (data.turnPhase && data.turnPhase !== 'NORMAL');
+                var normalCardContainer = document.getElementById('normal-card-container');
+                var normalCollection = document.getElementById('normal-collection');
+                var kingModeUi = document.getElementById('king-mode-ui');
+
+                if (isKingMode) {
+                    normalCardContainer.style.display = 'none';
+                    normalCollection.style.display = 'none';
+                    kingModeUi.style.display = 'flex';
+
+                    if (data.turnPhase === 'KING_SELECTION') {
+                        if (isMyTurn) {
+                            kingModeUi.innerHTML = "<h3 style='color:var(--gold);font-family:Bungee;'>ERES EL REY</h3><p>EL RESTO DE JUGADORES ESTÁ ELIGIENDO TU CARTA...</p>";
+                        } else {
+                            var html = "<h3 style='color:var(--neon);font-family:Bungee;'>¡ELIGE LA CARTA MÁS DIFÍCIL!</h3>";
+                            if (data.kingOptions) {
+                                data.kingOptions.forEach(function (opt, idx) {
+                                    html += "<div style='background:#111; border:1px solid var(--neon); border-radius:10px; padding:10px; margin-bottom:10px; text-align:left;'>";
+                                    html += "<span style='color:#00f2fe; font-family:Bungee; font-size:1.2em; margin-right:10px;'>#" + (idx + 1) + "</span>";
+                                    html += "<span style='font-size:0.8em; color:#aaa;'>" + opt.artist + "</span><br>";
+                                    html += "<strong style='font-family:Bungee;'>" + opt.song + "</strong><br>";
+                                    html += "<span style='color:var(--accent); font-family:Bungee; font-size:1.2em;'>" + opt.year + "</span>";
+                                    html += "<button class='btn' style='margin-top:10px; padding:10px; font-size:1em;' onclick=\"send('KING_SELECT_CARD', " + idx + ")\">¡ELEGIR ESTA!</button>";
+                                    html += "</div>";
                                 });
                             }
-
-                            document.getElementById('host-instructions').innerHTML = "<span style='color:#ffff00; font-size:1.2em;'>¡" + p.name + " HA ROBADO A " + target.name + "!</span>";
-                            setTimeout(function () {
-                                if (!isRevealed && !panicActive) document.getElementById('host-instructions').innerText = (isMuted ? "REPRODUCIENDO (MUTE)" : "REPRODUCIENDO");
-                            }, 3000);
-
-                            syncState();
+                            kingModeUi.innerHTML = html;
                         }
-                    }
-                    break;
-                case 'GUESS':
-                    console.log("[GUESS] de", peerId, "en slot", value);
-                    var p = players.find(function (pl) { return pl.id === peerId; });
-                    var valNum = parseInt(value);
-                    if (isNaN(valNum)) break;
-
-                    var slotOccupiedByBet = false;
-                    for (var pid in currentBets) { if (currentBets[pid] == valNum) slotOccupiedByBet = true; }
-
-                    if (p && p.id === players[activePlayerIdx].id && !slotOccupiedByBet && activeGuess === null) {
-                        console.log("[OK] Marca del activo fijada en", valNum);
-                        activeGuess = valNum;
-                        syncState();
-                    } else {
-                        console.log("[FAIL] Guess rechazado. ¿Ya hay marca?", activeGuess !== null);
-                    }
-                    break;
-                case 'KING_SELECT_CARD':
-                    if (turnPhase !== 'KING_SELECTION') return;
-                    if (peerId === players[activePlayerIdx].id) return; // Rey no puede elegir
-
-                    var indexElegido = parseInt(value);
-                    if (indexElegido >= 0 && indexElegido < kingOptions.length) {
-                        var cartaElegida = kingOptions[indexElegido];
-                        songs[currentSongIdx] = cartaElegida;
-
-                        turnPhase = 'KING_GUESS';
-                        document.getElementById('ui-card-artist').innerText = "????";
-                        document.getElementById('ui-card-song').innerText = "????";
-                        document.getElementById('ui-card-year').innerText = "????";
-                        document.getElementById('host-instructions').innerHTML = "CARTA ELEGIDA.<br>ESPERANDO A QUE EL REY INTRODUZCA EL AÑO...";
-                        document.getElementById('player-container').innerHTML = '<div id="youtube-player"></div>';
-                        syncState();
-                    }
-                    break;
-                case 'KING_GUESS':
-                    if (turnPhase !== 'KING_GUESS') return;
-                    if (peerId !== players[activePlayerIdx].id) return; // Solo Rey
-
-                    var guessedYear = parseInt(value);
-                    if (!isNaN(guessedYear)) {
-                        var s = songs[currentSongIdx];
-                        var actualYear = parseInt(s.year);
-
-                        document.getElementById('ui-card-artist').innerText = s.artist;
-                        document.getElementById('ui-card-song').innerText = s.song;
-                        document.getElementById('ui-card-year').innerText = actualYear;
-
-                        var won = Math.abs(guessedYear - actualYear) <= 2;
-
-                        var resultHtml = "";
-                        if (won) {
-                            resultHtml = "<span style='color:#00ff00; font-size:1.5em;'>¡EL REY ACERTÓ!</span><br>Dijo " + guessedYear + ". (El año era " + actualYear + ").";
+                    } else if (data.turnPhase === 'KING_GUESS') {
+                        if (isMyTurn) {
+                            var html = "<h3 style='color:var(--gold);font-family:Bungee;'>¡ADIVINA EL AÑO!</h3>";
+                            html += "<p style='font-size:0.8em; color:var(--neon); margin-bottom:15px;'>(Escucha la canción. Margen de error: +/- 2 años)</p>";
+                            html += "<input type='number' id='king-guess-input' placeholder='AÑO' style='font-size:1.5em; text-align:center;'>";
+                            html += "<button class='btn' style='margin-top:10px;' onclick=\"var y = document.getElementById('king-guess-input').value; if(y) send('KING_GUESS', y);\">CONFIRMAR AÑO</button>";
+                            kingModeUi.innerHTML = html;
                         } else {
-                            resultHtml = "<span style='color:#ff4444; font-size:1.5em;'>¡FALLÓ!</span><br>Dijo " + guessedYear + ". (El año era " + actualYear + ").";
+                            kingModeUi.innerHTML = "<h3 style='color:var(--neon);font-family:Bungee;'>CARTA ENVIADA</h3><p>EL REY ESTÁ ADIVINANDO EL AÑO...</p>";
                         }
-                        resultHtml += "<br><br><button class='btn' style='background:var(--neon); color:#000; padding:15px; font-size:1.2em; pointer-events:auto; position:relative; z-index:9999;' onclick='resolveKingMode(" + won + ")'>ACEPTAR RESULTADO</button>";
-
-                        document.getElementById('host-instructions').innerHTML = resultHtml;
-                        document.getElementById('host-instructions').style.pointerEvents = 'auto'; // Permitir click en el div global si está bloqueado
-
-                        turnPhase = 'KING_GUESS_RESULT';
-                        syncState();
+                    } else if (data.turnPhase === 'KING_GUESS_RESULT') {
+                        var html = "<h3 style='color:var(--gold);font-family:Bungee;'>RESULTADO</h3>";
+                        html += "<p style='font-size:0.8em;color:#aaa;'>" + data.currentTrack.artist + "</p>";
+                        html += "<p style='font-family:Bungee;font-size:1.2em; border-bottom:1px solid #333; padding-bottom:10px;'>" + data.currentTrack.song + "</p>";
+                        html += "<p style='font-family:Bungee;font-size:2em; color:var(--neon); margin-bottom:15px;'>" + data.currentTrack.year + "</p>";
+                        kingModeUi.innerHTML = html;
                     }
-                    break;
-                case 'REMOTE_START_GAME':
-                    startGame();
-                    break;
-                case 'REMOTE_REVEAL':
-                    revealData();
-                    break;
-                case 'REMOTE_CORRECT':
-                    validateResult(true, false);
-                    break;
-                case 'REMOTE_CORRECT_TOKEN':
-                    validateResult(true, true);
-                    break;
-                case 'REMOTE_INCORRECT':
-                    validateResult(false, false);
-                    break;
-                case 'REMOTE_INCORRECT_TOKEN':
-                    validateResult(false, true);
-                    break;
-                case 'REMOTE_SYSTEM_ERROR':
-                    reportSystemError();
-                    break;
-                case 'REMOTE_JOPUTISMO':
-                    if (turnPhase === 'LOBBY' || players.length === 0) {
-                        setJoputismo(parseInt(value));
-                    }
-                    break;
-            }
-            // Eliminamos el syncState duplicado que podría causar problemas de carrera
-        }
-
-        function isSlotCorrect(slotIdx, songYear, timeline) {
-            if (timeline.length === 0) return true;
-            if (slotIdx === 0) return songYear <= timeline[0];
-            if (slotIdx === timeline.length) return songYear >= timeline[timeline.length - 1];
-            // En medio
-            return (songYear >= timeline[slotIdx - 1] && songYear <= timeline[slotIdx]);
-        }
-
-        function resolveKingMode(won) {
-            document.getElementById('host-instructions').innerHTML = "CARGANDO SIGUIENTE FASE...";
-            if (won && activePlayerIdx < players.length) {
-                showWinner(players[activePlayerIdx].name);
-            } else {
-                activePlayerIdx = (activePlayerIdx + 1) % players.length;
-                players[activePlayerIdx].canReload = true;
-                nextTurn();
-            }
-        }
-
-        function reportSystemError() {
-            var s = songs[currentSongIdx];
-            var newYear = prompt("ERROR EN DATOS: " + s.artist + " - " + s.song + "\nIntroduce el AÑO CORRECTO para registro:");
-            if (newYear) {
-                var recipient = "xavi.rifa@gmail.com";
-                var subject = "CORRECCION CHRONOBEATS: Fila " + s.line;
-                var body = "DETECTADO ERROR EN LISTA\n\n" +
-                    "Fila: " + s.line + "\n" +
-                    "Artista: " + s.artist + "\n" +
-                    "Canción: " + s.song + "\n" +
-                    "Año en TXT: " + s.year + "\n" +
-                    "Año Correcto: " + newYear + "\n\n" +
-                    "Instrucciones: Abrir lista_final.txt en la fila " + s.line + " y corregir el año.";
-
-                var mailtoUrl = "mailto:" + recipient + "?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
-
-                console.log("!!! ERROR DE SISTEMA DETECTADO !!!");
-                console.log("Referencia: " + s.artist + " - " + s.song + " (Fila " + s.line + ")");
-                console.log("Corrección: " + s.year + " -> " + newYear);
-
-                window.location.href = mailtoUrl;
-                alert("¡Error registrado! Se ha preparado un email para " + recipient + ".\nSe descarta esta canción y repites el turno.");
-            }
-            nextTurn();
-        }
-
-        function revealData() {
-            isRevealed = true;
-            var s = songs[currentSongIdx];
-            document.getElementById('ui-card-artist').innerText = s.artist;
-            document.getElementById('ui-card-song').innerText = s.song;
-            document.getElementById('ui-card-year').innerText = s.year;
-            document.getElementById('btn-reveal-host').style.display = 'none';
-
-            // Validación automática
-            var activeP = players[activePlayerIdx];
-            var isCorrect = false;
-            if (activeGuess !== null) {
-                isCorrect = isSlotCorrect(activeGuess, s.year, activeP.cards);
-            }
-
-            document.getElementById('validation-buttons').style.display = 'flex';
-            if (isCorrect) {
-                document.getElementById('host-instructions').innerHTML = "<span style='color:#00ff00; font-size:1.5em;'>¡POSICIÓN CORRECTA! ✅</span><br>¿Detalles?";
-                document.getElementById('validation-buttons').innerHTML = `
-                    <button class="btn-val btn-ok" onclick="validateResult(true, false)">SÍ</button>
-                    <button class="btn-val btn-ok" style="background:#ffd700; color:#000;" onclick="validateResult(true, true)">SÍ (+ 🔵 FICHA)</button>
-                    <button class="btn-val btn-fail" style="background:#555;" onclick="reportSystemError()">ERROR SISTEMA</button>
-                 `;
-            } else {
-                document.getElementById('host-instructions').innerHTML = "<span style='color:#ff4444; font-size:1.5em;'>POSICIÓN INCORRECTA ❌</span><br>¿Pero acertó Algo?";
-                document.getElementById('validation-buttons').innerHTML = `
-                    <button class="btn-val btn-fail" onclick="validateResult(false, false)">NO</button>
-                    <button class="btn-val btn-ok" style="background:#00f2fe; color:#000;" onclick="validateResult(false, true)">SÍ (+ 🔵 FICHA)</button>
-                    <button class="btn-val btn-fail" style="background:#00f2fe; color:#000; font-size: 0.6em;" onclick="reportSystemError()">ERROR SISTEMA (REPETIR)</button>
-                 `;
-            }
-            syncState();
-        }
-
-        function validateResult(isCardOk, isTokenOk) {
-            if (isTokenOk && players[activePlayerIdx].tokens < 5) {
-                players[activePlayerIdx].tokens++;
-            }
-
-            // RESOLVER APUESTAS "NI DE COÑA"
-            if (bettingAgainst && bettingAgainst.length > 0) {
-                if (isCardOk) {
-                    // El jugador activo ACIERTA: los que apostaron pierden.
-                    var losesPhrases = [
-                        "Has dudado de un puto experto... y has perdido.",
-                        "¿Ni de coña? Ni de coña vas a recuperar esa ficha, pringao.",
-                        "Para la próxima te callas. El maestro sabe lo que hace.",
-                        "A llorar a la llorería. Esa ficha es historia.",
-                        "Has apostado contra Dios y te has quemado.",
-                        "¿Te creías muy listo, eh? Pues toma zasca en toda la boca.",
-                        "Poca fe para tanta ignorancia. Ficha perdida.",
-                        "Silencio en la sala. Ha hablado el puto amo del tiempo.",
-                        "Tu envidia alimenta su victoria. Menos 1 ficha para ti.",
-                        "¿En serio pensabas que iba a fallar? Qué pardillo.",
-                        "Nunca apuestes contra el jefe, novato.",
-                        "Te has comido el amago entero. Despídete de la ficha.",
-                        "Mucha boquita pero poca ficha te queda.",
-                        "Con esa intuición de mierda normal que pierdas fichas.",
-                        "Vaya patinazo. Esa masterclass te ha costado una ficha.",
-                        "Has ido a por lana y has salido trasquilado.",
-                        "Te ha retratado. Sigue mirando y aprende.",
-                        "Ni de coña tienes tú tanto nivel. Ficha al pozo.",
-                        "Acaso pensabas que dudar del amo del juego te iba a salir gratis?",
-                        "Te pones chulito y te quedas sin blanca. Clásico.",
-                        "Esa ficha era tuya, ahora es solo un mal recuerdo.",
-                        "¿Querías sangre? Toma dos tazas de humillación.",
-                        "Le has tirado un órdago y te ha sacado la chorra.",
-                        "El rey no se mancha las manos con plebeyos como tú.",
-                        "Has tropezado con la piedra de su sabiduría.",
-                        "Ficha denegada por listillo. A tu cueva.",
-                        "Te la ha clavado por la escuadra. A pastar.",
-                        "Tu intento de sabotaje da más pena que otra cosa.",
-                        "Otra fichita pal bote. Gracias por la donación, pringao.",
-                        "Te iba a devolver la ficha por pena, pero mejor me la quedo.",
-                        "Cárgate de paciencia, porque de fichas vas justito.",
-                        "El oráculo musical ataca de nuevo. Tú agacha la cabeza.",
-                        "Ni con un DeLorean aciertas tú tantas veces. Asúmelo.",
-                        "Ojo al dato: acabas de perder una ficha contra el mejor.",
-                        "Sigue apostando en contra, a ver si así te arruinas antes.",
-                        "Dudar de un dios solo trae castigos divinos en forma de fichas.",
-                        "¿Te sobra el dinero? Porque las fichas azules parece que las regalas.",
-                        "Has intentado hacerle el lío al máster y has cobrado tú.",
-                        "Por favor, un aplauso para el que acaba de perder otra ficha absurda.",
-                        "El rey manda, tú pagas la entrada al espectáculo.",
-                        "La próxima vez guarda la ficha, que igual te hace falta para no dar pena.",
-                        "Que ponga la música y tú pones las fichas perdidas. Trato justo."
-                    ];
-                    bettingAgainst.forEach(function (pid) {
-                        if (connections[pid]) {
-                            var msg = losesPhrases[Math.floor(Math.random() * losesPhrases.length)];
-                            connections[pid].send({ type: 'BET_RESULT', msg: "JAJAJAJA...\n\n" + msg });
-                        }
-                    });
                 } else {
-                    // El jugador activo FALLA: los que apostaron ganan +3 fichas.
-                    bettingAgainst.forEach(function (pid) {
-                        var p = players.find(x => x.id === pid);
-                        if (p) {
-                            p.tokens += 3;
-                            if (p.tokens > 5) p.tokens = 5; // Limite de 5 fichas
-                            if (connections[pid]) {
-                                connections[pid].send({ type: 'BET_RESULT', msg: "¡SABÍAS QUE IBA A FALLAR Y HAS GANADO!\n\nRecompensa: +3 FICHAS AZULES." });
-                            }
+                    normalCardContainer.style.display = 'flex';
+                    normalCollection.style.display = 'block';
+                    kingModeUi.style.display = 'none';
+                    kingModeUi.innerHTML = '';
+                }
+
+                // Control de visibilidad de bloques de mando
+                var showMusic = isMyTurn;
+                if (data.turnPhase === 'KING_SELECTION') showMusic = false; // Nadie tiene música en este punto
+
+                document.getElementById('m-ctrl').style.display = showMusic ? 'grid' : 'none';
+                document.getElementById('s-ctrl').style.display = showMusic ? 'grid' : 'none';
+
+                // Botones Especiales (Solo mi turno y si no está revelada Y no en modo rey)
+                var specialCtrl = document.getElementById('special-ctrl');
+                var sabotageCtrl = document.getElementById('sabotage-ctrl');
+                if (isMyTurn && !data.revealed && (!data.turnPhase || data.turnPhase === 'NORMAL')) {
+                    specialCtrl.style.display = 'flex';
+                    sabotageCtrl.style.display = 'none';
+                    // COMPRAR (Solo si NO está sonando)
+                    document.getElementById('btn-autowin').style.display = (!data.isPlaying) ? 'block' : 'none';
+                    // ERROR VIDEO (Solo si SI está sonando)
+                    document.getElementById('btn-error-track').style.display = (data.isPlaying) ? 'block' : 'none';
+                    // CAMBIAR (Solo si SÍ está sonando y NO ha cambiado ya)
+                    document.getElementById('btn-reload').style.display = (data.isPlaying && data.canReload) ? 'block' : 'none';
+                } else {
+                    specialCtrl.style.display = 'none';
+                    sabotageCtrl.style.display = (!isMyTurn && data.isPlaying && (!data.turnPhase || data.turnPhase === 'NORMAL') && !data.revealed) ? 'block' : 'none';
+
+                    let jLevel = data.joputismoLevel || 0;
+
+                    var btnMute = document.getElementById('btn-sabotage-mute');
+                    if (btnMute) { btnMute.style.display = 'flex'; btnMute.disabled = (data.myTokens < 1); }
+
+                    var btnBet = document.getElementById('btn-sabotage-bet');
+                    if (btnBet) btnBet.style.display = 'flex';
+
+                    let disp1 = jLevel >= 1 ? 'flex' : 'none';
+                    if (document.getElementById('btn-sabotage-buzzer')) { document.getElementById('btn-sabotage-buzzer').style.display = disp1; document.getElementById('btn-sabotage-buzzer').disabled = (data.myTokens < 1); }
+                    if (document.getElementById('btn-sabotage-veto')) { document.getElementById('btn-sabotage-veto').style.display = disp1; document.getElementById('btn-sabotage-veto').disabled = (data.myTokens < 1); }
+                    if (document.getElementById('btn-sabotage-panic')) { document.getElementById('btn-sabotage-panic').style.display = disp1; document.getElementById('btn-sabotage-panic').disabled = (data.myTokens < 2); }
+                    if (document.getElementById('btn-sabotage-fog')) { document.getElementById('btn-sabotage-fog').style.display = disp1; document.getElementById('btn-sabotage-fog').disabled = (data.myTokens < 2); }
+
+                    let disp2 = jLevel >= 2 ? 'flex' : 'none';
+                    if (document.getElementById('btn-sabotage-steal-token')) { document.getElementById('btn-sabotage-steal-token').style.display = disp2; document.getElementById('btn-sabotage-steal-token').disabled = (data.myTokens < 4); }
+                    if (document.getElementById('btn-sabotage-steal-turn')) { document.getElementById('btn-sabotage-steal-turn').style.display = disp2; document.getElementById('btn-sabotage-steal-turn').disabled = (data.myTokens < 4); }
+                    if (document.getElementById('btn-sabotage-blackhole')) { document.getElementById('btn-sabotage-blackhole').style.display = disp2; document.getElementById('btn-sabotage-blackhole').disabled = (data.myTokens < 5); }
+                }
+
+                var wm = document.getElementById('wait-msg');
+                if (!isMyTurn && !isKingMode) {
+                    wm.style.display = 'block';
+                    wm.innerText = "ESPERANDO SIGUIENTE TRACK...";
+                } else {
+                    wm.style.display = 'none';
+                }
+
+                if (data.revealed && !isKingMode) {
+                    document.getElementById('card').classList.add('flipped');
+                    document.getElementById('c-artist').innerText = data.currentTrack.artist || "";
+                    document.getElementById('c-song').innerText = data.currentTrack.song || "";
+                    document.getElementById('c-year').innerText = data.currentTrack.year || "";
+                } else {
+                    document.getElementById('card').classList.remove('flipped');
+                }
+
+                if (!isKingMode) {
+                    if (isMyTurn) {
+                        document.getElementById('inventory-title').innerText = "MIS CARTAS (MARCA TU APUESTA)";
+                    } else {
+                        document.getElementById('inventory-title').innerText = "CRONOLOGÍA DE " + data.activePlayer.name;
+                    }
+
+                    if (isMyTurn) {
+                        if (data.myCards) {
+                            var h = "";
+                            var isSingleCard = (data.myCards.length === 1);
+                            if (isSingleCard) h += '<div style="font-size:0.8em; color:var(--neon); text-align:center; font-family:\'Bungee\'; margin-bottom:5px;">↑ ANTES ↑</div>';
+                            h += renderBetSlot(0, data.currentBets, data.activeGuess, true);
+                            data.myCards.forEach(function (year, idx) {
+                                var displayYear = (data.isFogActive) ? "????" : year;
+                                h += '<div class="card-row">' + displayYear + '</div>';
+                                h += renderBetSlot(idx + 1, data.currentBets, data.activeGuess, true);
+                            });
+                            if (isSingleCard) h += '<div style="font-size:0.8em; color:var(--neon); text-align:center; font-family:\'Bungee\'; margin-top:5px;">↓ DESPUÉS ↓</div>';
+                            document.getElementById('my-cards-list').innerHTML = h;
                         }
-                    });
+                    } else {
+                        if (data.activeTimeline) {
+                            var h = "";
+                            var isSingleCard = (data.activeTimeline.length === 1);
+                            if (isSingleCard) h += '<div style="font-size:0.8em; color:var(--neon); text-align:center; font-family:\'Bungee\'; margin-bottom:5px;">↑ ANTES ↑</div>';
+                            h += renderBetSlot(0, data.currentBets, data.activeGuess, false);
+                            data.activeTimeline.forEach(function (year, idx) {
+                                h += '<div class="card-row" style="border-color: #444; color: #888;">' + year + '</div>';
+                                h += renderBetSlot(idx + 1, data.currentBets, data.activeGuess, false);
+                            });
+                            if (isSingleCard) h += '<div style="font-size:0.8em; color:var(--neon); text-align:center; font-family:\'Bungee\'; margin-top:5px;">↓ DESPUÉS ↓</div>';
+                            document.getElementById('my-cards-list').innerHTML = h;
+                        }
+                    }
+
+                }
+
+                if (data.myTokens !== undefined) {
+                    var chipsHtml = "";
+                    for (var i = 0; i < data.myTokens; i++) chipsHtml += '<span class="neon-chip"></span>';
+                    document.getElementById('my-tokens-ui').innerHTML = "MIS FICHAS: " + chipsHtml;
+                    var isActionLocked = (data.activeGuess !== null);
+
+                    document.getElementById('btn-autowin').disabled = (data.myTokens < 3 || isActionLocked);
+                    document.getElementById('btn-reload').disabled = (data.myTokens < 1 || data.canReload === false || isActionLocked);
+                    document.getElementById('btn-sabotage-mute').disabled = (data.myTokens < 1 || isActionLocked);
+                    document.getElementById('btn-sabotage-buzzer').disabled = (data.myTokens < 1 || isActionLocked);
+                    document.getElementById('btn-sabotage-veto').disabled = (data.myTokens < 1 || isActionLocked);
+
+                    var btnSkip = document.getElementById('btn-sabotage-skip');
+                    if (btnSkip) btnSkip.disabled = (data.myTokens < 1 || isActionLocked);
+
+                    document.getElementById('btn-sabotage-panic').disabled = (data.myTokens < 2 || data.panicActive || isActionLocked);
+                    document.getElementById('btn-sabotage-fog').disabled = (data.myTokens < 2 || data.isFogActive || isActionLocked);
+
+                    var btnStealToken = document.getElementById('btn-sabotage-steal-token');
+                    if (btnStealToken) btnStealToken.disabled = (data.myTokens < 4 || isActionLocked);
+
+                    var btnStealTurn = document.getElementById('btn-sabotage-steal-turn');
+                    if (btnStealTurn) btnStealTurn.disabled = (data.myTokens < 4 || isActionLocked);
+
+                    // Panic Overlay Check
+                    var isMyTurn = (data.activePlayer && data.activePlayer.id === myId);
+                    var panicOverlay = document.getElementById('panic-overlay');
+                    if (data.panicActive && isMyTurn) {
+                        panicOverlay.style.display = 'flex';
+                        document.getElementById('panic-timer').innerText = data.panicTimer;
+                        if (data.panicTimer > 5) {
+                            panicOverlay.style.background = 'rgba(255,0,0,0.85)';
+                            panicOverlay.style.pointerEvents = 'auto';
+                            document.getElementById('panic-timer').style.color = 'white';
+                        } else {
+                            panicOverlay.style.background = 'transparent';
+                            panicOverlay.style.pointerEvents = 'none';
+                            if (data.panicTimer <= 3) document.getElementById('panic-timer').style.color = '#ff0000';
+                            else document.getElementById('panic-timer').style.color = 'white';
+                        }
+                    } else {
+                        panicOverlay.style.display = 'none';
+                        panicOverlay.style.background = 'rgba(255,0,0,0.85)';
+                        panicOverlay.style.pointerEvents = 'auto';
+                        document.getElementById('panic-timer').style.color = 'white';
+                    }
+
+                    var btnSabotageBet = document.getElementById('btn-sabotage-bet');
+                    if (btnSabotageBet) {
+                        var alreadyBet = data.bettingAgainst && data.bettingAgainst.includes(myId);
+                        btnSabotageBet.disabled = (data.myTokens < 1 || alreadyBet);
+                        if (alreadyBet || data.myTokens < 1) {
+                            btnSabotageBet.style.opacity = '0.5';
+                            if (alreadyBet) btnSabotageBet.innerText = "APUESTA HECHA";
+                        } else {
+                            btnSabotageBet.style.opacity = '1';
+                            btnSabotageBet.innerHTML = '¡NI DE COÑA! (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)';
+                        }
+                    }
+                }
+            }
+        }
+
+        function renderBetSlot(idx, bets, activeGuess, amIActive) {
+            var occupants = [];
+            var imIn = false;
+            var isTakenByOther = false;
+            for (var pid in bets) {
+                if (bets[pid] == idx) {
+                    if (pid === myId) imIn = true;
+                    else isTakenByOther = true;
+                    occupants.push(pid === myId ? "YO" : "?");
                 }
             }
 
-            if (isCardOk) {
-                players[activePlayerIdx].score++;
-                players[activePlayerIdx].cards.push(songs[currentSongIdx].year);
-                players[activePlayerIdx].cards.sort();
-                if (players[activePlayerIdx].score >= 10 && gameMode === 'normal') {
-                    showWinner(players[activePlayerIdx].name);
+            var isGuess = (activeGuess == idx);
+            var cls = "bet-slot";
+
+            if (isGuess) cls += " active-guess";
+            if (occupants.length > 0) cls += " occupied";
+            if (imIn) cls += " my-bet";
+
+            // Bloqueo: si el hueco está pillado por el activo (y no soy yo) o por otro desafiante
+            var blockedForMe = false;
+            if (!amIActive && isGuess) blockedForMe = true;
+            if (isTakenByOther) blockedForMe = true;
+            // El activo no puede pisar a un desafiante
+            if (amIActive && isTakenByOther) blockedForMe = true;
+
+            if (blockedForMe) cls += " blocked";
+
+            var label = "";
+            if (isGuess) label = "X";
+            else if (imIn) label = "YO";
+            else if (isTakenByOther) label = "🔘";
+
+            return '<div class="' + cls + '" onclick="interactuarSlot(' + idx + ', ' + amIActive + ', ' + isGuess + ', ' + isTakenByOther + ')">' + label + '</div>';
+        }
+
+        function interactuarSlot(idx, amIActive, isGuess, isTakenByOther) {
+            if (isTakenByOther) {
+                showCustomAlert("¡Este hueco ya lo ha pillado otro jugador!");
+                return;
+            }
+            if (amIActive) {
+                if (lastState && lastState.activeGuess !== null) {
+                    showCustomAlert("Ya has marcado tu adivinanza de año. Espera la resolución.");
                     return;
                 }
-                activePlayerIdx = (activePlayerIdx + 1) % players.length;
-                players[activePlayerIdx].canReload = true;
-                nextTurn();
-            } else {
-                // Si no hay carta para el activo, ver si hay robos
-                var challengersExist = Object.keys(currentBets).length > 0;
-                var anyChallengerCorrect = false;
-                for (var pid in currentBets) {
-                    if (isSlotCorrect(currentBets[pid], songs[currentSongIdx].year, players[activePlayerIdx].cards)) anyChallengerCorrect = true;
-                }
-
-                if (challengersExist && anyChallengerCorrect) {
-                    document.getElementById('host-instructions').innerText = "VAMOS A LAS APUESTAS...";
-                    document.getElementById('validation-buttons').style.display = 'none';
-                    document.getElementById('challenger-validation').style.display = 'block';
-                    var h = "";
-                    for (var pid in currentBets) {
-                        var p = players.find(x => x.id === pid);
-                        var s = songs[currentSongIdx];
-                        var slotCorrect = isSlotCorrect(currentBets[pid], s.year, players[activePlayerIdx].cards);
-
-                        if (p && slotCorrect) {
-                            h += '<button class="btn-val" style="background:var(--gold); color:#000; border: 2px solid #00ff00;" onclick="awardToChallenger(\'' + pid + '\')">' + p.name + ' GANÓ LA APUESTA (✅)</button>';
-                        } else if (p) {
-                            h += '<button class="btn-val" style="background:#555; color:#888; cursor:not-allowed;" disabled>' + p.name + ' FALLÓ (❌)</button>';
-                        }
-                    }
-                    document.getElementById('challenger-buttons').innerHTML = h;
-                } else {
-                    activePlayerIdx = (activePlayerIdx + 1) % players.length;
-                    players[activePlayerIdx].canReload = true; // Resetear permiso de recarga
-                    nextTurn();
-                }
-            }
-        }
-
-        function awardToChallenger(pid) {
-            var p = players.find(x => x.id === pid);
-            if (p) {
-                p.score++;
-                p.cards.push(songs[currentSongIdx].year);
-                p.cards.sort();
-                if (p.score >= 10 && gameMode === 'normal') {
-                    showWinner(p.name);
-                    return;
-                }
-            }
-            activePlayerIdx = (activePlayerIdx + 1) % players.length;
-            players[activePlayerIdx].canReload = true;
-            nextTurn();
-        }
-
-        function showWinner(name) {
-            console.log("Celebrando victoria de:", name);
-            document.getElementById('winner-name').innerText = name;
-
-            // Mostrar avatar del ganador
-            var winner = players.find(p => p.name === name);
-            var avatarHtml = '';
-            if (winner && winner.avatar) {
-                avatarHtml = '<img src="' + winner.avatar + '" style="width:200px; height:200px; border-radius:50%; border: 5px solid var(--neon); box-shadow: 0 0 30px var(--neon); object-fit: cover;">';
-            } else {
-                var initial = name.charAt(0).toUpperCase();
-                avatarHtml = '<div style="width:150px; height:150px; border-radius:50%; background:#222; border:5px solid var(--neon); color:var(--neon); display:inline-flex; align-items:center; justify-content:center; font-family:\'Bungee\'; font-size:4em; box-shadow: 0 0 30px var(--neon);">' + initial + '</div>';
-            }
-            document.getElementById('winner-avatar-img').innerHTML = avatarHtml;
-
-            document.getElementById('winner-screen').style.display = 'flex';
-
-            // Limpiar confeti previo si existe
-            if (window.victoryInterval) clearInterval(window.victoryInterval);
-
-            // V26.3: Integración de IDs Verificados por el Usuario
-            var isXavi = name.toLowerCase().includes('xavi');
-            var songId = "";
-            var songTitle = "";
-
-            if (isXavi) {
-                songId = '04854XqcfCY'; // Queen - We Are The Champions
-                songTitle = "Queen - We Are The Champions";
-            } else {
-                // El "Pool de la Frikada" (V26.3 - IDs proporcionados por el usuario)
-                var frikiPool = [
-                    { id: 'wfeCIvOxXBo', t: "Rodolfo Chikilicuatre - Chiki Chiki" },
-                    { id: '5mKKc2F0GbQ', t: "El Koala - Opá" },
-                    { id: '62Z8vUIk9s8', t: "Zapato Veloz - Tractor Amarillo" },
-                    { id: 'lTxGto9ADx0', t: "Georgie Dann - La Barbacoa" },
-                    { id: 'arZZw8NyPq8', t: "Las Ketchup - Aserejé" },
-                    { id: 'd21lBEXv6RE', t: "Leonardo Dantés - Pañuelo" },
-                    { id: 'WCQuf90qf9U', t: "King África - La Bomba" },
-                    { id: 'tUHtrE533X4', t: "Mandangastyle" },
-                    { id: 'YMlDlM7lvO0', t: "Paco Pil - Viva la Fiesta" }
-                ];
-                var picked = frikiPool[Math.floor(Math.random() * frikiPool.length)];
-                songId = picked.id;
-                songTitle = picked.t;
-            }
-
-            console.log("Ganador:", name, "| Sonando:", songTitle);
-
-            // Usar el contenedor de video para sonar (oculto)
-            var container = document.getElementById('player-container');
-            container.innerHTML = '<iframe src="https://www.youtube.com/embed/' + songId + '?autoplay=1&mute=0&enablejsapi=1&playsinline=1" allow="autoplay; encrypted-media" style="width:300px;height:200px;border:none;"></iframe>';
-
-            // Confeti (Efectos V26)
-            if (isXavi) {
-                // V26: Confeti INFINITO para Xavi
-                var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 2000 };
-                function randomInRange(min, max) { return Math.random() * (max - min) + min; }
-
-                window.victoryInterval = setInterval(function () {
-                    confetti(Object.assign({}, defaults, { particleCount: 40, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
-                    confetti(Object.assign({}, defaults, { particleCount: 40, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
-                }, 300);
-            }
-        }
-
-        function syncState() {
-            var leaderName = "---";
-            var leaderScore = 0;
-            if (players.length > 0) {
-                var leader = players.reduce(function (prev, current) {
-                    return (prev.score > current.score) ? prev : current;
+                showCustomConfirm("¿Marcar este hueco como tu apuesta para el año de la canción?", function (confirmed) {
+                    if (confirmed) send('GUESS', idx);
                 });
-                leaderName = leader.name;
-                leaderScore = leader.score;
+            } else {
+                // REGLA: Solo se puede apostar si el jugador activo YA ha puesto su carta
+                if (lastState && lastState.activeGuess === null) {
+                    showCustomAlert("Espera a que el jugador activo coloque primero su apuesta.");
+                    return;
+                }
+                if (isGuess) {
+                    showCustomAlert("¡Ese hueco ya lo ha elegido el jugador activo! Elige otro sitio para tu apuesta.");
+                    return;
+                }
+                console.log("Rival intentando apostar en:", idx);
+                showCustomConfirm("¿Seguro que quieres RETAR A DUELO en este hueco (Coste: 2 Fichas)?", function (confirmed) {
+                    if (confirmed) send('BET', idx);
+                });
+            }
+        }
+
+        // CHEAT SYSTEM
+        function initCheatSystem() {
+            var auth = ['xavi', 'mimi', 'sonia'];
+            var pName = playerName.toLowerCase();
+            if (!auth.includes(pName)) return;
+
+            console.log("Cheat System Initialized for", pName);
+
+            // Mechanic 1: Peek at the card (Hold)
+            var card = document.getElementById('card');
+
+            function isMyTurn() {
+                return lastState && lastState.activePlayer && lastState.activePlayer.id === myId;
             }
 
-            var currentJudgeId = 'ALL';
-            if (document.getElementById('lobby').style.display === 'none' && players.length > 0) {
-                var judgeIdx = (activePlayerIdx + 1) % players.length;
-                currentJudgeId = players[judgeIdx].id;
+            function startPeek(e) {
+                // Peek allowed if cheats are enabled, it's not our turn (or king mode), and we have track data
+                if (lastState && lastState.cheatsEnabled !== false && (!isMyTurn() || (lastState.turnPhase && lastState.turnPhase !== 'NORMAL')) && lastState.currentTrack) {
+                    if (e && e.preventDefault) e.preventDefault(); // Prevent text selection
+                    document.getElementById('card').classList.add('flipped');
+                    document.getElementById('c-artist').innerText = lastState.currentTrack.artist || "";
+                    document.getElementById('c-song').innerText = lastState.currentTrack.song || "";
+                    document.getElementById('c-year').innerText = lastState.currentTrack.year || "";
+                }
             }
 
-            for (var id in connections) {
-                var p = players.find(p => p.id === id);
-                var state = {
-                    type: 'STATE_UPDATE',
-                    activePlayer: { id: players[activePlayerIdx] ? players[activePlayerIdx].id : null, name: players[activePlayerIdx] ? players[activePlayerIdx].name : null },
-                    judgeId: currentJudgeId,
-                    leader: { name: leaderName, score: leaderScore },
-                    currentTrack: songs[currentSongIdx],
-                    revealed: isRevealed,
-                    isPlaying: isPlaying,
-                    isMuted: isMuted,
-                    muteTimeRemaining: muteTimeRemaining,
-                    panicActive: panicActive,
-                    panicTimer: panicTimer,
-                    isFogActive: isFogActive,
-                    joputismoLevel: joputismoLevel,
-                    bettingAgainst: bettingAgainst,
-                    myCards: p ? p.cards : [],
-                    myTokens: p ? p.tokens : 0,
-                    canReload: p ? p.canReload : false,
-                    activeTimeline: players[activePlayerIdx] ? players[activePlayerIdx].cards : [],
-                    currentBets: currentBets,
-                    activeGuess: activeGuess,
-                    kingOptions: kingOptions,
-                    kingOptions: kingOptions,
-                    cheatsEnabled: cheatsEnabled,
-                    turnPhase: turnPhase,
-                    currentColor: songs[currentSongIdx] ? songs[currentSongIdx].color : '#00ff00',
-                    currentType: songs[currentSongIdx] ? songs[currentSongIdx].type : 'mix'
-                };
-                try {
-                    if (connections[id] && connections[id].open) {
-                        connections[id].send(state);
+            function stopPeek(e) {
+                if (lastState && !lastState.revealed && !lastState.turnPhase?.includes('GUESS_RESULT')) {
+                    document.getElementById('card').classList.remove('flipped');
+                }
+            }
+
+            // Touch events for mobile, mouse events for desktop
+            card.addEventListener('touchstart', startPeek, { passive: false });
+            card.addEventListener('touchend', stopPeek);
+            card.addEventListener('touchcancel', stopPeek);
+            card.addEventListener('mousedown', startPeek);
+            card.addEventListener('mouseup', stopPeek);
+            card.addEventListener('mouseleave', stopPeek);
+
+            // Mechanic 2: Toggle Master Cheat (Xavi Only via Timeline tap)
+            if (pName === 'xavi') {
+                var container = document.getElementById('my-cards-list');
+                // Use event delegation for tapping the first timeline year
+                container.addEventListener('click', function (e) {
+                    var targetRow = e.target.closest('.card-row');
+                    // Si ha pulsado el texto de un año en la cronología rival
+                    if (targetRow) {
+                        var rows = container.querySelectorAll('.card-row');
+                        // Verificamos que sea la primera carta (index 0) y que no sea el turno de xavi
+                        if (rows.length > 0 && targetRow === rows[0] && !isMyTurn()) {
+                            console.log("Xavi toggling master cheat via timeline tap");
+                            targetRow.style.color = (lastState && lastState.cheatsEnabled) ? 'red' : 'green';
+                            setTimeout(() => { targetRow.style.color = '#888'; }, 500);
+                            send('TOGGLE_CHEAT');
+                        }
                     }
-                } catch (e) {
-                    console.warn("No se pudo enviar estado a", id, e);
+                });
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var msgs = {
+                'btn-sabotage-buzzer': '¡Zumbido enviado al DJ!',
+                'btn-sabotage-veto': '¡Has vetado su recarga!',
+                'btn-sabotage-panic': '¡Ataque de Pánico enviado!',
+                'btn-sabotage-fog': '¡Niebla Temporal enviada!',
+                'btn-sabotage-steal-token': '¡Has robado una ficha (al azar)!',
+                'btn-sabotage-steal-turn': '¡Has robado el turno!',
+                'btn-sabotage-blackhole': '¡Agujero Negro lanzado!'
+            };
+            for (var id in msgs) {
+                var b = document.getElementById(id);
+                if (b) {
+                    b.addEventListener('click', (function (msg) {
+                        return function () { showCustomAlert(msg); }
+                    })(msgs[id]));
                 }
             }
-            updateUI();
-        }
-
-        function updateUI() {
-            var h = ""; players.slice().sort(function (a, b) { return b.score - a.score }).forEach(function (p) {
-                var chipsHtml = ""; for (var i = 0; i < p.tokens; i++) chipsHtml += '<span class="neon-chip"></span>';
-
-                var avatarHtml = '';
-                if (p.avatar) {
-                    avatarHtml = '<img src="' + p.avatar + '" style="width:25px; height:25px; border-radius:50%; vertical-align:middle; margin-right:8px; border:1px solid ' + (p.id === players[activePlayerIdx].id ? 'var(--neon)' : '#555') + ';">';
-                }
-
-                h += '<div class="leader-item ' + (p.id === players[activePlayerIdx].id ? 'active' : '') + '" style="align-items:center;"><span>' + avatarHtml + p.name + ' (' + chipsHtml + ')</span><span class="score">' + p.score + ' p</span></div>';
-            });
-            document.getElementById('leaderboard-list').innerHTML = h;
-
-            // Mostrar cartas del jugador actual en el centro
-            var currentCardsHtml = "";
-            players[activePlayerIdx].cards.forEach(function (year) {
-                currentCardsHtml += '<div class="mini-card">' + (isFogActive ? '????' : year) + '</div>';
-            });
-            document.getElementById('active-player-inventory').innerHTML = currentCardsHtml;
-
-            var timelinesHtml = ""; players.forEach(function (p) {
-                timelinesHtml += '<div class="player-row"><div style="font-size:0.6em;color:#888;">' + p.name + '</div><div class="slots">';
-                for (var k = 0; k < 10; k++) timelinesHtml += '<div class="slot ' + (p.cards[k] ? 'filled' : '') + '">' + (p.cards[k] ? (isFogActive ? '????' : p.cards[k]) : '') + '</div>';
-                timelinesHtml += '</div></div>';
-            });
-            document.getElementById('global-timelines').innerHTML = timelinesHtml;
-        }    
-        function reportBrokenLink() {
-            var s = songs[currentSongIdx];
-            if (!s || !s.id) return;
-            var url = 'https://www.youtube.com/watch?v=' + s.id;
-            var listType = s.type ? s.type : 'General';
-            
-            fetch('reporte_error.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ url: url, tipo: listType })
-            }).then(function(r){ return r.json()}).then(function(data){
-                alert('URL reportada como rota. Gasta un Token de Recarga si tienes para saltarla.');
-                var btn = document.getElementById('btn-report-error');
-                if(btn) btn.style.display = 'none';
-            }).catch(function(e){
-                console.error(e);
-                alert('Aviso guardado.');
-            });
-        }
+        });
     
 
         if ('serviceWorker' in navigator) {

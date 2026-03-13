@@ -784,6 +784,10 @@
                 <button class="spec-btn" id="btn-sabotage-blackhole"
                     style="background:var(--bg); border-color:#9900ff; color:#9900ff; grid-column: span 2;"
                     onclick="send('SABOTAGE_BLACKHOLE')">AGUJERO NEGRO (5 <span class="neon-chip"
+                </button>
+                <button class="spec-btn" id="btn-duel-select" onclick="document.getElementById('duel-player-select').style.display='flex';" style="background:var(--gold); color:#000; font-weight:bold;">
+                    RETAR A DUELO A MUERTE (2 <span class="neon-chip" style="display:inline-block; width:10px; height:10px; background:var(--neon); border-radius:50%; margin:0 2px;"></span>)
+                </button>
                         style="width:10px;height:10px;"></span>)</button>
             </div>
         </div>
@@ -1129,7 +1133,47 @@
                 return;
             }
 
-            if (data.type === 'STATE_UPDATE') {
+                                                if (data.type === 'STATE_UPDATE') {
+                // Populate Duel List
+                if(data.players) {
+                    var duelListHtml = "";
+                    data.players.forEach(function(p) {
+                        if(p.id !== myId) {
+                            duelListHtml += <button class="btn" style="background:#222; border:1px solid var(--neon);" onclick="send('SABOTAGE_DUEL', ' + p.id + '); document.getElementById('duel-player-select').style.display='none';">Duelo vs  + p.name + </button>;
+                        }
+                    });
+                    var listContainer = document.getElementById('duel-player-list');
+                    if(listContainer) listContainer.innerHTML = duelListHtml;
+                    var bombListHtml = "";
+                    data.players.forEach(function(p) {
+                        if(p.id !== myId) {
+                            bombListHtml += <button class="btn" style="background:#550000; border:1px solid #ff3333;" onclick="send('SABOTAGE_BOMB', ' + p.id + '); document.getElementById('bomb-player-select').style.display='none';">Pasar a  + p.name + </button>;
+                        }
+                    });
+                    var bombContainer = document.getElementById('bomb-player-list');
+                    if(bombContainer) bombContainer.innerHTML = bombListHtml;
+                }
+                const leapBtn = document.getElementById('leap-container');
+                if (leapBtn) {
+                    var amIActive = false;
+                    try {
+                        var myNameBlock = document.getElementById('player-name').innerText;
+                        var pData = data.players || [];
+                        var activeP = pData[data.activePlayerIdx] || pData[0];
+                        if (activeP && activeP.name && myNameBlock.includes(activeP.name)) {
+                            amIActive = true;
+                        }
+                    } catch(e) {}
+                    
+                    var tokensBlock = document.getElementById('token-container').innerText;
+                    var hasTokens = tokensBlock.includes("1") || tokensBlock.includes("2") || tokensBlock.includes("3") || tokensBlock.includes("4") || tokensBlock.includes("5") || tokensBlock.includes("6") || tokensBlock.includes("7") || tokensBlock.includes("8") || tokensBlock.includes("9");
+
+                    if (data.isLeapOfFaithWindow && !amIActive && hasTokens) {
+                        leapBtn.style.display = 'block';
+                    } else {
+                        leapBtn.style.display = 'none';
+                    }
+                }
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('game-screen').style.display = 'flex';
                 document.getElementById('cur-player').innerText = data.activePlayer && data.activePlayer.name ? data.activePlayer.name : "---";
@@ -1564,6 +1608,15 @@
             });
         }
     </script>
+    <!-- Modal Seleccion de Duelo -->
+    <div id="duel-player-select"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:10000; align-items:center; justify-content:center; flex-direction:column; padding:20px; box-sizing:border-box;">
+        <h2 style="color:var(--gold); font-family:'Bungee'; text-align:center;">ELIGE TU RIVAL</h2>
+        <div id="duel-player-list" style="width:100%; max-width:400px; display:flex; flex-direction:column; gap:10px; margin-top:20px;">
+            <!-- Rellenado dinamicamente -->
+        </div>
+        <button class="btn" onclick="document.getElementById('duel-player-select').style.display='none';" style="margin-top:20px; background:#444;">CANCELAR</button>
+    </div>
 </body>
 
 </html>
