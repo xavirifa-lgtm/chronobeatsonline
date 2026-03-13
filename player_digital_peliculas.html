@@ -3,24 +3,17 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icon-192.png">
-    <meta name="theme-color" content="#00f2ff">
-    <title>PLAYER - MOVIES VERSION</title>
-    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Montserrat:wght@400;700&display=swap"
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>CHRONOBEATS PELÍCULAS - PLAYER</title>
+    <link href="https://fonts.googleapis.com/css2?family=Shojumaru&family=Montserrat:wght@400;700&display=swap"
         rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Limelight&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
         :root {
             --neon: #ffaa00;
             --bg: #0d0d0d;
-            --accent: #ff0055;
-            --gold: #ffffff;
+            --accent: #00f2ff;
+            --gold: #ffd700;
         }
 
         * {
@@ -34,12 +27,9 @@
             font-family: 'Montserrat', sans-serif;
             margin: 0;
             height: 100vh;
-            height: 100dvh;
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-            padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 35px);
         }
 
         #login-screen {
@@ -52,7 +42,7 @@
         }
 
         .logo {
-            font-family: 'Bungee';
+            font-family: 'Shojumaru';
             font-size: 2em;
             color: var(--neon);
             text-shadow: 0 0 20px var(--neon);
@@ -96,7 +86,6 @@
         #game-screen {
             display: none;
             flex: 1;
-            min-height: 0;
             flex-direction: column;
             padding: 10px;
             align-items: center;
@@ -242,12 +231,12 @@
             color: #aaa;
             text-transform: uppercase;
             margin-bottom: 5px;
-            font-family: 'Limelight';
             line-height: 1.2;
+            font-family: 'Shojumaru';
         }
 
         #c-song {
-            font-family: 'Limelight';
+            font-family: 'Shojumaru';
             font-size: 1em;
             margin-bottom: 10px;
             line-height: 1.2;
@@ -274,12 +263,9 @@
             width: 100%;
             max-width: 340px;
             margin-top: 20px;
-            margin-top: auto;
-            background: #1a1a1a;
-            padding: 15px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
             border-radius: 12px;
-            text-align: center;
-            flex-shrink: 0;
         }
 
         .collection-summary h4 {
@@ -293,8 +279,7 @@
         .vertical-cards {
             display: flex;
             flex-direction: column;
-            gap: 5px;
-            align-items: center;
+            gap: 4px;
         }
 
         .card-row {
@@ -412,316 +397,38 @@
             color: #444;
         }
 
-        #sabotage-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            width: 100%;
-            margin-top: 10px;
-        }
-
-        #sabotage-grid .spec-btn {
-            margin-top: 0 !important;
-            padding: 12px 5px;
-            font-size: 0.7em;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: row;
-            flex-wrap: wrap;
-            gap: 5px;
-            text-align: center;
-        }
-
         .spec-btn#btn-reload {
             border-color: #00f2fe;
             color: #00f2fe;
             box-shadow: 0 0 10px rgba(0, 242, 254, 0.2);
         }
-
-        #leaderboard-info {
-            font-family: 'Limelight';
-            font-size: 0.7em;
-            color: #888;
-            margin-bottom: 5px;
-            text-align: center;
-            width: 100%;
-        }
-
-        .leader-row {
-            color: var(--gold);
-            margin-bottom: 2px;
-        }
-
-        .me-row {
-            color: var(--neon);
-        }
-
-        .btn-error-track {
-            border-color: #ff3333 !important;
-            color: #ff3333 !important;
-            box-shadow: 0 0 10px rgba(255, 51, 51, 0.2) !important;
-            flex: 1;
-        }
-
-        /* Hub Button */
-        .btn-hub {
-            position: fixed;
-            top: calc(20px + env(safe-area-inset-top, 0px));
-            left: 20px;
-            z-index: 10000;
-            width: 50px;
-            height: 50px;
-            background: #000;
-            border: 2px solid var(--neon, #ffaa00);
-            border-radius: 50%;
-            display: flex !important;
-            align-items: center;
-            justify-content: center;
-            color: var(--neon, #ffaa00);
-            text-decoration: none;
-            font-family: 'Bungee';
-            font-size: 1.5em;
-            box-shadow: 0 0 15px rgba(255, 170, 0, 0.5);
-            transition: 0.3s;
-            cursor: pointer;
-        }
-
-        .btn-hub:hover {
-            background: var(--neon, #ffaa00);
-            color: #000;
-            box-shadow: 0 0 30px var(--neon, #ffaa00);
-            transform: scale(1.1);
-        }
-
-        @media (max-width: 600px) {
-            .btn-hub {
-                width: 40px;
-                height: 40px;
-                font-size: 1.2em;
-                left: 15px;
-                top: calc(15px + env(safe-area-inset-top, 0px));
-            }
-        }
-
-        @keyframes pulse-neon {
-            0% {
-                box-shadow: 0 0 5px var(--neon);
-                border-color: var(--neon);
-            }
-
-            50% {
-                box-shadow: 0 0 20px var(--neon);
-                border-color: #fff;
-            }
-
-            100% {
-                box-shadow: 0 0 5px var(--neon);
-                border-color: var(--neon);
-            }
-        }
-
-        .pulse {
-            animation: pulse-neon 2s infinite;
-        }
-
-        #ai-loading-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            z-index: 10000;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            font-family: 'Bungee';
-            color: var(--neon);
-        }
-
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid rgba(255, 170, 0, 0.1);
-            border-top: 5px solid var(--neon);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
-        }
-
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
     </style>
 </head>
 
 <body>
-    <!-- FAB REGLAMENTO -->
-    <div id="fab-rules" onclick="toggleRules()"
-        style="display:flex; position:fixed; bottom:20px; right:20px; width:50px; height:50px; background:#111; border:2px solid var(--neon); border-radius:50%; z-index:9000; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 0 10px rgba(0,242,255,0.5); font-size:1.5em; transition:0.3s; color:var(--neon); font-family:'Bungee';">
-        ?
-    </div>
-
-    <!-- MANDO DEL HOST (REMOTE) -->
-    <div id="fab-remote" onclick="toggleRemote()"
-        style="display:none; position:fixed; top:20px; right:20px; width:50px; height:50px; background:#111; border:2px solid #555; border-radius:50%; z-index:9000; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 0 10px rgba(0,0,0,0.5); font-size:1.5em; filter:grayscale(100%); transition:0.3s; opacity:0.5; pointer-events:none;">
-        📱 Ã¡¢Ãƒ¢Ã¢â‚¬Å¡Ã‚¬Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚º
-    </div>
-
-    <div id="rules-overlay"
-        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:9500; align-items:center; justify-content:flex-start; flex-direction:column; padding:20px; text-align:left; overflow-y:auto;">
-        <h2
-            style="font-family:'Bungee'; color:var(--neon); margin-bottom:10px; font-size:2em; text-align:center; width:100%; margin-top:20px;">
-            📱 Ã¡¢Ãƒ¢Ã¢â‚¬Å¡Ã‚¬Ãƒâ€¦Ã¢â‚¬Å“  REGLAS</h2>
-                <div style="color:#ddd; font-family:''Montserrat''; font-size:0.9em; max-width:400px; width:100%; line-height:1.5;">
-            <p><strong style="color:var(--neon);">OBJETIVO:</strong> Coloca las canciones en orden cronolÃ³gico. ¡Gana quien llegue a 10 puntos!</p>
-            <p><strong style="color:var(--neon);">INICIO:</strong> Todos los jugadores empiezan con <strong style="color:var(--gold);">2 FICHAS</strong>.</p>
-            <p><strong style="color:var(--neon);">TU TURNO:</strong> Escucha la canciÃ³n, elige el hueco en tu lÃ­nea temporal y pulsa ¡PLAY!</p>
-            <p><strong style="color:var(--neon);">SALTO DE FE (1):</strong> Durante los primeros 3 segundos de una canciÃ³n, puedes intentar robÃ¡rsela al rival a ciegas.</p>
-            <p><strong style="color:var(--accent);">ESCUDO (3):</strong> Protege contra el prÃ³ximo sabotaje y rebota el ataque al rival con un ¡ZASCA!</p>
-            
-            <h3 style="color:var(--neon); font-family:''Bungee''; margin-top:20px; border-bottom:1px solid #333; padding-bottom:5px;">MERCADO (En tu turno)</h3>
-            <ul style="padding-left:15px; margin-top:10px;">
-                <li style="margin-bottom:8px;"><strong style="color:var(--gold);">DÃ‰CADA (1):</strong> Te dice de quÃ© dÃ©cada es la canciÃ³n (ej. 90s).</li>
-                <li style="margin-bottom:8px;"><strong style="color:var(--gold);">COMODÃN (1):</strong> Revela el nombre del artista en la pantalla del Host.</li>
-            </ul>
-
-            <h3 style="color:var(--neon); font-family:''Bungee''; margin-top:20px; border-bottom:1px solid #333; padding-bottom:5px;">SABOTAJES (Contra el rival)</h3>
-            <ul style="padding-left:15px; margin-top:10px;">
-                <li style="margin-bottom:8px;"><strong style="color:#00bdff;">SILENCIO (1):</strong> Mutea la mÃºsica durante 15 segundos.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#00ff00;">ZUMBIDO (1):</strong> Sonido molesto para desesperar al rival.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#ff8800;">VETO (1):</strong> Impide que el rival pueda cambiar de canciÃ³n.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#ff00ff;">SALTO FORZADO (2):</strong> Obliga al rival a pasar de canciÃ³n.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#ff0000;">PÃNICO (2):</strong> Solo 10 segundos para decidir el hueco.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#aaaaaa;">NIEBLA (2):</strong> Borra los aÃ±os de su pantalla este turno.</li>
-                <li style="margin-bottom:8px;"><strong style="color:var(--accent);">DUELO (2):</strong> ¡Apuesta contra Ã©l! Si fallas palmas fichas, si aciertas te llevas el punto.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#ff5500;">BOMBA LAPA (3/0):</strong> Ponla o pÃ¡sala si ya la tienes pegada.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#ffff00;">ROBO FICHA (4):</strong> Quita una ficha a un rival al azar.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#00f2fe;">ROBO TURNO (4):</strong> QuÃ©date con su turno ahora mismo.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#9900ff;">AGUJERO NEGRO (5):</strong> Vuela un punto ya ganado de un rival.</li>
-            </ul>
-        </div>
-        <button class="btn" onclick="toggleRules()"
-            style="margin-top:30px; margin-bottom: 40px; background:#333; color:white; border-color:#555; width:100%; max-width:300px; padding:15px;">CERRAR
-            REGLAMENTO</button>
-    </div>
-
-    <div id="remote-overlay"
-        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:9500; align-items:center; justify-content:center; flex-direction:column; padding:20px; text-align:center;">
-        <h2 style="font-family:'Bungee'; color:var(--neon); margin-bottom:10px; font-size:2em;">📱 Ã¡¢Ãƒ¢Ã¢â‚¬Å¡Ã‚¬Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚º MANDO HOST</h2>
-        <p style="color:#aaa; font-family:'Montserrat'; margin-bottom:30px; font-size:0.9em; max-width:80%;">CONTROLA LA
-            PARTIDA DESDE TU MÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢Ã¡¢Ãƒ¢Ã¢â‚¬Å¡Ã‚¬Ãƒâ€¦Ã¢â‚¬Å“VIL</p>
-
-        <div id="remote-controls-container"
-            style="display:flex; flex-direction:column; gap:15px; width:100%; max-width:300px;">
-            <!-- INJECTED BY JS -->
-        </div>
-
-        <button class="btn" onclick="toggleRemote()"
-            style="margin-top:40px; background:#333; color:white; border-color:#555;">CERRAR MANDO</button>
-    </div>
-
-    <script>
-        function toggleRules() {
-            var el = document.getElementById('rules-overlay');
-            el.style.display = (el.style.display === 'none' || el.style.display === '') ? 'flex' : 'none';
-        }
-        function toggleRemote() {
-            var el = document.getElementById('remote-overlay');
-            el.style.display = (el.style.display === 'none' || el.style.display === '') ? 'flex' : 'none';
-        }
-    </script>
-
-    <div id="panic-overlay"
-        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,0,0,0.85); z-index:9999; flex-direction:column; justify-content:center; align-items:center; text-align:center;">
-        <h1 style="color:white; font-family:'Bungee'; font-size:3em; margin:0; text-shadow:0 0 20px black;">ÃƒÆ’Ã†â€™Ãƒ¢Ã¢â€š¬Ã…¡ÃƒÆ’Ã¢â‚¬Å¡¡PÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚NICO!
-        </h1>
-        <div id="panic-timer"
-            style="color:white; font-family:'Bungee'; font-size:8em; margin:0; line-height:1; text-shadow:0 0 20px black;">
-            10</div>
-        <p style="color:white; font-family:'Bungee'; font-size:1.5em; text-shadow:0 0 10px black;">ÃƒÆ’Ã†â€™Ãƒ¢Ã¢â€š¬Ã…¡ÃƒÆ’Ã¢â‚¬Å¡¡COLOCA TU CARTA
-            RÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚PIDO!</p>
-    </div>
-
-    <div id="ai-loading-overlay">
-        <div class="spinner"></div>
-        <div style="font-size: 1.2em;">TRANSFORMANDO<br>SELFIE... 📱 ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ªÃ¡¢Ãƒ¢Ã¢â‚¬Å¡Ã‚¬Ãƒâ€¦Ã‚¾ ÃƒÆ’Ã¢â‚¬¦Ãƒ¢Ã¢â€š¬Ã…â€œÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚¨</div>
-        <div style="font-size: 0.6em; margin-top: 15px; color: #888; font-family: 'Montserrat';">Esto puede tardar unos
-            segundos</div>
-    </div>
-    <a href="index.html" class="btn-hub" title="Volver al Hub">H</a>
     <div id="login-screen">
         <div class="logo"
-            style="font-family:'Limelight'; color:var(--neon); text-shadow: 0 0 10px var(--neon); text-align:center;">
-            CHRONOBEATS<br><span style="font-size:0.4em; color:var(--gold); font-family:'Montserrat';">MOVIES
+            style="font-family:'Shojumaru'; color:var(--neon); text-shadow: 0 0 10px var(--neon); text-align:center;">
+            CHRONOBEATS<br><span
+                style="font-size:0.5em; color:var(--accent); font-family:'Montserrat'; font-weight:bold;">ANIME
                 VERSION</span></div>
-
-        <div id="avatar-container" onclick="document.getElementById('avatar-input').click()"
-            style="display:flex; flex-direction:column; align-items:center; margin-bottom:15px; cursor:pointer;">
-            <img id="avatar-preview" src="" alt="Avatar"
-                style="display:none; width:100px; height:100px; border-radius:50%; object-fit:cover; border: 3px solid var(--neon); box-shadow: 0 0 15px var(--neon);">
-            <div id="avatar-placeholder" class="pulse"
-                style="width:100px; height:100px; border-radius:50%; border: 3px dashed var(--neon); display:flex; align-items:center; justify-content:center; color:var(--neon); font-size:2.5em; font-family:'Bungee'; background:rgba(255,170,0,0.05); transition: 0.3s;">
-                +
-            </div>
-            <div
-                style="font-size: 0.7em; color: var(--neon); font-family: 'Bungee'; margin-top: 10px; text-shadow: 0 0 5px var(--neon);">
-                ÃƒÆ’Ã†â€™Ãƒ¢Ã¢â€š¬Ã…¡ÃƒÆ’Ã¢â‚¬Å¡¡HAZTE UN SELFIE!
-            </div>
-        </div>
-        <input type="file" id="avatar-input" accept="image/*" capture="user" style="display:none;"
-            onchange="handleAvatarSelect(event)">
-
-        <input type="text" id="host-id" placeholder="CÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢Ã¡¢Ãƒ¢Ã¢â‚¬Å¡Ã‚¬Ãƒâ€¦Ã¢â‚¬Å“DIGO SALA" maxlength="6">
+        <input type="text" id="host-id" placeholder="CÓDIGO SALA" maxlength="6">
         <input type="text" id="player-name" placeholder="TU NOMBRE">
         <button class="btn" id="join-btn" onclick="conectar()">ENTRAR</button>
     </div>
 
-    
-    
-    <div id="leap-container" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); width:90%; background:rgba(255,0,255,1); z-index:99999; border:4px solid white; border-radius:20px; padding:20px; text-align:center; box-shadow:0 0 50px rgba(255,0,255,0.8); font-family:'Bungee';">
-        <h2 style="color:white; margin:0 0 15px 0;">¡¡SALTO DE FE!!</h2>
-        <p style="color:white; font-size:1.1em; margin-bottom:20px;">¿PagarÃ¡s 1 ficha para robar este turno a ciegas?</p>
-        <button class="btn" onclick="send('LEAP_OF_FAITH')" style="background:white; color:#ff00ff; border:none; padding:15px; font-size:1.5em; width:100%; box-shadow:0 0 20px white;">¡ROBAR TURNO!</button>
-        <div onclick="document.getElementById('leap-container').style.display='none'" style="margin-top:15px; color:rgba(255,255,255,0.7); font-size:0.8em; cursor:pointer; text-decoration:underline;">No, cancelar</div>
-    </div>
-    <div id="mute-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:100000; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:20px; box-sizing:border-box; font-family:'Bungee';">
-        <h2 style="color:#ff00ff; font-size:1.8em; margin-bottom:20px; text-shadow:0 0 20px #ff00ff;">¡SILENCIO!</h2>
-        <p style="color:white; font-size:1em; margin-bottom:10px;">Como dice el sabio...</p>
-        <p style="color:var(--accent); font-size:1.4em; font-style:italic; margin-bottom:30px;">"Lo mejor de todo<br>es el silencio..."</p>
-        <div style="font-size:3em; color:var(--gold);" id="mute-countdown">15</div>
-        <p style="color:#888; font-size:0.7em; margin-top:20px;">Vibrando al ritmo de la nada...</p>
-    </div><div id="game-screen">
-        <div id="leaderboard-info">
-            <div class="leader-row">LÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚DER: <span id="lb-leader-name">---</span> (<span id="lb-leader-cards">0</span>)
-            </div>
-            <div class="me-row">YO: <span id="lb-me-cards">0</span> CARTAS</div>
-        </div>
+    <div id="game-screen">
         <h4 id="inventory-title"
             style="margin: 0 0 5px 0; font-family: 'Bungee'; font-size: 0.6em; color: #888; text-align: center;">MIS
             CARTAS</h4>
         <div id="turn-status">TURNO DE: <span id="cur-player">---</span></div>
-        <div id="cheat-indicator"
-            style="display:none; position: fixed; top: 80px; left: 50%; transform: translateX(-50%); background: var(--accent); color: #fff; padding: 5px 15px; border-radius: 20px; font-family: 'Bungee'; font-size: 0.8em; z-index: 10000; box-shadow: 0 0 15px var(--accent);">
-            TRUCOS OFF</div>
         <div class="chip-display" id="my-tokens-ui">MIS FICHAS: <span class="neon-chip"></span><span
                 class="neon-chip"></span></div>
 
         <div class="special-actions" id="special-ctrl">
             <button class="spec-btn" id="btn-autowin" onclick="send('AUTO_WIN')">COMPRAR CARTA (3 <span
                     class="neon-chip" style="width:10px;height:10px;"></span>)</button>
-            <button class="spec-btn btn-error-track" id="btn-error-track" onclick="send('SYSTEM_ERROR_TRACK')"
-                style="display:none;">ERROR TARJETA</button>
-            <button class="spec-btn" id="btn-reload" onclick="send('RELOAD_SONG')">CAMBIAR CANCIÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢Ã¡¢Ãƒ¢Ã¢â‚¬Å¡Ã‚¬Ãƒâ€¦Ã¢â‚¬Å“N (1 <span
+            <button class="spec-btn" id="btn-reload" onclick="send('RELOAD_SONG')">CAMBIAR CANCIÓN (1 <span
                     class="neon-chip" style="width:10px;height:10px;"></span>)</button>
         </div>
 
@@ -732,99 +439,12 @@
         </div>
 
         <div class="skip-controls" id="s-ctrl">
-            <button class="sk-btn sk-fwd" id="btn-skip-p5" onclick="send('SKIP',5)">+5s</button>
+            <button class="sk-btn sk-fwd" onclick="send('SKIP',5)">+5s</button>
             <button class="sk-btn sk-fwd" onclick="send('SKIP',10)">+10s</button>
-            <button class="sk-btn sk-fwd" id="btn-skip-p20" onclick="send('SKIP',20)">+20s</button>
-            <button class="sk-btn sk-back" id="btn-skip-m5" onclick="send('SKIP',-5)">-5s</button>
+            <button class="sk-btn sk-fwd" onclick="send('SKIP',20)">+20s</button>
+            <button class="sk-btn sk-back" onclick="send('SKIP',-5)">-5s</button>
             <button class="sk-btn sk-back" onclick="send('SKIP',-10)">-10s</button>
-            <button class="sk-btn sk-back" id="btn-skip-m20" onclick="send('SKIP',-20)">-20s</button>
-        </div>
-
-        <div class="special-actions" id="sabotage-ctrl" style="display:none; margin-top:10px;">
-            <p
-                style="width: 100%; text-align: center; color: var(--gold); font-size: 0.7em; margin: 0 0 5px 0; font-family: 'Bungee';">
-                SABOTAJES</p>
-            <div id="sabotage-grid">
-                <!-- Nivel 0 -->
-                <button class="spec-btn" id="btn-sabotage-mute"
-                    style="background:var(--bg); border-color:#ff0055; color:#ff0055;"
-                    onclick="send('SABOTAGE_MUTE')">MUTE 15s (1 <span class="neon-chip"
-                        style="width:10px;height:10px;"></span>)</button>
-                <button class="spec-btn" id="btn-sabotage-bet"
-                    style="background:var(--bg); border-color:#00f2fe; color:#00f2fe;"
-                    onclick="send('BET_AGAINST_ACTIVE')">ÃƒÆ’Ã†â€™Ãƒ¢Ã¢â€š¬Ã…¡ÃƒÆ’Ã¢â‚¬Å¡¡NI DE COÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ A! (1 <span class="neon-chip"
-                        style="width:10px;height:10px;"></span>)</button>
-
-                <!-- Nivel 1 -->
-                <button class="spec-btn" id="btn-sabotage-buzzer"
-                    style="background:var(--bg); border-color:#00ff00; color:#00ff00;"
-                    onclick="send('SABOTAGE_BUZZER')">ÃƒÆ’Ã†â€™Ãƒ¢Ã¢â€š¬Ã…¡ÃƒÆ’Ã¢â‚¬Å¡¡ZUMBIDO! (1 <span class="neon-chip"
-                        style="width:10px;height:10px;"></span>)</button>
-                <button class="spec-btn" id="btn-sabotage-veto"
-                    style="background:var(--bg); border-color:#ff8800; color:#ff8800;"
-                    onclick="send('SABOTAGE_VETO')">VETO CAMBIAR (1 <span class="neon-chip"
-                        style="width:10px;height:10px;"></span>)</button>
-                <button class="spec-btn" id="btn-sabotage-skip"
-                    style="background:var(--bg); border-color:#ff00ff; color:#ff00ff;"
-                    onclick="send('SABOTAGE_FORCE_SKIP')">FORZAR SALTO (2 <span class="neon-chip"
-                        style="width:10px;height:10px;"></span>)</button>
-                <button class="spec-btn" id="btn-sabotage-panic"
-                    style="background:var(--bg); border-color:#ff0000; color:#ff0000;"
-                    onclick="send('SABOTAGE_PANIC')">PÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚NICO 10s (2 <span class="neon-chip"
-                        style="width:10px;height:10px;"></span>)</button>
-                <button class="spec-btn" id="btn-sabotage-fog"
-                    style="background:var(--bg); border-color:#aaaaaa; color:#aaaaaa;"
-                    onclick="send('SABOTAGE_FOG')">NIEBLA TIEMPO (2 <span class="neon-chip"
-                        style="width:10px;height:10px;"></span>)</button>
-
-                <!-- Nivel 2 -->
-                <button class="spec-btn" id="btn-sabotage-steal-token"
-                    style="background:var(--bg); border-color:#ffff00; color:#ffff00;"
-                    onclick="send('SABOTAGE_STEAL_TOKEN')">ROBAR FICHA (4 <span class="neon-chip"
-                        style="width:10px;height:10px;"></span>)</button>
-                <button class="spec-btn" id="btn-sabotage-steal-turn"
-                    style="background:var(--bg); border-color:#ff00ff; color:#ff00ff;"
-                    onclick="send('SABOTAGE_STEAL_TURN')">ROBAR TURNO (4 <span class="neon-chip"
-                        style="width:10px;height:10px;"></span>)</button>
-                <button class="spec-btn" id="btn-sabotage-blackhole"
-                    style="background:var(--bg); border-color:#9900ff; color:#9900ff; grid-column: span 2;"
-                    onclick="send('SABOTAGE_BLACKHOLE')">AGUJERO NEGRO (5 <span class="neon-chip"
-                        style="width:10px;height:10px;"></span>)</button>
-                <button class="spec-btn" id="btn-duel-select"
-                    onclick="document.getElementById('duel-player-select').style.display='flex';"
-                    style="background:var(--gold); color:#000; font-weight:bold;">
-                    RETAR A DUELO A MUERTE (2 <span class="neon-chip"
-                        style="display:inline-block; width:10px; height:10px; background:var(--neon); border-radius:50%; margin:0 2px;"></span>)
-                </button>
-            </div>
-        </div>
-        <div id="tab-nav" style="display:flex; width:100%; gap:5px; margin-top:15px; margin-bottom:5px;">
-            <button class="nav-btn"
-                onclick="document.getElementById('sabotage-ctrl').style.display='none'; document.getElementById('market-ctrl').style.display='none'; document.getElementById('normal-card-container').style.display='flex'; document.getElementById('normal-collection').style.display='block'; this.style.opacity='1'; document.getElementById('nav-sabotage').style.opacity='0.5'; document.getElementById('nav-market').style.opacity='0.5';"
-                style="flex:1; background:var(--accent); color:#fff; border-radius:10px; padding:10px; font-weight:bold; font-size:0.8em; border:none; opacity:1;">JUEGO</button>
-            <button class="nav-btn" id="nav-sabotage"
-                onclick="document.getElementById('normal-card-container').style.display='none'; document.getElementById('normal-collection').style.display='none'; document.getElementById('market-ctrl').style.display='none'; document.getElementById('sabotage-ctrl').style.display='block'; this.style.opacity='1'; this.previousElementSibling.style.opacity='0.5'; document.getElementById('nav-market').style.opacity='0.5';"
-                style="flex:1; background:#cc0000; color:#fff; border-radius:10px; padding:10px; font-weight:bold; font-size:0.8em; border:none; opacity:0.5;">SABOTAJE</button>
-            <button class="nav-btn" id="nav-market"
-                onclick="document.getElementById('normal-card-container').style.display='none'; document.getElementById('normal-collection').style.display='none'; document.getElementById('sabotage-ctrl').style.display='none'; document.getElementById('market-ctrl').style.display='block'; this.style.opacity='1'; document.getElementById('nav-sabotage').style.opacity='0.5'; this.previousElementSibling.previousElementSibling.style.opacity='0.5';"
-                style="flex:1; background:#330066; color:#fff; border-radius:10px; padding:10px; font-weight:bold; font-size:0.8em; border:none; opacity:0.5;">MERCADO</button>
-        </div>
-
-        <div class="special-actions" id="market-ctrl" style="display:none; margin-top:10px;">
-            <p
-                style="width: 100%; text-align: center; color: var(--gold); font-size: 0.7em; margin: 0 0 5px 0; font-family: 'Bungee';">
-                MERCADO NEGRO</p>
-            <div id="market-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
-                <button class="spec-btn" id="btn-market-wildcard" onclick="send('MARKET_WILDCARD')"
-                    style="background:#5c00e6;">COMODIN 50/50 (1 <span class="neon-chip"
-                        style="width:10px;height:10px;"></span>)</button>
-                <button class="spec-btn" id="btn-market-decade" onclick="send('MARKET_DECADE')"
-                    style="background:#005ce6;">PISTA DECADA (1 <span class="neon-chip"
-                        style="width:10px;height:10px;"></span>)</button>
-                <button class="spec-btn" id="btn-market-shield" onclick="send('MARKET_SHIELD')"
-                    style="background:#cc7a00; grid-column:1 / -1; color:#000;">ESCUDO PASIVO (3 <span class="neon-chip"
-                        style="width:10px;height:10px;background:var(--neon);"></span>)</button>
-            </div>
+            <button class="sk-btn sk-back" onclick="send('SKIP',-20)">-20s</button>
         </div>
 
         <div id="king-mode-ui"
@@ -835,12 +455,12 @@
             <div id="card" class="card">
                 <div class="card-face card-front">
                     <div
-                        style="font-family:'Bungee';color:var(--neon);opacity:0.2;font-size:1.8em;text-align:center;line-height:0.95;word-wrap:break-word;width:100%">
-                        CHRONO<br>BEATS</div>
+                        style="font-family:'Shojumaru';color:var(--neon);opacity:0.2;font-size:1.8em;text-align:center;line-height:1.2;word-wrap:break-word;width:100%">
+                        CHRONO<br>BEATS<br><span style="font-size:0.5em;">ANIME</span></div>
                 </div>
                 <div class="card-face card-back">
-                    <div id="c-artist">INTÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢Ã¡¢Ãƒ¢Ã¢â‚¬Å¡Ã‚¬Ãƒâ€šÃ‚°RPRETE</div>
-                    <div id="c-song">TEMA (PELÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚CULA / SERIE)</div>
+                    <div id="c-artist">ANIME</div>
+                    <div id="c-song">TIPO</div>
                     <div id="c-year">1999</div>
                 </div>
             </div>
@@ -853,33 +473,18 @@
         </div>
     </div>
 
-    <div id="custom-alert"
-        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:20000; align-items:center; justify-content:center; flex-direction:column;">
-        <div
-            style="background:#111; border:2px solid var(--neon); border-radius:15px; padding:20px; width:80%; max-width:350px; text-align:center; box-shadow: 0 0 20px var(--neon);">
-            <h3 style="font-family:'Bungee'; color:var(--neon); margin-top:0;">AVISO</h3>
-            <p id="custom-alert-msg" style="font-size:1em; margin-bottom:20px;"></p>
-            <button class="btn"
-                onclick="document.getElementById('custom-alert').style.display='none'">ENTENDIDO</button>
-        </div>
-    </div>
-
-    <div id="custom-confirm"
-        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:20000; align-items:center; justify-content:center; flex-direction:column;">
-        <div
-            style="background:#111; border:2px solid var(--gold); border-radius:15px; padding:20px; width:80%; max-width:350px; text-align:center; box-shadow: 0 0 20px var(--gold);">
-            <h3 style="font-family:'Bungee'; color:var(--gold); margin-top:0;">CONFIRMAR</h3>
-            <p id="custom-confirm-msg" style="font-size:1em; margin-bottom:20px;"></p>
-            <div style="display:flex; gap:10px; justify-content:center;">
-                <button class="btn" id="custom-confirm-yes"
-                    style="background:var(--gold); color:#000; box-shadow:0 0 10px var(--gold); flex:1; padding:15px 5px;">SÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚</button>
-                <button class="btn" id="custom-confirm-no"
-                    style="background:transparent; border:2px solid #888; color:#888; box-shadow:none; flex:1; padding:15px 5px;">NO</button>
-            </div>
-        </div>
-    </div>
-
     <script>
+
+        function toggleRules() {
+            var el = document.getElementById('rules-overlay');
+            el.style.display = (el.style.display === 'none' || el.style.display === '') ? 'flex' : 'none';
+        }
+        function toggleRemote() {
+            var el = document.getElementById('remote-overlay');
+            el.style.display = (el.style.display === 'none' || el.style.display === '') ? 'flex' : 'none';
+        }
+    
+
         var peer, conn, myId, playerName;
         var lastState = null;
         var playerAvatarDataUrl = null;
@@ -940,7 +545,7 @@
                     // Guardar en localStorage
                     localStorage.setItem('cb_player_avatar', playerAvatarDataUrl);
 
-                    // Transformar a Toon automÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡¡ticamente
+                    // Transformar a Toon automáticamente
                     toonifyAvatar();
                 };
                 img.src = e.target.result;
@@ -955,7 +560,22 @@
             overlay.style.display = 'flex';
 
             try {
-                // --- FILTRO DE COLOR DEL TEMA PELÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚CULAS (NARANJA/ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚MBAR) ---
+                // Escalar imagen a 512px para Pollinations (optimizar subida)
+                const scaledDataUrl = await new Promise(resolve => {
+                    const img = new Image();
+                    img.onload = function () {
+                        const MAX = 512;
+                        const scale = Math.min(MAX / img.width, MAX / img.height, 1);
+                        const canvas = document.createElement('canvas');
+                        canvas.width = Math.round(img.width * scale);
+                        canvas.height = Math.round(img.height * scale);
+                        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                        resolve(canvas.toDataURL('image/jpeg', 0.85));
+                    };
+                    img.src = playerAvatarDataUrl;
+                });
+
+                // --- FILTRO DE COLOR NEÓN DEL TEMA NORMAL (AZUL/CYAN) ---
 
                 const img = new Image();
                 img.src = playerAvatarDataUrl;
@@ -985,17 +605,17 @@
                 ctx.drawImage(img, 0, 0, cWidth, cHeight);
                 ctx.filter = 'none';
 
-                // 2. TeÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚±ir con el color Naranja/ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚mbar del tema PelÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚­culas
+                // 2. Teñir con el color Azul Cyan del tema Normal
                 ctx.globalCompositeOperation = 'color';
-                ctx.fillStyle = 'rgba(255, 120, 0, 0.8)';
+                ctx.fillStyle = 'rgba(0, 200, 255, 0.8)';
                 ctx.fillRect(0, 0, cWidth, cHeight);
 
-                // Mezclar un poco de luz (Tono neÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚³n vibrante)
+                // Mezclar un poco de luz (Tono neón vibrante)
                 ctx.globalCompositeOperation = 'overlay';
-                ctx.fillStyle = 'rgba(255, 120, 0, 0.3)';
+                ctx.fillStyle = 'rgba(0, 200, 255, 0.3)';
                 ctx.fillRect(0, 0, cWidth, cHeight);
 
-                // 3. ViÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚±eta oscura
+                // 3. Viñeta oscura
                 ctx.globalCompositeOperation = 'multiply';
                 const grd = ctx.createRadialGradient(cWidth / 2, cHeight / 2, cWidth * 0.3, cWidth / 2, cHeight / 2, cWidth * 0.9);
                 grd.addColorStop(0, "white");
@@ -1015,15 +635,12 @@
                 await new Promise(r => setTimeout(r, 400));
 
             } catch (err) {
-                console.error('Gemini toon error:', err);
+                console.error('Pollinations toon error:', err);
+                alert("Error creando versión cómic: " + err.message);
             } finally {
                 overlay.style.display = 'none';
             }
-        }
-
-
-
-        function showCustomAlert(msg) {
+        } function showCustomAlert(msg) {
             document.getElementById('custom-alert-msg').innerText = msg;
             document.getElementById('custom-alert').style.display = 'flex';
         }
@@ -1061,7 +678,7 @@
 
             // Si no tiene avatar, preguntarle una vez
             if (!playerAvatarDataUrl) {
-                showCustomConfirm("ÃƒÆ’Ã†â€™Ãƒ¢Ã¢â€š¬Ã…¡ÃƒÆ’Ã¢â‚¬Å¡¿Quieres hacerte un selfie para tu avatar antes de entrar?", function (confirmed) {
+                showCustomConfirm("¿Quieres hacerte un selfie para tu avatar antes de entrar?", function (confirmed) {
                     if (confirmed) {
                         document.getElementById('avatar-input').click();
                     } else {
@@ -1097,10 +714,10 @@
             peer.on('open', function (id) {
                 myId = id;
                 console.log("Conectando con ID Peer:", id);
-                conn = peer.connect("CB-MOVIES-HOST-" + hostId);
+                conn = peer.connect("CB-HOST-" + hostId);
 
                 conn.on('open', function () {
-                    console.log("ÃƒÆ’Ã†â€™Ãƒ¢Ã¢â€š¬Ã…¡ÃƒÆ’Ã¢â‚¬Å¡¡Conectado!");
+                    console.log("¡Conectado!");
                     conn.send({ type: 'JOIN', name: playerName, avatar: playerAvatarDataUrl });
                     document.getElementById('login-screen').style.display = 'none';
                     document.getElementById('game-screen').style.display = 'flex';
@@ -1110,14 +727,14 @@
                 conn.on('data', handle);
 
                 conn.on('close', function () {
-                    showCustomAlert("ConexiÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚³n cerrada. El Host se ha desconectado.");
+                    showCustomAlert("Conexión cerrada. El Host se ha desconectado.");
                     setTimeout(() => location.reload(), 3000);
                 });
             });
 
             peer.on('error', function (err) {
                 console.error("Error PeerJS:", err);
-                showCustomAlert("Error de conexiÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚³n: " + err.type);
+                showCustomAlert("Error de conexión: " + err.type);
                 btn.disabled = false;
                 btn.innerText = "ENTRAR";
             });
@@ -1127,7 +744,7 @@
             if (conn && conn.open) {
                 conn.send({ type: 'COMMAND', action: action, value: value });
             } else {
-                showCustomAlert("ConexiÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚³n perdida. Recarga la pÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡¡gina.");
+                showCustomAlert("Conexión perdida. Recarga la página.");
             }
         }
 
@@ -1139,7 +756,7 @@
                 return;
             }
 
-            // RetroalimentaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚³n de trucos para Xavi
+            // Retroalimentación de trucos para Xavi
             if (data.type === 'STATE_UPDATE' && lastState && playerName.toLowerCase() === 'xavi') {
                 if (data.cheatsEnabled !== lastState.cheatsEnabled) {
                     const indicator = document.getElementById('cheat-indicator');
@@ -1176,18 +793,7 @@
                     var bombContainer = document.getElementById('bomb-player-list');
                     if (bombContainer) bombContainer.innerHTML = bombListHtml;
                 }
-                
-                // LÃƒÆ’Ã¢â‚¬Å“GICA DE SILENCIO (MUTE)
-                var muteOverlay = document.getElementById('mute-overlay');
-                if (muteOverlay) {
-                    if (data.isMuted) {
-                        muteOverlay.style.display = 'flex';
-                        document.getElementById('mute-countdown').innerText = data.muteTimeRemaining || 0;
-                    } else {
-                        muteOverlay.style.display = 'none';
-                    }
-                }
-        const leapBtn = document.getElementById('leap-container');
+                const leapBtn = document.getElementById('leap-container');
                 if (leapBtn) {
                     var amIActive = false;
                     try {
@@ -1234,19 +840,19 @@
                         jstr += "<button class='btn' style='padding:10px; font-size:0.8em; flex:1; " + (currJop === 2 ? "background:var(--neon);color:#000;" : "background:#222;color:#888") + "' onclick=\"send('REMOTE_JOPUTISMO', 2)\">SUPERMAN</button>";
                         jstr += "</div>";
 
-                        rContainer.innerHTML = jstr + `<button class="btn" style="background:#ff00ff; color:white; border-color:#ff00ff; padding:20px; font-size:1.2em;" onclick="send('REMOTE_START_GAME'); toggleRemote();">  ▶ INICIAR PARTIDA</button>`;
+                        rContainer.innerHTML = jstr + `<button class="btn" style="background:#ff00ff; color:white; border-color:#ff00ff; padding:20px; font-size:1.2em;" onclick="send('REMOTE_START_GAME'); toggleRemote();">▶ INICIAR PARTIDA</button>`;
                     } else if (data.turnPhase && data.turnPhase !== 'NORMAL') {
                         rContainer.innerHTML = `<p style="color:#888;">Controles no disponibles durante evento especial.</p>`;
                     } else {
                         if (!data.revealed) {
-                            rContainer.innerHTML = `<button class="btn" style="background:var(--neon); color:#000; padding:20px; font-size:1.2em;" onclick="send('REMOTE_REVEAL'); toggleRemote();">📱    REVELAR CARTA</button>
+                            rContainer.innerHTML = `<button class="btn" style="background:var(--neon); color:#000; padding:20px; font-size:1.2em;" onclick="send('REMOTE_REVEAL'); toggleRemote();">👀 REVELAR CARTA</button>
                             <button class="btn" style="background:#555; color:white; border-color:#555; margin-top:20px;" onclick="send('REMOTE_SYSTEM_ERROR'); toggleRemote();">ERROR DE SISTEMA (REPETIR)</button>`;
                         } else {
                             rContainer.innerHTML = `
-                                <button class="btn" style="background:#00ff00; color:#000; padding:15px; margin-bottom:10px;" onclick="send('REMOTE_CORRECT'); toggleRemote();"> ÃƒÆ’Ã¢â‚¬¦Ãƒ¢Ã¢â€š¬Ã…â€œÃ¡¢Ãƒ¢Ã¢â‚¬Å¡Ã‚¬Ãƒâ€šÃ‚¦ SÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ (AcertÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚³ y gana carta)</button>
-                                <button class="btn" style="background:#ffd700; color:#000; padding:15px; margin-bottom:10px;" onclick="send('REMOTE_CORRECT_TOKEN'); toggleRemote();">📱 Ã¡¢Ãƒ¢Ã¢â‚¬Å¡Ã‚¬Ãƒâ€šÃ‚ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚µ SÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ (+ Ficha Azul)</button>
-                                <button class="btn" style="background:#ff4444; color:#fff; padding:15px; margin-bottom:10px;" onclick="send('REMOTE_INCORRECT'); toggleRemote();"> ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÃƒÆ’Ã¢â‚¬¦Ãƒ¢Ã¢â€š¬Ã¢â€ž¢ NO (FallÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚³ todo)</button>
-                                <button class="btn" style="background:#00f2fe; color:#000; padding:15px; margin-bottom:10px;" onclick="send('REMOTE_INCORRECT_TOKEN'); toggleRemote();">📱 Ã¡¢Ãƒ¢Ã¢â‚¬Å¡Ã‚¬Ãƒâ€šÃ‚ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚µ NO (+ Ficha ConsolaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚³n)</button>
+                                <button class="btn" style="background:#00ff00; color:#000; padding:15px; margin-bottom:10px;" onclick="send('REMOTE_CORRECT'); toggleRemote();">✅ SÍ (Acertó y gana carta)</button>
+                                <button class="btn" style="background:#ffd700; color:#000; padding:15px; margin-bottom:10px;" onclick="send('REMOTE_CORRECT_TOKEN'); toggleRemote();">🔵 SÍ (+ Ficha Azul)</button>
+                                <button class="btn" style="background:#ff4444; color:#fff; padding:15px; margin-bottom:10px;" onclick="send('REMOTE_INCORRECT'); toggleRemote();">❌ NO (Falló todo)</button>
+                                <button class="btn" style="background:#00f2fe; color:#000; padding:15px; margin-bottom:10px;" onclick="send('REMOTE_INCORRECT_TOKEN'); toggleRemote();">🔵 NO (+ Ficha Consolación)</button>
                                 <button class="btn" style="background:#555; color:white; border-color:#555; margin-top:20px;" onclick="send('REMOTE_SYSTEM_ERROR'); toggleRemote();">ERROR SISTEMA</button>
                             `;
                         }
@@ -1271,7 +877,7 @@
 
                 // Identificar si es mi turno usando el ID de PeerJS
                 var isMyTurn = (data.activePlayer.id === myId);
-                console.log("ÃƒÆ’Ã†â€™Ãƒ¢Ã¢â€š¬Ã…¡ÃƒÆ’Ã¢â‚¬Å¡¿Es mi turno?", isMyTurn, "Mi ID:", myId, "ID Activo:", data.activePlayer.id);
+                console.log("¿Es mi turno?", isMyTurn, "Mi ID:", myId, "ID Activo:", data.activePlayer.id);
 
                 var isKingMode = (data.turnPhase && data.turnPhase !== 'NORMAL');
                 var normalCardContainer = document.getElementById('normal-card-container');
@@ -1285,9 +891,9 @@
 
                     if (data.turnPhase === 'KING_SELECTION') {
                         if (isMyTurn) {
-                            kingModeUi.innerHTML = "<h3 style='color:var(--gold);font-family:Bungee;'>ERES EL REY</h3><p>EL RESTO DE JUGADORES ESTÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ ELIGIENDO TU CARTA...</p>";
+                            kingModeUi.innerHTML = "<h3 style='color:var(--gold);font-family:Bungee;'>ERES EL REY</h3><p>EL RESTO DE JUGADORES ESTÁ ELIGIENDO TU CARTA...</p>";
                         } else {
-                            var html = "<h3 style='color:var(--neon);font-family:Bungee;'>ÃƒÆ’Ã†â€™Ãƒ¢Ã¢â€š¬Ã…¡ÃƒÆ’Ã¢â‚¬Å¡¡ELIGE LA CARTA MÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚S DIFÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚CIL!</h3>";
+                            var html = "<h3 style='color:var(--neon);font-family:Bungee;'>¡ELIGE LA CARTA MÁS DIFÍCIL!</h3>";
                             if (data.kingOptions) {
                                 data.kingOptions.forEach(function (opt, idx) {
                                     html += "<div style='background:#111; border:1px solid var(--neon); border-radius:10px; padding:10px; margin-bottom:10px; text-align:left;'>";
@@ -1295,7 +901,7 @@
                                     html += "<span style='font-size:0.8em; color:#aaa;'>" + opt.artist + "</span><br>";
                                     html += "<strong style='font-family:Bungee;'>" + opt.song + "</strong><br>";
                                     html += "<span style='color:var(--accent); font-family:Bungee; font-size:1.2em;'>" + opt.year + "</span>";
-                                    html += "<button class='btn' style='margin-top:10px; padding:10px; font-size:1em;' onclick=\"send('KING_SELECT_CARD', " + idx + ")\">ÃƒÆ’Ã†â€™Ãƒ¢Ã¢â€š¬Ã…¡ÃƒÆ’Ã¢â‚¬Å¡¡ELEGIR ESTA!</button>";
+                                    html += "<button class='btn' style='margin-top:10px; padding:10px; font-size:1em;' onclick=\"send('KING_SELECT_CARD', " + idx + ")\">¡ELEGIR ESTA!</button>";
                                     html += "</div>";
                                 });
                             }
@@ -1303,13 +909,13 @@
                         }
                     } else if (data.turnPhase === 'KING_GUESS') {
                         if (isMyTurn) {
-                            var html = "<h3 style='color:var(--gold);font-family:Bungee;'>ÃƒÆ’Ã†â€™Ãƒ¢Ã¢â€š¬Ã…¡ÃƒÆ’Ã¢â‚¬Å¡¡ADIVINA EL AÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ O!</h3>";
-                            html += "<p style='font-size:0.8em; color:var(--neon); margin-bottom:15px;'>(Escucha la canciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚³n. Margen de error: +/- 2 aÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚±os)</p>";
-                            html += "<input type='number' id='king-guess-input' placeholder='AÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ O' style='font-size:1.5em; text-align:center;'>";
-                            html += "<button class='btn' style='margin-top:10px;' onclick=\"var y = document.getElementById('king-guess-input').value; if(y) send('KING_GUESS', y);\">CONFIRMAR AÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ O</button>";
+                            var html = "<h3 style='color:var(--gold);font-family:Bungee;'>¡ADIVINA EL AÑO!</h3>";
+                            html += "<p style='font-size:0.8em; color:var(--neon); margin-bottom:15px;'>(Escucha la canción. Margen de error: +/- 2 años)</p>";
+                            html += "<input type='number' id='king-guess-input' placeholder='AÑO' style='font-size:1.5em; text-align:center;'>";
+                            html += "<button class='btn' style='margin-top:10px;' onclick=\"var y = document.getElementById('king-guess-input').value; if(y) send('KING_GUESS', y);\">CONFIRMAR AÑO</button>";
                             kingModeUi.innerHTML = html;
                         } else {
-                            kingModeUi.innerHTML = "<h3 style='color:var(--neon);font-family:Bungee;'>CARTA ENVIADA</h3><p>EL REY ESTÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ ADIVINANDO EL AÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ O...</p>";
+                            kingModeUi.innerHTML = "<h3 style='color:var(--neon);font-family:Bungee;'>CARTA ENVIADA</h3><p>EL REY ESTÁ ADIVINANDO EL AÑO...</p>";
                         }
                     } else if (data.turnPhase === 'KING_GUESS_RESULT') {
                         var html = "<h3 style='color:var(--gold);font-family:Bungee;'>RESULTADO</h3>";
@@ -1327,22 +933,22 @@
 
                 // Control de visibilidad de bloques de mando
                 var showMusic = isMyTurn;
-                if (data.turnPhase === 'KING_SELECTION') showMusic = false; // Nadie tiene mÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ºsica en este punto
+                if (data.turnPhase === 'KING_SELECTION') showMusic = false; // Nadie tiene música en este punto
 
                 document.getElementById('m-ctrl').style.display = showMusic ? 'grid' : 'none';
                 document.getElementById('s-ctrl').style.display = showMusic ? 'grid' : 'none';
 
-                // Botones Especiales (Solo mi turno y si no estÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡¡ revelada Y no en modo rey)
+                // Botones Especiales (Solo mi turno y si no está revelada Y no en modo rey)
                 var specialCtrl = document.getElementById('special-ctrl');
                 var sabotageCtrl = document.getElementById('sabotage-ctrl');
                 if (isMyTurn && !data.revealed && (!data.turnPhase || data.turnPhase === 'NORMAL')) {
                     specialCtrl.style.display = 'flex';
                     sabotageCtrl.style.display = 'none';
-                    // COMPRAR (Solo si NO estÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡¡ sonando)
+                    // COMPRAR (Solo si NO está sonando)
                     document.getElementById('btn-autowin').style.display = (!data.isPlaying) ? 'block' : 'none';
-                    // ERROR VIDEO (Solo si SI estÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡¡ sonando)
+                    // ERROR VIDEO (Solo si SI está sonando)
                     document.getElementById('btn-error-track').style.display = (data.isPlaying) ? 'block' : 'none';
-                    // CAMBIAR (Solo si SÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ estÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡¡ sonando y NO ha cambiado ya)
+                    // CAMBIAR (Solo si SÍ está sonando y NO ha cambiado ya)
                     document.getElementById('btn-reload').style.display = (data.isPlaying && data.canReload) ? 'block' : 'none';
                 } else {
                     specialCtrl.style.display = 'none';
@@ -1389,34 +995,34 @@
                     if (isMyTurn) {
                         document.getElementById('inventory-title').innerText = "MIS CARTAS (MARCA TU APUESTA)";
                     } else {
-                        document.getElementById('inventory-title').innerText = "CRONOLOGÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚A DE " + data.activePlayer.name;
+                        document.getElementById('inventory-title').innerText = "CRONOLOGÍA DE " + data.activePlayer.name;
                     }
 
                     if (isMyTurn) {
                         if (data.myCards) {
                             var h = "";
                             var isSingleCard = (data.myCards.length === 1);
-                            if (isSingleCard) h += '<div style="font-size:0.8em; color:var(--neon); text-align:center; font-family:\'Bungee\'; margin-bottom:5px;"> Ã¡¢Ãƒ¢Ã¢â‚¬Å¡Ã‚¬Ãƒâ€šÃ‚   ANTES  Ã¡¢Ãƒ¢Ã¢â‚¬Å¡Ã‚¬Ãƒâ€šÃ‚  </div>';
+                            if (isSingleCard) h += '<div style="font-size:0.8em; color:var(--neon); text-align:center; font-family:\'Bungee\'; margin-bottom:5px;">↑ ANTES ↑</div>';
                             h += renderBetSlot(0, data.currentBets, data.activeGuess, true);
                             data.myCards.forEach(function (year, idx) {
                                 var displayYear = (data.isFogActive) ? "????" : year;
                                 h += '<div class="card-row">' + displayYear + '</div>';
                                 h += renderBetSlot(idx + 1, data.currentBets, data.activeGuess, true);
                             });
-                            if (isSingleCard) h += '<div style="font-size:0.8em; color:var(--neon); text-align:center; font-family:\'Bungee\'; margin-top:5px;"> Ã¡¢Ãƒ¢Ã¢â‚¬Å¡Ã‚¬Ãƒâ€šÃ‚ Ã¡¢Ãƒ¢Ã¢â‚¬Å¡Ã‚¬Ãƒâ€¦Ã¢â‚¬Å“ DESPUÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢Ã¡¢Ãƒ¢Ã¢â‚¬Å¡Ã‚¬Ãƒâ€šÃ‚°S  Ã¡¢Ãƒ¢Ã¢â‚¬Å¡Ã‚¬Ãƒâ€šÃ‚ Ã¡¢Ãƒ¢Ã¢â‚¬Å¡Ã‚¬Ãƒâ€¦Ã¢â‚¬Å“</div>';
+                            if (isSingleCard) h += '<div style="font-size:0.8em; color:var(--neon); text-align:center; font-family:\'Bungee\'; margin-top:5px;">↓ DESPUÉS ↓</div>';
                             document.getElementById('my-cards-list').innerHTML = h;
                         }
                     } else {
                         if (data.activeTimeline) {
                             var h = "";
                             var isSingleCard = (data.activeTimeline.length === 1);
-                            if (isSingleCard) h += '<div style="font-size:0.8em; color:var(--neon); text-align:center; font-family:\'Bungee\'; margin-bottom:5px;"> Ã¡¢Ãƒ¢Ã¢â‚¬Å¡Ã‚¬Ãƒâ€šÃ‚   ANTES  Ã¡¢Ãƒ¢Ã¢â‚¬Å¡Ã‚¬Ãƒâ€šÃ‚  </div>';
+                            if (isSingleCard) h += '<div style="font-size:0.8em; color:var(--neon); text-align:center; font-family:\'Bungee\'; margin-bottom:5px;">↑ ANTES ↑</div>';
                             h += renderBetSlot(0, data.currentBets, data.activeGuess, false);
                             data.activeTimeline.forEach(function (year, idx) {
                                 h += '<div class="card-row" style="border-color: #444; color: #888;">' + year + '</div>';
                                 h += renderBetSlot(idx + 1, data.currentBets, data.activeGuess, false);
                             });
-                            if (isSingleCard) h += '<div style="font-size:0.8em; color:var(--neon); text-align:center; font-family:\'Bungee\'; margin-top:5px;"> Ã¡¢Ãƒ¢Ã¢â‚¬Å¡Ã‚¬Ãƒâ€šÃ‚ Ã¡¢Ãƒ¢Ã¢â‚¬Å¡Ã‚¬Ãƒâ€¦Ã¢â‚¬Å“ DESPUÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢Ã¡¢Ãƒ¢Ã¢â‚¬Å¡Ã‚¬Ãƒâ€šÃ‚°S  Ã¡¢Ãƒ¢Ã¢â‚¬Å¡Ã‚¬Ãƒâ€šÃ‚ Ã¡¢Ãƒ¢Ã¢â‚¬Å¡Ã‚¬Ãƒâ€¦Ã¢â‚¬Å“</div>';
+                            if (isSingleCard) h += '<div style="font-size:0.8em; color:var(--neon); text-align:center; font-family:\'Bungee\'; margin-top:5px;">↓ DESPUÉS ↓</div>';
                             document.getElementById('my-cards-list').innerHTML = h;
                         }
                     }
@@ -1479,7 +1085,7 @@
                             if (alreadyBet) btnSabotageBet.innerText = "APUESTA HECHA";
                         } else {
                             btnSabotageBet.style.opacity = '1';
-                            btnSabotageBet.innerHTML = 'ÃƒÆ’Ã†â€™Ãƒ¢Ã¢â€š¬Ã…¡ÃƒÆ’Ã¢â‚¬Å¡¡NI DE COÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ A! (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)';
+                            btnSabotageBet.innerHTML = '¡NI DE COÑA! (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)';
                         }
                     }
                 }
@@ -1505,7 +1111,7 @@
             if (occupants.length > 0) cls += " occupied";
             if (imIn) cls += " my-bet";
 
-            // Bloqueo: si el hueco estÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡¡ pillado por el activo (y no soy yo) o por otro desafiante
+            // Bloqueo: si el hueco está pillado por el activo (y no soy yo) o por otro desafiante
             var blockedForMe = false;
             if (!amIActive && isGuess) blockedForMe = true;
             if (isTakenByOther) blockedForMe = true;
@@ -1517,22 +1123,22 @@
             var label = "";
             if (isGuess) label = "X";
             else if (imIn) label = "YO";
-            else if (isTakenByOther) label = "📱 Ã¡¢Ãƒ¢Ã¢â‚¬Å¡Ã‚¬Ãƒâ€šÃ‚ÃƒÆ’Ã¢â‚¬¹Ãƒâ€¦Ã¢â‚¬Å“";
+            else if (isTakenByOther) label = "🔘";
 
             return '<div class="' + cls + '" onclick="interactuarSlot(' + idx + ', ' + amIActive + ', ' + isGuess + ', ' + isTakenByOther + ')">' + label + '</div>';
         }
 
         function interactuarSlot(idx, amIActive, isGuess, isTakenByOther) {
             if (isTakenByOther) {
-                showCustomAlert("ÃƒÆ’Ã†â€™Ãƒ¢Ã¢â€š¬Ã…¡ÃƒÆ’Ã¢â‚¬Å¡¡Este hueco ya lo ha pillado otro jugador!");
+                showCustomAlert("¡Este hueco ya lo ha pillado otro jugador!");
                 return;
             }
             if (amIActive) {
                 if (lastState && lastState.activeGuess !== null) {
-                    showCustomAlert("Ya has marcado tu adivinanza de aÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚±o. Espera la resoluciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚³n.");
+                    showCustomAlert("Ya has marcado tu adivinanza de año. Espera la resolución.");
                     return;
                 }
-                showCustomConfirm("ÃƒÆ’Ã†â€™Ãƒ¢Ã¢â€š¬Ã…¡ÃƒÆ’Ã¢â‚¬Å¡¿Marcar este hueco como tu apuesta para el aÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚±o de la canciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚³n?", function (confirmed) {
+                showCustomConfirm("¿Marcar este hueco como tu apuesta para el año de la canción?", function (confirmed) {
                     if (confirmed) send('GUESS', idx);
                 });
             } else {
@@ -1542,11 +1148,11 @@
                     return;
                 }
                 if (isGuess) {
-                    showCustomAlert("ÃƒÆ’Ã†â€™Ãƒ¢Ã¢â€š¬Ã…¡ÃƒÆ’Ã¢â‚¬Å¡¡Ese hueco ya lo ha elegido el jugador activo! Elige otro sitio para tu apuesta.");
+                    showCustomAlert("¡Ese hueco ya lo ha elegido el jugador activo! Elige otro sitio para tu apuesta.");
                     return;
                 }
                 console.log("Rival intentando apostar en:", idx);
-                showCustomConfirm("ÃƒÆ’Ã†â€™Ãƒ¢Ã¢â€š¬Ã…¡ÃƒÆ’Ã¢â‚¬Å¡¿Seguro que quieres RETAR A DUELO en este hueco (Coste: 2 Fichas)?", function (confirmed) {
+                showCustomConfirm("¿Seguro que quieres RETAR A DUELO en este hueco (Coste: 2 Fichas)?", function (confirmed) {
                     if (confirmed) send('BET', idx);
                 });
             }
@@ -1598,7 +1204,7 @@
                 // Use event delegation for tapping the first timeline year
                 container.addEventListener('click', function (e) {
                     var targetRow = e.target.closest('.card-row');
-                    // Si ha pulsado el texto de un aÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚±o en la cronologÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚­a rival
+                    // Si ha pulsado el texto de un año en la cronología rival
                     if (targetRow) {
                         var rows = container.querySelectorAll('.card-row');
                         // Verificamos que sea la primera carta (index 0) y que no sea el turno de xavi
@@ -1615,13 +1221,13 @@
 
         document.addEventListener('DOMContentLoaded', function () {
             var msgs = {
-                'btn-sabotage-buzzer': 'ÃƒÆ’Ã†â€™Ãƒ¢Ã¢â€š¬Ã…¡ÃƒÆ’Ã¢â‚¬Å¡¡Zumbido enviado al DJ!',
-                'btn-sabotage-veto': 'ÃƒÆ’Ã†â€™Ãƒ¢Ã¢â€š¬Ã…¡ÃƒÆ’Ã¢â‚¬Å¡¡Has vetado su recarga!',
-                'btn-sabotage-panic': 'ÃƒÆ’Ã†â€™Ãƒ¢Ã¢â€š¬Ã…¡ÃƒÆ’Ã¢â‚¬Å¡¡Ataque de PÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡¡nico enviado!',
-                'btn-sabotage-fog': 'ÃƒÆ’Ã†â€™Ãƒ¢Ã¢â€š¬Ã…¡ÃƒÆ’Ã¢â‚¬Å¡¡Niebla Temporal enviada!',
-                'btn-sabotage-steal-token': 'ÃƒÆ’Ã†â€™Ãƒ¢Ã¢â€š¬Ã…¡ÃƒÆ’Ã¢â‚¬Å¡¡Has robado una ficha (al azar)!',
-                'btn-sabotage-steal-turn': 'ÃƒÆ’Ã†â€™Ãƒ¢Ã¢â€š¬Ã…¡ÃƒÆ’Ã¢â‚¬Å¡¡Has robado el turno!',
-                'btn-sabotage-blackhole': 'ÃƒÆ’Ã†â€™Ãƒ¢Ã¢â€š¬Ã…¡ÃƒÆ’Ã¢â‚¬Å¡¡Agujero Negro lanzado!'
+                'btn-sabotage-buzzer': '¡Zumbido enviado al DJ!',
+                'btn-sabotage-veto': '¡Has vetado su recarga!',
+                'btn-sabotage-panic': '¡Ataque de Pánico enviado!',
+                'btn-sabotage-fog': '¡Niebla Temporal enviada!',
+                'btn-sabotage-steal-token': '¡Has robado una ficha (al azar)!',
+                'btn-sabotage-steal-turn': '¡Has robado el turno!',
+                'btn-sabotage-blackhole': '¡Agujero Negro lanzado!'
             };
             for (var id in msgs) {
                 var b = document.getElementById(id);
@@ -1632,8 +1238,8 @@
                 }
             }
         });
-    </script>
-    <script>
+    
+
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
@@ -1641,18 +1247,10 @@
                     .catch(err => console.log('Error registrando SW', err));
             });
         }
+    
+
+
     </script>
-    <!-- Modal Seleccion de Duelo -->
-    <div id="duel-player-select"
-        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:10000; align-items:center; justify-content:center; flex-direction:column; padding:20px; box-sizing:border-box;">
-        <h2 style="color:var(--gold); font-family:'Bungee'; text-align:center;">ELIGE TU RIVAL</h2>
-        <div id="duel-player-list"
-            style="width:100%; max-width:400px; display:flex; flex-direction:column; gap:10px; margin-top:20px;">
-            <!-- Rellenado dinamicamente -->
-        </div>
-        <button class="btn" onclick="document.getElementById('duel-player-select').style.display='none';"
-            style="margin-top:20px; background:#444;">CANCELAR</button>
-    </div>
 </body>
 
 </html>
