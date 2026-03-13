@@ -42,7 +42,7 @@
         }
 
         .logo {
-            font-family: 'Shojumaru';
+            font-family: 'Bungee';
             font-size: 2em;
             color: var(--neon);
             text-shadow: 0 0 20px var(--neon);
@@ -232,11 +232,11 @@
             text-transform: uppercase;
             margin-bottom: 5px;
             line-height: 1.2;
-            font-family: 'Shojumaru';
+            font-family: 'Bungee';
         }
 
         #c-song {
-            font-family: 'Shojumaru';
+            font-family: 'Bungee';
             font-size: 1em;
             margin-bottom: 10px;
             line-height: 1.2;
@@ -407,11 +407,17 @@
 
 <body>
     <div id="login-screen">
-        <div class="logo"
-            style="font-family:'Shojumaru'; color:var(--neon); text-shadow: 0 0 10px var(--neon); text-align:center;">
-            CHRONOBEATS<br><span
-                style="font-size:0.5em; color:var(--accent); font-family:'Montserrat'; font-weight:bold;">ANIME
-                VERSION</span></div>
+        <div class="logo" style="font-family:'Bungee'; color:var(--neon); text-shadow: 0 0 10px var(--neon); text-align:center;">
+            CHRONOBEATS<br><span style="font-size:0.5em; color:var(--accent); font-family:'Montserrat'; font-weight:bold;">MIX VERSION</span>
+        </div>
+        
+        <!-- AVATAR UPLOAD -->
+        <input type="file" id="avatar-input" accept="image/*" capture="user" onchange="handleAvatarSelect(event)" style="display:none;">
+        <div id="avatar-container" onclick="document.getElementById('avatar-input').click()" style="width: 150px; height: 150px; border-radius: 50%; border: 3px solid var(--neon); margin: 0 auto 20px auto; overflow: hidden; cursor: pointer; display: flex; justify-content: center; align-items: center; background: #1a1a1a;">
+            <div id="avatar-placeholder" style="color: #666; font-family: 'Bungee'; font-size: 0.8em; text-align: center;">TOCA PARA SELFIE</div>
+            <img id="avatar-preview" style="display: none; width: 100%; height: 100%; object-fit: cover;">
+        </div>
+
         <input type="text" id="host-id" placeholder="CÓDIGO SALA" maxlength="6">
         <input type="text" id="player-name" placeholder="TU NOMBRE">
         <button class="btn" id="join-btn" onclick="conectar()">ENTRAR</button>
@@ -430,6 +436,56 @@
                     class="neon-chip" style="width:10px;height:10px;"></span>)</button>
             <button class="spec-btn" id="btn-reload" onclick="send('RELOAD_SONG')">CAMBIAR CANCIÓN (1 <span
                     class="neon-chip" style="width:10px;height:10px;"></span>)</button>
+        
+            <button class="spec-btn" id="btn-error-track" style="display:none; border-color:#888; color:#888;" onclick="send('SYSTEM_ERROR_TRACK')">VÍDEO ROTO?</button>
+        </div>
+
+        <div id="sabotage-ctrl" style="display:none; margin-top:5px; width: 100%; max-width: 340px;">
+            <div style="font-family:'Bungee'; font-size:0.7em; color:var(--accent); text-align:center; margin-bottom:5px;">SABOTAJE (Nivel Joputismo <span id="ui-jop-lvl">0</span>)</div>
+            
+            <button class="spec-btn" id="btn-sabotage-mute" style="width:100%; margin-bottom:5px; background:#111; color:#00bdff; border-color:#00bdff;" onclick="send('SABOTAGE_MUTE')">SILENCIAR 15s (1 <span class="neon-chip" style="width:10px;height:10px;background:#00bdff;box-shadow:0 0 5px #00bdff;"></span>)</button>
+            
+            <div style="display:flex; gap:5px; margin-bottom:5px;">
+                <button class="spec-btn" id="btn-sabotage-buzzer" style="display:none; background:#111; color:#00ff00; border-color:#00ff00;" onclick="send('SABOTAGE_BUZZER')">ZUMBIDO (1 <span class="neon-chip" style="width:10px;height:10px;background:#00ff00;box-shadow:0 0 5px #00ff00;"></span>)</button>
+                <button class="spec-btn" id="btn-sabotage-veto" style="display:none; background:#111; color:#ff8800; border-color:#ff8800;" onclick="send('SABOTAGE_VETO')">VETO (1 <span class="neon-chip" style="width:10px;height:10px;background:#ff8800;box-shadow:0 0 5px #ff8800;"></span>)</button>
+            </div>
+            
+            <div style="display:flex; gap:5px; margin-bottom:5px;">
+                <button class="spec-btn" id="btn-sabotage-force-skip" style="display:flex; background:#111; color:#ff00ff; border-color:#ff00ff;" onclick="send('SABOTAGE_FORCE_SKIP')">SALTO FORZADO (2 <span class="neon-chip" style="width:10px;height:10px;background:#ff00ff;box-shadow:0 0 5px #ff00ff;"></span>)</button>                
+            </div>
+            
+            <div style="display:flex; gap:5px; margin-bottom:5px;">
+                <button class="spec-btn" id="btn-sabotage-panic" style="display:none; background:#111; color:#ff0000; border-color:#ff0000;" onclick="send('SABOTAGE_PANIC')">PÁNICO (2 <span class="neon-chip" style="width:10px;height:10px;background:#ff0000;box-shadow:0 0 5px #ff0000;"></span>)</button>
+                <button class="spec-btn" id="btn-sabotage-fog" style="display:none; background:#111; color:#aaa; border-color:#aaa;" onclick="send('SABOTAGE_FOG')">NIEBLA (2 <span class="neon-chip" style="width:10px;height:10px;background:#aaa;box-shadow:0 0 5px #aaa;"></span>)</button>
+            </div>
+
+            <!-- APUESTA / DUELO -->
+            <button class="spec-btn" id="btn-sabotage-bet" style="width:100%; margin-bottom:5px; background:#111; border-style:dashed; color:var(--gold); border-color:var(--gold);" onclick="document.getElementById('duel-player-select').style.display='flex'">🔥 DUELO 🔥 (2 <span class="neon-chip" style="width:10px;height:10px;background:var(--gold);box-shadow:0 0 5px var(--gold);"></span>)</button>
+            
+            <div id="duel-player-select" style="display:none; flex-direction:column; gap:5px; margin-bottom:5px;">
+                <div style="font-family:'Bungee'; font-size:0.6em; color:var(--gold); text-align:center;">ELIGE RIVAL PARA EL DUELO:</div>
+                <div id="duel-player-list" style="display:flex; gap:5px; flex-wrap:wrap; justify-content:center;"></div>
+                <button class="btn" style="background:#444; margin-top:5px; font-size:0.7em; padding:10px;" onclick="document.getElementById('duel-player-select').style.display='none'">CANCELAR</button>
+            </div>
+            
+            <!-- BOMBA LAPA -->
+            <button class="spec-btn" id="btn-sabotage-bomb" style="width:100%; margin-bottom:5px; background:#111; border-style:solid; color:#ff3333; border-color:#ff3333;" onclick="document.getElementById('bomb-player-select').style.display='flex'">💣 PONER/PASAR BOMBA LAPA 💣 (3/0 <span class="neon-chip" style="width:10px;height:10px;background:#ff3333;box-shadow:0 0 5px #ff3333;"></span>)</button>
+            <div id="bomb-player-select" style="display:none; flex-direction:column; gap:5px; margin-bottom:5px;">
+                <div style="font-family:'Bungee'; font-size:0.6em; color:#ff3333; text-align:center;">DALE LA BOMBA LAPA A:</div>
+                <div id="bomb-player-list" style="display:flex; gap:5px; flex-wrap:wrap; justify-content:center;"></div>
+                <button class="btn" style="background:#444; margin-top:5px; font-size:0.7em; padding:10px;" onclick="document.getElementById('bomb-player-select').style.display='none'">CANCELAR</button>
+            </div>
+
+            <!-- JOPUTISMO 2 -->
+            <div style="display:flex; gap:5px; margin-bottom:5px;">
+                <button class="spec-btn" id="btn-sabotage-steal-token" style="display:none; background:#111; color:#00f2fe; border-color:#00f2fe;" onclick="send('SABOTAGE_STEAL_TOKEN')">ROBAR FICHA AL AZAR (4 <span class="neon-chip" style="width:10px;height:10px;background:#00f2fe;box-shadow:0 0 5px #00f2fe;"></span>)</button>
+                <button class="spec-btn" id="btn-sabotage-steal-turn" style="display:none; background:#111; color:#ff00ff; border-color:#ff00ff;" onclick="send('SABOTAGE_STEAL_TURN')">ROBAR TURNO COMPLETO (4 <span class="neon-chip" style="width:10px;height:10px;background:#ff00ff;box-shadow:0 0 5px #ff00ff;"></span>)</button>
+            </div>
+            <button class="spec-btn" id="btn-sabotage-blackhole" style="display:none; width:100%;; background:#111; color:#9900ff; border-color:#9900ff;" onclick="send('SABOTAGE_BLACKHOLE')">AGUJERO NEGRO (-1 CARTA RIVAL) (5 <span class="neon-chip" style="width:10px;height:10px;background:#9900ff;box-shadow:0 0 5px #9900ff;"></span>)</button>
+
+            <!-- NI DE COÑA (1) -->
+            <button class="spec-btn" id="btn-sabotage-bet-against" style="width:100%; margin-top:10px; background:#111; border-color:#ff0055; color:#ff0055;" onclick="send('BET_AGAINST_ACTIVE')">¡NI DE COÑA LO SABE! (1 <span class="neon-chip" style="width:10px;height:10px;background:#ff0055;box-shadow:0 0 5px #ff0055;"></span>)</button>
+
         </div>
 
         <div class="music-controls" id="m-ctrl">
@@ -455,11 +511,11 @@
             <div id="card" class="card">
                 <div class="card-face card-front">
                     <div
-                        style="font-family:'Shojumaru';color:var(--neon);opacity:0.2;font-size:1.8em;text-align:center;line-height:1.2;word-wrap:break-word;width:100%">
-                        CHRONO<br>BEATS<br><span style="font-size:0.5em;">ANIME</span></div>
+                        style="font-family: 'Bungee';color:var(--neon);opacity:0.2;font-size:1.8em;text-align:center;line-height:1.2;word-wrap:break-word;width:100%">
+                        CHRONO<br>BEATS<br><span style="font-size:0.5em;">MIX VERSION</span></div>
                 </div>
                 <div class="card-face card-back">
-                    <div id="c-artist">ANIME</div>
+                    <div id="c-artist">CHRONOBEATS MIX</div>
                     <div id="c-song">TIPO</div>
                     <div id="c-year">1999</div>
                 </div>
@@ -607,12 +663,12 @@
 
                 // 2. Teñir con el color Azul Cyan del tema Normal
                 ctx.globalCompositeOperation = 'color';
-                ctx.fillStyle = 'rgba(0, 200, 255, 0.8)';
+                ctx.fillStyle = 'rgba(0, 255, 0, 0.8)';
                 ctx.fillRect(0, 0, cWidth, cHeight);
 
                 // Mezclar un poco de luz (Tono neón vibrante)
                 ctx.globalCompositeOperation = 'overlay';
-                ctx.fillStyle = 'rgba(0, 200, 255, 0.3)';
+                ctx.fillStyle = 'rgba(0, 255, 0, 0.3)';
                 ctx.fillRect(0, 0, cWidth, cHeight);
 
                 // 3. Viñeta oscura
