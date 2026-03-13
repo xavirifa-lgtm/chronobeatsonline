@@ -571,54 +571,40 @@
     <!-- MANDO DEL HOST (REMOTE) -->
     <div id="fab-remote" onclick="toggleRemote()"
         style="display:none; position:fixed; top:20px; right:20px; width:50px; height:50px; background:#111; border:2px solid #555; border-radius:50%; z-index:9000; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 0 10px rgba(0,0,0,0.5); font-size:1.5em; filter:grayscale(100%); transition:0.3s; opacity:0.5; pointer-events:none;">
-        📺
+        📱 Ã¡¢Ãƒ¢Ã¢â‚¬Å¡Ã‚¬Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚º
     </div>
 
     <div id="rules-overlay"
         style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:9500; align-items:center; justify-content:flex-start; flex-direction:column; padding:20px; text-align:left; overflow-y:auto;">
         <h2
             style="font-family:'Bungee'; color:var(--neon); margin-bottom:10px; font-size:2em; text-align:center; width:100%; margin-top:20px;">
-            📖 REGLAS</h2>
-        <div
-            style="color:#ddd; font-family:'Montserrat'; font-size:0.9em; max-width:400px; width:100%; line-height:1.5;">
-            <p><strong style="color:var(--neon);">OBJETIVO:</strong> Coloca las canciones en el orden correcto en tu
-                cronología. Quien llegue a 10 gana.</p>
-            <p><strong style="color:var(--neon);">TURNO NORMAL:</strong> Escucha la canción, márcate un tanto
-                colocándola en tu cronología.</p>
-            <p><strong style="color:var(--gold);">FICHAS AZULES (🔵):</strong> Sirven para sabotear. Se ganan si el Host
-                te da la razón, o si aciertas en un Duelo.</p>
-            <p><strong style="color:var(--accent);">DUELOS (¡NI DE COÑA!):</strong> Cuesta 1🔵. ¿Crees que el jugador
-                activo la ha cagado y sabes el hueco real? Rétale. Si él falla y tú acertaste el hueco real, tú te
-                llevas la carta. Si él acierta, palmas 1🔵 extra por listo.</p>
-
-            <h3
-                style="color:var(--neon); font-family:'Bungee'; margin-top:20px; border-bottom:1px solid #333; padding-bottom:5px;">
-                JOPUTISMO 1 (TROLL)</h3>
+            📱 Ã¡¢Ãƒ¢Ã¢â‚¬Å¡Ã‚¬Ãƒâ€¦Ã¢â‚¬Å“  REGLAS</h2>
+                <div style="color:#ddd; font-family:''Montserrat''; font-size:0.9em; max-width:400px; width:100%; line-height:1.5;">
+            <p><strong style="color:var(--neon);">OBJETIVO:</strong> Coloca las canciones en orden cronolÃ³gico. ¡Gana quien llegue a 10 puntos!</p>
+            <p><strong style="color:var(--neon);">INICIO:</strong> Todos los jugadores empiezan con <strong style="color:var(--gold);">2 FICHAS</strong>.</p>
+            <p><strong style="color:var(--neon);">TU TURNO:</strong> Escucha la canciÃ³n, elige el hueco en tu lÃ­nea temporal y pulsa ¡PLAY!</p>
+            <p><strong style="color:var(--neon);">SALTO DE FE (1):</strong> Durante los primeros 3 segundos de una canciÃ³n, puedes intentar robÃ¡rsela al rival a ciegas.</p>
+            <p><strong style="color:var(--accent);">ESCUDO (3):</strong> Protege contra el prÃ³ximo sabotaje y rebota el ataque al rival con un ¡ZASCA!</p>
+            
+            <h3 style="color:var(--neon); font-family:''Bungee''; margin-top:20px; border-bottom:1px solid #333; padding-bottom:5px;">MERCADO (En tu turno)</h3>
             <ul style="padding-left:15px; margin-top:10px;">
-                <li style="margin-bottom:8px;"><strong style="color:#00bdff;">MUTEAR (1🔵):</strong> Quita el sonido de
-                    su canción durante 5 segundos.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#00ff00;">¡ZUMBIDO! (1🔵):</strong> Despista con un
-                    ruido molesto.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#ff8800;">VETO CAMBIAR (1🔵):</strong> Le quita al
-                    activo la recarga (no puede cambiar de canción esa ronda).</li>
-                <li style="margin-bottom:8px;"><strong style="color:#ff00ff;">FORZAR SALTO (1🔵):</strong> Obliga al
-                    activo a pasar de canción automáticamente.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#ff0000;">PÁNICO 10s (2🔵):</strong> ¡Rápido! El
-                    activo solo tiene 10 segundos para poner su carta.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#aaaaaa;">NIEBLA TIEMPO (2🔵):</strong> Borra los
-                    años de su pantalla en ese turno.</li>
+                <li style="margin-bottom:8px;"><strong style="color:var(--gold);">DÃ‰CADA (1):</strong> Te dice de quÃ© dÃ©cada es la canciÃ³n (ej. 90s).</li>
+                <li style="margin-bottom:8px;"><strong style="color:var(--gold);">COMODÃN (1):</strong> Revela el nombre del artista en la pantalla del Host.</li>
             </ul>
 
-            <h3
-                style="color:var(--neon); font-family:'Bungee'; margin-top:20px; border-bottom:1px solid #333; padding-bottom:5px;">
-                JOPUTISMO 2 (SUPERMAN)</h3>
+            <h3 style="color:var(--neon); font-family:''Bungee''; margin-top:20px; border-bottom:1px solid #333; padding-bottom:5px;">SABOTAJES (Contra el rival)</h3>
             <ul style="padding-left:15px; margin-top:10px;">
-                <li style="margin-bottom:8px;"><strong style="color:#ffff00;">ROBAR FICHA (4🔵):</strong> Le quitas 1
-                    ficha a un pringado al azar.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#ff00ff;">ROBAR TURNO (4🔵):</strong> Interrumpe al
-                    activo de inmediato y te quedas con su turno actual.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#00f2fe; text-shadow:0 0 5px white;">AGUJERO NEGRO
-                        (5🔵):</strong> Borra la última carta de su cronología. Adiós punto.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#00bdff;">SILENCIO (1):</strong> Mutea la mÃºsica durante 15 segundos.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#00ff00;">ZUMBIDO (1):</strong> Sonido molesto para desesperar al rival.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#ff8800;">VETO (1):</strong> Impide que el rival pueda cambiar de canciÃ³n.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#ff00ff;">SALTO FORZADO (2):</strong> Obliga al rival a pasar de canciÃ³n.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#ff0000;">PÃNICO (2):</strong> Solo 10 segundos para decidir el hueco.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#aaaaaa;">NIEBLA (2):</strong> Borra los aÃ±os de su pantalla este turno.</li>
+                <li style="margin-bottom:8px;"><strong style="color:var(--accent);">DUELO (2):</strong> ¡Apuesta contra Ã©l! Si fallas palmas fichas, si aciertas te llevas el punto.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#ff5500;">BOMBA LAPA (3/0):</strong> Ponla o pÃ¡sala si ya la tienes pegada.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#ffff00;">ROBO FICHA (4):</strong> Quita una ficha a un rival al azar.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#00f2fe;">ROBO TURNO (4):</strong> QuÃ©date con su turno ahora mismo.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#9900ff;">AGUJERO NEGRO (5):</strong> Vuela un punto ya ganado de un rival.</li>
             </ul>
         </div>
         <button class="btn" onclick="toggleRules()"
@@ -628,9 +614,9 @@
 
     <div id="remote-overlay"
         style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:9500; align-items:center; justify-content:center; flex-direction:column; padding:20px; text-align:center;">
-        <h2 style="font-family:'Bungee'; color:var(--neon); margin-bottom:10px; font-size:2em;">📺 MANDO HOST</h2>
+        <h2 style="font-family:'Bungee'; color:var(--neon); margin-bottom:10px; font-size:2em;">📱 Ã¡¢Ãƒ¢Ã¢â‚¬Å¡Ã‚¬Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚º MANDO HOST</h2>
         <p style="color:#aaa; font-family:'Montserrat'; margin-bottom:30px; font-size:0.9em; max-width:80%;">CONTROLA LA
-            PARTIDA DESDE TU MÓVIL</p>
+            PARTIDA DESDE TU MÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢Ã¡¢Ãƒ¢Ã¢â‚¬Å¡Ã‚¬Ãƒâ€¦Ã¢â‚¬Å“VIL</p>
 
         <div id="remote-controls-container"
             style="display:flex; flex-direction:column; gap:15px; width:100%; max-width:300px;">
@@ -654,18 +640,18 @@
 
     <div id="panic-overlay"
         style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,0,0,0.85); z-index:9999; flex-direction:column; justify-content:center; align-items:center; text-align:center;">
-        <h1 style="color:white; font-family:'Bungee'; font-size:3em; margin:0; text-shadow:0 0 20px black;">¡PÁNICO!
+        <h1 style="color:white; font-family:'Bungee'; font-size:3em; margin:0; text-shadow:0 0 20px black;">ÃƒÆ’Ã†â€™Ãƒ¢Ã¢â€š¬Ã…¡ÃƒÆ’Ã¢â‚¬Å¡¡PÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚NICO!
         </h1>
         <div id="panic-timer"
             style="color:white; font-family:'Bungee'; font-size:8em; margin:0; line-height:1; text-shadow:0 0 20px black;">
             10</div>
-        <p style="color:white; font-family:'Bungee'; font-size:1.5em; text-shadow:0 0 10px black;">¡COLOCA TU CARTA
-            RÁPIDO!</p>
+        <p style="color:white; font-family:'Bungee'; font-size:1.5em; text-shadow:0 0 10px black;">ÃƒÆ’Ã†â€™Ãƒ¢Ã¢â€š¬Ã…¡ÃƒÆ’Ã¢â‚¬Å¡¡COLOCA TU CARTA
+            RÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚PIDO!</p>
     </div>
 
     <div id="ai-loading-overlay">
         <div class="spinner"></div>
-        <div style="font-size: 1.2em;">TRANSFORMANDO<br>SELFIE... 🪄✨</div>
+        <div style="font-size: 1.2em;">TRANSFORMANDO<br>SELFIE... 📱 ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ªÃ¡¢Ãƒ¢Ã¢â‚¬Å¡Ã‚¬Ãƒâ€¦Ã‚¾ ÃƒÆ’Ã¢â‚¬¦Ãƒ¢Ã¢â€š¬Ã…â€œÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚¨</div>
         <div style="font-size: 0.6em; margin-top: 15px; color: #888; font-family: 'Montserrat';">Esto puede tardar unos
             segundos</div>
     </div>
@@ -684,20 +670,34 @@
             </div>
             <div
                 style="font-size: 0.7em; color: var(--neon); font-family: 'Bungee'; margin-top: 10px; text-shadow: 0 0 5px var(--neon);">
-                ¡HAZTE UN SELFIE!
+                ÃƒÆ’Ã†â€™Ãƒ¢Ã¢â€š¬Ã…¡ÃƒÆ’Ã¢â‚¬Å¡¡HAZTE UN SELFIE!
             </div>
         </div>
         <input type="file" id="avatar-input" accept="image/*" capture="user" style="display:none;"
             onchange="handleAvatarSelect(event)">
 
-        <input type="text" id="host-id" placeholder="CÓDIGO SALA" maxlength="6">
+        <input type="text" id="host-id" placeholder="CÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢Ã¡¢Ãƒ¢Ã¢â‚¬Å¡Ã‚¬Ãƒâ€¦Ã¢â‚¬Å“DIGO SALA" maxlength="6">
         <input type="text" id="player-name" placeholder="TU NOMBRE">
         <button class="btn" id="join-btn" onclick="conectar()">ENTRAR</button>
     </div>
 
-    <div id="game-screen">
+    
+    
+    <div id="leap-container" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); width:90%; background:rgba(255,0,255,1); z-index:99999; border:4px solid white; border-radius:20px; padding:20px; text-align:center; box-shadow:0 0 50px rgba(255,0,255,0.8); font-family:'Bungee';">
+        <h2 style="color:white; margin:0 0 15px 0;">¡¡SALTO DE FE!!</h2>
+        <p style="color:white; font-size:1.1em; margin-bottom:20px;">¿PagarÃ¡s 1 ficha para robar este turno a ciegas?</p>
+        <button class="btn" onclick="send('LEAP_OF_FAITH')" style="background:white; color:#ff00ff; border:none; padding:15px; font-size:1.5em; width:100%; box-shadow:0 0 20px white;">¡ROBAR TURNO!</button>
+        <div onclick="document.getElementById('leap-container').style.display='none'" style="margin-top:15px; color:rgba(255,255,255,0.7); font-size:0.8em; cursor:pointer; text-decoration:underline;">No, cancelar</div>
+    </div>
+    <div id="mute-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:100000; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:20px; box-sizing:border-box; font-family:'Bungee';">
+        <h2 style="color:#ff00ff; font-size:1.8em; margin-bottom:20px; text-shadow:0 0 20px #ff00ff;">¡SILENCIO!</h2>
+        <p style="color:white; font-size:1em; margin-bottom:10px;">Como dice el sabio...</p>
+        <p style="color:var(--accent); font-size:1.4em; font-style:italic; margin-bottom:30px;">"Lo mejor de todo<br>es el silencio..."</p>
+        <div style="font-size:3em; color:var(--gold);" id="mute-countdown">15</div>
+        <p style="color:#888; font-size:0.7em; margin-top:20px;">Vibrando al ritmo de la nada...</p>
+    </div><div id="game-screen">
         <div id="leaderboard-info">
-            <div class="leader-row">LÍDER: <span id="lb-leader-name">---</span> (<span id="lb-leader-cards">0</span>)
+            <div class="leader-row">LÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚DER: <span id="lb-leader-name">---</span> (<span id="lb-leader-cards">0</span>)
             </div>
             <div class="me-row">YO: <span id="lb-me-cards">0</span> CARTAS</div>
         </div>
@@ -716,7 +716,7 @@
                     class="neon-chip" style="width:10px;height:10px;"></span>)</button>
             <button class="spec-btn btn-error-track" id="btn-error-track" onclick="send('SYSTEM_ERROR_TRACK')"
                 style="display:none;">ERROR TARJETA</button>
-            <button class="spec-btn" id="btn-reload" onclick="send('RELOAD_SONG')">CAMBIAR CANCIÓN (1 <span
+            <button class="spec-btn" id="btn-reload" onclick="send('RELOAD_SONG')">CAMBIAR CANCIÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢Ã¡¢Ãƒ¢Ã¢â‚¬Å¡Ã‚¬Ãƒâ€¦Ã¢â‚¬Å“N (1 <span
                     class="neon-chip" style="width:10px;height:10px;"></span>)</button>
         </div>
 
@@ -747,13 +747,13 @@
                         style="width:10px;height:10px;"></span>)</button>
                 <button class="spec-btn" id="btn-sabotage-bet"
                     style="background:var(--bg); border-color:#00f2fe; color:#00f2fe;"
-                    onclick="send('BET_AGAINST_ACTIVE')">¡NI DE COÑA! (1 <span class="neon-chip"
+                    onclick="send('BET_AGAINST_ACTIVE')">ÃƒÆ’Ã†â€™Ãƒ¢Ã¢â€š¬Ã…¡ÃƒÆ’Ã¢â‚¬Å¡¡NI DE COÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ A! (1 <span class="neon-chip"
                         style="width:10px;height:10px;"></span>)</button>
 
                 <!-- Nivel 1 -->
                 <button class="spec-btn" id="btn-sabotage-buzzer"
                     style="background:var(--bg); border-color:#00ff00; color:#00ff00;"
-                    onclick="send('SABOTAGE_BUZZER')">¡ZUMBIDO! (1 <span class="neon-chip"
+                    onclick="send('SABOTAGE_BUZZER')">ÃƒÆ’Ã†â€™Ãƒ¢Ã¢â€š¬Ã…¡ÃƒÆ’Ã¢â‚¬Å¡¡ZUMBIDO! (1 <span class="neon-chip"
                         style="width:10px;height:10px;"></span>)</button>
                 <button class="spec-btn" id="btn-sabotage-veto"
                     style="background:var(--bg); border-color:#ff8800; color:#ff8800;"
@@ -765,7 +765,7 @@
                         style="width:10px;height:10px;"></span>)</button>
                 <button class="spec-btn" id="btn-sabotage-panic"
                     style="background:var(--bg); border-color:#ff0000; color:#ff0000;"
-                    onclick="send('SABOTAGE_PANIC')">PÁNICO 10s (2 <span class="neon-chip"
+                    onclick="send('SABOTAGE_PANIC')">PÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚NICO 10s (2 <span class="neon-chip"
                         style="width:10px;height:10px;"></span>)</button>
                 <button class="spec-btn" id="btn-sabotage-fog"
                     style="background:var(--bg); border-color:#aaaaaa; color:#aaaaaa;"
@@ -795,7 +795,7 @@
         </div>
         <div id="tab-nav" style="display:flex; width:100%; gap:5px; margin-top:15px; margin-bottom:5px;">
             <button class="nav-btn"
-                onclick="document.getElementById('sabotage-ctrl').style.display='none'; document.getElementById('market-ctrl').style.display='none'; document.getElementById('normal-card-container').style.display='block'; document.getElementById('normal-collection').style.display='block'; this.style.opacity='1'; document.getElementById('nav-sabotage').style.opacity='0.5'; document.getElementById('nav-market').style.opacity='0.5';"
+                onclick="document.getElementById('sabotage-ctrl').style.display='none'; document.getElementById('market-ctrl').style.display='none'; document.getElementById('normal-card-container').style.display='flex'; document.getElementById('normal-collection').style.display='block'; this.style.opacity='1'; document.getElementById('nav-sabotage').style.opacity='0.5'; document.getElementById('nav-market').style.opacity='0.5';"
                 style="flex:1; background:var(--accent); color:#fff; border-radius:10px; padding:10px; font-weight:bold; font-size:0.8em; border:none; opacity:1;">JUEGO</button>
             <button class="nav-btn" id="nav-sabotage"
                 onclick="document.getElementById('normal-card-container').style.display='none'; document.getElementById('normal-collection').style.display='none'; document.getElementById('market-ctrl').style.display='none'; document.getElementById('sabotage-ctrl').style.display='block'; this.style.opacity='1'; this.previousElementSibling.style.opacity='0.5'; document.getElementById('nav-market').style.opacity='0.5';"
@@ -835,7 +835,7 @@
                 </div>
                 <div class="card-face card-back">
                     <div id="c-artist">ARTISTA</div>
-                    <div id="c-song">TÍTULO</div>
+                    <div id="c-song">TÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚TULO</div>
                     <div id="c-year">1999</div>
                 </div>
             </div>
@@ -867,7 +867,7 @@
             <p id="custom-confirm-msg" style="font-size:1em; margin-bottom:20px;"></p>
             <div style="display:flex; gap:10px; justify-content:center;">
                 <button class="btn" id="custom-confirm-yes"
-                    style="background:var(--gold); color:#000; box-shadow:0 0 10px var(--gold); flex:1; padding:15px 5px;">SÍ</button>
+                    style="background:var(--gold); color:#000; box-shadow:0 0 10px var(--gold); flex:1; padding:15px 5px;">SÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚</button>
                 <button class="btn" id="custom-confirm-no"
                     style="background:transparent; border:2px solid #888; color:#888; box-shadow:none; flex:1; padding:15px 5px;">NO</button>
             </div>
@@ -935,7 +935,7 @@
                     // Guardar en localStorage
                     localStorage.setItem('cb_player_avatar', playerAvatarDataUrl);
 
-                    // Transformar a Toon automáticamente
+                    // Transformar a Toon automÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡¡ticamente
                     toonifyAvatar();
                 };
                 img.src = e.target.result;
@@ -965,7 +965,7 @@
                     img.src = playerAvatarDataUrl;
                 });
 
-                // --- FILTRO DE COLOR NEÓN DEL TEMA NORMAL (AZUL/CYAN) ---
+                // --- FILTRO DE COLOR NEÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢Ã¡¢Ãƒ¢Ã¢â‚¬Å¡Ã‚¬Ãƒâ€¦Ã¢â‚¬Å“N DEL TEMA NORMAL (AZUL/CYAN) ---
 
                 const img = new Image();
                 img.src = playerAvatarDataUrl;
@@ -995,17 +995,17 @@
                 ctx.drawImage(img, 0, 0, cWidth, cHeight);
                 ctx.filter = 'none';
 
-                // 2. Teñir con el color Azul Cyan del tema Normal
+                // 2. TeÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚±ir con el color Azul Cyan del tema Normal
                 ctx.globalCompositeOperation = 'color';
                 ctx.fillStyle = 'rgba(0, 200, 255, 0.8)';
                 ctx.fillRect(0, 0, cWidth, cHeight);
 
-                // Mezclar un poco de luz (Tono neón vibrante)
+                // Mezclar un poco de luz (Tono neÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚³n vibrante)
                 ctx.globalCompositeOperation = 'overlay';
                 ctx.fillStyle = 'rgba(0, 200, 255, 0.3)';
                 ctx.fillRect(0, 0, cWidth, cHeight);
 
-                // 3. Viñeta oscura
+                // 3. ViÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚±eta oscura
                 ctx.globalCompositeOperation = 'multiply';
                 const grd = ctx.createRadialGradient(cWidth / 2, cHeight / 2, cWidth * 0.3, cWidth / 2, cHeight / 2, cWidth * 0.9);
                 grd.addColorStop(0, "white");
@@ -1026,7 +1026,7 @@
 
             } catch (err) {
                 console.error('Pollinations toon error:', err);
-                alert("Error creando versión cómic: " + err.message);
+                alert("Error creando versiÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚³n cÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚³mic: " + err.message);
             } finally {
                 overlay.style.display = 'none';
             }
@@ -1068,7 +1068,7 @@
 
             // Si no tiene avatar, preguntarle una vez
             if (!playerAvatarDataUrl) {
-                showCustomConfirm("¿Quieres hacerte un selfie para tu avatar antes de entrar?", function (confirmed) {
+                showCustomConfirm("ÃƒÆ’Ã†â€™Ãƒ¢Ã¢â€š¬Ã…¡ÃƒÆ’Ã¢â‚¬Å¡¿Quieres hacerte un selfie para tu avatar antes de entrar?", function (confirmed) {
                     if (confirmed) {
                         document.getElementById('avatar-input').click();
                     } else {
@@ -1107,7 +1107,7 @@
                 conn = peer.connect("CB-HOST-" + hostId);
 
                 conn.on('open', function () {
-                    console.log("¡Conectado!");
+                    console.log("ÃƒÆ’Ã†â€™Ãƒ¢Ã¢â€š¬Ã…¡ÃƒÆ’Ã¢â‚¬Å¡¡Conectado!");
                     conn.send({ type: 'JOIN', name: playerName, avatar: playerAvatarDataUrl });
                     document.getElementById('login-screen').style.display = 'none';
                     document.getElementById('game-screen').style.display = 'flex';
@@ -1117,14 +1117,14 @@
                 conn.on('data', handle);
 
                 conn.on('close', function () {
-                    showCustomAlert("Conexión cerrada. El Host se ha desconectado.");
+                    showCustomAlert("ConexiÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚³n cerrada. El Host se ha desconectado.");
                     setTimeout(() => location.reload(), 3000);
                 });
             });
 
             peer.on('error', function (err) {
                 console.error("Error PeerJS:", err);
-                showCustomAlert("Error de conexión: " + err.type);
+                showCustomAlert("Error de conexiÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚³n: " + err.type);
                 btn.disabled = false;
                 btn.innerText = "ENTRAR";
             });
@@ -1134,7 +1134,7 @@
             if (conn && conn.open) {
                 conn.send({ type: 'COMMAND', action: action, value: value });
             } else {
-                showCustomAlert("Conexión perdida. Recarga la página.");
+                showCustomAlert("ConexiÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚³n perdida. Recarga la pÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡¡gina.");
             }
         }
 
@@ -1146,7 +1146,7 @@
                 return;
             }
 
-            // Retroalimentación de trucos para Xavi
+            // RetroalimentaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚³n de trucos para Xavi
             if (data.type === 'STATE_UPDATE' && lastState && playerName.toLowerCase() === 'xavi') {
                 if (data.cheatsEnabled !== lastState.cheatsEnabled) {
                     const indicator = document.getElementById('cheat-indicator');
@@ -1183,7 +1183,18 @@
                     var bombContainer = document.getElementById('bomb-player-list');
                     if (bombContainer) bombContainer.innerHTML = bombListHtml;
                 }
-                const leapBtn = document.getElementById('leap-container');
+                
+                // LÃƒÆ’Ã¢â‚¬Å“GICA DE SILENCIO (MUTE)
+                var muteOverlay = document.getElementById('mute-overlay');
+                if (muteOverlay) {
+                    if (data.isMuted) {
+                        muteOverlay.style.display = 'flex';
+                        document.getElementById('mute-countdown').innerText = data.muteTimeRemaining || 0;
+                    } else {
+                        muteOverlay.style.display = 'none';
+                    }
+                }
+        const leapBtn = document.getElementById('leap-container');
                 if (leapBtn) {
                     var amIActive = false;
                     try {
@@ -1230,19 +1241,19 @@
                         jstr += "<button class='btn' style='padding:10px; font-size:0.8em; flex:1; " + (currJop === 2 ? "background:var(--neon);color:#000;" : "background:#222;color:#888") + "' onclick=\"send('REMOTE_JOPUTISMO', 2)\">SUPERMAN</button>";
                         jstr += "</div>";
 
-                        rContainer.innerHTML = jstr + `<button class="btn" style="background:#ff00ff; color:white; border-color:#ff00ff; padding:20px; font-size:1.2em;" onclick="send('REMOTE_START_GAME'); toggleRemote();">▶ INICIAR PARTIDA</button>`;
+                        rContainer.innerHTML = jstr + `<button class="btn" style="background:#ff00ff; color:white; border-color:#ff00ff; padding:20px; font-size:1.2em;" onclick="send('REMOTE_START_GAME'); toggleRemote();">  ▶ INICIAR PARTIDA</button>`;
                     } else if (data.turnPhase && data.turnPhase !== 'NORMAL') {
                         rContainer.innerHTML = `<p style="color:#888;">Controles no disponibles durante evento especial.</p>`;
                     } else {
                         if (!data.revealed) {
-                            rContainer.innerHTML = `<button class="btn" style="background:var(--neon); color:#000; padding:20px; font-size:1.2em;" onclick="send('REMOTE_REVEAL'); toggleRemote();">👀 REVELAR CARTA</button>
+                            rContainer.innerHTML = `<button class="btn" style="background:var(--neon); color:#000; padding:20px; font-size:1.2em;" onclick="send('REMOTE_REVEAL'); toggleRemote();">📱    REVELAR CARTA</button>
                             <button class="btn" style="background:#555; color:white; border-color:#555; margin-top:20px;" onclick="send('REMOTE_SYSTEM_ERROR'); toggleRemote();">ERROR DE SISTEMA (REPETIR)</button>`;
                         } else {
                             rContainer.innerHTML = `
-                                <button class="btn" style="background:#00ff00; color:#000; padding:15px; margin-bottom:10px;" onclick="send('REMOTE_CORRECT'); toggleRemote();">✅ SÍ (Acertó y gana carta)</button>
-                                <button class="btn" style="background:#ffd700; color:#000; padding:15px; margin-bottom:10px;" onclick="send('REMOTE_CORRECT_TOKEN'); toggleRemote();">🔵 SÍ (+ Ficha Azul)</button>
-                                <button class="btn" style="background:#ff4444; color:#fff; padding:15px; margin-bottom:10px;" onclick="send('REMOTE_INCORRECT'); toggleRemote();">❌ NO (Falló todo)</button>
-                                <button class="btn" style="background:#00f2fe; color:#000; padding:15px; margin-bottom:10px;" onclick="send('REMOTE_INCORRECT_TOKEN'); toggleRemote();">🔵 NO (+ Ficha Consolación)</button>
+                                <button class="btn" style="background:#00ff00; color:#000; padding:15px; margin-bottom:10px;" onclick="send('REMOTE_CORRECT'); toggleRemote();"> ÃƒÆ’Ã¢â‚¬¦Ãƒ¢Ã¢â€š¬Ã…â€œÃ¡¢Ãƒ¢Ã¢â‚¬Å¡Ã‚¬Ãƒâ€šÃ‚¦ SÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ (AcertÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚³ y gana carta)</button>
+                                <button class="btn" style="background:#ffd700; color:#000; padding:15px; margin-bottom:10px;" onclick="send('REMOTE_CORRECT_TOKEN'); toggleRemote();">📱 Ã¡¢Ãƒ¢Ã¢â‚¬Å¡Ã‚¬Ãƒâ€šÃ‚ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚µ SÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ (+ Ficha Azul)</button>
+                                <button class="btn" style="background:#ff4444; color:#fff; padding:15px; margin-bottom:10px;" onclick="send('REMOTE_INCORRECT'); toggleRemote();"> ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÃƒÆ’Ã¢â‚¬¦Ãƒ¢Ã¢â€š¬Ã¢â€ž¢ NO (FallÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚³ todo)</button>
+                                <button class="btn" style="background:#00f2fe; color:#000; padding:15px; margin-bottom:10px;" onclick="send('REMOTE_INCORRECT_TOKEN'); toggleRemote();">📱 Ã¡¢Ãƒ¢Ã¢â‚¬Å¡Ã‚¬Ãƒâ€šÃ‚ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚µ NO (+ Ficha ConsolaciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚³n)</button>
                                 <button class="btn" style="background:#555; color:white; border-color:#555; margin-top:20px;" onclick="send('REMOTE_SYSTEM_ERROR'); toggleRemote();">ERROR SISTEMA</button>
                             `;
                         }
@@ -1267,7 +1278,7 @@
 
                 // Identificar si es mi turno usando el ID de PeerJS
                 var isMyTurn = (data.activePlayer.id === myId);
-                console.log("¿Es mi turno?", isMyTurn, "Mi ID:", myId, "ID Activo:", data.activePlayer.id);
+                console.log("ÃƒÆ’Ã†â€™Ãƒ¢Ã¢â€š¬Ã…¡ÃƒÆ’Ã¢â‚¬Å¡¿Es mi turno?", isMyTurn, "Mi ID:", myId, "ID Activo:", data.activePlayer.id);
 
                 var isKingMode = (data.turnPhase && data.turnPhase !== 'NORMAL');
                 var normalCardContainer = document.getElementById('normal-card-container');
@@ -1281,9 +1292,9 @@
 
                     if (data.turnPhase === 'KING_SELECTION') {
                         if (isMyTurn) {
-                            kingModeUi.innerHTML = "<h3 style='color:var(--gold);font-family:Bungee;'>ERES EL REY</h3><p>EL RESTO DE JUGADORES ESTÁ ELIGIENDO TU CARTA...</p>";
+                            kingModeUi.innerHTML = "<h3 style='color:var(--gold);font-family:Bungee;'>ERES EL REY</h3><p>EL RESTO DE JUGADORES ESTÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ ELIGIENDO TU CARTA...</p>";
                         } else {
-                            var html = "<h3 style='color:var(--neon);font-family:Bungee;'>¡ELIGE LA CARTA MÁS DIFÍCIL!</h3>";
+                            var html = "<h3 style='color:var(--neon);font-family:Bungee;'>ÃƒÆ’Ã†â€™Ãƒ¢Ã¢â€š¬Ã…¡ÃƒÆ’Ã¢â‚¬Å¡¡ELIGE LA CARTA MÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚S DIFÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚CIL!</h3>";
                             if (data.kingOptions) {
                                 data.kingOptions.forEach(function (opt, idx) {
                                     html += "<div style='background:#111; border:1px solid var(--neon); border-radius:10px; padding:10px; margin-bottom:10px; text-align:left;'>";
@@ -1291,7 +1302,7 @@
                                     html += "<span style='font-size:0.8em; color:#aaa;'>" + opt.artist + "</span><br>";
                                     html += "<strong style='font-family:Bungee;'>" + opt.song + "</strong><br>";
                                     html += "<span style='color:var(--accent); font-family:Bungee; font-size:1.2em;'>" + opt.year + "</span>";
-                                    html += "<button class='btn' style='margin-top:10px; padding:10px; font-size:1em;' onclick=\"send('KING_SELECT_CARD', " + idx + ")\">¡ELEGIR ESTA!</button>";
+                                    html += "<button class='btn' style='margin-top:10px; padding:10px; font-size:1em;' onclick=\"send('KING_SELECT_CARD', " + idx + ")\">ÃƒÆ’Ã†â€™Ãƒ¢Ã¢â€š¬Ã…¡ÃƒÆ’Ã¢â‚¬Å¡¡ELEGIR ESTA!</button>";
                                     html += "</div>";
                                 });
                             }
@@ -1299,13 +1310,13 @@
                         }
                     } else if (data.turnPhase === 'KING_GUESS') {
                         if (isMyTurn) {
-                            var html = "<h3 style='color:var(--gold);font-family:Bungee;'>¡ADIVINA EL AÑO!</h3>";
-                            html += "<p style='font-size:0.8em; color:var(--neon); margin-bottom:15px;'>(Escucha la canción. Margen de error: +/- 2 años)</p>";
-                            html += "<input type='number' id='king-guess-input' placeholder='AÑO' style='font-size:1.5em; text-align:center;'>";
-                            html += "<button class='btn' style='margin-top:10px;' onclick=\"var y = document.getElementById('king-guess-input').value; if(y) send('KING_GUESS', y);\">CONFIRMAR AÑO</button>";
+                            var html = "<h3 style='color:var(--gold);font-family:Bungee;'>ÃƒÆ’Ã†â€™Ãƒ¢Ã¢â€š¬Ã…¡ÃƒÆ’Ã¢â‚¬Å¡¡ADIVINA EL AÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ O!</h3>";
+                            html += "<p style='font-size:0.8em; color:var(--neon); margin-bottom:15px;'>(Escucha la canciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚³n. Margen de error: +/- 2 aÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚±os)</p>";
+                            html += "<input type='number' id='king-guess-input' placeholder='AÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ O' style='font-size:1.5em; text-align:center;'>";
+                            html += "<button class='btn' style='margin-top:10px;' onclick=\"var y = document.getElementById('king-guess-input').value; if(y) send('KING_GUESS', y);\">CONFIRMAR AÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ O</button>";
                             kingModeUi.innerHTML = html;
                         } else {
-                            kingModeUi.innerHTML = "<h3 style='color:var(--neon);font-family:Bungee;'>CARTA ENVIADA</h3><p>EL REY ESTÁ ADIVINANDO EL AÑO...</p>";
+                            kingModeUi.innerHTML = "<h3 style='color:var(--neon);font-family:Bungee;'>CARTA ENVIADA</h3><p>EL REY ESTÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ ADIVINANDO EL AÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ O...</p>";
                         }
                     } else if (data.turnPhase === 'KING_GUESS_RESULT') {
                         var html = "<h3 style='color:var(--gold);font-family:Bungee;'>RESULTADO</h3>";
@@ -1323,22 +1334,22 @@
 
                 // Control de visibilidad de bloques de mando
                 var showMusic = isMyTurn;
-                if (data.turnPhase === 'KING_SELECTION') showMusic = false; // Nadie tiene música en este punto
+                if (data.turnPhase === 'KING_SELECTION') showMusic = false; // Nadie tiene mÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ºsica en este punto
 
                 document.getElementById('m-ctrl').style.display = showMusic ? 'grid' : 'none';
                 document.getElementById('s-ctrl').style.display = showMusic ? 'grid' : 'none';
 
-                // Botones Especiales (Solo mi turno y si no está revelada Y no en modo rey)
+                // Botones Especiales (Solo mi turno y si no estÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡¡ revelada Y no en modo rey)
                 var specialCtrl = document.getElementById('special-ctrl');
                 var sabotageCtrl = document.getElementById('sabotage-ctrl');
                 if (isMyTurn && !data.revealed && (!data.turnPhase || data.turnPhase === 'NORMAL')) {
                     specialCtrl.style.display = 'flex';
                     sabotageCtrl.style.display = 'none';
-                    // COMPRAR (Solo si NO está sonando)
+                    // COMPRAR (Solo si NO estÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡¡ sonando)
                     document.getElementById('btn-autowin').style.display = (!data.isPlaying) ? 'block' : 'none';
-                    // ERROR VIDEO (Solo si SI está sonando)
+                    // ERROR VIDEO (Solo si SI estÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡¡ sonando)
                     document.getElementById('btn-error-track').style.display = (data.isPlaying) ? 'block' : 'none';
-                    // CAMBIAR (Solo si SÍ está sonando y NO ha cambiado ya)
+                    // CAMBIAR (Solo si SÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ estÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡¡ sonando y NO ha cambiado ya)
                     document.getElementById('btn-reload').style.display = (data.isPlaying && data.canReload) ? 'block' : 'none';
                 } else {
                     specialCtrl.style.display = 'none';
@@ -1385,34 +1396,34 @@
                     if (isMyTurn) {
                         document.getElementById('inventory-title').innerText = "MIS CARTAS (MARCA TU APUESTA)";
                     } else {
-                        document.getElementById('inventory-title').innerText = "CRONOLOGÍA DE " + data.activePlayer.name;
+                        document.getElementById('inventory-title').innerText = "CRONOLOGÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚A DE " + data.activePlayer.name;
                     }
 
                     if (isMyTurn) {
                         if (data.myCards) {
                             var h = "";
                             var isSingleCard = (data.myCards.length === 1);
-                            if (isSingleCard) h += '<div style="font-size:0.8em; color:var(--neon); text-align:center; font-family:\'Bungee\'; margin-bottom:5px;">↑ ANTES ↑</div>';
+                            if (isSingleCard) h += '<div style="font-size:0.8em; color:var(--neon); text-align:center; font-family:\'Bungee\'; margin-bottom:5px;"> Ã¡¢Ãƒ¢Ã¢â‚¬Å¡Ã‚¬Ãƒâ€šÃ‚   ANTES  Ã¡¢Ãƒ¢Ã¢â‚¬Å¡Ã‚¬Ãƒâ€šÃ‚  </div>';
                             h += renderBetSlot(0, data.currentBets, data.activeGuess, true);
                             data.myCards.forEach(function (year, idx) {
                                 var displayYear = (data.isFogActive) ? "????" : year;
                                 h += '<div class="card-row">' + displayYear + '</div>';
                                 h += renderBetSlot(idx + 1, data.currentBets, data.activeGuess, true);
                             });
-                            if (isSingleCard) h += '<div style="font-size:0.8em; color:var(--neon); text-align:center; font-family:\'Bungee\'; margin-top:5px;">↓ DESPUÉS ↓</div>';
+                            if (isSingleCard) h += '<div style="font-size:0.8em; color:var(--neon); text-align:center; font-family:\'Bungee\'; margin-top:5px;"> Ã¡¢Ãƒ¢Ã¢â‚¬Å¡Ã‚¬Ãƒâ€šÃ‚ Ã¡¢Ãƒ¢Ã¢â‚¬Å¡Ã‚¬Ãƒâ€¦Ã¢â‚¬Å“ DESPUÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢Ã¡¢Ãƒ¢Ã¢â‚¬Å¡Ã‚¬Ãƒâ€šÃ‚°S  Ã¡¢Ãƒ¢Ã¢â‚¬Å¡Ã‚¬Ãƒâ€šÃ‚ Ã¡¢Ãƒ¢Ã¢â‚¬Å¡Ã‚¬Ãƒâ€¦Ã¢â‚¬Å“</div>';
                             document.getElementById('my-cards-list').innerHTML = h;
                         }
                     } else {
                         if (data.activeTimeline) {
                             var h = "";
                             var isSingleCard = (data.activeTimeline.length === 1);
-                            if (isSingleCard) h += '<div style="font-size:0.8em; color:var(--neon); text-align:center; font-family:\'Bungee\'; margin-bottom:5px;">↑ ANTES ↑</div>';
+                            if (isSingleCard) h += '<div style="font-size:0.8em; color:var(--neon); text-align:center; font-family:\'Bungee\'; margin-bottom:5px;"> Ã¡¢Ãƒ¢Ã¢â‚¬Å¡Ã‚¬Ãƒâ€šÃ‚   ANTES  Ã¡¢Ãƒ¢Ã¢â‚¬Å¡Ã‚¬Ãƒâ€šÃ‚  </div>';
                             h += renderBetSlot(0, data.currentBets, data.activeGuess, false);
                             data.activeTimeline.forEach(function (year, idx) {
                                 h += '<div class="card-row" style="border-color: #444; color: #888;">' + year + '</div>';
                                 h += renderBetSlot(idx + 1, data.currentBets, data.activeGuess, false);
                             });
-                            if (isSingleCard) h += '<div style="font-size:0.8em; color:var(--neon); text-align:center; font-family:\'Bungee\'; margin-top:5px;">↓ DESPUÉS ↓</div>';
+                            if (isSingleCard) h += '<div style="font-size:0.8em; color:var(--neon); text-align:center; font-family:\'Bungee\'; margin-top:5px;"> Ã¡¢Ãƒ¢Ã¢â‚¬Å¡Ã‚¬Ãƒâ€šÃ‚ Ã¡¢Ãƒ¢Ã¢â‚¬Å¡Ã‚¬Ãƒâ€¦Ã¢â‚¬Å“ DESPUÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢Ã¡¢Ãƒ¢Ã¢â‚¬Å¡Ã‚¬Ãƒâ€šÃ‚°S  Ã¡¢Ãƒ¢Ã¢â‚¬Å¡Ã‚¬Ãƒâ€šÃ‚ Ã¡¢Ãƒ¢Ã¢â‚¬Å¡Ã‚¬Ãƒâ€¦Ã¢â‚¬Å“</div>';
                             document.getElementById('my-cards-list').innerHTML = h;
                         }
                     }
@@ -1475,7 +1486,7 @@
                             if (alreadyBet) btnSabotageBet.innerText = "APUESTA HECHA";
                         } else {
                             btnSabotageBet.style.opacity = '1';
-                            btnSabotageBet.innerHTML = '¡NI DE COÑA! (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)';
+                            btnSabotageBet.innerHTML = 'ÃƒÆ’Ã†â€™Ãƒ¢Ã¢â€š¬Ã…¡ÃƒÆ’Ã¢â‚¬Å¡¡NI DE COÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ A! (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)';
                         }
                     }
                 }
@@ -1501,7 +1512,7 @@
             if (occupants.length > 0) cls += " occupied";
             if (imIn) cls += " my-bet";
 
-            // Bloqueo: si el hueco está pillado por el activo (y no soy yo) o por otro desafiante
+            // Bloqueo: si el hueco estÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡¡ pillado por el activo (y no soy yo) o por otro desafiante
             var blockedForMe = false;
             if (!amIActive && isGuess) blockedForMe = true;
             if (isTakenByOther) blockedForMe = true;
@@ -1513,22 +1524,22 @@
             var label = "";
             if (isGuess) label = "X";
             else if (imIn) label = "YO";
-            else if (isTakenByOther) label = "🔘";
+            else if (isTakenByOther) label = "📱 Ã¡¢Ãƒ¢Ã¢â‚¬Å¡Ã‚¬Ãƒâ€šÃ‚ÃƒÆ’Ã¢â‚¬¹Ãƒâ€¦Ã¢â‚¬Å“";
 
             return '<div class="' + cls + '" onclick="interactuarSlot(' + idx + ', ' + amIActive + ', ' + isGuess + ', ' + isTakenByOther + ')">' + label + '</div>';
         }
 
         function interactuarSlot(idx, amIActive, isGuess, isTakenByOther) {
             if (isTakenByOther) {
-                showCustomAlert("¡Este hueco ya lo ha pillado otro jugador!");
+                showCustomAlert("ÃƒÆ’Ã†â€™Ãƒ¢Ã¢â€š¬Ã…¡ÃƒÆ’Ã¢â‚¬Å¡¡Este hueco ya lo ha pillado otro jugador!");
                 return;
             }
             if (amIActive) {
                 if (lastState && lastState.activeGuess !== null) {
-                    showCustomAlert("Ya has marcado tu adivinanza de año. Espera la resolución.");
+                    showCustomAlert("Ya has marcado tu adivinanza de aÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚±o. Espera la resoluciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚³n.");
                     return;
                 }
-                showCustomConfirm("¿Marcar este hueco como tu apuesta para el año de la canción?", function (confirmed) {
+                showCustomConfirm("ÃƒÆ’Ã†â€™Ãƒ¢Ã¢â€š¬Ã…¡ÃƒÆ’Ã¢â‚¬Å¡¿Marcar este hueco como tu apuesta para el aÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚±o de la canciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚³n?", function (confirmed) {
                     if (confirmed) send('GUESS', idx);
                 });
             } else {
@@ -1538,11 +1549,11 @@
                     return;
                 }
                 if (isGuess) {
-                    showCustomAlert("¡Ese hueco ya lo ha elegido el jugador activo! Elige otro sitio para tu apuesta.");
+                    showCustomAlert("ÃƒÆ’Ã†â€™Ãƒ¢Ã¢â€š¬Ã…¡ÃƒÆ’Ã¢â‚¬Å¡¡Ese hueco ya lo ha elegido el jugador activo! Elige otro sitio para tu apuesta.");
                     return;
                 }
                 console.log("Rival intentando apostar en:", idx);
-                showCustomConfirm("¿Seguro que quieres RETAR A DUELO en este hueco (Coste: 2 Fichas)?", function (confirmed) {
+                showCustomConfirm("ÃƒÆ’Ã†â€™Ãƒ¢Ã¢â€š¬Ã…¡ÃƒÆ’Ã¢â‚¬Å¡¿Seguro que quieres RETAR A DUELO en este hueco (Coste: 2 Fichas)?", function (confirmed) {
                     if (confirmed) send('BET', idx);
                 });
             }
@@ -1594,7 +1605,7 @@
                 // Use event delegation for tapping the first timeline year
                 container.addEventListener('click', function (e) {
                     var targetRow = e.target.closest('.card-row');
-                    // Si ha pulsado el texto de un año en la cronología rival
+                    // Si ha pulsado el texto de un aÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚±o en la cronologÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚­a rival
                     if (targetRow) {
                         var rows = container.querySelectorAll('.card-row');
                         // Verificamos que sea la primera carta (index 0) y que no sea el turno de xavi
@@ -1611,13 +1622,13 @@
 
         document.addEventListener('DOMContentLoaded', function () {
             var msgs = {
-                'btn-sabotage-buzzer': '¡Zumbido enviado al DJ!',
-                'btn-sabotage-veto': '¡Has vetado su recarga!',
-                'btn-sabotage-panic': '¡Ataque de Pánico enviado!',
-                'btn-sabotage-fog': '¡Niebla Temporal enviada!',
-                'btn-sabotage-steal-token': '¡Has robado una ficha (al azar)!',
-                'btn-sabotage-steal-turn': '¡Has robado el turno!',
-                'btn-sabotage-blackhole': '¡Agujero Negro lanzado!'
+                'btn-sabotage-buzzer': 'ÃƒÆ’Ã†â€™Ãƒ¢Ã¢â€š¬Ã…¡ÃƒÆ’Ã¢â‚¬Å¡¡Zumbido enviado al DJ!',
+                'btn-sabotage-veto': 'ÃƒÆ’Ã†â€™Ãƒ¢Ã¢â€š¬Ã…¡ÃƒÆ’Ã¢â‚¬Å¡¡Has vetado su recarga!',
+                'btn-sabotage-panic': 'ÃƒÆ’Ã†â€™Ãƒ¢Ã¢â€š¬Ã…¡ÃƒÆ’Ã¢â‚¬Å¡¡Ataque de PÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡¡nico enviado!',
+                'btn-sabotage-fog': 'ÃƒÆ’Ã†â€™Ãƒ¢Ã¢â€š¬Ã…¡ÃƒÆ’Ã¢â‚¬Å¡¡Niebla Temporal enviada!',
+                'btn-sabotage-steal-token': 'ÃƒÆ’Ã†â€™Ãƒ¢Ã¢â€š¬Ã…¡ÃƒÆ’Ã¢â‚¬Å¡¡Has robado una ficha (al azar)!',
+                'btn-sabotage-steal-turn': 'ÃƒÆ’Ã†â€™Ãƒ¢Ã¢â€š¬Ã…¡ÃƒÆ’Ã¢â‚¬Å¡¡Has robado el turno!',
+                'btn-sabotage-blackhole': 'ÃƒÆ’Ã†â€™Ãƒ¢Ã¢â€š¬Ã…¡ÃƒÆ’Ã¢â‚¬Å¡¡Agujero Negro lanzado!'
             };
             for (var id in msgs) {
                 var b = document.getElementById(id);
