@@ -307,12 +307,13 @@
 </head>
 
 <body>
+    <a href="indexchrono.html" style="position:absolute; top:20px; left:20px; font-family:'Bungee'; color:#888; font-size:1.2em; text-decoration:none; border:2px solid #555; border-radius:8px; padding:5px 15px; background:#111; z-index:100;">H</a>
     <div id="winner-screen">
         <h1>¡TENEMOS GANADOR!</h1>
         <h2 id="winner-name">---</h2>
         <button class="btn-start" onclick="location.reload()" style="margin-top:30px">JUGAR OTRA VEZ</button>
     </div>
-    <div class="logo">CHRONOBEATS ANIME</div>
+    <div class="logo" style="font-family:'Shojumaru'; margin-top:20px;">CHRONOBEATS ANIME</div>
     <div id="lobby">
         <div class="room-code" id="join-code">------</div>
         <div class="player-list" id="lobby-players" style="margin-bottom: 20px;"></div>
@@ -423,7 +424,7 @@
         // Eliminadas funciones de YT API
 
         function initPeer() {
-            peer = new Peer("CB-ANIME-HOST-" + roomCode + roomCode, {
+            peer = new Peer("CB-HOST-" + roomCode, {
                 config: {
                                                             'iceServers': [
                         { urls: 'stun:stun.l.google.com:19302' },

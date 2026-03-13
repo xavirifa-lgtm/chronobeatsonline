@@ -28,7 +28,7 @@
         }
 
         .logo {
-            font-family: 'Shojumaru';
+            font-family: 'Bungee';
             font-size: 2em;
             color: var(--neon);
             text-shadow: 0 0 20px var(--neon);
@@ -155,7 +155,7 @@
         }
 
         .val-card h3 {
-            font-family: 'Shojumaru';
+            font-family: 'Bungee';
             font-size: 1.5em;
             margin: 10px 0;
         }
@@ -307,12 +307,13 @@
 </head>
 
 <body>
+    <a href="indexchrono.html" style="position:absolute; top:20px; left:20px; font-family:'Bungee'; color:#888; font-size:1.2em; text-decoration:none; border:2px solid #555; border-radius:8px; padding:5px 15px; background:#111; z-index:100;">H</a>
     <div id="winner-screen">
         <h1>¡TENEMOS GANADOR!</h1>
         <h2 id="winner-name">---</h2>
         <button class="btn-start" onclick="location.reload()" style="margin-top:30px">JUGAR OTRA VEZ</button>
     </div>
-    <div class="logo">CHRONOBEATS MIX</div>
+    <div class="logo" style="font-family:'Bungee'; margin-top:20px;">CHRONOBEATS MIX</div>
     <div id="lobby">
         <div class="room-code" id="join-code">------</div>
         <div class="player-list" id="lobby-players" style="margin-bottom: 20px;"></div>
@@ -320,7 +321,7 @@
         <!-- NEW MODE SELECTOR -->
         <div id="mode-selector" style="margin-bottom: 20px;">
             <label
-                style="font-family: 'Shojumaru'; color: var(--neon); font-size: 1.2em; display: block; margin-bottom: 10px;">MODO
+                style="font-family: 'Bungee'; color: var(--neon); font-size: 1.2em; display: block; margin-bottom: 10px;">MODO
                 DE JUEGO</label>
             <select id="game-mode-select"
                 style="padding: 10px; font-family: 'Montserrat'; font-size: 1em; border-radius: 8px; background: #222; color: #fff; border: 1px solid var(--neon);">
@@ -350,9 +351,9 @@
                 <div class="val-card" id="val-card-ui" style="display:none;">
                     <p style="font-size: 0.7em; color: var(--neon); margin-bottom: 5px;">ANIME EN JUEGO</p>
                     <p id="ui-card-artist"
-                        style="font-size: 0.9em; color: #aaa; margin: 0; font-weight: bold; font-family:'Shojumaru';">
+                        style="font-size: 0.9em; color: #aaa; margin: 0; font-weight: bold; font-family: 'Bungee';">
                         ????</p>
-                    <h3 id="ui-card-song" style="margin: 5px 0; font-size: 1.2em; font-family:'Shojumaru';">????</h3>
+                    <h3 id="ui-card-song" style="margin: 5px 0; font-size: 1.2em; font-family: 'Bungee';">????</h3>
                     <div id="ui-card-year"
                         style="font-family: 'Bungee'; font-size: 3.5em; color: var(--accent); margin-top: 5px; line-height: 1;">
                         ????</div>
@@ -423,7 +424,7 @@
         // Eliminadas funciones de YT API
 
         function initPeer() {
-            peer = new Peer("CB-MIX-HOST-" + roomCode + roomCode, {
+            peer = new Peer("CB-HOST-" + roomCode, {
                 config: {
                                                             'iceServers': [
                         { urls: 'stun:stun.l.google.com:19302' },
