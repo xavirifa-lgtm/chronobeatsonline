@@ -538,7 +538,7 @@
                             connections[conn.peer] = conn;
                             syncState(); // Force state sync to reconnecting player
                         } else {
-                            players.push({ id: conn.peer, name: data.name, avatar: data.avatar || null, score: 1, cards: [], tokens: 5, canReload: true });
+                            players.push({ id: conn.peer, name: data.name, avatar: data.avatar || null, score: 1, cards: [], tokens: 2, canReload: true });
                             connections[conn.peer] = conn;
                         }
                         updateLobby();
@@ -1009,6 +1009,21 @@
                         p.tokens -= 2;
                         isFogActive = true;
 
+                        var activeP = players[activePlayerIdx];
+                        var fogPhrases = [
+                            "Alguien acaba de soltar una bomba de humo. \u00A1Buena suerte viendo tu carta!",
+                            "Parece que Londres ha llegado a tu mesa. \u00A1A ciegas se adivina mejor!",
+                            "Esa niebla huele a miedo de tus rivales. B\u00E1jala como puedas.",
+                            "\u00A1Cegado! A ver c\u00F3mo apuntas tu ficha sin ver.",
+                            "Mucha suerte apostando contra la niebla de guerra..."
+                        ];
+                        var randomFogPhrase = fogPhrases[Math.floor(Math.random() * fogPhrases.length)];
+                        try {
+                            if (connections[activeP.id] && connections[activeP.id].open) {
+                                connections[activeP.id].send({ type: 'SABOTAGE_MESSAGE', message: randomFogPhrase });
+                            }
+                        } catch(e) {}
+
                         document.getElementById('host-instructions').innerHTML = "<span style='color:#aaaaaa; font-size:1.5em; font-family:Bungee;'>¡JAJAJA! ¡" + p.name + " HA LANZADO NIEBLA TEMPORAL!</span>";
                         setTimeout(function () {
                             if (!isRevealed && !panicActive) document.getElementById('host-instructions').innerText = (isMuted ? "REPRODUCIENDO (MUTE)" : "REPRODUCIENDO");
@@ -1019,8 +1034,23 @@
                     break;
                 case 'SABOTAGE_FORCE_SKIP':
                     var p = players.find(function (pl) { return pl.id === peerId; });
-                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 1 && activeGuess === null && isPlaying && !isRevealed && (!turnPhase || turnPhase === 'NORMAL')) {
-                        p.tokens -= 1;
+                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 2 && activeGuess === null && isPlaying && !isRevealed && (!turnPhase || turnPhase === 'NORMAL')) {
+                        p.tokens -= 2;
+
+                        var activeP = players[activePlayerIdx];
+                        var phrases = [
+                            "Alguien ha pensado que esta no era para ti jajaja",
+                            "Se te ve\u00EDa muy confiado con esta. \u00A1Saltada por la cara!",
+                            "Uy, parece que a alguien no le gusta esa canci\u00F3n para ti...",
+                            "\u00A1ZASCA! Te acaban de volatilizar la canci\u00F3n.",
+                            "Demasiado f\u00E1cil para ti, a ver la siguiente si tienes lo que hay que tener."
+                        ];
+                        var randomPhrase = phrases[Math.floor(Math.random() * phrases.length)];
+                        try {
+                            if (connections[activeP.id] && connections[activeP.id].open) {
+                                connections[activeP.id].send({ type: 'SABOTAGE_MESSAGE', message: randomPhrase });
+                            }
+                        } catch(e) {}
                         isPlaying = false;
                         container.innerHTML = '<div id="youtube-player"></div>';
                         currentSongIdx++; if(songs[currentSongIdx] && songs[currentSongIdx].id) { var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]'); if(!_pl.includes(songs[currentSongIdx].id)){ _pl.push(songs[currentSongIdx].id); localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl)); } }
@@ -1132,7 +1162,7 @@
                     var slotOccupiedByBet = false;
                     for (var pid in currentBets) { if (currentBets[pid] == valNum) slotOccupiedByBet = true; }
 
-                    if (p && p.id === players[activePlayerIdx].id && !slotOccupiedByBet && activeGuess === null) {
+                    if (p && p.id === players[activePlayerIdx].id && !slotOccupiedByBet && activeGuess === null && !isRevealed) {
                         console.log("[OK] Marca del activo fijada en", valNum);
                         activeGuess = valNum;
                         syncState();

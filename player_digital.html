@@ -761,7 +761,7 @@
                         style="width:10px;height:10px;"></span>)</button>
                 <button class="spec-btn" id="btn-sabotage-skip"
                     style="background:var(--bg); border-color:#ff00ff; color:#ff00ff;"
-                    onclick="send('SABOTAGE_FORCE_SKIP')">FORZAR SALTO (1 <span class="neon-chip"
+                    onclick="send('SABOTAGE_FORCE_SKIP')">FORZAR SALTO (2 <span class="neon-chip"
                         style="width:10px;height:10px;"></span>)</button>
                 <button class="spec-btn" id="btn-sabotage-panic"
                     style="background:var(--bg); border-color:#ff0000; color:#ff0000;"
@@ -1124,6 +1124,11 @@
             }
 
             lastState = data;
+                        if (data.type === 'SABOTAGE_MESSAGE') {
+                showCustomAlert(data.message);
+                return;
+            }
+
             if (data.type === 'STATE_UPDATE') {
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('game-screen').style.display = 'flex';
