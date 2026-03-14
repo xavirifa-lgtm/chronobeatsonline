@@ -474,16 +474,9 @@
     </div>
 
     <script>
-
         var peer, roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-        var players = [], connections = {}, songs = [], currentSongIdx = -1, activePlayerIdx = 0, isRevealed = false, isLeapOfFaithWindow = false, leapOfFaithVictor = null;
-        var currentBets = {};
-        var hasShield = {};
-        var hasBomb = {}; // playerId -> boolean
-        var hasBomb = {}; // playerId -> boolean
-        var hasShield = {};
-        var hasBomb = {}; // playerId -> boolean
-        var hasBomb = {}; // playerId -> boolean
+        var players = [], connections = {}, songs = [], currentSongIdx = -1, activePlayerIdx = 0, isRevealed = false;
+        var currentBets = {}; // playerId -> slotIndex
         var activeGuess = null; // slotIndex del jugador activo
         var bettingAgainst = []; // IDs de los jugadores que han apostado contra el jugador activo
 
@@ -543,11 +536,11 @@
                             console.log("ReconexiÃ³n de jugador:", data.name);
                             delete connections[existing.id];
                             existing.id = conn.peer;
-                            existing.avatar = data.avatar || existing.avatar; // Actualizar avatar si cambiÃ³
+                            existing.avatar = data.avatar || existing.avatar; // Actualizar avatar
                             connections[conn.peer] = conn;
                             syncState(); // Force state sync to reconnecting player
                         } else {
-                            players.push({ id: conn.peer, name: data.name, avatar: data.avatar || null, score: 1, cards: [], tokens: 2, canReload: true });
+                            players.push({ id: conn.peer, name: data.name, avatar: data.avatar || null, score: 1, cards: [], tokens: 5, canReload: true });
                             connections[conn.peer] = conn;
                         }
                         updateLobby();
@@ -576,7 +569,7 @@
         }
         initPeer();
 
-        fetch('lista_final.txt?v=' + new Date().getTime()).then(function (r) { return r.text() }).then(function (t) {
+        fetch('lista_final_anime.txt?v=' + new Date().getTime()).then(function (r) { return r.text() }).then(function (t) {
             var lines = t.replace(/\r/g, '').split('\n');
             var uniqueIds = new Set();
             var playedIds = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]');
@@ -584,8 +577,8 @@
                 var p = l.split('|');
                 var m = p[3] ? p[3].match(/[?&]v=([^&#]+)|youtu\.be\/([^?&#]+)/) : null;
                 return {
-                    artist: p[0],
-                    song: p[1],
+                    artist: p[0], // Anime
+                    song: p[1], // Tipo (OP/ED)
                     year: p[2],
                     id: m ? (m[1] || m[2]) : null,
                     line: index + 1 // Guardar nÃºmero de fila original
@@ -594,7 +587,13 @@
                 if (!s.id || uniqueIds.has(s.id) || playedIds.includes(s.id)) return false;
                 uniqueIds.add(s.id);
                 return true;
-            }).sort(function () { return Math.random() - 0.5; });
+            });
+            if(songs.length < 15) { localStorage.removeItem('CB_PlayedSongs'); alert('¡Enhorabuena! Habéis reventado la base de datos entera. Se ha reseteado la memoria de canciones vistas para esta sala para que podáis seguir jugando. Recargando partida...'); window.location.reload(); return; }
+            // Fisher-Yates shuffle
+            for (let i = songs.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [songs[i], songs[j]] = [songs[j], songs[i]];
+            }
         });
 
         function updateLobby() {
@@ -681,23 +680,7 @@
             panicTimer = 0;
             if (panicInterval) { clearInterval(panicInterval); panicInterval = null; }
 
-                        isFogActive = false;
-
-            // --- CHECK DUELO ---
-            activeDuel = null;
-            if (queuedDuel) {
-                activeDuel = queuedDuel;
-                queuedDuel = null;
-                // Reproducir musica de duelo: 5U9ilW1d_M (The Good the Bad and the Ugly whistle) o similar
-                // Ponemos esto en los players con un aviso gigante.
-                try {
-                    Object.keys(connections).forEach(id => {
-                        if(connections[id] && connections[id].open) {
-                            connections[id].send({ type: 'BET_RESULT', msg: "\u00A1DUELO A MUERTE! " + activeDuel.p1Name.toUpperCase() + " vs " + activeDuel.p2Name.toUpperCase() + "!" });
-                        }
-                    });
-                } catch(e) {}
-            }
+            isFogActive = false;
 
             // --- INICIO MODO REY CHECK ---
             if (gameMode === 'rey' && players[activePlayerIdx] && players[activePlayerIdx].score >= 10) {
@@ -767,11 +750,6 @@
             var container = document.getElementById('player-container');
 
             switch (action) {
-                case 'REMOTE_START_GAME':
-                    if (document.getElementById('lobby').style.display !== 'none') {
-                        startGame();
-                    }
-                    break;
                 case 'PLAY':
                     if (peerId !== activeP.id) return;
                     if (!isPlaying) {
@@ -838,6 +816,7 @@
                     break;
                 case 'TOGGLE_CHEAT':
                     cheatsEnabled = !cheatsEnabled;
+                    console.log("Cheats Enabled:", cheatsEnabled);
                     syncState();
                     break;
                 case 'SKIP':
@@ -853,7 +832,6 @@
                     if (isPlaying) {
                         container.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + s.id + '?autoplay=1&start=' + segundosAcumulados + (isMuted ? '&mute=1' : '') + '" allow="autoplay"></iframe>';
                         document.getElementById('host-instructions').innerText = "REPRODUCIENDO" + (isMuted ? " (MUTE)" : "");
-                        syncState();
                     }
                     break;
                 case 'RELOAD_SONG':
@@ -987,34 +965,10 @@
                     }
                     break;
                 case 'SABOTAGE_FOG':
-                                        if (hasShield[players[activePlayerIdx].id]) {
-                        var p = players.find(function(pl) { return pl.id === peerId; });
-                        if(p) {
-                            try { if(connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "\u00A1ZASCA! El Escudo de " + players[activePlayerIdx].name + " ha rebotado tu sabotaje y lo has perdido todo jajaja" }); } catch(e){}
-                        }
-                        hasShield[players[activePlayerIdx].id] = false;
-                        syncState();
-                        break;
-                    }
                     var p = players.find(function (pl) { return pl.id === peerId; });
                     if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 2 && !isFogActive && (!turnPhase || turnPhase === 'NORMAL')) {
                         p.tokens -= 2;
                         isFogActive = true;
-
-                        var activeP = players[activePlayerIdx];
-                        var fogPhrases = [
-                            "Alguien acaba de soltar una bomba de humo. \u00A1Buena suerte viendo tu carta!",
-                            "Parece que Londres ha llegado a tu mesa. \u00A1A ciegas se adivina mejor!",
-                            "Esa niebla huele a miedo de tus rivales. B\u00E1jala como puedas.",
-                            "\u00A1Cegado! A ver c\u00F3mo apuntas tu ficha sin ver.",
-                            "Mucha suerte apostando contra la niebla de guerra..."
-                        ];
-                        var randomFogPhrase = fogPhrases[Math.floor(Math.random() * fogPhrases.length)];
-                        try {
-                            if (connections[activeP.id] && connections[activeP.id].open) {
-                                connections[activeP.id].send({ type: 'SABOTAGE_MESSAGE', message: randomFogPhrase });
-                            }
-                        } catch(e) {}
 
                         document.getElementById('host-instructions').innerHTML = "<span style='color:#aaaaaa; font-size:1.5em; font-family:Bungee;'>Â¡JAJAJA! Â¡" + p.name + " HA LANZADO NIEBLA TEMPORAL!</span>";
                         setTimeout(function () {
@@ -1024,80 +978,10 @@
                         syncState();
                     }
                     break;
-                                                case 'SABOTAGE_BOMB':
-                    var p = players.find(function(pl) { return pl.id === peerId; });
-                    var target = players.find(function(pl) { return pl.id === value; });
-                    if(p && target && p.tokens >= 3) {
-                        // Check if p is just passing the bomb for free (cost 0 if passing)
-                        var isPassing = hasBomb[p.id];
-                        if (!isPassing) {
-                            p.tokens -= 3;
-                        } else {
-                            hasBomb[p.id] = false; // Te la quitas de encima
-                        }
-                        
-                        hasBomb[target.id] = true;
-                        
-                        try {
-                            // Alerta a todos
-                            Object.keys(connections).forEach(id => {
-                                if(connections[id] && connections[id].open) {
-                                    connections[id].send({ type: 'BET_RESULT', msg: "\u00A1" + target.name.toUpperCase() + " TIENE LA BOMBA LAPA PEGADA!" });
-                                }
-                            });
-                        } catch(e) {}
-                        syncState();
-                    }
-                    else if (p && target && hasBomb[p.id]) {
-                        // Pasando la bomba sin coste de fichas
-                        hasBomb[p.id] = false;
-                        hasBomb[target.id] = true;
-                        try {
-                            Object.keys(connections).forEach(id => {
-                                if(connections[id] && connections[id].open) {
-                                    connections[id].send({ type: 'BET_RESULT', msg: "\u00A1" + target.name.toUpperCase() + " TIENE LA BOMBA LAPA PEGADA!" });
-                                }
-                            });
-                        } catch(e) {}
-                        syncState();
-                    }
-                    break;
-                case 'SABOTAGE_DUEL':
-                    var p = players.find(function(pl) { return pl.id === peerId; });
-                    var target = players.find(function(pl) { return pl.id === value; });
-                    if(p && target && p.tokens >= 2) {
-                        p.tokens -= 2;
-                        queuedDuel = { p1: p.id, p2: target.id, p1Name: p.name, p2Name: target.name };
-                        try {
-                            // Alert everyone it was queued
-                            Object.keys(connections).forEach(id => {
-                                if(connections[id] && connections[id].open) {
-                                    connections[id].send({ type: 'BET_RESULT', msg: "\u00A1" + p.name.toUpperCase() + " HA RETADO A DUELO A " + target.name.toUpperCase() + "!" });
-                                }
-                            });
-                        } catch(e) {}
-                        syncState();
-                    }
-                    break;
                 case 'SABOTAGE_FORCE_SKIP':
                     var p = players.find(function (pl) { return pl.id === peerId; });
-                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 2 && activeGuess === null && isPlaying && !isRevealed && (!turnPhase || turnPhase === 'NORMAL')) {
-                        p.tokens -= 2;
-
-                        var activeP = players[activePlayerIdx];
-                        var phrases = [
-                            "Alguien ha pensado que esta no era para ti jajaja",
-                            "Se te ve\u00EDa muy confiado con esta. \u00A1Saltada por la cara!",
-                            "Uy, parece que a alguien no le gusta esa canci\u00F3n para ti...",
-                            "\u00A1ZASCA! Te acaban de volatilizar la canci\u00F3n.",
-                            "Demasiado f\u00E1cil para ti, a ver la siguiente si tienes lo que hay que tener."
-                        ];
-                        var randomPhrase = phrases[Math.floor(Math.random() * phrases.length)];
-                        try {
-                            if (connections[activeP.id] && connections[activeP.id].open) {
-                                connections[activeP.id].send({ type: 'SABOTAGE_MESSAGE', message: randomPhrase });
-                            }
-                        } catch(e) {}
+                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 1 && activeGuess === null && isPlaying && !isRevealed && (!turnPhase || turnPhase === 'NORMAL')) {
+                        p.tokens -= 1;
                         isPlaying = false;
                         container.innerHTML = '<div id="youtube-player"></div>';
                         currentSongIdx++; if(songs[currentSongIdx] && songs[currentSongIdx].id) { var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]'); if(!_pl.includes(songs[currentSongIdx].id)){ _pl.push(songs[currentSongIdx].id); localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl)); } }
@@ -1200,79 +1084,8 @@
                         }
                     }
                     break;
-                                case 'LEAP_OF_FAITH':
-                    if (isLeapOfFaithWindow && !leapOfFaithVictor) {
-                        var p = players.find(function (pl) { return pl.id === peerId; });
-                        if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 1) {
-                            p.tokens -= 1;
-                            leapOfFaithVictor = p.id;
-                            
-                            // Re-assign active player manually for this exact turn
-                            activePlayerIdx = players.indexOf(p);
-                            
-                            // Broadcast an alert saying "X player has stolen the turn blindly!"
-                            try {
-                                Object.keys(connections).forEach(id => {
-                                    if(connections[id] && connections[id].open) {
-                                        connections[id].send({ type: 'BET_RESULT', msg: "\u00A1" + p.name.toUpperCase() + " SE HA TIRADO A CIEGAS (" + (isFogActive?"CON":"SIN") + " NIEBLA)!" });
-                                    }
-                                });
-                            } catch(e) {}
-                            
-                            syncState();
-                        }
-                    }
-                    break;
-                                                                case 'MARKET_WILDCARD':
-                    var p = players.find(function(pl) { return pl.id === peerId; });
-                    if(p && p.id === players[activePlayerIdx].id && p.tokens >= 1 && currentSongIdx < songs.length) {
-                        p.tokens -= 1;
-                        var songObj = songs[currentSongIdx];
-                        try {
-                            if(connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "COMODlN: 50% REVELADO EN PANTALLA." });
-                        } catch(e) {}
-                        
-                        document.getElementById('ui-card-artist').innerText = songObj.artist;
-                        document.getElementById('ui-card-artist').style.color = "var(--gold)";
-                        syncState();
-                    }
-                    break;
-                case 'MARKET_DECADE':
-                    var p = players.find(function(pl) { return pl.id === peerId; });
-                    if(p && p.id === players[activePlayerIdx].id && p.tokens >= 1 && currentSongIdx < songs.length) {
-                        p.tokens -= 1;
-                        var sYear = parseInt(songs[currentSongIdx].year);
-                        var decadeStr = "Desconocida";
-                        if (!isNaN(sYear)) {
-                            decadeStr = Math.floor(sYear / 10) * 10 + "s";
-                        }
-                        try {
-                            if(connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "PISTA! A\u00F1os " + decadeStr });
-                        } catch(e) {}
-                        syncState();
-                    }
-                    break;
-                case 'MARKET_SHIELD':
-                    var p = players.find(function(pl) { return pl.id === peerId; });
-                    if(p && p.tokens >= 3 && !hasShield[p.id]) {
-                        p.tokens -= 3;
-                        hasShield[p.id] = true;
-                        try {
-                            if(connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "ESCUDO ACTIVADO! Tu proximo sabotaje enemigo ser\u00E1 neutralizado." });
-                        } catch(e) {}
-                        syncState();
-                    }
-                    break;
                 case 'GUESS':
                     console.log("[GUESS] de", peerId, "en slot", value);
-                    // Check Duel Block
-                    if(activeDuel && peerId !== activeDuel.p1 && peerId !== activeDuel.p2) {
-                        return; // Espectadores no apuestan
-                    }
-                    // Check Duel Block
-                    if(activeDuel && peerId !== activeDuel.p1 && peerId !== activeDuel.p2) {
-                        return; // Espectadores no apuestan
-                    }
                     var p = players.find(function (pl) { return pl.id === peerId; });
                     var valNum = parseInt(value);
                     if (isNaN(valNum)) break;
@@ -1280,7 +1093,7 @@
                     var slotOccupiedByBet = false;
                     for (var pid in currentBets) { if (currentBets[pid] == valNum) slotOccupiedByBet = true; }
 
-                    if (p && p.id === players[activePlayerIdx].id && !slotOccupiedByBet && activeGuess === null && !isRevealed) {
+                    if (p && p.id === players[activePlayerIdx].id && !slotOccupiedByBet && activeGuess === null) {
                         console.log("[OK] Marca del activo fijada en", valNum);
                         activeGuess = valNum;
                         syncState();
@@ -1745,19 +1558,7 @@
                 alert('Aviso guardado.');
             });
         }
-    
-
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log('Service Worker registrado', reg))
-                    .catch(err => console.log('Error registrando SW', err));
-            });
-        }
-    
-
-
-</script>
+    </script>
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
