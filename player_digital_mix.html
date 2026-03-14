@@ -558,6 +558,70 @@
                 transform: rotate(360deg);
             }
         }
+    
+        /* TABS RESTAURADAS */
+        .tab-bar {
+            display: flex;
+            width: 100%;
+            background: #111;
+            border-bottom: 2px solid #333;
+            margin-bottom: 5px;
+            flex-shrink: 0;
+            z-index: 100;
+        }
+        .tab-btn {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #666;
+            padding: 12px 5px;
+            font-family: 'Bungee';
+            font-size: 0.65em;
+            cursor: pointer;
+            transition: 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+        .tab-btn.active {
+            color: var(--neon);
+            border-bottom-color: var(--neon);
+            background: rgba(0, 242, 255, 0.05);
+        }
+        .tab-pane {
+            display: none;
+            width: 100%;
+            flex-direction: column;
+            align-items: center;
+        }
+        .tab-pane.active {
+            display: flex;
+        }
+        /* DUELO YEAR INPUT */
+        #duel-input-container {
+            display: none;
+            background: #1a1a1a;
+            border: 2px solid var(--gold);
+            padding: 15px;
+            border-radius: 15px;
+            width: 100%;
+            max-width: 320px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        #bomb-pass-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 21000;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
     </style>
 </head>
 
@@ -696,6 +760,14 @@
     </div>
 
     <div id="game-screen">
+        
+        <div class="tab-bar" id="game-tabs" style="display:none;">
+            <button class="tab-btn active" onclick="switchTab('juego')">JUEGO</button>
+            <button class="tab-btn" onclick="switchTab('sabotaje')">SABOTAJE</button>
+            <button class="tab-btn" onclick="switchTab('mercado')">MERCADO</button>
+        </div>
+
+        <div id="tab-juego" class="tab-pane active">
         <div id="leaderboard-info">
             <div class="leader-row">LÍDER: <span id="lb-leader-name">---</span> (<span id="lb-leader-cards">0</span>)
             </div>
@@ -735,6 +807,8 @@
             <button class="sk-btn sk-back" id="btn-skip-m20" onclick="send('SKIP',-20)">-20s</button>
         </div>
 
+        </div>
+        <div id="tab-sabotaje" class="tab-pane">
         <div class="special-actions" id="sabotage-ctrl" style="display:none; margin-top:10px;">
             <p
                 style="width: 100%; text-align: center; color: var(--gold); font-size: 0.7em; margin: 0 0 5px 0; font-family: 'Bungee';">
@@ -781,12 +855,23 @@
                     style="background:var(--bg); border-color:#ff00ff; color:#ff00ff;"
                     onclick="send('SABOTAGE_STEAL_TURN')">ROBAR TURNO (4 <span class="neon-chip"
                         style="width:10px;height:10px;"></span>)</button>
-                <button class="spec-btn" id="btn-sabotage-blackhole"
+                <button class="spec-btn" id="btn-sabotage-blackhole" style="grid-column: 1 / 2;"
                     style="background:var(--bg); border-color:#9900ff; color:#9900ff; grid-column: span 2;"
                     onclick="send('SABOTAGE_BLACKHOLE')">AGUJERO NEGRO (5 <span class="neon-chip"
                         style="width:10px;height:10px;"></span>)</button>
             </div>
         </div>
+        </div>
+        <div id="tab-mercado" class="tab-pane">
+            <h4 style="font-family: 'Bungee'; color: var(--gold); margin: 20px 0 10px;">MERCADO NEGRO</h4>
+            <div style="display:grid; grid-template-columns: 1fr; gap:10px; width:100%; max-width:340px;">
+                <button class="spec-btn" onclick="send('MARKET_WILDCARD')">COMODÍN 50/50 (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
+                <button class="spec-btn" onclick="send('MARKET_DECADE')">PISTA DÉCADA (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
+                <button class="spec-btn" onclick="send('MARKET_SHIELD')">ESCUDO PROTECTOR (3 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
+            </div>
+            <p style="font-size: 0.6em; color: #666; margin-top: 15px; text-align: center;">VENTAJAS PARA TU TURNO</p>
+        </div>
+
 
         <div id="king-mode-ui"
             style="display: none; width: 100%; max-width: 340px; margin-top: 10px; text-align: center; flex-direction: column; gap: 10px;">
@@ -907,6 +992,41 @@
                 img.src = e.target.result;
             };
             reader.readAsDataURL(file);
+        }
+
+        
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('tab-' + tabId).classList.add('active');
+            document.querySelector('.tab-btn[onclick*="' + tabId + '"]').classList.add('active');
+        }
+
+        function submitDuelGuess() {
+            var val = document.getElementById('duel-year-input').value;
+            if (val) {
+                send('DUEL_GUESS', val);
+                document.getElementById('duel-input-container').style.display = 'none';
+                document.getElementById('duel-year-input').value = '';
+            }
+        }
+
+        function showBombPass(playersList) {
+            var container = document.getElementById('bomb-targets-list');
+            container.innerHTML = '';
+            playersList.forEach(p => {
+                if (p.id !== myId) {
+                    var btn = document.createElement('button');
+                    btn.className = 'btn';
+                    btn.innerText = p.name.toUpperCase();
+                    btn.onclick = function() {
+                        send('SABOTAGE_BOMB', p.id);
+                        document.getElementById('bomb-pass-overlay').style.display = 'none';
+                    };
+                    container.appendChild(btn);
+                }
+            });
+            document.getElementById('bomb-pass-overlay').style.display = 'flex';
         }
 
         async function toonifyAvatar() {
@@ -1107,7 +1227,7 @@
         function handle(data) {
             console.log("Evento:", data.type, data);
 
-            if (data.type === 'BET_RESULT') {
+            if (data.type === 'BOMB_PASS_ACTIVE') { showBombPass(lastState.players); } else if (data.type === 'BET_RESULT') {
                 showCustomAlert(data.msg);
                 return;
             }
@@ -1123,9 +1243,46 @@
                 }
             }
 
-            lastState = data;
+            
+                // NIVELES DE JOPUTISMO (SABOTAJES)
+                var lvl = data.joputismoLevel || 0;
+                document.getElementById('btn-sabotage-buzzer').style.display = (lvl >= 1) ? 'flex' : 'none';
+                document.getElementById('btn-sabotage-veto').style.display = (lvl >= 1) ? 'flex' : 'none';
+                document.getElementById('btn-sabotage-skip').style.display = (lvl >= 1) ? 'flex' : 'none';
+                document.getElementById('btn-sabotage-panic').style.display = (lvl >= 1) ? 'flex' : 'none';
+                document.getElementById('btn-sabotage-fog').style.display = (lvl >= 1) ? 'flex' : 'none';
+                
+                document.getElementById('btn-sabotage-steal-token').style.display = (lvl >= 2) ? 'flex' : 'none';
+                document.getElementById('btn-sabotage-steal-turn').style.display = (lvl >= 2) ? 'flex' : 'none';
+                document.getElementById('btn-sabotage-blackhole').style.display = (lvl >= 2) ? 'flex' : 'none';
+                document.getElementById('btn-sabotage-bomb').style.display = (lvl >= 2) ? 'flex' : 'none';
+                document.getElementById('btn-sabotage-duel').style.display = (lvl >= 0) ? 'flex' : 'none'; // Duelo siempre? o lvl 1? User said "Duel is a new mode".
+                
+                // BOMBA LAPA: Cambiar coste si la tienes
+                var myBomb = data.hasBomb && data.hasBomb[myId];
+                var bombBtn = document.getElementById('btn-sabotage-bomb');
+                if (bombBtn) {
+                    if (myBomb) {
+                        bombBtn.innerHTML = '¡PÁSALO! (0 <span class="neon-chip" style="width:10px;height:10px;"></span>)';
+                        bombBtn.style.borderColor = "#ff0000";
+                        bombBtn.style.color = "#ff0000";
+                        bombBtn.classList.add('pulse');
+                    } else {
+                        bombBtn.innerHTML = 'BOMBA LAPA (3 <span class="neon-chip" style="width:10px;height:10px;"></span>)';
+                        bombBtn.style.borderColor = "#9900ff";
+                        bombBtn.style.color = "#9900ff";
+                        bombBtn.classList.remove('pulse');
+                    }
+                }
+
+                // MODO DUELO
+                if (data.duelActive && (myId === data.duelP1 || myId === data.duelP2)) {
+                    document.getElementById('duel-input-container').style.display = 'block';
+                } else {
+                    document.getElementById('duel-input-container').style.display = 'none';
+                }
+                lastState = data;
             if (data.type === 'STATE_UPDATE') {
-                if (data.currentColor) document.documentElement.style.setProperty('--neon', data.currentColor);
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('game-screen').style.display = 'flex';
                 document.getElementById('cur-player').innerText = data.activePlayer && data.activePlayer.name ? data.activePlayer.name : "---";
@@ -1305,10 +1462,7 @@
 
                 if (!isKingMode) {
                     if (isMyTurn) {
-                        var guessLabel = "ADIVINA EL GRUPO";
-                        if (data.currentType === 'anime') guessLabel = "ADIVINA LA SERIE";
-                        if (data.currentType === 'movies') guessLabel = "ADIVINA LA PELÍCULA";
-                        document.getElementById('inventory-title').innerText = guessLabel + " (MARCA TU APUESTA)";
+                        document.getElementById('inventory-title').innerText = "MIS CARTAS (MARCA TU APUESTA)";
                     } else {
                         document.getElementById('inventory-title').innerText = "CRONOLOGÍA DE " + data.activePlayer.name;
                     }
@@ -1563,6 +1717,19 @@
             });
         }
     </script>
+
+    <div id="duel-input-container">
+        <h4 style="font-family:'Bungee'; color:var(--gold); margin:0 0 10px 0;">¡DUELO! ESCRIBE EL AÑO</h4>
+        <input type="number" id="duel-year-input" placeholder="AÑO" style="font-size: 2em; width: 100%;">
+        <button class="btn" style="margin-top:10px;" onclick="submitDuelGuess()">ENVIAR AÑO</button>
+    </div>
+
+    <div id="bomb-pass-overlay">
+        <h2 style="font-family:'Bungee'; color:#ff0000; text-shadow:0 0 10px black;">¡PÁSALO!</h2>
+        <p style="color:white; margin-bottom:20px;">ELIGE A QUIÉN PEGAR LA BOMBA</p>
+        <div id="bomb-targets-list" style="display:flex; flex-direction:column; gap:10px; width:100%; max-width:300px;"></div>
+    </div>
+
 </body>
 
 </html>
