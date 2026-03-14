@@ -7,10 +7,9 @@
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon-192.png">
     <meta name="theme-color" content="#00f2ff">
-    <title>HOST - MOVIES VERSION</title>
+    <title>HOST - CHRONOBEATS PELÍCULAS</title>
     <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Montserrat:wght@400;700&display=swap"
         rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Limelight&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js">        ,
                 body: JSON.stringify({ url: url, tipo: listType })
             }).then(function(r){ return r.json()}).then(function(data){
@@ -38,10 +37,10 @@
     <!-- Eliminado script de YouTube API ya que usamos inyección de iframe directa -->
     <style>
         :root {
-            --neon: #ffaa00;
+            --neon: #00f2ff;
             --bg: #0d0d0d;
             --accent: #ff0055;
-            --gold: #ffffff;
+            --gold: #ffd700;
         }
 
         body {
@@ -54,7 +53,7 @@
         }
 
         .logo {
-            font-family: 'Limelight';
+            font-family: 'Bungee';
             font-size: 2em;
             color: var(--neon);
             text-shadow: 0 0 20px var(--neon);
@@ -339,24 +338,24 @@
             width: 55px;
             height: 55px;
             background: #000;
-            border: 2px solid var(--neon, #ffaa00);
+            border: 2px solid var(--neon, #00f2ff);
             border-radius: 50%;
             display: flex !important;
             align-items: center;
             justify-content: center;
-            color: var(--neon, #ffaa00);
+            color: var(--neon, #00f2ff);
             text-decoration: none;
-            font-family: 'Limelight';
+            font-family: 'Bungee';
             font-size: 1.5em;
-            box-shadow: 0 0 20px rgba(255, 170, 0, 0.5);
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.5);
             transition: 0.3s;
             cursor: pointer;
         }
 
         .btn-hub:hover {
-            background: var(--neon, #ffaa00);
+            background: var(--neon, #00f2ff);
             color: #000;
-            box-shadow: 0 0 40px var(--neon, #ffaa00);
+            box-shadow: 0 0 40px var(--neon, #00f2ff);
             transform: scale(1.1);
         }
     </style>
@@ -370,8 +369,7 @@
         <h2 id="winner-name">---</h2>
         <button class="btn-start" onclick="location.reload()" style="margin-top:30px">JUGAR OTRA VEZ</button>
     </div>
-    <div class="logo">CHRONOBEATS<br><span style="font-size:0.4em; color:var(--gold); font-family:'Montserrat';">MOVIES
-            & TV SHOWS VERSION</span></div>
+    <div class="logo">CHRONOBEATS</div>
     <div id="live-room-code"
         style="display:none; position:fixed; top:20px; right:20px; background:var(--bg); border:1px solid var(--neon); color:var(--neon); padding:8px 15px; border-radius:10px; font-family:'Bungee'; font-size:1.2em; z-index:10000; box-shadow:0 0 10px rgba(0,242,255,0.3);">
         CODE</div>
@@ -438,13 +436,9 @@
             </div>
             <div class="validation-area">
                 <div class="val-card" id="val-card-ui" style="display:none;">
-                    <p style="font-size: 0.7em; color: var(--neon); margin-bottom: 5px;">INTÉRPRETE</p>
-                    <p id="ui-card-artist"
-                        style="font-size: 0.9em; color: #aaa; margin: 0; font-weight: bold; font-family:'Limelight';">
-                        ????</p>
-                    <p style="font-size: 0.7em; color: var(--neon); margin-bottom: 0px; margin-top:15px;">TEMA (PELÍCULA
-                        / SERIE)</p>
-                    <h3 id="ui-card-song" style="margin: 5px 0; font-size: 1.2em; font-family:'Limelight';">????</h3>
+                    <p style="font-size: 0.7em; color: var(--neon); margin-bottom: 5px;">CANCIÓN EN JUEGO</p>
+                    <p id="ui-card-artist" style="font-size: 0.9em; color: #aaa; margin: 0; font-weight: bold;">????</p>
+                    <h3 id="ui-card-song" style="margin: 5px 0; font-size: 1.2em;">????</h3>
                     <div id="ui-card-year"
                         style="font-family: 'Bungee'; font-size: 3.5em; color: var(--accent); margin-top: 5px; line-height: 1;">
                         ????</div>
@@ -508,7 +502,7 @@
         // Eliminadas funciones de YT API
 
         function initPeer() {
-            peer = new Peer("CB-MOVIES-HOST-" + roomCode, {
+            peer = new Peer("CB-HOST-" + roomCode, {
                 config: {
                                                             'iceServers': [
                         { urls: 'stun:stun.l.google.com:19302' },
@@ -540,7 +534,7 @@
                             console.log("Reconexión de jugador:", data.name);
                             delete connections[existing.id];
                             existing.id = conn.peer;
-                            existing.avatar = data.avatar || existing.avatar; // Actualizar avatar
+                            existing.avatar = data.avatar || existing.avatar; // Actualizar avatar si cambió
                             connections[conn.peer] = conn;
                             syncState(); // Force state sync to reconnecting player
                         } else {
@@ -573,7 +567,7 @@
         }
         initPeer();
 
-        fetch('lista_final_pelis.txt?v=' + new Date().getTime()).then(function (r) { return r.text() }).then(function (t) {
+        fetch('lista_final.txt?v=' + new Date().getTime()).then(function (r) { return r.text() }).then(function (t) {
             var lines = t.replace(/\r/g, '').split('\n');
             var uniqueIds = new Set();
             var playedIds = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]');
@@ -591,13 +585,7 @@
                 if (!s.id || uniqueIds.has(s.id) || playedIds.includes(s.id)) return false;
                 uniqueIds.add(s.id);
                 return true;
-            });
-            if(songs.length < 15) { localStorage.removeItem('CB_PlayedSongs'); alert('�Enhorabuena! Hab�is reventado la base de datos entera. Se ha reseteado la memoria de canciones vistas para esta sala para que pod�is seguir jugando. Recargando partida...'); window.location.reload(); return; }
-            // Fisher-Yates shuffle
-            for (let i = songs.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [songs[i], songs[j]] = [songs[j], songs[i]];
-            }
+            }).sort(function () { return Math.random() - 0.5; });
         });
 
         function updateLobby() {
@@ -835,6 +823,7 @@
                     if (isPlaying) {
                         container.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + s.id + '?autoplay=1&start=' + segundosAcumulados + (isMuted ? '&mute=1' : '') + '" allow="autoplay"></iframe>';
                         document.getElementById('host-instructions').innerText = "REPRODUCIENDO" + (isMuted ? " (MUTE)" : "");
+                        syncState();
                     }
                     break;
                 case 'RELOAD_SONG':
@@ -1099,6 +1088,16 @@
                     if (p && p.id === players[activePlayerIdx].id && !slotOccupiedByBet && activeGuess === null) {
                         console.log("[OK] Marca del activo fijada en", valNum);
                         activeGuess = valNum;
+
+                        // STOP PANIC TIMER IF ACTIVE
+                        if (panicActive) {
+                            clearInterval(panicInterval);
+                            panicInterval = null;
+                            panicActive = false;
+                            panicTimer = 0;
+                            console.log("[PANIC] Temporizador detenido por respuesta rápida.");
+                        }
+
                         syncState();
                     } else {
                         console.log("[FAIL] Guess rechazado. ¿Ya hay marca?", activeGuess !== null);

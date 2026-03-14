@@ -41,6 +41,58 @@
             padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 35px);
         }
 
+        /* TABS CSS */
+        .tab-bar {
+            display: flex;
+            background: rgba(0,0,0,0.9);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid #333;
+            height: 65px;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .tab-btn {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-family: 'Bungee';
+            font-size: 0.65em;
+            cursor: pointer;
+            transition: 0.3s;
+            border: none;
+            background: none;
+            gap: 4px;
+        }
+
+        .tab-btn.active {
+            color: var(--neon);
+            text-shadow: 0 0 10px var(--neon);
+        }
+
+        .tab-content {
+            display: none;
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            padding: 15px;
+            padding-bottom: 90px;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .tab-content.active {
+            display: flex;
+        }
+
+
         #login-screen {
             flex: 1;
             display: flex;
@@ -696,121 +748,112 @@
     </div>
 
     <div id="game-screen">
-        <div id="leaderboard-info">
-            <div class="leader-row">LÍDER: <span id="lb-leader-name">---</span> (<span id="lb-leader-cards">0</span>)
+        <!-- PESTAÑA JUEGO -->
+        <div id="tab-game" class="tab-content active">
+            <div id="leaderboard-info">
+                <div class="leader-row">LÍDER: <span id="lb-leader-name">---</span> (<span id="lb-leader-cards">0</span>)</div>
+                <div class="me-row">YO: <span id="lb-me-cards">0</span> CARTAS</div>
             </div>
-            <div class="me-row">YO: <span id="lb-me-cards">0</span> CARTAS</div>
-        </div>
-        <h4 id="inventory-title"
-            style="margin: 0 0 5px 0; font-family: 'Bungee'; font-size: 0.6em; color: #888; text-align: center;">MIS
-            CARTAS</h4>
-        <div id="turn-status">TURNO DE: <span id="cur-player">---</span></div>
-        <div id="cheat-indicator"
-            style="display:none; position: fixed; top: 80px; left: 50%; transform: translateX(-50%); background: var(--accent); color: #fff; padding: 5px 15px; border-radius: 20px; font-family: 'Bungee'; font-size: 0.8em; z-index: 10000; box-shadow: 0 0 15px var(--accent);">
-            TRUCOS OFF</div>
-        <div class="chip-display" id="my-tokens-ui">MIS FICHAS: <span class="neon-chip"></span><span
-                class="neon-chip"></span></div>
+            
+            <h4 id="inventory-title" style="margin: 0 0 5px 0; font-family: 'Bungee'; font-size: 0.6em; color: #888; text-align: center;">MIS CARTAS</h4>
+            <div id="turn-status">TURNO DE: <span id="cur-player">---</span></div>
+            
+            <div id="cheat-indicator" style="display:none; position: fixed; top: 80px; left: 50%; transform: translateX(-50%); background: var(--accent); color: #fff; padding: 5px 15px; border-radius: 20px; font-family: 'Bungee'; font-size: 0.8em; z-index: 10000; box-shadow: 0 0 15px var(--accent);">TRUCOS OFF</div>
+            
+            <div class="chip-display" id="my-tokens-ui">MIS FICHAS: <span class="neon-chip"></span><span class="neon-chip"></span></div>
 
-        <div class="special-actions" id="special-ctrl">
-            <button class="spec-btn" id="btn-autowin" onclick="send('AUTO_WIN')">COMPRAR CARTA (3 <span
-                    class="neon-chip" style="width:10px;height:10px;"></span>)</button>
-            <button class="spec-btn btn-error-track" id="btn-error-track" onclick="send('SYSTEM_ERROR_TRACK')"
-                style="display:none;">ERROR TARJETA</button>
-            <button class="spec-btn" id="btn-reload" onclick="send('RELOAD_SONG')">CAMBIAR CANCIÓN (1 <span
-                    class="neon-chip" style="width:10px;height:10px;"></span>)</button>
-        </div>
-
-        <div class="music-controls" id="m-ctrl">
-            <button class="ctrl-btn btn-play" onclick="send('PLAY')">PLAY</button>
-            <button class="ctrl-btn" onclick="send('PAUSE')">PAUSE</button>
-            <button class="ctrl-btn btn-stop" onclick="send('STOP')">STOP</button>
-        </div>
-
-        <div class="skip-controls" id="s-ctrl">
-            <button class="sk-btn sk-fwd" id="btn-skip-p5" onclick="send('SKIP',5)">+5s</button>
-            <button class="sk-btn sk-fwd" onclick="send('SKIP',10)">+10s</button>
-            <button class="sk-btn sk-fwd" id="btn-skip-p20" onclick="send('SKIP',20)">+20s</button>
-            <button class="sk-btn sk-back" id="btn-skip-m5" onclick="send('SKIP',-5)">-5s</button>
-            <button class="sk-btn sk-back" onclick="send('SKIP',-10)">-10s</button>
-            <button class="sk-btn sk-back" id="btn-skip-m20" onclick="send('SKIP',-20)">-20s</button>
-        </div>
-
-        <div class="special-actions" id="sabotage-ctrl" style="display:none; margin-top:10px;">
-            <p
-                style="width: 100%; text-align: center; color: var(--gold); font-size: 0.7em; margin: 0 0 5px 0; font-family: 'Bungee';">
-                SABOTAJES</p>
-            <div id="sabotage-grid">
-                <!-- Nivel 0 -->
-                <button class="spec-btn" id="btn-sabotage-mute"
-                    style="background:var(--bg); border-color:#ff0055; color:#ff0055;"
-                    onclick="send('SABOTAGE_MUTE')">MUTE 15s (1 <span class="neon-chip"
-                        style="width:10px;height:10px;"></span>)</button>
-                <button class="spec-btn" id="btn-sabotage-bet"
-                    style="background:var(--bg); border-color:#00f2fe; color:#00f2fe;"
-                    onclick="send('BET_AGAINST_ACTIVE')">¡NI DE COÑA! (1 <span class="neon-chip"
-                        style="width:10px;height:10px;"></span>)</button>
-
-                <!-- Nivel 1 -->
-                <button class="spec-btn" id="btn-sabotage-buzzer"
-                    style="background:var(--bg); border-color:#00ff00; color:#00ff00;"
-                    onclick="send('SABOTAGE_BUZZER')">¡ZUMBIDO! (1 <span class="neon-chip"
-                        style="width:10px;height:10px;"></span>)</button>
-                <button class="spec-btn" id="btn-sabotage-veto"
-                    style="background:var(--bg); border-color:#ff8800; color:#ff8800;"
-                    onclick="send('SABOTAGE_VETO')">VETO CAMBIAR (1 <span class="neon-chip"
-                        style="width:10px;height:10px;"></span>)</button>
-                <button class="spec-btn" id="btn-sabotage-skip"
-                    style="background:var(--bg); border-color:#ff00ff; color:#ff00ff;"
-                    onclick="send('SABOTAGE_FORCE_SKIP')">FORZAR SALTO (1 <span class="neon-chip"
-                        style="width:10px;height:10px;"></span>)</button>
-                <button class="spec-btn" id="btn-sabotage-panic"
-                    style="background:var(--bg); border-color:#ff0000; color:#ff0000;"
-                    onclick="send('SABOTAGE_PANIC')">PÁNICO 10s (2 <span class="neon-chip"
-                        style="width:10px;height:10px;"></span>)</button>
-                <button class="spec-btn" id="btn-sabotage-fog"
-                    style="background:var(--bg); border-color:#aaaaaa; color:#aaaaaa;"
-                    onclick="send('SABOTAGE_FOG')">NIEBLA TIEMPO (2 <span class="neon-chip"
-                        style="width:10px;height:10px;"></span>)</button>
-
-                <!-- Nivel 2 -->
-                <button class="spec-btn" id="btn-sabotage-steal-token"
-                    style="background:var(--bg); border-color:#ffff00; color:#ffff00;"
-                    onclick="send('SABOTAGE_STEAL_TOKEN')">ROBAR FICHA (4 <span class="neon-chip"
-                        style="width:10px;height:10px;"></span>)</button>
-                <button class="spec-btn" id="btn-sabotage-steal-turn"
-                    style="background:var(--bg); border-color:#ff00ff; color:#ff00ff;"
-                    onclick="send('SABOTAGE_STEAL_TURN')">ROBAR TURNO (4 <span class="neon-chip"
-                        style="width:10px;height:10px;"></span>)</button>
-                <button class="spec-btn" id="btn-sabotage-blackhole"
-                    style="background:var(--bg); border-color:#9900ff; color:#9900ff; grid-column: span 2;"
-                    onclick="send('SABOTAGE_BLACKHOLE')">AGUJERO NEGRO (5 <span class="neon-chip"
-                        style="width:10px;height:10px;"></span>)</button>
-            </div>
-        </div>
-
-        <div id="king-mode-ui"
-            style="display: none; width: 100%; max-width: 340px; margin-top: 10px; text-align: center; flex-direction: column; gap: 10px;">
-        </div>
-
-        <div class="card-container" id="normal-card-container">
-            <div id="card" class="card">
-                <div class="card-face card-front">
-                    <div
-                        style="font-family:'Bungee';color:var(--neon);opacity:0.2;font-size:1.8em;text-align:center;line-height:0.95;word-wrap:break-word;width:100%">
-                        CHRONO<br>BEATS</div>
+            <div class="card-container" id="normal-card-container">
+                <div id="card" class="card">
+                    <div class="card-face card-front">
+                        <div style="font-family:'Bungee';color:var(--neon);opacity:0.2;font-size:1.8em;text-align:center;line-height:0.95;word-wrap:break-word;width:100%">CHRONO<br>BEATS</div>
+                    </div>
+                    <div class="card-face card-back">
+                        <div id="c-artist">ARTISTA</div>
+                        <div id="c-song">TÍTULO</div>
+                        <div id="c-year">1999</div>
+                    </div>
                 </div>
-                <div class="card-face card-back">
-                    <div id="c-artist">ARTISTA</div>
-                    <div id="c-song">TÍTULO</div>
-                    <div id="c-year">1999</div>
+                <div id="wait-msg">ESPERANDO SIGUIENTE TRACK...</div>
+            </div>
+
+            <div class="collection-summary" id="normal-collection">
+                <h4>MI CRONOLOGÍA</h4>
+                <div id="my-cards-list" class="vertical-cards"></div>
+            </div>
+        </div>
+
+        <!-- PESTAÑA SABOTAJE -->
+        <div id="tab-sabotage" class="tab-content">
+            <h2 style="font-family:'Bungee'; color:var(--neon); margin-top:20px;">SABOTAJE</h2>
+            
+            <!-- Mando de Reproducción (Solo Activo) -->
+            <div class="music-controls" id="m-ctrl">
+                <button class="ctrl-btn btn-play" onclick="send('PLAY')">PLAY</button>
+                <button class="ctrl-btn" onclick="send('PAUSE')">PAUSE</button>
+                <button class="ctrl-btn btn-stop" onclick="send('STOP')">STOP</button>
+            </div>
+
+            <div class="skip-controls" id="s-ctrl">
+                <button class="sk-btn sk-fwd" id="btn-skip-p5" onclick="send('SKIP',5)">+5s</button>
+                <button class="sk-btn sk-fwd" onclick="send('SKIP',10)">+10s</button>
+                <button class="sk-btn sk-fwd" id="btn-skip-p20" onclick="send('SKIP',20)">+20s</button>
+                <button class="sk-btn sk-back" id="btn-skip-m5" onclick="send('SKIP',-5)">-5s</button>
+                <button class="sk-btn sk-back" onclick="send('SKIP',-10)">-10s</button>
+                <button class="sk-btn sk-back" id="btn-skip-m20" onclick="send('SKIP',-20)">-20s</button>
+            </div>
+
+            <!-- Acciones Especiales (Activo) -->
+            <div class="special-actions" id="special-ctrl" style="display:none; flex-direction:column; gap:10px; width:100%; max-width:340px;">
+                <button class="spec-btn" id="btn-autowin" onclick="send('AUTO_WIN')">COMPRAR CARTA (3 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
+                <button class="spec-btn btn-error-track" id="btn-error-track" onclick="send('SYSTEM_ERROR_TRACK')" style="display:none;">ERROR VIDEO</button>
+                <button class="spec-btn" id="btn-reload" onclick="send('RELOAD_SONG')">CAMBIAR CANCIÓN (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
+            </div>
+
+            <!-- Cuadrícula de Sabotajes (Rivales) -->
+            <div class="special-actions" id="sabotage-ctrl" style="display:none; width:100%; max-width:340px; margin-top:10px;">
+                <div id="sabotage-grid">
+                    <button class="spec-btn" id="btn-sabotage-mute" style="background:var(--bg); border-color:#ff0055; color:#ff0055;" onclick="send('SABOTAGE_MUTE')">MUTE 15s (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
+                    <button class="spec-btn" id="btn-sabotage-bet" style="background:var(--bg); border-color:#00f2fe; color:#00f2fe;" onclick="send('BET_AGAINST_ACTIVE')">¡NI DE COÑA! (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
+                    <button class="spec-btn" id="btn-sabotage-buzzer" style="background:var(--bg); border-color:#00ff00; color:#00ff00;" onclick="send('SABOTAGE_BUZZER')">¡ZUMBIDO! (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
+                    <button class="spec-btn" id="btn-sabotage-veto" style="background:var(--bg); border-color:#ff8800; color:#ff8800;" onclick="send('SABOTAGE_VETO')">VETO CAMBIAR (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
+                    <button class="spec-btn" id="btn-sabotage-skip" style="background:var(--bg); border-color:#ff00ff; color:#ff00ff;" onclick="send('SABOTAGE_FORCE_SKIP')">FORZAR SALTO (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
+                    <button class="spec-btn" id="btn-sabotage-panic" style="background:var(--bg); border-color:#ff0000; color:#ff0000;" onclick="send('SABOTAGE_PANIC')">PÁNICO 10s (2 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
+                    <button class="spec-btn" id="btn-sabotage-fog" style="background:var(--bg); border-color:#aaaaaa; color:#aaaaaa;" onclick="send('SABOTAGE_FOG')">NIEBLA TIEMPO (2 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
+                    <button class="spec-btn" id="btn-sabotage-steal-token" style="background:var(--bg); border-color:#ffff00; color:#ffff00;" onclick="send('SABOTAGE_STEAL_TOKEN')">ROBAR FICHA (4 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
+                    <button class="spec-btn" id="btn-sabotage-steal-turn" style="background:var(--bg); border-color:#ff00ff; color:#ff00ff;" onclick="send('SABOTAGE_STEAL_TURN')">ROBAR TURNO (4 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
+                    <button class="spec-btn" id="btn-sabotage-blackhole" style="background:var(--bg); border-color:#9900ff; color:#9900ff; grid-column: span 2;" onclick="send('SABOTAGE_BLACKHOLE')">AGUJERO NEGRO (5 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
                 </div>
             </div>
-            <div id="wait-msg">ESPERANDO SIGUIENTE TRACK...</div>
+            
+            <!-- Rey (Global dentro de sabotaje por ahora o oculto) -->
+            <div id="king-mode-ui" style="display: none; width: 100%; max-width: 340px; margin-top: 10px; text-align: center; flex-direction: column; gap: 10px;"></div>
         </div>
 
-        <div class="collection-summary" id="normal-collection">
-            <h4>MIS CARTAS</h4>
-            <div id="my-cards-list" class="vertical-cards"></div>
+        <!-- PESTAÑA MERCADO -->
+        <div id="tab-market" class="tab-content">
+            <h2 style="font-family:'Bungee'; color:var(--gold); margin-top:20px;">MERCADO NEGRO</h2>
+            <div style="display:flex; flex-direction:column; gap:15px; width:100%; max-width:340px; margin-top:20px;">
+                <p style="color:#666; font-size:0.8em; text-align:center;">Próximamente más ventajas...</p>
+                <button class="btn" style="background:#222; color:#555; border:1px solid #333;" disabled>COMODÍN 50/50 (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
+                <button class="btn" style="background:#222; color:#555; border:1px solid #333;" disabled>PISTA DÉCADA (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
+                <button class="btn" style="background:#222; color:#555; border:1px solid #333;" disabled>ESCUDO PROTECTOR (3 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
+            </div>
+        </div>
+
+        <!-- BARRA DE PESTAÑAS (Fija al fondo) -->
+        <div class="tab-bar">
+            <div class="tab-btn active" onclick="switchTab('tab-game', this)">
+                <span style="font-size:1.4em">🎸</span>
+                <span>JUEGO</span>
+            </div>
+            <div class="tab-btn" onclick="switchTab('tab-sabotage', this)">
+                <span style="font-size:1.4em">💀</span>
+                <span>SABOTAJE</span>
+            </div>
+            <div class="tab-btn" onclick="switchTab('tab-market', this)">
+                <span style="font-size:1.4em">💰</span>
+                <span>MERCADO</span>
+            </div>
         </div>
     </div>
 
@@ -1549,6 +1592,13 @@
                 }
             }
         });
+
+        function switchTab(tabId, el) {
+            document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabId).style.display = 'flex';
+            el.classList.add('active');
+        }
     </script>
     <script>
         if ('serviceWorker' in navigator) {

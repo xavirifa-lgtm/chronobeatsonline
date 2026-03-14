@@ -7,7 +7,7 @@
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon-192.png">
     <meta name="theme-color" content="#00f2ff">
-    <title>HOST - CHRONOBEATS DIGITAL</title>
+    <title>HOST - CHRONOBEATS MIX</title>
     <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Montserrat:wght@400;700&display=swap"
         rel="stylesheet">
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js">        ,
@@ -567,65 +567,25 @@
         }
         initPeer();
 
-        var urlParams = new URLSearchParams(window.location.search);
-        var mixParam = urlParams.get('mix') || 'orig,anime,movies';
-        var mixTypes = mixParam.split(',');
-        var fetchPromises = [];
-
-        if (mixTypes.includes('orig')) {
-            fetchPromises.push(fetch('lista_final.txt?v=' + new Date().getTime()).then(function (r) { return r.text() }).then(function (t) { return { text: t, type: 'orig', color: '#00f2ff' } }));
-        }
-        if (mixTypes.includes('anime')) {
-            fetchPromises.push(fetch('lista_final_anime.txt?v=' + new Date().getTime()).then(function (r) { return r.text() }).then(function (t) { return { text: t, type: 'anime', color: '#ff00cc' } }));
-        }
-        if (mixTypes.includes('movies')) {
-            fetchPromises.push(fetch('lista_final_pelis.txt?v=' + new Date().getTime()).then(function (r) { return r.text() }).then(function (t) { return { text: t, type: 'movies', color: '#ffaa00' } }));
-        }
-
-        Promise.all(fetchPromises).then(function (results) {
-            var rawSongs = [];
+        fetch('lista_final.txt?v=' + new Date().getTime()).then(function (r) { return r.text() }).then(function (t) {
+            var lines = t.replace(/\r/g, '').split('\n');
             var uniqueIds = new Set();
             var playedIds = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]');
-            results.forEach(function (res) {
-                var categorySongs = [];
-                var lines = res.text.replace(/\r/g, '').split('\n');
-                lines.forEach(function (l, index) {
-                    var p = l.split('|');
-                    var m = p[3] ? p[3].match(/[?&]v=([^&#]+)|youtu\.be\/([^?&#]+)/) : null;
-                    if (m) {
-                        var currentId = (m[1] || m[2]);
-                        if (!uniqueIds.has(currentId) && !playedIds.includes(currentId)) {
-                            uniqueIds.add(currentId);
-                            categorySongs.push({
-                                artist: p[0],
-                                song: p[1],
-                                year: p[2],
-                                id: currentId,
-                                line: index + 1,
-                                type: res.type,
-                                color: res.color
-                            });
-                        }
-                    }
-                });
-
-                // Shuffle the songs inside this category before taking a chunk
-                for (let i = categorySongs.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [categorySongs[i], categorySongs[j]] = [categorySongs[j], categorySongs[i]];
-                }
-
-                // Take a maximum of 60 songs from this category to equalize proportions
-                var selectedSongs = categorySongs.slice(0, 60);
-                rawSongs = rawSongs.concat(selectedSongs);
-            });
-            if(rawSongs.length < 15) { localStorage.removeItem('CB_PlayedSongs'); alert('°Enhorabuena! HabÈis reventado la base de datos entera. Se ha reseteado la memoria de canciones vistas para esta sala para que pod·is seguir jugando. Recargando partida...'); window.location.reload(); return; }
-            // Fisher-Yates shuffle
-            for (let i = rawSongs.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [rawSongs[i], rawSongs[j]] = [rawSongs[j], rawSongs[i]];
-            }
-            songs = rawSongs;
+            songs = lines.map(function (l, index) {
+                var p = l.split('|');
+                var m = p[3] ? p[3].match(/[?&]v=([^&#]+)|youtu\.be\/([^?&#]+)/) : null;
+                return {
+                    artist: p[0],
+                    song: p[1],
+                    year: p[2],
+                    id: m ? (m[1] || m[2]) : null,
+                    line: index + 1 // Guardar n√∫mero de fila original
+                };
+            }).filter(function (s) {
+                if (!s.id || uniqueIds.has(s.id) || playedIds.includes(s.id)) return false;
+                uniqueIds.add(s.id);
+                return true;
+            }).sort(function () { return Math.random() - 0.5; });
         });
 
         function updateLobby() {
@@ -743,14 +703,7 @@
             // --- FIN MODO REY CHECK ---
 
             var s = songs[currentSongIdx];
-            if (s && s.color) document.documentElement.style.setProperty('--neon', s.color);
-
-            var typeText = "????";
-            if (s && s.type === 'anime') typeText = "ADIVINA LA SERIE";
-            else if (s && s.type === 'movies') typeText = "ADIVINA LA PEL√çCULA";
-            else typeText = "ADIVINA EL GRUPO";
-
-            document.getElementById('ui-card-artist').innerText = typeText;
+            document.getElementById('ui-card-artist').innerText = "????";
             document.getElementById('ui-card-song').innerText = "????";
             document.getElementById('ui-card-year').innerText = "????";
             document.getElementById('btn-reveal-host').style.display = 'block';
@@ -1135,6 +1088,16 @@
                     if (p && p.id === players[activePlayerIdx].id && !slotOccupiedByBet && activeGuess === null) {
                         console.log("[OK] Marca del activo fijada en", valNum);
                         activeGuess = valNum;
+
+                        // STOP PANIC TIMER IF ACTIVE
+                        if (panicActive) {
+                            clearInterval(panicInterval);
+                            panicInterval = null;
+                            panicActive = false;
+                            panicTimer = 0;
+                            console.log("[PANIC] Temporizador detenido por respuesta r√°pida.");
+                        }
+
                         syncState();
                     } else {
                         console.log("[FAIL] Guess rechazado. ¬øYa hay marca?", activeGuess !== null);
@@ -1537,11 +1500,8 @@
                     currentBets: currentBets,
                     activeGuess: activeGuess,
                     kingOptions: kingOptions,
-                    kingOptions: kingOptions,
                     cheatsEnabled: cheatsEnabled,
-                    turnPhase: turnPhase,
-                    currentColor: songs[currentSongIdx] ? songs[currentSongIdx].color : '#00ff00',
-                    currentType: songs[currentSongIdx] ? songs[currentSongIdx].type : 'mix'
+                    turnPhase: turnPhase
                 };
                 try {
                     if (connections[id] && connections[id].open) {

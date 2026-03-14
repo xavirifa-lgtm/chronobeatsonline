@@ -1088,6 +1088,16 @@
                     if (p && p.id === players[activePlayerIdx].id && !slotOccupiedByBet && activeGuess === null) {
                         console.log("[OK] Marca del activo fijada en", valNum);
                         activeGuess = valNum;
+
+                        // STOP PANIC TIMER IF ACTIVE
+                        if (panicActive) {
+                            clearInterval(panicInterval);
+                            panicInterval = null;
+                            panicActive = false;
+                            panicTimer = 0;
+                            console.log("[PANIC] Temporizador detenido por respuesta rápida.");
+                        }
+
                         syncState();
                     } else {
                         console.log("[FAIL] Guess rechazado. ¿Ya hay marca?", activeGuess !== null);
