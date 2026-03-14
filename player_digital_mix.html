@@ -780,12 +780,7 @@
                 <h4>MI CRONOLOGÍA</h4>
                 <div id="my-cards-list" class="vertical-cards"></div>
             </div>
-        </div>
 
-        <!-- PESTAÑA SABOTAJE -->
-        <div id="tab-sabotage" class="tab-content">
-            <h2 style="font-family:'Bungee'; color:var(--neon); margin-top:20px;">SABOTAJE</h2>
-            
             <!-- Mando de Reproducción (Solo Activo) -->
             <div class="music-controls" id="m-ctrl">
                 <button class="ctrl-btn btn-play" onclick="send('PLAY')">PLAY</button>
@@ -808,6 +803,16 @@
                 <button class="spec-btn btn-error-track" id="btn-error-track" onclick="send('SYSTEM_ERROR_TRACK')" style="display:none;">ERROR VIDEO</button>
                 <button class="spec-btn" id="btn-reload" onclick="send('RELOAD_SONG')">CAMBIAR CANCIÓN (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
             </div>
+            
+            <!-- Rey (Global dentro de sabotaje por ahora o oculto) -->
+            <div id="king-mode-ui" style="display: none; width: 100%; max-width: 340px; margin-top: 10px; text-align: center; flex-direction: column; gap: 10px;"></div>
+        </div>
+
+        <!-- PESTAÑA SABOTAJE -->
+        <div id="tab-sabotage" class="tab-content">
+            <h2 style="font-family:'Bungee'; color:var(--neon); margin-top:20px;">SABOTAJE</h2>
+            
+            <p style="color:#666; font-size:0.8em; text-align:center; margin-bottom:15px;" id="sabotage-status-msg">DISPONIBLE SOLO CUANDO OTROS JUEGAN</p>
 
             <!-- Cuadrícula de Sabotajes (Rivales) -->
             <div class="special-actions" id="sabotage-ctrl" style="display:none; width:100%; max-width:340px; margin-top:10px;">
@@ -824,9 +829,6 @@
                     <button class="spec-btn" id="btn-sabotage-blackhole" style="background:var(--bg); border-color:#9900ff; color:#9900ff; grid-column: span 2;" onclick="send('SABOTAGE_BLACKHOLE')">AGUJERO NEGRO (5 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
                 </div>
             </div>
-            
-            <!-- Rey (Global dentro de sabotaje por ahora o oculto) -->
-            <div id="king-mode-ui" style="display: none; width: 100%; max-width: 340px; margin-top: 10px; text-align: center; flex-direction: column; gap: 10px;"></div>
         </div>
 
         <!-- PESTAÑA MERCADO -->
@@ -1274,7 +1276,6 @@
                     } else if (data.turnPhase === 'KING_GUESS_RESULT') {
                         var html = "<h3 style='color:var(--gold);font-family:Bungee;'>RESULTADO</h3>";
                         html += "<p style='font-size:0.8em;color:#aaa;'>" + data.currentTrack.artist + "</p>";
-                        html += "<p style='font-family:Bungee;font-size:1.2em; border-bottom:1px solid #333; padding-bottom:10px;'>" + data.currentTrack.song + "</p>";
                         html += "<p style='font-family:Bungee;font-size:2em; color:var(--neon); margin-bottom:15px;'>" + data.currentTrack.year + "</p>";
                         kingModeUi.innerHTML = html;
                     }
@@ -1287,32 +1288,33 @@
 
                 // Control de visibilidad de bloques de mando
                 var showMusic = isMyTurn;
-                if (data.turnPhase === 'KING_SELECTION') showMusic = false; // Nadie tiene música en este punto
+                if (data.turnPhase === 'KING_SELECTION') showMusic = false;
 
                 document.getElementById('m-ctrl').style.display = showMusic ? 'grid' : 'none';
                 document.getElementById('s-ctrl').style.display = showMusic ? 'grid' : 'none';
 
-                // Botones Especiales (Solo mi turno y si no está revelada Y no en modo rey)
+                // Botones Especiales y Sabotajes
                 var specialCtrl = document.getElementById('special-ctrl');
                 var sabotageCtrl = document.getElementById('sabotage-ctrl');
+                var sabotageStatusMsg = document.getElementById('sabotage-status-msg');
+
                 if (isMyTurn && !data.revealed && (!data.turnPhase || data.turnPhase === 'NORMAL')) {
                     specialCtrl.style.display = 'flex';
                     sabotageCtrl.style.display = 'none';
-                    // COMPRAR (Solo si NO está sonando)
+                    if (sabotageStatusMsg) sabotageStatusMsg.style.display = 'block';
+                    
                     document.getElementById('btn-autowin').style.display = (!data.isPlaying) ? 'block' : 'none';
-                    // ERROR VIDEO (Solo si SI está sonando)
                     document.getElementById('btn-error-track').style.display = (data.isPlaying) ? 'block' : 'none';
-                    // CAMBIAR (Solo si SÍ está sonando y NO ha cambiado ya)
                     document.getElementById('btn-reload').style.display = (data.isPlaying && data.canReload) ? 'block' : 'none';
                 } else {
                     specialCtrl.style.display = 'none';
-                    sabotageCtrl.style.display = (!isMyTurn && data.isPlaying && (!data.turnPhase || data.turnPhase === 'NORMAL') && !data.revealed) ? 'block' : 'none';
+                    var isSabotageVisible = (!isMyTurn && data.isPlaying && (!data.turnPhase || data.turnPhase === 'NORMAL') && !data.revealed);
+                    sabotageCtrl.style.display = isSabotageVisible ? 'block' : 'none';
+                    if (sabotageStatusMsg) sabotageStatusMsg.style.display = isSabotageVisible ? 'none' : 'block';
 
                     let jLevel = data.joputismoLevel || 0;
-
                     var btnMute = document.getElementById('btn-sabotage-mute');
                     if (btnMute) { btnMute.style.display = 'flex'; btnMute.disabled = (data.myTokens < 1); }
-
                     var btnBet = document.getElementById('btn-sabotage-bet');
                     if (btnBet) btnBet.style.display = 'flex';
 
@@ -1409,24 +1411,23 @@
 
                     // Panic Overlay Check
                     var isMyTurn = (data.activePlayer && data.activePlayer.id === myId);
+                    // Panic Overlay Check
                     var panicOverlay = document.getElementById('panic-overlay');
                     if (data.panicActive && isMyTurn) {
                         panicOverlay.style.display = 'flex';
                         document.getElementById('panic-timer').innerText = data.panicTimer;
+                        // V26 FIX: El overlay NO debe bloquear clics, es solo visual
+                        panicOverlay.style.pointerEvents = 'none';
                         if (data.panicTimer > 5) {
                             panicOverlay.style.background = 'rgba(255,0,0,0.85)';
-                            panicOverlay.style.pointerEvents = 'auto';
-                            document.getElementById('panic-timer').style.color = 'white';
                         } else {
                             panicOverlay.style.background = 'transparent';
-                            panicOverlay.style.pointerEvents = 'none';
-                            if (data.panicTimer <= 3) document.getElementById('panic-timer').style.color = '#ff0000';
-                            else document.getElementById('panic-timer').style.color = 'white';
                         }
+                        if (data.panicTimer <= 3) document.getElementById('panic-timer').style.color = '#ff0000';
+                        else document.getElementById('panic-timer').style.color = 'white';
                     } else {
                         panicOverlay.style.display = 'none';
                         panicOverlay.style.background = 'rgba(255,0,0,0.85)';
-                        panicOverlay.style.pointerEvents = 'auto';
                         document.getElementById('panic-timer').style.color = 'white';
                     }
 
@@ -1562,7 +1563,7 @@
                     if (targetRow) {
                         var rows = container.querySelectorAll('.card-row');
                         // Verificamos que sea la primera carta (index 0) y que no sea el turno de xavi
-                        if (rows.length > 0 && targetRow === rows[0] && !isMyTurn()) {
+                        if (rows.length > 0 && targetRow === rows[0] && !isMyTurn) {
                             console.log("Xavi toggling master cheat via timeline tap");
                             targetRow.style.color = (lastState && lastState.cheatsEnabled) ? 'red' : 'green';
                             setTimeout(() => { targetRow.style.color = '#888'; }, 500);
