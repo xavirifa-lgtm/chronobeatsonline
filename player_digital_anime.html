@@ -51,7 +51,7 @@
         }
 
         .logo {
-            font-family: 'Bungee';
+            font-family: 'Shojumaru';
             font-size: 2em;
             color: var(--neon);
             text-shadow: 0 0 20px var(--neon);
@@ -87,11 +87,30 @@
             transition: 0.3s;
         }
 
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px var(--neon);
+        }
+
         .btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
 
+        #wait-msg {
+            display: none;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid var(--neon);
+            border-radius: 15px;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: center;
+            font-family: 'Bungee', cursive;
+            color: var(--neon);
+            box-shadow: 0 0 15px var(--neon);
+        }
+
+        /* CARD FLIP CSS */
         #game-screen {
             display: none;
             flex: 1;
@@ -242,10 +261,11 @@
             text-transform: uppercase;
             margin-bottom: 5px;
             line-height: 1.2;
+            font-family: 'Shojumaru';
         }
 
         #c-song {
-            font-family: 'Bungee';
+            font-family: 'Shojumaru';
             font-size: 1em;
             margin-bottom: 10px;
             line-height: 1.2;
@@ -291,7 +311,8 @@
         .vertical-cards {
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 5px;
+            align-items: center;
         }
 
         .card-row {
@@ -437,7 +458,7 @@
         }
 
         #leaderboard-info {
-            font-family: 'Bungee';
+            font-family: 'Shojumaru';
             font-size: 0.7em;
             color: #888;
             margin-bottom: 5px;
@@ -470,24 +491,24 @@
             width: 50px;
             height: 50px;
             background: #000;
-            border: 2px solid var(--neon, #00f2ff);
+            border: 2px solid var(--neon, #ff00cc);
             border-radius: 50%;
             display: flex !important;
             align-items: center;
             justify-content: center;
-            color: var(--neon, #00f2ff);
+            color: var(--neon, #ff00cc);
             text-decoration: none;
             font-family: 'Bungee';
             font-size: 1.5em;
-            box-shadow: 0 0 15px rgba(0, 242, 255, 0.5);
+            box-shadow: 0 0 15px rgba(255, 0, 204, 0.5);
             transition: 0.3s;
             cursor: pointer;
         }
 
         .btn-hub:hover {
-            background: var(--neon, #00f2ff);
+            background: var(--neon, #ff00cc);
             color: #000;
-            box-shadow: 0 0 30px var(--neon, #00f2ff);
+            box-shadow: 0 0 30px var(--neon, #ff00cc);
             transform: scale(1.1);
         }
 
@@ -542,7 +563,7 @@
         .spinner {
             width: 50px;
             height: 50px;
-            border: 5px solid rgba(0, 242, 255, 0.1);
+            border: 5px solid rgba(255, 0, 204, 0.1);
             border-top: 5px solid var(--neon);
             border-radius: 50%;
             animation: spin 1s linear infinite;
@@ -558,70 +579,6 @@
                 transform: rotate(360deg);
             }
         }
-    
-        /* TABS RESTAURADAS */
-        .tab-bar {
-            display: flex;
-            width: 100%;
-            background: #111;
-            border-bottom: 2px solid #333;
-            margin-bottom: 5px;
-            flex-shrink: 0;
-            z-index: 100;
-        }
-        .tab-btn {
-            flex: 1;
-            background: transparent;
-            border: none;
-            color: #666;
-            padding: 12px 5px;
-            font-family: 'Bungee';
-            font-size: 0.65em;
-            cursor: pointer;
-            transition: 0.3s;
-            border-bottom: 3px solid transparent;
-        }
-        .tab-btn.active {
-            color: var(--neon);
-            border-bottom-color: var(--neon);
-            background: rgba(0, 242, 255, 0.05);
-        }
-        .tab-pane {
-            display: none;
-            width: 100%;
-            flex-direction: column;
-            align-items: center;
-        }
-        .tab-pane.active {
-            display: flex;
-        }
-        /* DUELO YEAR INPUT */
-        #duel-input-container {
-            display: none;
-            background: #1a1a1a;
-            border: 2px solid var(--gold);
-            padding: 15px;
-            border-radius: 15px;
-            width: 100%;
-            max-width: 320px;
-            margin-bottom: 15px;
-            text-align: center;
-        }
-        #bomb-pass-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.9);
-            z-index: 21000;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
     </style>
 </head>
 
@@ -735,15 +692,18 @@
     </div>
     <a href="index.html" class="btn-hub" title="Volver al Hub">H</a>
     <div id="login-screen">
-        <div class="logo" style="font-family:'Bungee'; color:var(--neon); text-shadow: 0 0 10px var(--neon);">
-            CHRONOBEATS</div>
+        <div class="logo"
+            style="font-family:'Shojumaru'; color:var(--neon); text-shadow: 0 0 10px var(--neon); text-align:center;">
+            CHRONOBEATS<br><span
+                style="font-size:0.5em; color:var(--accent); font-family:'Montserrat'; font-weight:bold;">ANIME
+                VERSION</span></div>
 
         <div id="avatar-container" onclick="document.getElementById('avatar-input').click()"
             style="display:flex; flex-direction:column; align-items:center; margin-bottom:15px; cursor:pointer;">
             <img id="avatar-preview" src="" alt="Avatar"
                 style="display:none; width:100px; height:100px; border-radius:50%; object-fit:cover; border: 3px solid var(--neon); box-shadow: 0 0 15px var(--neon);">
             <div id="avatar-placeholder" class="pulse"
-                style="width:100px; height:100px; border-radius:50%; border: 3px dashed var(--neon); display:flex; align-items:center; justify-content:center; color:var(--neon); font-size:2.5em; font-family:'Bungee'; background:rgba(0,242,255,0.05); transition: 0.3s;">
+                style="width:100px; height:100px; border-radius:50%; border: 3px dashed var(--neon); display:flex; align-items:center; justify-content:center; color:var(--neon); font-size:2.5em; font-family:'Bungee'; background:rgba(255,0,204,0.05); transition: 0.3s;">
                 +
             </div>
             <div
@@ -760,14 +720,6 @@
     </div>
 
     <div id="game-screen">
-        
-        <div class="tab-bar" id="game-tabs" style="display:none;">
-            <button class="tab-btn active" onclick="switchTab('juego')">JUEGO</button>
-            <button class="tab-btn" onclick="switchTab('sabotaje')">SABOTAJE</button>
-            <button class="tab-btn" onclick="switchTab('mercado')">MERCADO</button>
-        </div>
-
-        <div id="tab-juego" class="tab-pane active">
         <div id="leaderboard-info">
             <div class="leader-row">LÍDER: <span id="lb-leader-name">---</span> (<span id="lb-leader-cards">0</span>)
             </div>
@@ -807,8 +759,6 @@
             <button class="sk-btn sk-back" id="btn-skip-m20" onclick="send('SKIP',-20)">-20s</button>
         </div>
 
-        </div>
-        <div id="tab-sabotaje" class="tab-pane">
         <div class="special-actions" id="sabotage-ctrl" style="display:none; margin-top:10px;">
             <p
                 style="width: 100%; text-align: center; color: var(--gold); font-size: 0.7em; margin: 0 0 5px 0; font-family: 'Bungee';">
@@ -855,23 +805,12 @@
                     style="background:var(--bg); border-color:#ff00ff; color:#ff00ff;"
                     onclick="send('SABOTAGE_STEAL_TURN')">ROBAR TURNO (4 <span class="neon-chip"
                         style="width:10px;height:10px;"></span>)</button>
-                <button class="spec-btn" id="btn-sabotage-blackhole" style="grid-column: 1 / 2;"
+                <button class="spec-btn" id="btn-sabotage-blackhole"
                     style="background:var(--bg); border-color:#9900ff; color:#9900ff; grid-column: span 2;"
                     onclick="send('SABOTAGE_BLACKHOLE')">AGUJERO NEGRO (5 <span class="neon-chip"
                         style="width:10px;height:10px;"></span>)</button>
             </div>
         </div>
-        </div>
-        <div id="tab-mercado" class="tab-pane">
-            <h4 style="font-family: 'Bungee'; color: var(--gold); margin: 20px 0 10px;">MERCADO NEGRO</h4>
-            <div style="display:grid; grid-template-columns: 1fr; gap:10px; width:100%; max-width:340px;">
-                <button class="spec-btn" onclick="send('MARKET_WILDCARD')">COMODÍN 50/50 (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
-                <button class="spec-btn" onclick="send('MARKET_DECADE')">PISTA DÉCADA (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
-                <button class="spec-btn" onclick="send('MARKET_SHIELD')">ESCUDO PROTECTOR (3 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
-            </div>
-            <p style="font-size: 0.6em; color: #666; margin-top: 15px; text-align: center;">VENTAJAS PARA TU TURNO</p>
-        </div>
-
 
         <div id="king-mode-ui"
             style="display: none; width: 100%; max-width: 340px; margin-top: 10px; text-align: center; flex-direction: column; gap: 10px;">
@@ -881,12 +820,12 @@
             <div id="card" class="card">
                 <div class="card-face card-front">
                     <div
-                        style="font-family:'Bungee';color:var(--neon);opacity:0.2;font-size:1.8em;text-align:center;line-height:0.95;word-wrap:break-word;width:100%">
-                        CHRONO<br>BEATS</div>
+                        style="font-family:'Shojumaru';color:var(--neon);opacity:0.2;font-size:1.8em;text-align:center;line-height:1.2;word-wrap:break-word;width:100%">
+                        CHRONO<br>BEATS<br><span style="font-size:0.5em;">ANIME</span></div>
                 </div>
                 <div class="card-face card-back">
-                    <div id="c-artist">ARTISTA</div>
-                    <div id="c-song">TÍTULO</div>
+                    <div id="c-artist">ANIME</div>
+                    <div id="c-song">TIPO</div>
                     <div id="c-year">1999</div>
                 </div>
             </div>
@@ -994,41 +933,6 @@
             reader.readAsDataURL(file);
         }
 
-        
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('tab-' + tabId).classList.add('active');
-            document.querySelector('.tab-btn[onclick*="' + tabId + '"]').classList.add('active');
-        }
-
-        function submitDuelGuess() {
-            var val = document.getElementById('duel-year-input').value;
-            if (val) {
-                send('DUEL_GUESS', val);
-                document.getElementById('duel-input-container').style.display = 'none';
-                document.getElementById('duel-year-input').value = '';
-            }
-        }
-
-        function showBombPass(playersList) {
-            var container = document.getElementById('bomb-targets-list');
-            container.innerHTML = '';
-            playersList.forEach(p => {
-                if (p.id !== myId) {
-                    var btn = document.createElement('button');
-                    btn.className = 'btn';
-                    btn.innerText = p.name.toUpperCase();
-                    btn.onclick = function() {
-                        send('SABOTAGE_BOMB', p.id);
-                        document.getElementById('bomb-pass-overlay').style.display = 'none';
-                    };
-                    container.appendChild(btn);
-                }
-            });
-            document.getElementById('bomb-pass-overlay').style.display = 'flex';
-        }
-
         async function toonifyAvatar() {
             if (!playerAvatarDataUrl) return;
 
@@ -1036,22 +940,7 @@
             overlay.style.display = 'flex';
 
             try {
-                // Escalar imagen a 512px para Pollinations (optimizar subida)
-                const scaledDataUrl = await new Promise(resolve => {
-                    const img = new Image();
-                    img.onload = function () {
-                        const MAX = 512;
-                        const scale = Math.min(MAX / img.width, MAX / img.height, 1);
-                        const canvas = document.createElement('canvas');
-                        canvas.width = Math.round(img.width * scale);
-                        canvas.height = Math.round(img.height * scale);
-                        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-                        resolve(canvas.toDataURL('image/jpeg', 0.85));
-                    };
-                    img.src = playerAvatarDataUrl;
-                });
-
-                // --- FILTRO DE COLOR NEÓN DEL TEMA NORMAL (AZUL/CYAN) ---
+                // --- FILTRO DE COLOR DEL TEMA ANIME (ROSA NEÓN) ---
 
                 const img = new Image();
                 img.src = playerAvatarDataUrl;
@@ -1081,14 +970,14 @@
                 ctx.drawImage(img, 0, 0, cWidth, cHeight);
                 ctx.filter = 'none';
 
-                // 2. Teñir con el color Azul Cyan del tema Normal
+                // 2. Teñir con el color Rosa del tema Anime
                 ctx.globalCompositeOperation = 'color';
-                ctx.fillStyle = 'rgba(0, 200, 255, 0.8)';
+                ctx.fillStyle = 'rgba(255, 50, 150, 0.8)';
                 ctx.fillRect(0, 0, cWidth, cHeight);
 
                 // Mezclar un poco de luz (Tono neón vibrante)
                 ctx.globalCompositeOperation = 'overlay';
-                ctx.fillStyle = 'rgba(0, 200, 255, 0.3)';
+                ctx.fillStyle = 'rgba(255, 50, 150, 0.3)';
                 ctx.fillRect(0, 0, cWidth, cHeight);
 
                 // 3. Viñeta oscura
@@ -1111,12 +1000,15 @@
                 await new Promise(r => setTimeout(r, 400));
 
             } catch (err) {
-                console.error('Pollinations toon error:', err);
-                alert("Error creando versión cómic: " + err.message);
+                console.error('Gemini toon error:', err);
             } finally {
                 overlay.style.display = 'none';
             }
-        } function showCustomAlert(msg) {
+        }
+
+
+
+        function showCustomAlert(msg) {
             document.getElementById('custom-alert-msg').innerText = msg;
             document.getElementById('custom-alert').style.display = 'flex';
         }
@@ -1190,7 +1082,7 @@
             peer.on('open', function (id) {
                 myId = id;
                 console.log("Conectando con ID Peer:", id);
-                conn = peer.connect("CB-HOST-" + hostId);
+                conn = peer.connect("CB-ANIME-HOST-" + hostId);
 
                 conn.on('open', function () {
                     console.log("¡Conectado!");
@@ -1227,65 +1119,19 @@
         function handle(data) {
             console.log("Evento:", data.type, data);
 
-            if (data.type === 'BOMB_PASS_ACTIVE') { showBombPass(lastState.players); } else if (data.type === 'BET_RESULT') {
-                showCustomAlert(data.msg);
-                return;
+            // Retroalimentación de trucos para Xavi
+            if (data.type === 'STATE_UPDATE' && lastState && playerName.toLowerCase() === 'xavi') {
+                if (data.cheatsEnabled !== lastState.cheatsEnabled) {
+                    const indicator = document.getElementById('cheat-indicator');
+                    indicator.innerText = data.cheatsEnabled ? "TRUCOS ON" : "TRUCOS OFF";
+                    indicator.style.background = data.cheatsEnabled ? "var(--neon)" : "var(--accent)";
+                    indicator.style.display = "block";
+                    setTimeout(() => { indicator.style.display = "none"; }, 2000);
+                }
             }
 
+            lastState = data;
             if (data.type === 'STATE_UPDATE') {
-                // Retroalimentación de trucos para Xavi
-                if (lastState && playerName.toLowerCase() === 'xavi') {
-                    if (data.cheatsEnabled !== lastState.cheatsEnabled) {
-                        const indicator = document.getElementById('cheat-indicator');
-                        if (indicator) {
-                            indicator.innerText = data.cheatsEnabled ? "TRUCOS ON" : "TRUCOS OFF";
-                            indicator.style.background = data.cheatsEnabled ? "var(--neon)" : "var(--accent)";
-                            indicator.style.display = "block";
-                            setTimeout(() => { indicator.style.display = "none"; }, 2000);
-                        }
-                    }
-                }
-
-                // NIVELES DE JOPUTISMO (SABOTAJES)
-                var lvl = data.joputismoLevel || 0;
-                var btns1 = ['btn-sabotage-buzzer', 'btn-sabotage-veto', 'btn-sabotage-skip', 'btn-sabotage-panic', 'btn-sabotage-fog'];
-                btns1.forEach(id => {
-                    var el = document.getElementById(id);
-                    if (el) el.style.display = (lvl >= 1) ? 'flex' : 'none';
-                });
-
-                var btns2 = ['btn-sabotage-steal-token', 'btn-sabotage-steal-turn', 'btn-sabotage-blackhole', 'btn-sabotage-bomb'];
-                btns2.forEach(id => {
-                    var el = document.getElementById(id);
-                    if (el) el.style.display = (lvl >= 2) ? 'flex' : 'none';
-                });
-                
-                var btnDuel = document.getElementById('btn-sabotage-duel');
-                if (btnDuel) btnDuel.style.display = 'flex';
-
-                // BOMBA LAPA
-                var myBomb = data.hasBomb && data.hasBomb[myId];
-                var bombBtn = document.getElementById('btn-sabotage-bomb');
-                if (bombBtn) {
-                    if (myBomb) {
-                        bombBtn.innerHTML = '¡PÁSALO! (0 <span class="neon-chip" style="width:10px;height:10px;"></span>)';
-                        bombBtn.style.borderColor = "#ff0000";
-                        bombBtn.style.color = "#ff0000";
-                        bombBtn.classList.add('pulse');
-                    } else {
-                        bombBtn.innerHTML = 'BOMBA LAPA (3 <span class="neon-chip" style="width:10px;height:10px;"></span>)';
-                        bombBtn.style.borderColor = "#9900ff";
-                        bombBtn.style.color = "#9900ff";
-                        bombBtn.classList.remove('pulse');
-                    }
-                }
-
-                // MODO DUELO
-                var duelInp = document.getElementById('duel-input-container');
-                if (duelInp) {
-                    duelInp.style.display = (data.duelActive && (myId === data.duelP1 || myId === data.duelP2)) ? 'block' : 'none';
-                }
-
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('game-screen').style.display = 'flex';
                 document.getElementById('cur-player').innerText = data.activePlayer && data.activePlayer.name ? data.activePlayer.name : "---";
@@ -1548,6 +1394,7 @@
                         document.getElementById('panic-timer').style.color = 'white';
                     }
 
+
                     var btnSabotageBet = document.getElementById('btn-sabotage-bet');
                     if (btnSabotageBet) {
                         var alreadyBet = data.bettingAgainst && data.bettingAgainst.includes(myId);
@@ -1720,19 +1567,6 @@
             });
         }
     </script>
-
-    <div id="duel-input-container">
-        <h4 style="font-family:'Bungee'; color:var(--gold); margin:0 0 10px 0;">¡DUELO! ESCRIBE EL AÑO</h4>
-        <input type="number" id="duel-year-input" placeholder="AÑO" style="font-size: 2em; width: 100%;">
-        <button class="btn" style="margin-top:10px;" onclick="submitDuelGuess()">ENVIAR AÑO</button>
-    </div>
-
-    <div id="bomb-pass-overlay">
-        <h2 style="font-family:'Bungee'; color:#ff0000; text-shadow:0 0 10px black;">¡PÁSALO!</h2>
-        <p style="color:white; margin-bottom:20px;">ELIGE A QUIÉN PEGAR LA BOMBA</p>
-        <div id="bomb-targets-list" style="display:flex; flex-direction:column; gap:10px; width:100%; max-width:300px;"></div>
-    </div>
-
 </body>
 
 </html>
