@@ -1232,33 +1232,38 @@
                 return;
             }
 
-            // Retroalimentación de trucos para Xavi
-            if (data.type === 'STATE_UPDATE' && lastState && playerName.toLowerCase() === 'xavi') {
-                if (data.cheatsEnabled !== lastState.cheatsEnabled) {
-                    const indicator = document.getElementById('cheat-indicator');
-                    indicator.innerText = data.cheatsEnabled ? "TRUCOS ON" : "TRUCOS OFF";
-                    indicator.style.background = data.cheatsEnabled ? "var(--neon)" : "var(--accent)";
-                    indicator.style.display = "block";
-                    setTimeout(() => { indicator.style.display = "none"; }, 2000);
+            if (data.type === 'STATE_UPDATE') {
+                // Retroalimentación de trucos para Xavi
+                if (lastState && playerName.toLowerCase() === 'xavi') {
+                    if (data.cheatsEnabled !== lastState.cheatsEnabled) {
+                        const indicator = document.getElementById('cheat-indicator');
+                        if (indicator) {
+                            indicator.innerText = data.cheatsEnabled ? "TRUCOS ON" : "TRUCOS OFF";
+                            indicator.style.background = data.cheatsEnabled ? "var(--neon)" : "var(--accent)";
+                            indicator.style.display = "block";
+                            setTimeout(() => { indicator.style.display = "none"; }, 2000);
+                        }
+                    }
                 }
-            }
 
-            
                 // NIVELES DE JOPUTISMO (SABOTAJES)
                 var lvl = data.joputismoLevel || 0;
-                document.getElementById('btn-sabotage-buzzer').style.display = (lvl >= 1) ? 'flex' : 'none';
-                document.getElementById('btn-sabotage-veto').style.display = (lvl >= 1) ? 'flex' : 'none';
-                document.getElementById('btn-sabotage-skip').style.display = (lvl >= 1) ? 'flex' : 'none';
-                document.getElementById('btn-sabotage-panic').style.display = (lvl >= 1) ? 'flex' : 'none';
-                document.getElementById('btn-sabotage-fog').style.display = (lvl >= 1) ? 'flex' : 'none';
+                var btns1 = ['btn-sabotage-buzzer', 'btn-sabotage-veto', 'btn-sabotage-skip', 'btn-sabotage-panic', 'btn-sabotage-fog'];
+                btns1.forEach(id => {
+                    var el = document.getElementById(id);
+                    if (el) el.style.display = (lvl >= 1) ? 'flex' : 'none';
+                });
+
+                var btns2 = ['btn-sabotage-steal-token', 'btn-sabotage-steal-turn', 'btn-sabotage-blackhole', 'btn-sabotage-bomb'];
+                btns2.forEach(id => {
+                    var el = document.getElementById(id);
+                    if (el) el.style.display = (lvl >= 2) ? 'flex' : 'none';
+                });
                 
-                document.getElementById('btn-sabotage-steal-token').style.display = (lvl >= 2) ? 'flex' : 'none';
-                document.getElementById('btn-sabotage-steal-turn').style.display = (lvl >= 2) ? 'flex' : 'none';
-                document.getElementById('btn-sabotage-blackhole').style.display = (lvl >= 2) ? 'flex' : 'none';
-                document.getElementById('btn-sabotage-bomb').style.display = (lvl >= 2) ? 'flex' : 'none';
-                document.getElementById('btn-sabotage-duel').style.display = (lvl >= 0) ? 'flex' : 'none'; // Duelo siempre? o lvl 1? User said "Duel is a new mode".
-                
-                // BOMBA LAPA: Cambiar coste si la tienes
+                var btnDuel = document.getElementById('btn-sabotage-duel');
+                if (btnDuel) btnDuel.style.display = 'flex';
+
+                // BOMBA LAPA
                 var myBomb = data.hasBomb && data.hasBomb[myId];
                 var bombBtn = document.getElementById('btn-sabotage-bomb');
                 if (bombBtn) {
@@ -1276,13 +1281,11 @@
                 }
 
                 // MODO DUELO
-                if (data.duelActive && (myId === data.duelP1 || myId === data.duelP2)) {
-                    document.getElementById('duel-input-container').style.display = 'block';
-                } else {
-                    document.getElementById('duel-input-container').style.display = 'none';
+                var duelInp = document.getElementById('duel-input-container');
+                if (duelInp) {
+                    duelInp.style.display = (data.duelActive && (myId === data.duelP1 || myId === data.duelP2)) ? 'block' : 'none';
                 }
-                lastState = data;
-            if (data.type === 'STATE_UPDATE') {
+
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('game-screen').style.display = 'flex';
                 document.getElementById('cur-player').innerText = data.activePlayer && data.activePlayer.name ? data.activePlayer.name : "---";
