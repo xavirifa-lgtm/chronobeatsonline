@@ -450,6 +450,7 @@
     <script>
         var peer, roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
         var players = [], connections = {}, songs = [], currentSongIdx = -1, activePlayerIdx = 0, isRevealed = false;
+        var hasShield = {}; // playerId -> boolean
         var currentBets = {}; // playerId -> slotIndex
         var activeGuess = null; // slotIndex del jugador activo
         var bettingAgainst = []; // IDs de los jugadores que han apostado contra el jugador activo
@@ -748,6 +749,15 @@
                     syncState();
                     break;
                 case 'SABOTAGE_MUTE':
+                    if (hasShield[activeP.id]) {
+                        var p = players.find(function (pl) { return pl.id === peerId; });
+                        if (p) {
+                            try { if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "¡ZASCA! El Escudo de " + activeP.name + " ha rebotado tu sabotaje y lo has perdido todo jajaja" }); } catch (e) { }
+                        }
+                        hasShield[activeP.id] = false;
+                        syncState();
+                        break;
+                    }
                     var p = players.find(function (pl) { return pl.id === peerId; });
                     if (p && p.tokens >= 1 && p.id !== players[activePlayerIdx].id && isPlaying) {
                         p.tokens--;
@@ -883,6 +893,15 @@
                     }
                     break;
                 case 'SABOTAGE_PANIC':
+                    if (hasShield[activeP.id]) {
+                        var p = players.find(function (pl) { return pl.id === peerId; });
+                        if (p) {
+                            try { if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "¡ZASCA! El Escudo de " + activeP.name + " ha rebotado tu sabotaje y lo has perdido todo jajaja" }); } catch (e) { }
+                        }
+                        hasShield[activeP.id] = false;
+                        syncState();
+                        break;
+                    }
                     var p = players.find(function (pl) { return pl.id === peerId; });
                     if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 2 && !panicActive && isPlaying && !isRevealed && (!turnPhase || turnPhase === 'NORMAL')) {
                         p.tokens -= 2;
@@ -903,10 +922,10 @@
                                 panicTimer = 0;
                                 panicActive = false;
 
-                                // Forzar fallo
+                                // Forzar fallo y PARAR MÚSICA (V29)
                                 isRevealed = true;
                                 isPlaying = false;
-                                document.getElementById('player-container').innerHTML = '';
+                                document.getElementById(\'player-container\').innerHTML = \'\';
                                 document.getElementById('host-instructions').innerHTML = "<span style='color:#ff4444; font-size:1.5em;'>¡TIEMPO AGOTADO! ❌</span><br>Turno perdido por pánico.";
                                 document.getElementById('btn-reveal-host').style.display = 'none';
                                 document.getElementById('val-card-ui').style.display = 'block';
@@ -933,6 +952,15 @@
                     }
                     break;
                 case 'SABOTAGE_FOG':
+                    if (hasShield[activeP.id]) {
+                        var p = players.find(function (pl) { return pl.id === peerId; });
+                        if (p) {
+                            try { if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "¡ZASCA! El Escudo de " + activeP.name + " ha rebotado tu sabotaje y lo has perdido todo jajaja" }); } catch (e) { }
+                        }
+                        hasShield[activeP.id] = false;
+                        syncState();
+                        break;
+                    }
                     var p = players.find(function (pl) { return pl.id === peerId; });
                     if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 2 && !isFogActive && (!turnPhase || turnPhase === 'NORMAL')) {
                         p.tokens -= 2;
@@ -947,6 +975,15 @@
                     }
                     break;
                 case 'SABOTAGE_FORCE_SKIP':
+                    if (hasShield[activeP.id]) {
+                        var p = players.find(function (pl) { return pl.id === peerId; });
+                        if (p) {
+                            try { if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "¡ZASCA! El Escudo de " + activeP.name + " ha rebotado tu sabotaje y lo has perdido todo jajaja" }); } catch (e) { }
+                        }
+                        hasShield[activeP.id] = false;
+                        syncState();
+                        break;
+                    }
                     var p = players.find(function (pl) { return pl.id === peerId; });
                     if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 1 && activeGuess === null && isPlaying && !isRevealed && (!turnPhase || turnPhase === 'NORMAL')) {
                         p.tokens -= 1;
@@ -972,6 +1009,15 @@
                     }
                     break;
                 case 'SABOTAGE_VETO':
+                    if (hasShield[activeP.id]) {
+                        var p = players.find(function (pl) { return pl.id === peerId; });
+                        if (p) {
+                            try { if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "¡ZASCA! El Escudo de " + activeP.name + " ha rebotado tu sabotaje y lo has perdido todo jajaja" }); } catch (e) { }
+                        }
+                        hasShield[activeP.id] = false;
+                        syncState();
+                        break;
+                    }
                     var p = players.find(function (pl) { return pl.id === peerId; });
                     if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 1 && players[activePlayerIdx].canReload && (!turnPhase || turnPhase === 'NORMAL')) {
                         p.tokens -= 1;
@@ -1151,6 +1197,46 @@
                 case 'REMOTE_JOPUTISMO':
                     if (turnPhase === 'LOBBY' || players.length === 0) {
                         setJoputismo(parseInt(value));
+                    }
+                    break;
+                case 'MARKET_WILDCARD':
+                    var p = players.find(function (pl) { return pl.id === peerId; });
+                    if (p && p.id === activeP.id && p.tokens >= 1) {
+                        p.tokens -= 1;
+                        if (value === 'artist') {
+                            document.getElementById('ui-card-artist').innerText = s.artist;
+                            document.getElementById('ui-card-artist').style.color = "var(--gold)";
+                        } else {
+                            document.getElementById('ui-card-song').innerText = s.song;
+                            document.getElementById('ui-card-song').style.color = "var(--gold)";
+                        }
+                        syncState();
+                    }
+                    break;
+                case 'MARKET_DECADE':
+                    var p = players.find(function (pl) { return pl.id === peerId; });
+                    if (p && p.id === activeP.id && p.tokens >= 1) {
+                        p.tokens -= 1;
+                        var sYear = parseInt(s.year);
+                        var decadeStr = "Desconocida";
+                        if (!isNaN(sYear)) {
+                            decadeStr = Math.floor(sYear / 10) * 10 + "s";
+                        }
+                        try {
+                            if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "PISTA! Años " + decadeStr });
+                        } catch (e) { }
+                        syncState();
+                    }
+                    break;
+                case 'MARKET_SHIELD':
+                    var p = players.find(function (pl) { return pl.id === peerId; });
+                    if (p && p.tokens >= 3 && !hasShield[p.id]) {
+                        p.tokens -= 3;
+                        hasShield[p.id] = true;
+                        try {
+                            if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "ESCUDO ACTIVADO! Tu proximo sabotaje enemigo será neutralizado." });
+                        } catch (e) { }
+                        syncState();
                     }
                     break;
             }
@@ -1477,7 +1563,8 @@
                     activeGuess: activeGuess,
                     kingOptions: kingOptions,
                     cheatsEnabled: cheatsEnabled,
-                    turnPhase: turnPhase
+                    turnPhase: turnPhase,
+                    hasShield: hasShield
                 };
                 try {
                     if (connections[id] && connections[id].open) {

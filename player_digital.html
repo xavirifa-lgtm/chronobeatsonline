@@ -769,6 +769,22 @@
             
             <div class="chip-display" id="my-tokens-ui">MIS FICHAS: <span class="neon-chip"></span><span class="neon-chip"></span></div>
 
+            <!-- Mando de Reproducción (Solo Activo) -->
+            <div class="music-controls" id="m-ctrl">
+                <button class="ctrl-btn btn-play" onclick="send('PLAY')">PLAY</button>
+                <button class="ctrl-btn" onclick="send('PAUSE')">PAUSE</button>
+                <button class="ctrl-btn btn-stop" onclick="send('STOP')">STOP</button>
+            </div>
+
+            <div class="skip-controls" id="s-ctrl">
+                <button class="sk-btn sk-fwd" id="btn-skip-p5" onclick="send('SKIP',5)">+5s</button>
+                <button class="sk-btn sk-fwd" onclick="send('SKIP',10)">+10s</button>
+                <button class="sk-btn sk-fwd" id="btn-skip-p20" onclick="send('SKIP',20)">+20s</button>
+                <button class="sk-btn sk-back" id="btn-skip-m5" onclick="send('SKIP',-5)">-5s</button>
+                <button class="sk-btn sk-back" onclick="send('SKIP',-10)">-10s</button>
+                <button class="sk-btn sk-back" id="btn-skip-m20" onclick="send('SKIP',-20)">-20s</button>
+            </div>
+
             <div class="card-container" id="normal-card-container">
                 <div id="card" class="card">
                     <div class="card-face card-front">
@@ -786,22 +802,6 @@
             <div class="collection-summary" id="normal-collection">
                 <h4>MI CRONOLOGÍA</h4>
                 <div id="my-cards-list" class="vertical-cards"></div>
-            </div>
-
-            <!-- Mando de Reproducción (Solo Activo) -->
-            <div class="music-controls" id="m-ctrl">
-                <button class="ctrl-btn btn-play" onclick="send('PLAY')">PLAY</button>
-                <button class="ctrl-btn" onclick="send('PAUSE')">PAUSE</button>
-                <button class="ctrl-btn btn-stop" onclick="send('STOP')">STOP</button>
-            </div>
-
-            <div class="skip-controls" id="s-ctrl">
-                <button class="sk-btn sk-fwd" id="btn-skip-p5" onclick="send('SKIP',5)">+5s</button>
-                <button class="sk-btn sk-fwd" onclick="send('SKIP',10)">+10s</button>
-                <button class="sk-btn sk-fwd" id="btn-skip-p20" onclick="send('SKIP',20)">+20s</button>
-                <button class="sk-btn sk-back" id="btn-skip-m5" onclick="send('SKIP',-5)">-5s</button>
-                <button class="sk-btn sk-back" onclick="send('SKIP',-10)">-10s</button>
-                <button class="sk-btn sk-back" id="btn-skip-m20" onclick="send('SKIP',-20)">-20s</button>
             </div>
 
             <!-- Acciones Especiales (Activo) -->
@@ -841,11 +841,8 @@
         <!-- PESTAÑA MERCADO -->
         <div id="tab-market" class="tab-content">
             <h2 style="font-family:'Bungee'; color:var(--gold); margin-top:20px;">MERCADO NEGRO</h2>
-            <div style="display:flex; flex-direction:column; gap:15px; width:100%; max-width:340px; margin-top:20px;">
-                <p style="color:#666; font-size:0.8em; text-align:center;">Próximamente más ventajas...</p>
-                <button class="btn" style="background:#222; color:#555; border:1px solid #333;" disabled>COMODÍN 50/50 (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
-                <button class="btn" style="background:#222; color:#555; border:1px solid #333;" disabled>PISTA DÉCADA (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
-                <button class="btn" style="background:#222; color:#555; border:1px solid #333;" disabled>ESCUDO PROTECTOR (3 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
+            <div id="market-container" style="display:flex; flex-direction:column; gap:15px; width:100%; max-width:340px; margin-top:20px;">
+                <!-- Se rellena dinámicamente -->
             </div>
         </div>
 
@@ -1156,6 +1153,44 @@
             }
         }
 
+        function updateMarket(state) {
+            const container = document.getElementById('market-container');
+            if (!container) return;
+
+            const isMyTurn = (state.activePlayer && state.activePlayer.id === myId);
+            const myTokens = state.myTokens || 0;
+            const hasActiveShield = state.hasShield && state.hasShield[myId];
+
+            let html = "";
+
+            // COMODÍN ARTISTA (1🔘)
+            html += `<button class="market-btn" ${(!isMyTurn || myTokens < 1) ? 'disabled' : ''} onclick="send('MARKET_WILDCARD', 'artist')">
+                        COMODÍN ARTISTA (1 <span class="neon-chip"></span>)
+                     </button>`;
+
+            // COMODÍN CANCIÓN (1🔘)
+            html += `<button class="market-btn" ${(!isMyTurn || myTokens < 1) ? 'disabled' : ''} onclick="send('MARKET_WILDCARD', 'song')">
+                        COMODÍN CANCIÓN (1 <span class="neon-chip"></span>)
+                     </button>`;
+
+            // PISTA DÉCADA (1🔘)
+            html += `<button class="market-btn" ${(!isMyTurn || myTokens < 1) ? 'disabled' : ''} onclick="send('MARKET_DECADE')">
+                        PISTA DÉCADA (1 <span class="neon-chip"></span>)
+                     </button>`;
+
+            // ESCUDO PROTECTOR (3🔘)
+            html += `<button class="market-btn" ${(myTokens < 3 || hasActiveShield) ? 'disabled' : ''} onclick="send('MARKET_SHIELD')" 
+                        style="${hasActiveShield ? 'border-color:var(--gold); color:var(--gold);' : ''}">
+                        ${hasActiveShield ? '🛡️ ESCUDO ACTIVO' : 'ESCUDO PROTECTOR (3 <span class="neon-chip"></span>)'}
+                     </button>`;
+            
+            if (hasActiveShield) {
+                html += `<p style="color:var(--gold); font-size:0.75em; text-align:center; margin-top:-5px; font-family:Bungee;">PROTECCIÓN CONTRA SABOTAJES ACTIVA</p>`;
+            }
+
+            container.innerHTML = html;
+        }
+
         function handle(data) {
             console.log("Evento:", data.type, data);
 
@@ -1177,6 +1212,7 @@
 
             lastState = data;
             if (data.type === 'STATE_UPDATE') {
+                updateMarket(data);
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('game-screen').style.display = 'flex';
                 document.getElementById('cur-player').innerText = data.activePlayer && data.activePlayer.name ? data.activePlayer.name : "---";
@@ -1414,12 +1450,11 @@
                     if (btnStealTurn) btnStealTurn.disabled = (data.myTokens < 4 || isActionLocked);
 
                     // Panic Overlay Check
-                    // Panic Overlay Check
                     var panicOverlay = document.getElementById('panic-overlay');
                     if (data.panicActive && isMyTurn) {
                         panicOverlay.style.display = 'flex';
                         document.getElementById('panic-timer').innerText = data.panicTimer;
-                        // V26 FIX: El overlay NO debe bloquear clics, es solo visual
+                        // El overlay NO debe bloquear clics, es solo visual
                         panicOverlay.style.pointerEvents = 'none';
                         if (data.panicTimer > 5) {
                             panicOverlay.style.background = 'rgba(255,0,0,0.85)';
@@ -1428,6 +1463,11 @@
                         }
                         if (data.panicTimer <= 3) document.getElementById('panic-timer').style.color = '#ff0000';
                         else document.getElementById('panic-timer').style.color = 'white';
+
+                        // AUTO-STOP: si el timer llega a 0, mandar STOP al host
+                        if (data.panicTimer <= 0) {
+                            send('STOP');
+                        }
                     } else {
                         panicOverlay.style.display = 'none';
                         panicOverlay.style.background = 'rgba(255,0,0,0.85)';

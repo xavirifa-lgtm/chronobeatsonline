@@ -13,7 +13,7 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
-            --neon: #00f2ff;
+            --neon: #00ff00; /* Verde por defecto para MIX */
             --bg: #0d0d0d;
             --accent: #ff0055;
             --gold: #ffd700;
@@ -472,6 +472,7 @@
         var panicInterval = null;
         var joputismoLevel = 0; // 0: LOSER, 1: HE-MAN, 2: SUPERMAN
         var isFogActive = false;
+        var hasShield = {}; // playerId -> boolean
 
         document.getElementById('join-code').innerText = roomCode;
 
@@ -541,27 +542,79 @@
                 }
             });
         }
+        function applyTheme(type) {
+            let color = '#00ff00'; // Mix / Default
+            if (type === 'orig') color = '#00f2ff';
+            if (type === 'anime') color = '#ff00cc';
+            if (type === 'movies') color = '#ffaa00';
+            
+            document.documentElement.style.setProperty('--neon', color);
+            // Actualizar meta theme-color para navegadores móviles
+            let metaTheme = document.querySelector('meta[name="theme-color"]');
+            if (metaTheme) metaTheme.setAttribute('content', color);
+        }
+
         initPeer();
 
-        fetch('lista_final.txt?v=' + new Date().getTime()).then(function (r) { return r.text() }).then(function (t) {
-            var lines = t.replace(/\r/g, '').split('\n');
+        var urlParams = new URLSearchParams(window.location.search);
+        var mixParam = urlParams.get('mix') || 'orig,anime,movies';
+        var mixTypes = mixParam.split(',');
+        var fetchPromises = [];
+
+        if (mixTypes.includes('orig')) {
+            fetchPromises.push(fetch('lista_final.txt?v=' + new Date().getTime()).then(function (r) { return r.text() }).then(function (t) { return { text: t, type: 'orig', color: '#00f2ff' } }));
+        }
+        if (mixTypes.includes('anime')) {
+            fetchPromises.push(fetch('lista_final_anime.txt?v=' + new Date().getTime()).then(function (r) { return r.text() }).then(function (t) { return { text: t, type: 'anime', color: '#ff00cc' } }));
+        }
+        if (mixTypes.includes('movies')) {
+            fetchPromises.push(fetch('lista_final_pelis.txt?v=' + new Date().getTime()).then(function (r) { return r.text() }).then(function (t) { return { text: t, type: 'movies', color: '#ffaa00' } }));
+        }
+
+        Promise.all(fetchPromises).then(function (results) {
+            var rawSongs = [];
             var uniqueIds = new Set();
             var playedIds = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]');
-            songs = lines.map(function (l, index) {
-                var p = l.split('|');
-                var m = p[3] ? p[3].match(/[?&]v=([^&#]+)|youtu\.be\/([^?&#]+)/) : null;
-                return {
-                    artist: p[0],
-                    song: p[1],
-                    year: p[2],
-                    id: m ? (m[1] || m[2]) : null,
-                    line: index + 1 // Guardar número de fila original
-                };
-            }).filter(function (s) {
-                if (!s.id || uniqueIds.has(s.id) || playedIds.includes(s.id)) return false;
-                uniqueIds.add(s.id);
-                return true;
-            }).sort(function () { return Math.random() - 0.5; });
+            results.forEach(function (res) {
+                var categorySongs = [];
+                var lines = res.text.replace(/\r/g, '').split('\n');
+                lines.forEach(function (l, index) {
+                    var p = l.split('|');
+                    var m = p[3] ? p[3].match(/[?&]v=([^&#]+)|youtu\.be\/([^?&#]+)/) : null;
+                    if (m) {
+                        var currentId = (m[1] || m[2]);
+                        if (!uniqueIds.has(currentId) && !playedIds.includes(currentId)) {
+                            uniqueIds.add(currentId);
+                            categorySongs.push({
+                                artist: p[0],
+                                song: p[1],
+                                year: p[2],
+                                id: currentId,
+                                line: index + 1,
+                                type: res.type,
+                                color: res.color
+                            });
+                        }
+                    }
+                });
+
+                // Mezclar la categoría antes de recortar
+                categorySongs.sort(function() { return Math.random() - 0.5; });
+
+                // Tomar máximo 60 para equilibrar el Mix
+                var selectedSongs = categorySongs.slice(0, 60);
+                rawSongs = rawSongs.concat(selectedSongs);
+            });
+
+            if (rawSongs.length < 10 && playedIds.length > 0) {
+                localStorage.removeItem('CB_PlayedSongs');
+                location.reload();
+                return;
+            }
+
+            // Mezcla final de todo el mix
+            rawSongs.sort(function() { return Math.random() - 0.5; });
+            songs = rawSongs;
         });
 
         function updateLobby() {
@@ -679,6 +732,7 @@
             // --- FIN MODO REY CHECK ---
 
             var s = songs[currentSongIdx];
+            applyTheme(s ? s.type : 'mix');
             document.getElementById('ui-card-artist').innerText = "????";
             document.getElementById('ui-card-song').innerText = "????";
             document.getElementById('ui-card-year').innerText = "????";
@@ -748,6 +802,15 @@
                     syncState();
                     break;
                 case 'SABOTAGE_MUTE':
+                    if (hasShield[activeP.id]) {
+                        var p = players.find(function (pl) { return pl.id === peerId; });
+                        if (p) {
+                            try { if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "¡ZASCA! El Escudo de " + activeP.name + " ha rebotado tu sabotaje y lo has perdido todo jajaja" }); } catch (e) { }
+                        }
+                        hasShield[activeP.id] = false;
+                        syncState();
+                        break;
+                    }
                     var p = players.find(function (pl) { return pl.id === peerId; });
                     if (p && p.tokens >= 1 && p.id !== players[activePlayerIdx].id && isPlaying) {
                         p.tokens--;
@@ -883,6 +946,15 @@
                     }
                     break;
                 case 'SABOTAGE_PANIC':
+                    if (hasShield[activeP.id]) {
+                        var p = players.find(function (pl) { return pl.id === peerId; });
+                        if (p) {
+                            try { if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "¡ZASCA! El Escudo de " + activeP.name + " ha rebotado tu sabotaje y lo has perdido todo jajaja" }); } catch (e) { }
+                        }
+                        hasShield[activeP.id] = false;
+                        syncState();
+                        break;
+                    }
                     var p = players.find(function (pl) { return pl.id === peerId; });
                     if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 2 && !panicActive && isPlaying && !isRevealed && (!turnPhase || turnPhase === 'NORMAL')) {
                         p.tokens -= 2;
@@ -903,10 +975,10 @@
                                 panicTimer = 0;
                                 panicActive = false;
 
-                                // Forzar fallo
+                                // Forzar fallo y PARAR MÚSICA (V29)
                                 isRevealed = true;
                                 isPlaying = false;
-                                document.getElementById('player-container').innerHTML = '';
+                                document.getElementById(\'player-container\').innerHTML = \'\';
                                 document.getElementById('host-instructions').innerHTML = "<span style='color:#ff4444; font-size:1.5em;'>¡TIEMPO AGOTADO! ❌</span><br>Turno perdido por pánico.";
                                 document.getElementById('btn-reveal-host').style.display = 'none';
                                 document.getElementById('val-card-ui').style.display = 'block';
@@ -933,6 +1005,15 @@
                     }
                     break;
                 case 'SABOTAGE_FOG':
+                    if (hasShield[activeP.id]) {
+                        var p = players.find(function (pl) { return pl.id === peerId; });
+                        if (p) {
+                            try { if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "¡ZASCA! El Escudo de " + activeP.name + " ha rebotado tu sabotaje y lo has perdido todo jajaja" }); } catch (e) { }
+                        }
+                        hasShield[activeP.id] = false;
+                        syncState();
+                        break;
+                    }
                     var p = players.find(function (pl) { return pl.id === peerId; });
                     if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 2 && !isFogActive && (!turnPhase || turnPhase === 'NORMAL')) {
                         p.tokens -= 2;
@@ -947,6 +1028,15 @@
                     }
                     break;
                 case 'SABOTAGE_FORCE_SKIP':
+                    if (hasShield[activeP.id]) {
+                        var p = players.find(function (pl) { return pl.id === peerId; });
+                        if (p) {
+                            try { if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "¡ZASCA! El Escudo de " + activeP.name + " ha rebotado tu sabotaje y lo has perdido todo jajaja" }); } catch (e) { }
+                        }
+                        hasShield[activeP.id] = false;
+                        syncState();
+                        break;
+                    }
                     var p = players.find(function (pl) { return pl.id === peerId; });
                     if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 1 && activeGuess === null && isPlaying && !isRevealed && (!turnPhase || turnPhase === 'NORMAL')) {
                         p.tokens -= 1;
@@ -972,6 +1062,15 @@
                     }
                     break;
                 case 'SABOTAGE_VETO':
+                    if (hasShield[activeP.id]) {
+                        var p = players.find(function (pl) { return pl.id === peerId; });
+                        if (p) {
+                            try { if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "¡ZASCA! El Escudo de " + activeP.name + " ha rebotado tu sabotaje y lo has perdido todo jajaja" }); } catch (e) { }
+                        }
+                        hasShield[activeP.id] = false;
+                        syncState();
+                        break;
+                    }
                     var p = players.find(function (pl) { return pl.id === peerId; });
                     if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 1 && players[activePlayerIdx].canReload && (!turnPhase || turnPhase === 'NORMAL')) {
                         p.tokens -= 1;
@@ -1151,6 +1250,46 @@
                 case 'REMOTE_JOPUTISMO':
                     if (turnPhase === 'LOBBY' || players.length === 0) {
                         setJoputismo(parseInt(value));
+                    }
+                    break;
+                case 'MARKET_WILDCARD':
+                    var p = players.find(function (pl) { return pl.id === peerId; });
+                    if (p && p.id === activeP.id && p.tokens >= 1) {
+                        p.tokens -= 1;
+                        if (value === 'artist') {
+                            document.getElementById('ui-card-artist').innerText = s.artist;
+                            document.getElementById('ui-card-artist').style.color = "var(--gold)";
+                        } else {
+                            document.getElementById('ui-card-song').innerText = s.song;
+                            document.getElementById('ui-card-song').style.color = "var(--gold)";
+                        }
+                        syncState();
+                    }
+                    break;
+                case 'MARKET_DECADE':
+                    var p = players.find(function (pl) { return pl.id === peerId; });
+                    if (p && p.id === activeP.id && p.tokens >= 1) {
+                        p.tokens -= 1;
+                        var sYear = parseInt(s.year);
+                        var decadeStr = "Desconocida";
+                        if (!isNaN(sYear)) {
+                            decadeStr = Math.floor(sYear / 10) * 10 + "s";
+                        }
+                        try {
+                            if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "PISTA! Años " + decadeStr });
+                        } catch (e) { }
+                        syncState();
+                    }
+                    break;
+                case 'MARKET_SHIELD':
+                    var p = players.find(function (pl) { return pl.id === peerId; });
+                    if (p && p.tokens >= 3 && !hasShield[p.id]) {
+                        p.tokens -= 3;
+                        hasShield[p.id] = true;
+                        try {
+                            if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "ESCUDO ACTIVADO! Tu proximo sabotaje enemigo será neutralizado." });
+                        } catch (e) { }
+                        syncState();
                     }
                     break;
             }
@@ -1477,7 +1616,9 @@
                     activeGuess: activeGuess,
                     kingOptions: kingOptions,
                     cheatsEnabled: cheatsEnabled,
-                    turnPhase: turnPhase
+                    turnPhase: turnPhase,
+                    currentType: songs[currentSongIdx] ? songs[currentSongIdx].type : 'mix',
+                    hasShield: hasShield
                 };
                 try {
                     if (connections[id] && connections[id].open) {

@@ -199,6 +199,44 @@
             color: var(--neon);
         }
 
+        .neon-chip {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            background: var(--neon);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--neon);
+            vertical-align: middle;
+            margin: 0 1px;
+        }
+
+        .market-btn {
+            background: #111;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 15px;
+            border-radius: 12px;
+            font-family: 'Bungee';
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .market-btn:not(:disabled):hover {
+            border-color: var(--neon);
+            box-shadow: 0 0 10px var(--neon);
+        }
+
+        .market-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            filter: grayscale(1);
+        }
+
         .btn-stop {
             border-color: var(--accent);
             color: var(--accent);
@@ -841,11 +879,8 @@
         <!-- PESTAÑA MERCADO -->
         <div id="tab-market" class="tab-content">
             <h2 style="font-family:'Bungee'; color:var(--gold); margin-top:20px;">MERCADO NEGRO</h2>
-            <div style="display:flex; flex-direction:column; gap:15px; width:100%; max-width:340px; margin-top:20px;">
-                <p style="color:#666; font-size:0.8em; text-align:center;">Próximamente más ventajas...</p>
-                <button class="btn" style="background:#222; color:#555; border:1px solid #333;" disabled>COMODÍN 50/50 (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
-                <button class="btn" style="background:#222; color:#555; border:1px solid #333;" disabled>PISTA DÉCADA (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
-                <button class="btn" style="background:#222; color:#555; border:1px solid #333;" disabled>ESCUDO PROTECTOR (3 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
+            <div id="market-container" style="display:flex; flex-direction:column; gap:15px; width:100%; max-width:340px; margin-top:20px;">
+                <!-- Se rellena dinámicamente -->
             </div>
         </div>
 
@@ -1133,12 +1168,67 @@
             });
         }
 
+        function applyTheme(type) {
+            let color = '#00ff00'; // Mix / Default
+            if (type === 'orig') color = '#00f2ff';
+            if (type === 'anime') color = '#ff00cc';
+            if (type === 'movies') color = '#ffaa00';
+            
+            document.documentElement.style.setProperty('--neon', color);
+            let metaTheme = document.querySelector('meta[name="theme-color"]');
+            if (metaTheme) metaTheme.setAttribute('content', color);
+            
+            // Actualizar el indicador de trucos si es necesario
+            const indicator = document.getElementById('cheat-indicator');
+            if (indicator && indicator.style.display !== 'none') {
+                indicator.style.boxShadow = '0 0 15px ' + color;
+            }
+        }
+
         function send(action, value) {
             if (conn && conn.open) {
                 conn.send({ type: 'COMMAND', action: action, value: value });
             } else {
                 showCustomAlert("Conexión perdida. Recarga la página.");
             }
+        }
+
+        function updateMarket(state) {
+            const container = document.getElementById('market-container');
+            if (!container) return;
+
+            const isMyTurn = (state.activePlayer && state.activePlayer.id === myId);
+            const myTokens = state.myTokens || 0;
+            const hasActiveShield = state.hasShield && state.hasShield[myId];
+
+            let html = "";
+
+            // COMODÍN ARTISTA (1🔘)
+            html += `<button class="market-btn" ${(!isMyTurn || myTokens < 1) ? 'disabled' : ''} onclick="send('MARKET_WILDCARD', 'artist')">
+                        COMODÍN ARTISTA (1 <span class="neon-chip"></span>)
+                     </button>`;
+
+            // COMODÍN CANCIÓN (1🔘)
+            html += `<button class="market-btn" ${(!isMyTurn || myTokens < 1) ? 'disabled' : ''} onclick="send('MARKET_WILDCARD', 'song')">
+                        COMODÍN CANCIÓN (1 <span class="neon-chip"></span>)
+                     </button>`;
+
+            // PISTA DÉCADA (1🔘)
+            html += `<button class="market-btn" ${(!isMyTurn || myTokens < 1) ? 'disabled' : ''} onclick="send('MARKET_DECADE')">
+                        PISTA DÉCADA (1 <span class="neon-chip"></span>)
+                     </button>`;
+
+            // ESCUDO PROTECTOR (3🔘)
+            html += `<button class="market-btn" ${(myTokens < 3 || hasActiveShield) ? 'disabled' : ''} onclick="send('MARKET_SHIELD')" 
+                        style="${hasActiveShield ? 'border-color:var(--gold); color:var(--gold);' : ''}">
+                        ${hasActiveShield ? '🛡️ ESCUDO ACTIVO' : 'ESCUDO PROTECTOR (3 <span class="neon-chip"></span>)'}
+                     </button>`;
+            
+            if (hasActiveShield) {
+                html += `<p style="color:var(--gold); font-size:0.75em; text-align:center; margin-top:-5px; font-family:Bungee;">PROTECCIÓN CONTRA SABOTAJES ACTIVA</p>`;
+            }
+
+            container.innerHTML = html;
         }
 
         function handle(data) {
@@ -1162,6 +1252,8 @@
 
             lastState = data;
             if (data.type === 'STATE_UPDATE') {
+                applyTheme(data.currentType || 'mix');
+                updateMarket(data);
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('game-screen').style.display = 'flex';
                 document.getElementById('cur-player').innerText = data.activePlayer && data.activePlayer.name ? data.activePlayer.name : "---";
