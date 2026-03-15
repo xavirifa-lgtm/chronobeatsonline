@@ -968,22 +968,7 @@
             overlay.style.display = 'flex';
 
             try {
-                // Escalar imagen a 512px para Pollinations (optimizar subida)
-                const scaledDataUrl = await new Promise(resolve => {
-                    const img = new Image();
-                    img.onload = function () {
-                        const MAX = 512;
-                        const scale = Math.min(MAX / img.width, MAX / img.height, 1);
-                        const canvas = document.createElement('canvas');
-                        canvas.width = Math.round(img.width * scale);
-                        canvas.height = Math.round(img.height * scale);
-                        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-                        resolve(canvas.toDataURL('image/jpeg', 0.85));
-                    };
-                    img.src = playerAvatarDataUrl;
-                });
-
-                // --- FILTRO DE COLOR NEÓN DEL TEMA NORMAL (AZUL/CYAN) ---
+                // --- FILTRO DE COLOR NEÓN DEL TEMA MIX (VERDE NEÓN) ---
 
                 const img = new Image();
                 img.src = playerAvatarDataUrl;
@@ -1013,14 +998,14 @@
                 ctx.drawImage(img, 0, 0, cWidth, cHeight);
                 ctx.filter = 'none';
 
-                // 2. Teñir con el color Azul Cyan del tema Normal
+                // 2. Teñir con el color Verde Neón del tema Mix
                 ctx.globalCompositeOperation = 'color';
-                ctx.fillStyle = 'rgba(0, 200, 255, 0.8)';
+                ctx.fillStyle = 'rgba(0, 255, 0, 0.8)';
                 ctx.fillRect(0, 0, cWidth, cHeight);
 
                 // Mezclar un poco de luz (Tono neón vibrante)
                 ctx.globalCompositeOperation = 'overlay';
-                ctx.fillStyle = 'rgba(0, 200, 255, 0.3)';
+                ctx.fillStyle = 'rgba(0, 255, 0, 0.3)';
                 ctx.fillRect(0, 0, cWidth, cHeight);
 
                 // 3. Viñeta oscura
@@ -1043,8 +1028,8 @@
                 await new Promise(r => setTimeout(r, 400));
 
             } catch (err) {
-                console.error('Pollinations toon error:', err);
-                alert("Error creando versión cómic: " + err.message);
+                console.error('Color filter error:', err);
+                alert("Error aplicando filtro de color: " + err.message);
             } finally {
                 overlay.style.display = 'none';
             }
