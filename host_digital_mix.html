@@ -873,6 +873,7 @@
                         isPlaying = false;
                         container.innerHTML = '<div id="youtube-player"></div>'; // Parar música de verdad
                         currentSongIdx++; if(songs[currentSongIdx] && songs[currentSongIdx].id) { var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]'); if(!_pl.includes(songs[currentSongIdx].id)){ _pl.push(songs[currentSongIdx].id); localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl)); } } // Descartar y pasar a la siguiente
+                        if(songs[currentSongIdx]) applyTheme(songs[currentSongIdx].type);
                         segundosAcumulados = 0;
                         momentoDeInicio = 0;
                         isRevealed = false; // Resetear revelado
@@ -892,6 +893,7 @@
                         isPlaying = false;
                         container.innerHTML = '<div id="youtube-player"></div>';
                         currentSongIdx++; if(songs[currentSongIdx] && songs[currentSongIdx].id) { var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]'); if(!_pl.includes(songs[currentSongIdx].id)){ _pl.push(songs[currentSongIdx].id); localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl)); } }
+                        if(songs[currentSongIdx]) applyTheme(songs[currentSongIdx].type);
                         segundosAcumulados = 0;
                         momentoDeInicio = 0;
                         isRevealed = false;
@@ -975,20 +977,12 @@
                                 panicTimer = 0;
                                 panicActive = false;
 
-                                // Forzar fallo y PARAR MÚSICA (V29)
-                                isRevealed = true;
+                                // PARAR MÚSICA Y REVELAR (V30)
                                 isPlaying = false;
                                 document.getElementById('player-container').innerHTML = '';
-                                document.getElementById('host-instructions').innerHTML = "<span style='color:#ff4444; font-size:1.5em;'>¡TIEMPO AGOTADO! ❌</span><br>Turno perdido por pánico.";
-                                document.getElementById('btn-reveal-host').style.display = 'none';
-                                document.getElementById('val-card-ui').style.display = 'block';
-                                document.getElementById('validation-buttons').style.display = 'none';
+                                revealData(); 
                                 syncState();
-                                setTimeout(function () {
-                                    activePlayerIdx = (activePlayerIdx + 1) % players.length;
-                                    players[activePlayerIdx].canReload = true;
-                                    nextTurn();
-                                }, 4000);
+                                // Quitamos el setTimeout para que el Host valide manualmente o pase turno
                             } else {
                                 syncState();
                             }

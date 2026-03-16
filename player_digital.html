@@ -769,13 +769,12 @@
             
             <div class="chip-display" id="my-tokens-ui">MIS FICHAS: <span class="neon-chip"></span><span class="neon-chip"></span></div>
 
-            <!-- Mando de Reproducción (Solo Activo) -->
+            <!-- Mando de Reproducción (Mover arriba V30) -->
             <div class="music-controls" id="m-ctrl">
                 <button class="ctrl-btn btn-play" onclick="send('PLAY')">PLAY</button>
                 <button class="ctrl-btn" onclick="send('PAUSE')">PAUSE</button>
                 <button class="ctrl-btn btn-stop" onclick="send('STOP')">STOP</button>
             </div>
-
             <div class="skip-controls" id="s-ctrl">
                 <button class="sk-btn sk-fwd" id="btn-skip-p5" onclick="send('SKIP',5)">+5s</button>
                 <button class="sk-btn sk-fwd" onclick="send('SKIP',10)">+10s</button>
@@ -784,6 +783,11 @@
                 <button class="sk-btn sk-back" onclick="send('SKIP',-10)">-10s</button>
                 <button class="sk-btn sk-back" id="btn-skip-m20" onclick="send('SKIP',-20)">-20s</button>
             </div>
+
+            <!-- Mando de Reproducción (Solo Activo) -->
+            
+
+            
 
             <div class="card-container" id="normal-card-container">
                 <div id="card" class="card">

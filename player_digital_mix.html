@@ -807,6 +807,21 @@
             
             <div class="chip-display" id="my-tokens-ui">MIS FICHAS: <span class="neon-chip"></span><span class="neon-chip"></span></div>
 
+            <!-- Mando de Reproducción (Mover arriba V30) -->
+            <div class="music-controls" id="m-ctrl">
+                <button class="ctrl-btn btn-play" onclick="send('PLAY')">PLAY</button>
+                <button class="ctrl-btn" onclick="send('PAUSE')">PAUSE</button>
+                <button class="ctrl-btn btn-stop" onclick="send('STOP')">STOP</button>
+            </div>
+            <div class="skip-controls" id="s-ctrl">
+                <button class="sk-btn sk-fwd" id="btn-skip-p5" onclick="send('SKIP',5)">+5s</button>
+                <button class="sk-btn sk-fwd" onclick="send('SKIP',10)">+10s</button>
+                <button class="sk-btn sk-fwd" id="btn-skip-p20" onclick="send('SKIP',20)">+20s</button>
+                <button class="sk-btn sk-back" id="btn-skip-m5" onclick="send('SKIP',-5)">-5s</button>
+                <button class="sk-btn sk-back" onclick="send('SKIP',-10)">-10s</button>
+                <button class="sk-btn sk-back" id="btn-skip-m20" onclick="send('SKIP',-20)">-20s</button>
+            </div>
+
             <div class="card-container" id="normal-card-container">
                 <div id="card" class="card">
                     <div class="card-face card-front">
@@ -827,20 +842,9 @@
             </div>
 
             <!-- Mando de Reproducción (Solo Activo) -->
-            <div class="music-controls" id="m-ctrl">
-                <button class="ctrl-btn btn-play" onclick="send('PLAY')">PLAY</button>
-                <button class="ctrl-btn" onclick="send('PAUSE')">PAUSE</button>
-                <button class="ctrl-btn btn-stop" onclick="send('STOP')">STOP</button>
-            </div>
+            
 
-            <div class="skip-controls" id="s-ctrl">
-                <button class="sk-btn sk-fwd" id="btn-skip-p5" onclick="send('SKIP',5)">+5s</button>
-                <button class="sk-btn sk-fwd" onclick="send('SKIP',10)">+10s</button>
-                <button class="sk-btn sk-fwd" id="btn-skip-p20" onclick="send('SKIP',20)">+20s</button>
-                <button class="sk-btn sk-back" id="btn-skip-m5" onclick="send('SKIP',-5)">-5s</button>
-                <button class="sk-btn sk-back" onclick="send('SKIP',-10)">-10s</button>
-                <button class="sk-btn sk-back" id="btn-skip-m20" onclick="send('SKIP',-20)">-20s</button>
-            </div>
+            
 
             <!-- Acciones Especiales (Activo) -->
             <div class="special-actions" id="special-ctrl" style="display:none; flex-direction:column; gap:10px; width:100%; max-width:340px;">
