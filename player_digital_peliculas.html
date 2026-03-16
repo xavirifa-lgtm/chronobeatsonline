@@ -1590,7 +1590,20 @@
                     document.getElementById('btn-reload').disabled = (data.myTokens < 1 || data.canReload === false || isActionLocked);
                     document.getElementById('btn-sabotage-mute').disabled = (data.myTokens < 1 || isActionLocked);
                     document.getElementById('btn-sabotage-buzzer').disabled = (data.myTokens < 1 || isActionLocked);
-                    document.getElementById('btn-sabotage-veto').disabled = (data.myTokens < 1 || isActionLocked);
+                     document.getElementById('btn-sabotage-veto').disabled = (data.myTokens < 1 || isActionLocked);
+                    
+                    var btnDuel = document.getElementById('btn-sabotage-duel');
+                    if (btnDuel) {
+                        btnDuel.disabled = (data.myTokens < 3 || isActionLocked || data.duelTriggered || data.turnPhase === 'DUEL');
+                        if (data.duelTriggered) {
+                            btnDuel.style.opacity = '0.5';
+                            btnDuel.innerText = "DUELO INICIADO";
+                        } else {
+                            btnDuel.style.opacity = '1';
+                            btnDuel.innerHTML = '🔥 DUELO 🔥 (1 <span class="neon-chip" style="width:10px;height:10px; background:var(--gold);"></span>)';
+                        }
+                    }
+
                     var btnBet = document.getElementById('btn-sabotage-bet');
                     if (btnBet) {
                        btnBet.disabled = (data.myTokens < 3 || isActionLocked);

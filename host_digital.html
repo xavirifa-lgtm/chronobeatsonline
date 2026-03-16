@@ -457,6 +457,7 @@
         var queuedDuel = null;
         var currentDuel = null;
         var duelResult = null; // Para mensajes de fin de duelo
+        var duelTriggered = false; // Bloqueo de un duelo por turno
 
         // Variables de estado del Modo Rey
         var gameMode = 'normal';
@@ -518,7 +519,7 @@
                             connections[conn.peer] = conn;
                             syncState(); // Force state sync to reconnecting player
                         } else {
-                            players.push({ id: conn.peer, name: data.name, avatar: data.avatar || null, score: 1, cards: [], tokens: 2, canReload: true });
+                            players.push({ id: conn.peer, name: data.name, avatar: data.avatar || null, score: 1, cards: [], tokens: 5, canReload: true });
                             connections[conn.peer] = conn;
                         }
                         updateLobby();
@@ -645,6 +646,7 @@
             currentBets = {}; var rb=document.getElementById('btn-report-error'); if(rb) rb.style.display='block'; // al cambiar de turno
             activeGuess = null; // Limpiar adivinanza
             bettingAgainst = []; // Limpiar apuestas de "ni de coña"
+            duelTriggered = false; // Reset duel flag
 
             isMuted = false;
             muteTimeRemaining = 0;
@@ -1120,9 +1122,11 @@
                     }
                     break;
                 case 'SABOTAGE_DUEL':
+                    if (turnPhase === 'DUEL' || duelTriggered) return;
                     var p = players.find(x => x.id === peerId);
-                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 1 && (!turnPhase || turnPhase === 'NORMAL') && !queuedDuel && !currentDuel) {
-                        p.tokens -= 1;
+                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 3 && (!turnPhase || turnPhase === 'NORMAL') && !queuedDuel && !currentDuel) {
+                        p.tokens -= 3;
+                        duelTriggered = true;
                         var target = players[activePlayerIdx];
                         // ACTIVACIÓN INMEDIATA
                         currentDuel = { 
@@ -1710,7 +1714,8 @@
                     turnPhase: turnPhase,
                     currentDuel: currentDuel,
                     duelResult: duelResult,
-                    hasShield: hasShield
+                    hasShield: hasShield,
+                    duelTriggered: duelTriggered
                 };
                 try {
                     if (connections[id] && connections[id].open) {

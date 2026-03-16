@@ -457,6 +457,7 @@
         var queuedDuel = null;
         var currentDuel = null;
         var duelResult = null; // Para mensajes de fin de duelo
+        var duelTriggered = false; // Bloqueo de un duelo por turno
 
         // Variables de estado del Modo Rey
         var gameMode = 'normal';
@@ -518,7 +519,7 @@
                             connections[conn.peer] = conn;
                             syncState(); // Force state sync to reconnecting player
                         } else {
-                            players.push({ id: conn.peer, name: data.name, avatar: data.avatar || null, score: 1, cards: [], tokens: 2, canReload: true });
+                            players.push({ id: conn.peer, name: data.name, avatar: data.avatar || null, score: 1, cards: [], tokens: 5, canReload: true });
                             connections[conn.peer] = conn;
                         }
                         updateLobby();
@@ -649,6 +650,11 @@
             isMuted = false;
             muteTimeRemaining = 0;
             if (muteIntervalTimer) { clearInterval(muteIntervalTimer); muteIntervalTimer = null; }
+
+            // Resetear variables de duelo
+            currentDuel = null;
+            duelResult = null;
+            duelTriggered = false;
 
             // Parar música de duelo
             var audioContainer = document.getElementById('audio-player-container');
@@ -837,9 +843,12 @@
                     }
                     break;
                 case 'SABOTAGE_DUEL':
-                    var p = players.find(x => x.id === peerId);
-                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 1 && (!turnPhase || turnPhase === 'NORMAL') && !currentDuel) {
-                        p.tokens -= 1;
+                    if (turnPhase === 'DUEL' || duelTriggered) return;
+                    // Retar a duelo (3 fichas de coste)
+                    var p = players.find(function (pl) { return pl.id === peerId; });
+                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 3 && activeGuess === null && isPlaying && !isRevealed) {
+                        p.tokens -= 3;
+                        duelTriggered = true;
                         var target = players[activePlayerIdx];
                         
                         // ACTIVACIÓN INMEDIATA
@@ -1712,6 +1721,7 @@
                     turnPhase: turnPhase,
                     currentDuel: currentDuel,
                     duelResult: duelResult,
+                    duelTriggered: duelTriggered,
                     hasShield: hasShield
                 };
                 try {

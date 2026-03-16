@@ -457,6 +457,7 @@
         var queuedDuel = null;
         var currentDuel = null;
         var duelResult = null; // Para mensajes de fin de duelo
+        var duelTriggered = false; // Bloqueo de un duelo por turno
 
         // Variables de estado del Modo Rey
         var gameMode = 'normal';
@@ -518,7 +519,7 @@
                             connections[conn.peer] = conn;
                             syncState(); // Force state sync to reconnecting player
                         } else {
-                            players.push({ id: conn.peer, name: data.name, avatar: data.avatar || null, score: 1, cards: [], tokens: 2, canReload: true });
+                            players.push({ id: conn.peer, name: data.name, avatar: data.avatar || null, score: 1, cards: [], tokens: 5, canReload: true });
                             connections[conn.peer] = conn;
                         }
                         updateLobby();
@@ -645,6 +646,8 @@
             currentBets = {}; var rb=document.getElementById('btn-report-error'); if(rb) rb.style.display='block'; // al cambiar de turno
             activeGuess = null; // Limpiar adivinanza
             bettingAgainst = []; // Limpiar apuestas de "ni de coña"
+            duelResult = null;
+            duelTriggered = false;
 
             isMuted = false;
             muteTimeRemaining = 0;
@@ -837,9 +840,12 @@
                     }
                     break;
                 case 'SABOTAGE_DUEL':
-                    var p = players.find(x => x.id === peerId);
-                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 1 && (!turnPhase || turnPhase === 'NORMAL') && !currentDuel) {
-                        p.tokens -= 1;
+                    if (turnPhase === 'DUEL' || duelTriggered) return;
+                    // Retar a duelo (3 fichas de coste)
+                    var p = players.find(function (pl) { return pl.id === peerId; });
+                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 3 && activeGuess === null && isPlaying && !isRevealed) {
+                        p.tokens -= 3;
+                        duelTriggered = true;
                         var target = players[activePlayerIdx];
                         
                         // ACTIVACIÓN INMEDIATA
@@ -1020,6 +1026,7 @@
                         p.tokens -= 2;
                         currentBets[peerId] = valNum;
                         syncState();
+                    } else {
                         console.log("[FAIL] Apuesta rechazada. p:", !!p, "Tokens:", p ? p.tokens : 0, "Ya apostó?", p ? currentBets[peerId] !== undefined : false, "Slot ocupado?", slotOccupied, "Guess es", activeGuess);
                     }
                     break;
@@ -1403,28 +1410,22 @@
 
         function reportSystemError() {
             var s = songs[currentSongIdx];
-            var newYear = prompt("ERROR EN DATOS: " + s.artist + " - " + s.song + "\nIntroduce el AÑO CORRECTO para registro:");
-            if (newYear) {
-                var recipient = "xavi.rifa@gmail.com";
-                var subject = "CORRECCION CHRONOBEATS: Fila " + s.line;
-                var body = "DETECTADO ERROR EN LISTA\n\n" +
-                    "Fila: " + s.line + "\n" +
-                    "Artista: " + s.artist + "\n" +
-                    "Canción: " + s.song + "\n" +
-                    "Año en TXT: " + s.year + "\n" +
-                    "Año Correcto: " + newYear + "\n\n" +
-                    "Instrucciones: Abrir lista_final.txt en la fila " + s.line + " y corregir el año.";
-
-                var mailtoUrl = "mailto:" + recipient + "?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
-
-                console.log("!!! ERROR DE SISTEMA DETECTADO !!!");
-                console.log("Referencia: " + s.artist + " - " + s.song + " (Fila " + s.line + ")");
-                console.log("Corrección: " + s.year + " -> " + newYear);
-
-                window.location.href = mailtoUrl;
-                alert("¡Error registrado! Se ha preparado un email para " + recipient + ".\nSe descarta esta canción y repites el turno.");
-            }
-            nextTurn();
+            if (!s || !s.id) return;
+            var url = 'https://www.youtube.com/watch?v=' + s.id;
+            var listType = s.type ? s.type : 'General';
+            
+            fetch('reporte_error.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url: url, tipo: listType })
+            }).then(function(r){ return r.json()}).then(function(data){
+                alert('URL reportada como rota. Gasta un Token de Recarga si tienes para saltarla.');
+                var btn = document.getElementById('btn-report-error');
+                if(btn) btn.style.display = 'none';
+            }).catch(function(e){
+                console.error(e);
+                alert('Aviso guardado.');
+            });
         }
 
         function revealData() {
@@ -1712,7 +1713,8 @@
                     turnPhase: turnPhase,
                     currentDuel: currentDuel,
                     duelResult: duelResult,
-                    hasShield: hasShield
+                    hasShield: hasShield,
+                    duelTriggered: duelTriggered
                 };
                 try {
                     if (connections[id] && connections[id].open) {

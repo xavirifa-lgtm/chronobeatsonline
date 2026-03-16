@@ -478,6 +478,7 @@
         var queuedDuel = null; // { challenger: id, target: id }
         var currentDuel = null;
         var duelResult = null; // Para mensajes de fin de duelo
+        var duelTriggered = false; // Bloqueo de un duelo por turno
 
         document.getElementById('join-code').innerText = roomCode;
 
@@ -520,7 +521,7 @@
                             connections[conn.peer] = conn;
                             syncState(); // Force state sync to reconnecting player
                         } else {
-                            players.push({ id: conn.peer, name: data.name, avatar: data.avatar || null, score: 1, cards: [], tokens: 2, canReload: true });
+                            players.push({ id: conn.peer, name: data.name, avatar: data.avatar || null, score: 1, cards: [], tokens: 5, canReload: true });
                             connections[conn.peer] = conn;
                         }
                         updateLobby();
@@ -842,8 +843,9 @@
             } else {
                 document.getElementById('host-instructions').innerHTML = "<span style='color:#ff4444; font-size:1.5em; font-family:Bungee;'>EL DUELO QUEDÓ DESIERTO</span>";
             }
-            
             currentDuel = null;
+            duelResult = null;
+            duelTriggered = false;
             syncState();
             // El host verá el resultado y luego dará a Siguiente Turno manualmente o podemos poner un botón
             document.getElementById('host-instructions').innerHTML += "<br><button class='btn' style='margin-top:10px; padding:10px; font-family:Bungee; background:var(--neon); color:#000;' onclick='nextTurn()'>SIGUIENTE TURNO</button>";
@@ -1011,6 +1013,7 @@
                         p.tokens -= 2;
                         currentBets[peerId] = valNum;
                         syncState();
+                    } else {
                         console.log("[FAIL] Apuesta rechazada. p:", !!p, "Tokens:", p ? p.tokens : 0, "Ya apostó?", p ? currentBets[peerId] !== undefined : false, "Slot ocupado?", slotOccupied, "Guess es", activeGuess);
                     }
                     break;
@@ -1140,9 +1143,11 @@
                     }
                     break;
                 case 'SABOTAGE_DUEL':
+                    if (turnPhase === 'DUEL' || duelTriggered) return;
                     var p = players.find(x => x.id === peerId);
-                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 1 && (!turnPhase || turnPhase === 'NORMAL') && !currentDuel) {
-                        p.tokens -= 1;
+                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 3 && (!turnPhase || turnPhase === 'NORMAL') && !currentDuel) {
+                        p.tokens -= 3;
+                        duelTriggered = true;
                         var target = players[activePlayerIdx];
                         
                         // ACTIVACIÓN INMEDIATA
@@ -1455,6 +1460,7 @@
 
         function reportSystemError() {
             var s = songs[currentSongIdx];
+            if (!s || !s.id) return;
             var newYear = prompt("ERROR EN DATOS: " + s.artist + " - " + s.song + "\nIntroduce el AÑO CORRECTO para registro:");
             if (newYear) {
                 var recipient = "xavi.rifa@gmail.com";
@@ -1766,7 +1772,8 @@
                     turnPhase: turnPhase,
                     currentDuel: currentDuel,
                     currentType: songs[currentSongIdx] ? songs[currentSongIdx].type : 'mix',
-                    hasShield: hasShield
+                    hasShield: hasShield,
+                    duelTriggered: duelTriggered
                 };
                 try {
                     if (connections[id] && connections[id].open) {
