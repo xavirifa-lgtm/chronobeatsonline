@@ -383,6 +383,7 @@
 
     <!-- AUDIO JOPUTISMO YOUTUBE -->
     <div id="joputismo-audio-player" style="display:none;"></div>
+    <div id="audio-player-container" style="display:none;"></div>
 
     <div id="dashboard">
         <div class="sidebar">
@@ -1167,6 +1168,7 @@
                             var audioContainer = document.getElementById('audio-player-container');
                             if (audioContainer) audioContainer.innerHTML = '';
                             
+                            document.getElementById('host-instructions').innerHTML = "<div style='color:var(--gold); font-family:Bungee; font-size:2em;'>¡DUELO FINALIZADO!</div><div style='font-size:1.2em;'>Calculando resultados...</div>";
                             revealData();
                         }
                         syncState();

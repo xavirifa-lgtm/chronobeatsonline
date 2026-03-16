@@ -878,15 +878,15 @@
                 <div id="duel-wait-msg" style="display:none; font-size: 0.7em; color: var(--gold); font-family: 'Bungee';">¡DISPARO RECIBIDO! Esperando al rival...</div>
             </div>
 
-            <!-- Overlay de Anuncio de Duelo -->
-            <div id="duel-announcement" class="duel-overlay">
+            <!-- Overlay de Anuncio de Duelo (Movido fuera para visibilidad global) -->
+            <div id="duel-announcement" class="duel-overlay" style="display:none;">
                 <div class="title">¡DUELO A MUERTE!</div>
                 <div id="duel-opponent-names"></div>
                 <div style="color: var(--gold); margin-top: 30px; font-family: 'Bungee';">¡PREPARAOS!</div>
             </div>
 
-            <!-- Pop-up de Resultado Cabrón -->
-            <div id="duel-feedback-popup" class="duel-feedback">
+            <!-- Pop-up de Resultado Cabrón (Movido fuera) -->
+            <div id="duel-feedback-popup" class="duel-feedback" style="display:none;">
                 <h2 id="duel-result-title"></h2>
                 <p id="duel-result-msg"></p>
                 <button class="btn" style="margin-top: 20px; background: var(--neon); color: #000; font-family: 'Bungee';" onclick="this.parentElement.style.display='none'">VALE...</button>
@@ -1479,6 +1479,12 @@
 
                     var isParticipant = (data.currentDuel.challenger === myId || data.currentDuel.target === myId);
                     if (isParticipant) {
+                        // AUTO-SWITCH TO GAME TAB
+                        var gameTabBtn = document.querySelector('.tab-btn[onclick*="tab-game"]');
+                        if (gameTabBtn && !gameTabBtn.classList.contains('active')) {
+                            switchTab('tab-game', gameTabBtn);
+                        }
+
                         normalCardContainer.style.display = 'none';
                         normalCollection.style.display = 'none';
                         kingModeUi.style.display = 'none';
@@ -1816,6 +1822,11 @@
         function sendDuelGuess() {
             var year = document.getElementById('duel-year-input').value;
             if (year && year.length >= 4) {
+                // Sonido de disparo local para feedback inmediato
+                try {
+                    new Audio('https://www.myinstants.com/media/sounds/pistol-shot.mp3').play();
+                } catch(e){}
+                
                 send('DUEL_GUESS', year);
                 document.getElementById('duel-year-input').style.display = 'none';
                 document.querySelector('#duel-mode-ui button').style.display = 'none';
