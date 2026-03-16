@@ -1073,7 +1073,7 @@
                         break;
                     }
                     var p = players.find(function (pl) { return pl.id === peerId; });
-                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 3 && activeGuess === null && isPlaying && !isRevealed && (!turnPhase || turnPhase === 'NORMAL')) {
+                    if (p && p.tokens >= 3 && activeGuess === null && isPlaying && !isRevealed && (!turnPhase || turnPhase === 'NORMAL')) {
                         p.tokens -= 3;
                         isPlaying = false;
                         container.innerHTML = '<div id="youtube-player"></div>';

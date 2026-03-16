@@ -905,8 +905,8 @@
                     <button class="spec-btn" id="btn-sabotage-mute" style="background:var(--bg); border-color:#ff0055; color:#ff0055;" onclick="send('SABOTAGE_MUTE')">MUTE 15s (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
                     <button class="spec-btn" id="btn-sabotage-bet" style="background:var(--bg); border-color:#00f2fe; color:#00f2fe;" onclick="send('BET_AGAINST_ACTIVE')">¡NI DE COÑA! (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
                     <button class="spec-btn" id="btn-sabotage-buzzer" style="background:var(--bg); border-color:#00ff00; color:#00ff00;" onclick="send('SABOTAGE_BUZZER')">¡ZUMBIDO! (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
+                    <button class="spec-btn" id="btn-sabotage-duel" style="background:var(--bg); border:2px dashed var(--gold); color:var(--gold);" onclick="if(lastState && lastState.myTokens >= 3) { send('SABOTAGE_DUEL'); } else { showCustomAlert('Necesitas al menos 3 fichas para retar a duelo (1 de coste + 2 de garantía).'); }">🔥 DUELO 🔥 (1 <span class="neon-chip" style="width:10px;height:10px; background:var(--gold);"></span>)</button>
                     <button class="spec-btn" id="btn-sabotage-veto" style="background:var(--bg); border-color:#ff8800; color:#ff8800;" onclick="send('SABOTAGE_VETO')">VETO CAMBIAR (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
-                    <button class="spec-btn" id="btn-sabotage-skip" style="background:var(--bg); border-color:#ff00ff; color:#ff00ff;" onclick="send('SABOTAGE_FORCE_SKIP')">FORZAR SALTO (3 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
                     <button class="spec-btn" id="btn-sabotage-panic" style="background:var(--bg); border-color:#ff0000; color:#ff0000;" onclick="send('SABOTAGE_PANIC')">PÁNICO 10s (2 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
                     <button class="spec-btn" id="btn-sabotage-fog" style="background:var(--bg); border-color:#aaaaaa; color:#aaaaaa;" onclick="send('SABOTAGE_FOG')">NIEBLA TIEMPO (2 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
                     <button class="spec-btn" id="btn-sabotage-steal-token" style="background:var(--bg); border-color:#ffff00; color:#ffff00;" onclick="send('SABOTAGE_STEAL_TOKEN')">ROBAR FICHA (4 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
@@ -1257,6 +1257,11 @@
             if (hasActiveShield) {
                 html += `<p style="color:var(--gold); font-size:0.75em; text-align:center; margin-top:-5px; font-family:Bungee;">PROTECCIÓN CONTRA SABOTAJES ACTIVA</p>`;
             }
+
+            // FORZAR SALTO (3🔘) - MODO SUPERMAN
+            html += `<button class="market-btn" ${(myTokens < 3) ? 'disabled' : ''} onclick="send('SABOTAGE_FORCE_SKIP')" style="border-color:#ff00ff; color:#ff00ff;">
+                        FORZAR SALTO (3 <span class="neon-chip" style="background:#ff00ff;"></span>)
+                     </button>`;
 
             container.innerHTML = html;
         }
