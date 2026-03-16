@@ -1037,6 +1037,7 @@
                         isPlaying = false;
                         container.innerHTML = '<div id="youtube-player"></div>';
                         currentSongIdx++; if(songs[currentSongIdx] && songs[currentSongIdx].id) { var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]'); if(!_pl.includes(songs[currentSongIdx].id)){ _pl.push(songs[currentSongIdx].id); localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl)); } }
+                        if(songs[currentSongIdx]) applyTheme(songs[currentSongIdx].type);
                         segundosAcumulados = 0;
                         momentoDeInicio = 0;
                         isRevealed = false;
