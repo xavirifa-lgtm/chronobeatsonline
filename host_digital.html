@@ -412,7 +412,7 @@
             </div>
             <div class="validation-area">
                 <div class="val-card" id="val-card-ui" style="display:none;">
-                    <p style="font-size: 0.7em; color: var(--neon); margin-bottom: 5px;">CANCIÓN EN JUEGO</p>
+                    <p style="font-size: 0.7em; color: var(--neon); margin-bottom: 5px;">CANCIÓN EN JUEGO <span style="font-size: 0.8em; opacity: 0.8;"> - ORIGINAL EDITION</span></p>
                     <p id="ui-card-artist" style="font-size: 0.9em; color: #aaa; margin: 0; font-weight: bold;">????</p>
                     <h3 id="ui-card-song" style="margin: 5px 0; font-size: 1.2em;">????</h3>
                     <div id="ui-card-year"
@@ -454,6 +454,9 @@
         var currentBets = {}; // playerId -> slotIndex
         var activeGuess = null; // slotIndex del jugador activo
         var bettingAgainst = []; // IDs de los jugadores que han apostado contra el jugador activo
+        var queuedDuel = null;
+        var currentDuel = null;
+        var duelResult = null; // Para mensajes de fin de duelo
 
         // Variables de estado del Modo Rey
         var gameMode = 'normal';
@@ -633,6 +636,8 @@
         }
 
         function nextTurn() {
+            // Duelo ya no se activa en nextTurn sino inmediatamente
+
             currentSongIdx++; if(songs[currentSongIdx] && songs[currentSongIdx].id) { var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]'); if(!_pl.includes(songs[currentSongIdx].id)){ _pl.push(songs[currentSongIdx].id); localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl)); } } isRevealed = false;
             segundosAcumulados = 0;
             momentoDeInicio = 0;
@@ -644,6 +649,10 @@
             isMuted = false;
             muteTimeRemaining = 0;
             if (muteIntervalTimer) { clearInterval(muteIntervalTimer); muteIntervalTimer = null; }
+
+            // Parar música de duelo
+            var audioContainer = document.getElementById('audio-player-container');
+            if (audioContainer) audioContainer.innerHTML = '';
 
             panicActive = false;
             panicTimer = 0;
@@ -690,6 +699,93 @@
             document.getElementById('ui-current-player').innerText = players[activePlayerIdx].name;
             document.getElementById('host-instructions').innerText = "ESPERANDO ACCIÓN...";
             document.getElementById('player-container').innerHTML = '<div id="youtube-player"></div>';
+            syncState();
+        }
+
+        function playDuelMusic() {
+            var container = document.getElementById('audio-player-container');
+            if (container) {
+                // Limitamos a 45s para que no se haga eterno
+                container.innerHTML = '<iframe id="duel-iframe" width="1" height="1" src="https://www.youtube.com/embed/AFa1-kciCb4?autoplay=1&end=45" allow="autoplay" style="display:none;"></iframe>';
+            }
+        }
+
+        function playGunshot() {
+            try {
+                var audio = new Audio('https://www.myinstants.com/media/sounds/pistol-shot.mp3');
+                audio.play();
+            } catch (e) {
+                console.warn("Error reproducinedo disparo:", e);
+            }
+        }
+
+        function resolveDuel() {
+            if (!currentDuel) return;
+            var s = songs[currentSongIdx];
+            var challenger = players.find(x => x.id === currentDuel.challenger);
+            var target = players.find(x => x.id === currentDuel.target);
+            
+            var dChallenger = Math.abs(currentDuel.challengerYear - s.year);
+            var dTarget = Math.abs(currentDuel.targetYear - s.year);
+            
+            var winnerId = null;
+            var reason = "";
+            
+            if (dChallenger < dTarget) {
+                winnerId = challenger.id;
+                reason = challenger.name + " estuvo más cerca (" + currentDuel.challengerYear + " vs " + currentDuel.targetYear + ")";
+            } else if (dTarget < dChallenger) {
+                winnerId = target.id;
+                reason = target.name + " estuvo más cerca (" + currentDuel.targetYear + " vs " + currentDuel.challengerYear + ")";
+            } else {
+                // Tie breaker: Quick Draw
+                if (currentDuel.challengerTime < currentDuel.targetTime) {
+                    winnerId = challenger.id;
+                    reason = "¡EMPATE! Pero " + challenger.name + " fue más rápido (QUICK DRAW).";
+                } else {
+                    winnerId = target.id;
+                    reason = "¡EMPATE! Pero " + target.name + " fue más rápido (QUICK DRAW).";
+                }
+            }
+            
+            var winner = (winnerId === challenger.id) ? challenger : target;
+            var loser = (winnerId === challenger.id) ? target : challenger;
+            
+            // Frases cabronas
+            var winnerPhrases = [
+                "¡Felicidades, lumbreras! Hasta un reloj parado acierta dos veces al día.",
+                "Qué potra tienes, chaval. A la próxima no te salva ni la caridad.",
+                "¡Victoria! Aunque con esa cara, dudo que te sirva de mucho.",
+                "Mira cómo brilla... es tu ego, no tu inteligencia."
+            ];
+            var loserPhrases = [
+                "¡Qué ridículo! Mi abuela sorda lo habría hecho mejor.",
+                "A fregar, que para adivinar años no sirves.",
+                "¿En serio? ¿Ese año? Vuelve a la guardería.",
+                "Palizón gitano. A casa a llorar con tu madre."
+            ];
+
+            duelResult = {
+                winnerId: winner.id,
+                loserId: loser.id,
+                winnerMsg: winnerPhrases[Math.floor(Math.random() * winnerPhrases.length)],
+                loserMsg: loserPhrases[Math.floor(Math.random() * loserPhrases.length)]
+            };
+
+            // Awarding
+            winner.score++;
+            winner.cards.push(s.year);
+            winner.cards.sort();
+            
+            // Stealing tokens
+            var stolen = Math.min(loser.tokens, 2);
+            loser.tokens -= stolen;
+            winner.tokens += stolen;
+            
+            document.getElementById('host-instructions').innerHTML = "<div style='color:var(--gold); font-family:Bungee; font-size:1.8em;'>¡GANADOR: " + winner.name + "!</div><div style='font-size:0.9em; margin-bottom:10px;'>" + reason + "</div><div style='color:var(--neon);'>Se lleva la carta y " + stolen + " fichas del rival.</div>";
+            document.getElementById('validation-buttons').style.display = 'flex';
+            document.getElementById('validation-buttons').innerHTML = '<button class="btn-val btn-ok" onclick="currentDuel=null; turnPhase=\'NORMAL\'; activePlayerIdx=(activePlayerIdx+1)%players.length; nextTurn();">SIGUIENTE TURNO</button>';
+            
             syncState();
         }
 
@@ -1023,6 +1119,55 @@
                         syncState();
                     }
                     break;
+                case 'SABOTAGE_DUEL':
+                    var p = players.find(x => x.id === peerId);
+                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 1 && (!turnPhase || turnPhase === 'NORMAL') && !queuedDuel && !currentDuel) {
+                        p.tokens -= 1;
+                        var target = players[activePlayerIdx];
+                        // ACTIVACIÓN INMEDIATA
+                        currentDuel = { 
+                            challenger: p.id, 
+                            target: target.id,
+                            challengerYear: null, targetYear: null,
+                            challengerTime: null, targetTime: null
+                        };
+                        duelResult = null;
+                        turnPhase = 'DUEL';
+                        
+                        // Parar musica actual
+                        if (isPlaying) {
+                            isPlaying = false;
+                            container.innerHTML = '<div id="youtube-player"></div>';
+                        }
+                        if (typeof player !== 'undefined' && player && player.stopVideo) player.stopVideo();
+                        
+                        playDuelMusic();
+
+                        document.getElementById('host-instructions').innerHTML = "<div style='color:var(--gold); font-family:Bungee; font-size:2em;'>¡DUELO A MUERTE!</div><div style='font-size:1.2em;'>" + p.name + " VS " + target.name + "</div>";
+                        document.getElementById('validation-buttons').style.display = 'none';
+                        syncState();
+                    }
+                    break;
+                case 'DUEL_GUESS':
+                    if (currentDuel) {
+                        playGunshot();
+                        if (peerId === currentDuel.challenger) {
+                            currentDuel.challengerYear = parseInt(value);
+                            currentDuel.challengerTime = Date.now();
+                        } else if (peerId === currentDuel.target) {
+                            currentDuel.targetYear = parseInt(value);
+                            currentDuel.targetTime = Date.now();
+                        }
+                        if (currentDuel.challengerYear !== null && currentDuel.targetYear !== null) {
+                            // Parar musica de duelo inmediatamente
+                            var audioContainer = document.getElementById('audio-player-container');
+                            if (audioContainer) audioContainer.innerHTML = '';
+                            
+                            revealData();
+                        }
+                        syncState();
+                    }
+                    break;
                 case 'SABOTAGE_STEAL_TURN':
                     var p = players.find(function (pl) { return pl.id === peerId; });
                     if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 4 && isPlaying && !isRevealed) {
@@ -1288,6 +1433,11 @@
             document.getElementById('ui-card-year').innerText = s.year;
             document.getElementById('btn-reveal-host').style.display = 'none';
 
+            if (turnPhase === 'DUEL') {
+                resolveDuel();
+                return;
+            }
+
             // Validación automática
             var activeP = players[activePlayerIdx];
             var isCorrect = false;
@@ -1315,6 +1465,8 @@
         }
 
         function validateResult(isCardOk, isTokenOk) {
+            if (turnPhase === 'DUEL') return;
+            
             if (isTokenOk && players[activePlayerIdx].tokens < 5) {
                 players[activePlayerIdx].tokens++;
             }
@@ -1556,6 +1708,8 @@
                     kingOptions: kingOptions,
                     cheatsEnabled: cheatsEnabled,
                     turnPhase: turnPhase,
+                    currentDuel: currentDuel,
+                    duelResult: duelResult,
                     hasShield: hasShield
                 };
                 try {

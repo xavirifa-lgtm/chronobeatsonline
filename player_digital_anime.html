@@ -581,6 +581,57 @@
             animation: pulse-neon 2s infinite;
         }
 
+        /* Duel Refinements */
+        .duel-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.95);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 20000;
+            padding: 20px;
+            text-align: center;
+            border: 5px solid var(--gold);
+        }
+        .duel-overlay .title {
+            font-family: 'Bungee';
+            font-size: 2.5em;
+            color: var(--gold);
+            text-shadow: 0 0 20px var(--gold);
+            margin-bottom: 20px;
+        }
+        .duel-overlay .vs {
+            font-family: 'Bungee';
+            font-size: 1.2em;
+            color: #fff;
+            margin: 15px 0;
+        }
+        .duel-overlay .player-name {
+            font-family: 'Bungee';
+            font-size: 1.8em;
+            color: var(--neon);
+        }
+
+        .duel-feedback {
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 400px;
+            background: #000;
+            border: 4px solid var(--neon);
+            padding: 30px;
+            text-align: center;
+            z-index: 21000;
+            display: none;
+            box-shadow: 0 0 50px rgba(0,255,0,0.5);
+        }
+        .duel-feedback.lose { border-color: #ff0055; box-shadow: 0 0 50px rgba(255,0,85,0.5); }
+        .duel-feedback h2 { font-family: 'Bungee'; margin-bottom: 15px; }
+        .duel-feedback p { font-family: 'Montserrat'; font-style: italic; line-height: 1.4; }
+
         #ai-loading-overlay {
             display: none;
             position: fixed;
@@ -817,6 +868,29 @@
             
             <!-- Rey (Global dentro de sabotaje por ahora o oculto) -->
             <div id="king-mode-ui" style="display: none; width: 100%; max-width: 340px; margin-top: 10px; text-align: center; flex-direction: column; gap: 10px;"></div>
+
+            <!-- DUELO UI -->
+            <div id="duel-mode-ui" style="display: none; width: 100%; max-width: 340px; margin-top: 20px; text-align: center; flex-direction: column; gap: 15px; background: rgba(255, 215, 0, 0.1); padding: 20px; border: 2px solid var(--gold); border-radius: 15px; box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);">
+                <div style="font-family: 'Bungee'; color: var(--gold); font-size: 1.4em; text-shadow: 0 0 10px var(--gold);">¡DUELO! 🤠</div>
+                <div style="font-family: 'Montserrat'; font-size: 0.8em; color: #fff;">Introduce el año que creas correcto:</div>
+                <input type="number" id="duel-year-input" placeholder="Ej: 1995" style="width: 100%; font-size: 1.5em; border-color: var(--gold); background: #000;">
+                <button class="btn" style="background: var(--gold); color: #000; font-family: 'Bungee';" onclick="sendDuelGuess()">¡DISPARAR!</button>
+                <div id="duel-wait-msg" style="display:none; font-size: 0.7em; color: var(--gold); font-family: 'Bungee';">¡DISPARO RECIBIDO! Esperando al rival...</div>
+            </div>
+
+            <!-- Overlay de Anuncio de Duelo -->
+            <div id="duel-announcement" class="duel-overlay">
+                <div class="title">¡DUELO A MUERTE!</div>
+                <div id="duel-opponent-names"></div>
+                <div style="color: var(--gold); margin-top: 30px; font-family: 'Bungee';">¡PREPARAOS!</div>
+            </div>
+
+            <!-- Pop-up de Resultado Cabrón -->
+            <div id="duel-feedback-popup" class="duel-feedback">
+                <h2 id="duel-result-title"></h2>
+                <p id="duel-result-msg"></p>
+                <button class="btn" style="margin-top: 20px; background: var(--neon); color: #000; font-family: 'Bungee';" onclick="this.parentElement.style.display='none'">VALE...</button>
+            </div>
         </div>
 
         <!-- PESTAÑA SABOTAJE -->
@@ -1374,8 +1448,77 @@
                     let disp2 = jLevel >= 2 ? 'flex' : 'none';
                     if (document.getElementById('btn-sabotage-steal-token')) { document.getElementById('btn-sabotage-steal-token').style.display = disp2; document.getElementById('btn-sabotage-steal-token').disabled = (data.myTokens < 4); }
                     if (document.getElementById('btn-sabotage-steal-turn')) { document.getElementById('btn-sabotage-steal-turn').style.display = disp2; document.getElementById('btn-sabotage-steal-turn').disabled = (data.myTokens < 4); }
-                    if (document.getElementById('btn-sabotage-blackhole')) { document.getElementById('btn-sabotage-blackhole').style.display = disp2; document.getElementById('btn-sabotage-blackhole').disabled = (data.myTokens < 5); }
+                    if (document.getElementById('btn-sabotage-blackhole')) { document.getElementById('btn-sabotage-blackhole').style.display = disp2; }
                 }
+
+                // DUEL PHASE HANDLING
+                var duelModeUi = document.getElementById('duel-mode-ui');
+                var duelAnnouncement = document.getElementById('duel-announcement');
+                var duelFeedback = document.getElementById('duel-feedback-popup');
+
+                if (data.turnPhase === 'DUEL' && data.currentDuel) {
+                    // Mostrar anuncio global si acaba de empezar (y no lo hemos visto aún para este duelo)
+                    var duelId = data.currentDuel.challenger + "_" + data.currentDuel.target;
+                    if (window.lastDuelId !== duelId) {
+                        window.lastDuelId = duelId;
+                        var p1 = players.find(x => x.id === data.currentDuel.challenger);
+                        var p2 = players.find(x => x.id === data.currentDuel.target);
+                        document.getElementById('duel-opponent-names').innerHTML = `
+                            <div class="player-name">${p1 ? p1.name : '???'}</div>
+                            <div class="vs">VS</div>
+                            <div class="player-name">${p2 ? p2.name : '???'}</div>
+                        `;
+                        duelAnnouncement.style.display = 'flex';
+                        setTimeout(() => { duelAnnouncement.style.display = 'none'; }, 4000);
+                    }
+
+                    var isParticipant = (data.currentDuel.challenger === myId || data.currentDuel.target === myId);
+                    if (isParticipant) {
+                        normalCardContainer.style.display = 'none';
+                        normalCollection.style.display = 'none';
+                        kingModeUi.style.display = 'none';
+                        duelModeUi.style.display = 'flex';
+                        
+                        // Si ya contesté, ocultar input y mostrar espera
+                        var hasAnswered = (data.currentDuel.challenger === myId && data.currentDuel.challengerYear !== null) || 
+                                         (data.currentDuel.target === myId && data.currentDuel.targetYear !== null);
+                        if (hasAnswered) {
+                            document.getElementById('duel-year-input').style.display = 'none';
+                            document.querySelector('#duel-mode-ui button').style.display = 'none';
+                            document.getElementById('duel-wait-msg').style.display = 'block';
+                        } else {
+                            document.getElementById('duel-year-input').style.display = 'block';
+                            document.querySelector('#duel-mode-ui button').style.display = 'block';
+                            document.getElementById('duel-wait-msg').style.display = 'none';
+                        }
+                    } else {
+                        if (duelModeUi) duelModeUi.style.display = 'none';
+                    }
+                } else {
+                    if (duelModeUi) duelModeUi.style.display = 'none';
+                    // Resetear lastDuelId cuando no hay duelo
+                    if (!data.currentDuel) window.lastDuelId = null;
+                }
+
+                // MOSTRAR FEEDBACK CABRÓN AL FINALIZAR
+                if (data.duelResult && !window.feedbackShown) {
+                    if (data.duelResult.winnerId === myId) {
+                        document.getElementById('duel-result-title').innerText = "¡HAS GANADO EL DUELO!";
+                        document.getElementById('duel-result-title').style.color = "var(--neon)";
+                        document.getElementById('duel-result-msg').innerText = data.duelResult.winnerMsg;
+                        duelFeedback.className = "duel-feedback";
+                        duelFeedback.style.display = "block";
+                        window.feedbackShown = true;
+                    } else if (data.duelResult.loserId === myId) {
+                        document.getElementById('duel-result-title').innerText = "¡HAS PERDIDO EL DUELO!";
+                        document.getElementById('duel-result-title').style.color = "#ff0055";
+                        document.getElementById('duel-result-msg').innerText = data.duelResult.loserMsg;
+                        duelFeedback.className = "duel-feedback lose";
+                        duelFeedback.style.display = "block";
+                        window.feedbackShown = true;
+                    }
+                }
+                if (!data.duelResult) window.feedbackShown = false;
 
                 var wm = document.getElementById('wait-msg');
                 if (!isMyTurn && !isKingMode) {
@@ -1443,6 +1586,10 @@
                     document.getElementById('btn-sabotage-mute').disabled = (data.myTokens < 1 || isActionLocked);
                     document.getElementById('btn-sabotage-buzzer').disabled = (data.myTokens < 1 || isActionLocked);
                     document.getElementById('btn-sabotage-veto').disabled = (data.myTokens < 1 || isActionLocked);
+                    var btnBet = document.getElementById('btn-sabotage-bet');
+                    if (btnBet) {
+                       btnBet.disabled = (data.myTokens < 3 || isActionLocked);
+                    }
 
                     var btnSkip = document.getElementById('btn-sabotage-skip');
                     if (btnSkip) btnSkip.disabled = (data.myTokens < 1 || isActionLocked);
@@ -1646,6 +1793,18 @@
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(tabId).style.display = 'flex';
             el.classList.add('active');
+        }
+
+        function sendDuelGuess() {
+            var year = document.getElementById('duel-year-input').value;
+            if (year && year.length >= 4) {
+                send('DUEL_GUESS', year);
+                document.getElementById('duel-year-input').style.display = 'none';
+                document.querySelector('#duel-mode-ui button').style.display = 'none';
+                document.getElementById('duel-wait-msg').style.display = 'block';
+            } else {
+                showCustomAlert("Introduce un año válido");
+            }
         }
     </script>
     <script>

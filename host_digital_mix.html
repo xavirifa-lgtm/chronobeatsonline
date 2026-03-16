@@ -412,7 +412,7 @@
             </div>
             <div class="validation-area">
                 <div class="val-card" id="val-card-ui" style="display:none;">
-                    <p style="font-size: 0.7em; color: var(--neon); margin-bottom: 5px;">CANCIÓN EN JUEGO</p>
+                    <p style="font-size: 0.7em; color: var(--neon); margin-bottom: 5px;">CANCIÓN EN JUEGO <span id="ui-song-category" style="font-size: 0.8em; opacity: 0.8;"></span></p>
                     <p id="ui-card-artist" style="font-size: 0.9em; color: #aaa; margin: 0; font-weight: bold;">????</p>
                     <h3 id="ui-card-song" style="margin: 5px 0; font-size: 1.2em;">????</h3>
                     <div id="ui-card-year"
@@ -473,6 +473,11 @@
         var joputismoLevel = 0; // 0: LOSER, 1: HE-MAN, 2: SUPERMAN
         var isFogActive = false;
         var hasShield = {}; // playerId -> boolean
+
+        // Duel Mode variables
+        var queuedDuel = null; // { challenger: id, target: id }
+        var currentDuel = null;
+        var duelResult = null; // Para mensajes de fin de duelo
 
         document.getElementById('join-code').innerText = roomCode;
 
@@ -544,14 +549,14 @@
         }
         function applyTheme(type) {
             let color = '#00ff00'; // Mix / Default
-            if (type === 'orig') color = '#00f2ff';
-            if (type === 'anime') color = '#ff00cc';
-            if (type === 'movies') color = '#ffaa00';
+            let label = ' - MODO MIX';
+            if (type === 'orig') { color = '#00f2ff'; label = ' - ORIGINAL EDITION'; }
+            if (type === 'anime') { color = '#ff00cc'; label = ' - ANIME EDITION'; }
+            if (type === 'movies') { color = '#ffaa00'; label = ' - PELÍCULAS Y SERIES'; }
             
             document.documentElement.style.setProperty('--neon', color);
-            // Actualizar meta theme-color para navegadores móviles
-            let metaTheme = document.querySelector('meta[name="theme-color"]');
-            if (metaTheme) metaTheme.setAttribute('content', color);
+            let catSpan = document.getElementById('ui-song-category');
+            if (catSpan) catSpan.innerText = label;
         }
 
         initPeer();
@@ -697,6 +702,10 @@
             muteTimeRemaining = 0;
             if (muteIntervalTimer) { clearInterval(muteIntervalTimer); muteIntervalTimer = null; }
 
+            // Parar música de duelo
+            var audioContainer = document.getElementById('joputismo-audio-player');
+            if (audioContainer) audioContainer.innerHTML = '';
+
             panicActive = false;
             panicTimer = 0;
             if (panicInterval) { clearInterval(panicInterval); panicInterval = null; }
@@ -726,10 +735,10 @@
                 document.getElementById('player-container').innerHTML = '';
                 syncState();
                 return;
-            } else {
-                turnPhase = 'NORMAL';
             }
             // --- FIN MODO REY CHECK ---
+
+            // Duelo ya no se activa en nextTurn sino inmediatamente
 
             var s = songs[currentSongIdx];
             applyTheme(s ? s.type : 'mix');
@@ -748,22 +757,96 @@
 
         function playBuzzerWebAudio() {
             try {
-                var ctx = new (window.AudioContext || window.webkitAudioContext)();
-                var osc = ctx.createOscillator();
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(150, ctx.currentTime);
-                osc.frequency.linearRampToValueAtTime(100, ctx.currentTime + 2);
-                var gain = ctx.createGain();
-                gain.gain.setValueAtTime(0, ctx.currentTime);
-                gain.gain.linearRampToValueAtTime(1, ctx.currentTime + 0.1);
-                gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 3);
-                osc.connect(gain);
-                gain.connect(ctx.destination);
-                osc.start();
-                osc.stop(ctx.currentTime + 3);
-            } catch (e) {
-                console.error("Audio API error:", e);
+                var audio = new Audio('https://www.myinstants.com/media/sounds/wrong-answer-buzzer.mp3');
+                audio.play();
+            } catch(e) {}
+        }
+
+        function playDuelMusic() {
+            var tc = document.getElementById('joputismo-audio-player');
+            if (tc) {
+                // El bueno, el feo y el malo - Climax - Limitado a 45s
+                tc.innerHTML = '<iframe id="duel-iframe" width="1" height="1" src="https://www.youtube-nocookie.com/embed/AFa1-kciCb4?autoplay=1&end=45" allow="autoplay" style="display:none;"></iframe>';
             }
+        }
+
+        function playGunshot() {
+            try {
+                var audio = new Audio('https://www.myinstants.com/media/sounds/pistol-shot.mp3');
+                audio.play();
+            } catch (e) {
+                console.warn("Error reproducinedo disparo:", e);
+            }
+        }
+
+        function resolveDuel() {
+            if (!currentDuel) return;
+            var s = songs[currentSongIdx];
+            var actualYear = parseInt(s.year);
+            var ch = players.find(p => p.id === currentDuel.challenger);
+            var tg = players.find(p => p.id === currentDuel.target);
+            
+            var chDist = currentDuel.challengerYear !== null ? Math.abs(currentDuel.challengerYear - actualYear) : 999;
+            var tgDist = currentDuel.targetYear !== null ? Math.abs(currentDuel.targetYear - actualYear) : 999;
+            
+            var winnerId = null;
+            if (chDist < tgDist) {
+                winnerId = currentDuel.challenger;
+            } else if (tgDist < chDist) {
+                winnerId = currentDuel.target;
+            } else {
+                // Empate en distancia o ambos exactos
+                // Quick Draw: el que tenga el timestamp más bajo gana
+                if (currentDuel.challengerTime < currentDuel.targetTime) {
+                    winnerId = currentDuel.challenger;
+                } else {
+                    winnerId = currentDuel.target;
+                }
+            }
+            
+            var winner = players.find(p => p.id === winnerId);
+            var loser = players.find(p => p.id === (winnerId === (ch ? ch.id : currentDuel.challenger) ? (tg ? tg.id : currentDuel.target) : (ch ? ch.id : currentDuel.challenger)));
+            
+            // Frases cabronas
+            var winnerPhrases = [
+                "¡Felicidades, lumbreras! Hasta un reloj parado acierta dos veces al día.",
+                "Qué potra tienes, chaval. A la próxima no te salva ni la caridad.",
+                "¡Victoria! Aunque con esa cara, dudo que te sirva de mucho.",
+                "Mira cómo brilla... es tu ego, no tu inteligencia."
+            ];
+            var loserPhrases = [
+                "¡Qué ridículo! Mi abuela sorda lo habría hecho mejor.",
+                "A fregar, que para adivinar años no sirves.",
+                "¿En serio? ¿Ese año? Vuelve a la guardería.",
+                "Palizón gitano. A casa a llorar con tu madre."
+            ];
+
+            duelResult = {
+                winnerId: winner.id,
+                loserId: loser.id,
+                winnerMsg: winnerPhrases[Math.floor(Math.random() * winnerPhrases.length)],
+                loserMsg: loserPhrases[Math.floor(Math.random() * loserPhrases.length)]
+            };
+            
+            if (winner && loser) {
+                // Premio: Gana la carta
+                winner.score++;
+                winner.cards.push(actualYear);
+                
+                // Robo: 2 fichas al oponente (Garantía de Juego Limpio activada)
+                var theft = Math.min(loser.tokens, 2);
+                loser.tokens -= theft;
+                winner.tokens += theft;
+                
+                document.getElementById('host-instructions').innerHTML = "<span style='color:var(--gold); font-size:1.5em; font-family:Bungee;'>¡" + winner.name + " GANA EL DUELO!</span><br>Robó " + theft + " fichas y se queda la carta.";
+            } else {
+                document.getElementById('host-instructions').innerHTML = "<span style='color:#ff4444; font-size:1.5em; font-family:Bungee;'>EL DUELO QUEDÓ DESIERTO</span>";
+            }
+            
+            currentDuel = null;
+            syncState();
+            // El host verá el resultado y luego dará a Siguiente Turno manualmente o podemos poner un botón
+            document.getElementById('host-instructions').innerHTML += "<br><button class='btn' style='margin-top:10px; padding:10px; font-family:Bungee; background:var(--neon); color:#000;' onclick='nextTurn()'>SIGUIENTE TURNO</button>";
         }
 
         function handlePlayerCommand(peerId, action, value) {
@@ -1056,6 +1139,66 @@
                         syncState();
                     }
                     break;
+                case 'SABOTAGE_DUEL':
+                    var p = players.find(x => x.id === peerId);
+                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 1 && (!turnPhase || turnPhase === 'NORMAL') && !currentDuel) {
+                        p.tokens -= 1;
+                        var target = players[activePlayerIdx];
+                        
+                        // ACTIVACIÓN INMEDIATA
+                        currentDuel = { 
+                            challenger: p.id, 
+                            target: target.id,
+                            challengerYear: null, targetYear: null,
+                            challengerTime: null, targetTime: null
+                        };
+                        duelResult = null;
+                        turnPhase = 'DUEL';
+                        
+                        // Parar musica actual
+                        if (isPlaying) {
+                            isPlaying = false;
+                            container.innerHTML = '<div id="youtube-player"></div>';
+                        }
+                        if (typeof player !== 'undefined' && player && player.stopVideo) player.stopVideo();
+                        
+                        playDuelMusic();
+
+                        document.getElementById('ui-card-artist').innerText = "¡DUELO A MUERTE!";
+                        document.getElementById('ui-card-song').innerText = p.name + " VS " + target.name;
+                        document.getElementById('ui-card-year').innerText = "PONED EL AÑO";
+                        document.getElementById('btn-reveal-host').style.display = 'none';
+                        document.getElementById('val-card-ui').style.display = 'block';
+                        document.getElementById('validation-buttons').style.display = 'none';
+                        document.getElementById('challenger-validation').style.display = 'none';
+                        document.getElementById('ui-current-player').innerText = "¡DUELO!";
+                        document.getElementById('host-instructions').innerText = "EL QUE MÁS SE ACERQUE (Y MÁS RÁPIDO) GANA.";
+
+                        syncState();
+                    }
+                    break;
+                case 'DUEL_GUESS':
+                    if (currentDuel) {
+                        playGunshot();
+                        if (peerId === currentDuel.challenger) {
+                            currentDuel.challengerYear = parseInt(value);
+                            currentDuel.challengerTime = Date.now();
+                        } else if (peerId === currentDuel.target) {
+                            currentDuel.targetYear = parseInt(value);
+                            currentDuel.targetTime = Date.now();
+                        }
+                        
+                        // Si ambos han contestado, podemos revelar automáticamente o esperar al host
+                        if (currentDuel.challengerYear !== null && currentDuel.targetYear !== null) {
+                            // Parar musica de duelo inmediatamente
+                            var audioContainer = document.getElementById('joputismo-audio-player');
+                            if (audioContainer) audioContainer.innerHTML = '';
+                            
+                            revealData();
+                        }
+                        syncState();
+                    }
+                    break;
                 case 'SABOTAGE_VETO':
                     if (hasShield[activeP.id]) {
                         var p = players.find(function (pl) { return pl.id === peerId; });
@@ -1344,6 +1487,11 @@
             document.getElementById('ui-card-year').innerText = s.year;
             document.getElementById('btn-reveal-host').style.display = 'none';
 
+            if (turnPhase === 'DUEL') {
+                resolveDuel();
+                return;
+            }
+
             // Validación automática
             var activeP = players[activePlayerIdx];
             var isCorrect = false;
@@ -1371,6 +1519,8 @@
         }
 
         function validateResult(isCardOk, isTokenOk) {
+            if (turnPhase === 'DUEL') return; // No se valida nada en modo duelo manualmente de esta forma
+            
             if (isTokenOk && players[activePlayerIdx].tokens < 5) {
                 players[activePlayerIdx].tokens++;
             }
@@ -1609,9 +1759,12 @@
                     activeTimeline: players[activePlayerIdx] ? players[activePlayerIdx].cards : [],
                     currentBets: currentBets,
                     activeGuess: activeGuess,
+                    currentDuel: currentDuel,
+                    duelResult: duelResult,
                     kingOptions: kingOptions,
                     cheatsEnabled: cheatsEnabled,
                     turnPhase: turnPhase,
+                    currentDuel: currentDuel,
                     currentType: songs[currentSongIdx] ? songs[currentSongIdx].type : 'mix',
                     hasShield: hasShield
                 };
