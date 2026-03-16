@@ -518,7 +518,7 @@
                             connections[conn.peer] = conn;
                             syncState(); // Force state sync to reconnecting player
                         } else {
-                            players.push({ id: conn.peer, name: data.name, avatar: data.avatar || null, score: 1, cards: [], tokens: 5, canReload: true });
+                            players.push({ id: conn.peer, name: data.name, avatar: data.avatar || null, score: 1, cards: [], tokens: 2, canReload: true });
                             connections[conn.peer] = conn;
                         }
                         updateLobby();
@@ -1073,8 +1073,8 @@
                         break;
                     }
                     var p = players.find(function (pl) { return pl.id === peerId; });
-                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 1 && activeGuess === null && isPlaying && !isRevealed && (!turnPhase || turnPhase === 'NORMAL')) {
-                        p.tokens -= 1;
+                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 3 && activeGuess === null && isPlaying && !isRevealed && (!turnPhase || turnPhase === 'NORMAL')) {
+                        p.tokens -= 3;
                         isPlaying = false;
                         container.innerHTML = '<div id="youtube-player"></div>';
                         currentSongIdx++; if(songs[currentSongIdx] && songs[currentSongIdx].id) { var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]'); if(!_pl.includes(songs[currentSongIdx].id)){ _pl.push(songs[currentSongIdx].id); localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl)); } }
