@@ -1699,6 +1699,7 @@
                 var p = players.find(p => p.id === id);
                 var state = {
                     type: 'STATE_UPDATE',
+                    players: players,
                     activePlayer: { id: players[activePlayerIdx] ? players[activePlayerIdx].id : null, name: players[activePlayerIdx] ? players[activePlayerIdx].name : null },
                     judgeId: currentJudgeId,
                     leader: { name: leaderName, score: leaderScore },

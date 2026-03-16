@@ -773,6 +773,20 @@
             RÁPIDO!</p>
     </div>
 
+    <!-- Overlay de Anuncio de Duelo (Visibilidad Global) -->
+    <div id="duel-announcement" class="duel-overlay" style="display:none;">
+        <div class="title">¡DUELO A MUERTE!</div>
+        <div id="duel-opponent-names"></div>
+        <div style="color: var(--gold); margin-top: 30px; font-family: 'Bungee';">¡PREPARAOS!</div>
+    </div>
+
+    <!-- Pop-up de Resultado Cabrón (Visibilidad Global) -->
+    <div id="duel-feedback-popup" class="duel-feedback" style="display:none;">
+        <h2 id="duel-result-title"></h2>
+        <p id="duel-result-msg"></p>
+        <button class="btn" style="margin-top: 20px; background: var(--neon); color: #000; font-family: 'Bungee';" onclick="this.parentElement.style.display='none'">VALE...</button>
+    </div>
+
     <div id="ai-loading-overlay">
         <div class="spinner"></div>
         <div style="font-size: 1.2em;">TRANSFORMANDO<br>SELFIE... 🪄✨</div>
@@ -878,19 +892,6 @@
                 <div id="duel-wait-msg" style="display:none; font-size: 0.7em; color: var(--gold); font-family: 'Bungee';">¡DISPARO RECIBIDO! Esperando al rival...</div>
             </div>
 
-            <!-- Overlay de Anuncio de Duelo (Movido fuera para visibilidad global) -->
-            <div id="duel-announcement" class="duel-overlay" style="display:none;">
-                <div class="title">¡DUELO A MUERTE!</div>
-                <div id="duel-opponent-names"></div>
-                <div style="color: var(--gold); margin-top: 30px; font-family: 'Bungee';">¡PREPARAOS!</div>
-            </div>
-
-            <!-- Pop-up de Resultado Cabrón (Movido fuera) -->
-            <div id="duel-feedback-popup" class="duel-feedback" style="display:none;">
-                <h2 id="duel-result-title"></h2>
-                <p id="duel-result-msg"></p>
-                <button class="btn" style="margin-top: 20px; background: var(--neon); color: #000; font-family: 'Bungee';" onclick="this.parentElement.style.display='none'">VALE...</button>
-            </div>
         </div>
 
         <!-- PESTAÑA SABOTAJE -->
@@ -907,6 +908,7 @@
                     <button class="spec-btn" id="btn-sabotage-buzzer" style="background:var(--bg); border-color:#00ff00; color:#00ff00;" onclick="send('SABOTAGE_BUZZER')">¡ZUMBIDO! (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
                     <button class="spec-btn" id="btn-sabotage-duel" style="background:var(--bg); border:2px dashed var(--gold); color:var(--gold);" onclick="if(lastState && lastState.myTokens >= 3) { send('SABOTAGE_DUEL'); } else { showCustomAlert('Necesitas al menos 3 fichas para retar a duelo (1 de coste + 2 de garantía).'); }">🔥 DUELO 🔥 (1 <span class="neon-chip" style="width:10px;height:10px; background:var(--gold);"></span>)</button>
                     <button class="spec-btn" id="btn-sabotage-veto" style="background:var(--bg); border-color:#ff8800; color:#ff8800;" onclick="send('SABOTAGE_VETO')">VETO CAMBIAR (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
+                    <button class="spec-btn" id="btn-sabotage-skip" style="background:var(--bg); border-color:#ff00ff; color:#ff00ff;" onclick="send('SABOTAGE_FORCE_SKIP')">FORZAR SALTO (3 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
                     <button class="spec-btn" id="btn-sabotage-panic" style="background:var(--bg); border-color:#ff0000; color:#ff0000;" onclick="send('SABOTAGE_PANIC')">PÁNICO 10s (2 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
                     <button class="spec-btn" id="btn-sabotage-fog" style="background:var(--bg); border-color:#aaaaaa; color:#aaaaaa;" onclick="send('SABOTAGE_FOG')">NIEBLA TIEMPO (2 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
                     <button class="spec-btn" id="btn-sabotage-steal-token" style="background:var(--bg); border-color:#ffff00; color:#ffff00;" onclick="send('SABOTAGE_STEAL_TOKEN')">ROBAR FICHA (4 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
@@ -1258,10 +1260,6 @@
                 html += `<p style="color:var(--gold); font-size:0.75em; text-align:center; margin-top:-5px; font-family:Bungee;">PROTECCIÓN CONTRA SABOTAJES ACTIVA</p>`;
             }
 
-            // FORZAR SALTO (3🔘) - MODO SUPERMAN
-            html += `<button class="market-btn" ${(myTokens < 3) ? 'disabled' : ''} onclick="send('SABOTAGE_FORCE_SKIP')" style="border-color:#ff00ff; color:#ff00ff;">
-                        FORZAR SALTO (3 <span class="neon-chip" style="background:#ff00ff;"></span>)
-                     </button>`;
 
             container.innerHTML = html;
         }
@@ -1447,13 +1445,16 @@
                     let disp1 = jLevel >= 1 ? 'flex' : 'none';
                     if (document.getElementById('btn-sabotage-buzzer')) { document.getElementById('btn-sabotage-buzzer').style.display = disp1; document.getElementById('btn-sabotage-buzzer').disabled = (data.myTokens < 1); }
                     if (document.getElementById('btn-sabotage-veto')) { document.getElementById('btn-sabotage-veto').style.display = disp1; document.getElementById('btn-sabotage-veto').disabled = (data.myTokens < 1); }
-                    if (document.getElementById('btn-sabotage-panic')) { document.getElementById('btn-sabotage-panic').style.display = disp1; document.getElementById('btn-sabotage-panic').disabled = (data.myTokens < 2); }
-                    if (document.getElementById('btn-sabotage-fog')) { document.getElementById('btn-sabotage-fog').style.display = disp1; document.getElementById('btn-sabotage-fog').disabled = (data.myTokens < 2); }
-
+                    
                     let disp2 = jLevel >= 2 ? 'flex' : 'none';
-                    if (document.getElementById('btn-sabotage-steal-token')) { document.getElementById('btn-sabotage-steal-token').style.display = disp2; document.getElementById('btn-sabotage-steal-token').disabled = (data.myTokens < 4); }
-                    if (document.getElementById('btn-sabotage-steal-turn')) { document.getElementById('btn-sabotage-steal-turn').style.display = disp2; document.getElementById('btn-sabotage-steal-turn').disabled = (data.myTokens < 4); }
-                    if (document.getElementById('btn-sabotage-blackhole')) { document.getElementById('btn-sabotage-blackhole').disabled = (data.myTokens < 5 || isActionLocked); }
+                    if (document.getElementById('btn-sabotage-skip')) { document.getElementById('btn-sabotage-skip').style.display = disp2; document.getElementById('btn-sabotage-skip').disabled = (data.myTokens < 3); }
+                    if (document.getElementById('btn-sabotage-panic')) { document.getElementById('btn-sabotage-panic').style.display = disp2; document.getElementById('btn-sabotage-panic').disabled = (data.myTokens < 2); }
+                    if (document.getElementById('btn-sabotage-fog')) { document.getElementById('btn-sabotage-fog').style.display = disp2; document.getElementById('btn-sabotage-fog').disabled = (data.myTokens < 2); }
+
+                    let disp3 = jLevel >= 3 ? 'flex' : 'none';
+                    if (document.getElementById('btn-sabotage-steal-token')) { document.getElementById('btn-sabotage-steal-token').style.display = disp3; document.getElementById('btn-sabotage-steal-token').disabled = (data.myTokens < 4); }
+                    if (document.getElementById('btn-sabotage-steal-turn')) { document.getElementById('btn-sabotage-steal-turn').style.display = disp3; document.getElementById('btn-sabotage-steal-turn').disabled = (data.myTokens < 4); }
+                    if (document.getElementById('btn-sabotage-blackhole')) { document.getElementById('btn-sabotage-blackhole').style.display = disp3; document.getElementById('btn-sabotage-blackhole').disabled = (data.myTokens < 5 || isActionLocked); }
                 }
 
                 // DUEL PHASE HANDLING
