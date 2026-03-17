@@ -1438,6 +1438,11 @@
                         } else {
                             kingModeUi.innerHTML = "<h3 style='color:var(--neon);font-family:Bungee;'>CARTA ENVIADA</h3><p>EL REY ESTÁ ADIVINANDO EL AÑO...</p>";
                         }
+                    } else if (data.turnPhase === 'DUEL') {
+                        var isParticipant = data.currentDuel && (data.currentDuel.challenger === myId || data.currentDuel.target === myId);
+                        if (!isParticipant) {
+                            kingModeUi.innerHTML = "<h3 style='color:var(--neon);font-family:Bungee;'>⚔️ DUELO EN CURSO ⚔️</h3><p>LOS DUELISTAS SE ESTÁN BATIENDO EN DUELO...</p>";
+                        }
                     } else if (data.turnPhase === 'KING_GUESS_RESULT') {
                         var html = "<h3 style='color:var(--gold);font-family:Bungee;'>RESULTADO</h3>";
                         html += "<p style='font-size:0.8em;color:#aaa;'>" + data.currentTrack.artist + "</p>";
@@ -1494,11 +1499,11 @@
 
                     let disp2 = jLevel >= 2 ? 'flex' : 'none';
                     if (document.getElementById('btn-sabotage-skip')) { document.getElementById('btn-sabotage-skip').style.display = disp2; document.getElementById('btn-sabotage-skip').disabled = (data.myTokens < 3); }
-                    
-                    let disp3 = jLevel >= 3 ? 'flex' : 'none';
-                    if (document.getElementById('btn-sabotage-steal-token')) { document.getElementById('btn-sabotage-steal-token').style.display = disp3; document.getElementById('btn-sabotage-steal-token').disabled = (data.myTokens < 4); }
-                    if (document.getElementById('btn-sabotage-steal-turn')) { document.getElementById('btn-sabotage-steal-turn').style.display = disp3; document.getElementById('btn-sabotage-steal-turn').disabled = (data.myTokens < 4); }
-                    if (document.getElementById('btn-sabotage-blackhole')) { document.getElementById('btn-sabotage-blackhole').style.display = disp3; document.getElementById('btn-sabotage-blackhole').disabled = (data.myTokens < 5 || isActionLocked); }
+                    if (document.getElementById('btn-sabotage-panic')) { document.getElementById('btn-sabotage-panic').style.display = disp2; document.getElementById('btn-sabotage-panic').disabled = (data.myTokens < 2); }
+                    if (document.getElementById('btn-sabotage-fog')) { document.getElementById('btn-sabotage-fog').style.display = disp2; document.getElementById('btn-sabotage-fog').disabled = (data.myTokens < 2); }
+                    if (document.getElementById('btn-sabotage-steal-token')) { document.getElementById('btn-sabotage-steal-token').style.display = disp2; document.getElementById('btn-sabotage-steal-token').disabled = (data.myTokens < 4); }
+                    if (document.getElementById('btn-sabotage-steal-turn')) { document.getElementById('btn-sabotage-steal-turn').style.display = disp2; document.getElementById('btn-sabotage-steal-turn').disabled = (data.myTokens < 4); }
+                    if (document.getElementById('btn-sabotage-blackhole')) { document.getElementById('btn-sabotage-blackhole').style.display = disp2; document.getElementById('btn-sabotage-blackhole').disabled = (data.myTokens < 5); }
                 }
 
                 // DUEL PHASE HANDLING
@@ -1511,8 +1516,8 @@
                     var duelId = data.currentDuel.challenger + "_" + data.currentDuel.target;
                     if (window.lastDuelId !== duelId) {
                         window.lastDuelId = duelId;
-                        var p1 = players.find(x => x.id === data.currentDuel.challenger);
-                        var p2 = players.find(x => x.id === data.currentDuel.target);
+                        var p1 = data.players ? data.players.find(x => x.id === data.currentDuel.challenger) : null;
+                        var p2 = data.players ? data.players.find(x => x.id === data.currentDuel.target) : null;
                         document.getElementById('duel-opponent-names').innerHTML = `
                             <div class="player-name">${p1 ? p1.name : '???'}</div>
                             <div class="vs">VS</div>

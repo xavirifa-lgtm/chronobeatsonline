@@ -1400,6 +1400,11 @@
                         html += "<p style='font-family:Bungee;font-size:1.2em; border-bottom:1px solid #333; padding-bottom:10px;'>" + data.currentTrack.song + "</p>";
                         html += "<p style='font-family:Bungee;font-size:2em; color:var(--neon); margin-bottom:15px;'>" + data.currentTrack.year + "</p>";
                         kingModeUi.innerHTML = html;
+                    } else if (data.turnPhase === 'DUEL') {
+                        var isParticipant = data.currentDuel && (data.currentDuel.challenger === myId || data.currentDuel.target === myId);
+                        if (!isParticipant) {
+                            kingModeUi.innerHTML = "<h3 style='color:var(--neon);font-family:Bungee;'>⚔️ DUELO EN CURSO ⚔️</h3><p>LOS DUELISTAS SE ESTÁN BATIENDO EN DUELO...</p>";
+                        }
                     }
                 } else {
                     normalCardContainer.style.display = 'flex';
@@ -1448,11 +1453,9 @@
                     if (document.getElementById('btn-sabotage-skip')) { document.getElementById('btn-sabotage-skip').style.display = disp2; document.getElementById('btn-sabotage-skip').disabled = (data.myTokens < 3); }
                     if (document.getElementById('btn-sabotage-panic')) { document.getElementById('btn-sabotage-panic').style.display = disp2; document.getElementById('btn-sabotage-panic').disabled = (data.myTokens < 2); }
                     if (document.getElementById('btn-sabotage-fog')) { document.getElementById('btn-sabotage-fog').style.display = disp2; document.getElementById('btn-sabotage-fog').disabled = (data.myTokens < 2); }
-
-                    let disp3 = jLevel >= 3 ? 'flex' : 'none';
-                    if (document.getElementById('btn-sabotage-steal-token')) { document.getElementById('btn-sabotage-steal-token').style.display = disp3; document.getElementById('btn-sabotage-steal-token').disabled = (data.myTokens < 4); }
-                    if (document.getElementById('btn-sabotage-steal-turn')) { document.getElementById('btn-sabotage-steal-turn').style.display = disp3; document.getElementById('btn-sabotage-steal-turn').disabled = (data.myTokens < 4); }
-                    if (document.getElementById('btn-sabotage-blackhole')) { document.getElementById('btn-sabotage-blackhole').style.display = disp3; document.getElementById('btn-sabotage-blackhole').disabled = (data.myTokens < 5 || isActionLocked); }
+                    if (document.getElementById('btn-sabotage-steal-token')) { document.getElementById('btn-sabotage-steal-token').style.display = disp2; document.getElementById('btn-sabotage-steal-token').disabled = (data.myTokens < 4); }
+                    if (document.getElementById('btn-sabotage-steal-turn')) { document.getElementById('btn-sabotage-steal-turn').style.display = disp2; document.getElementById('btn-sabotage-steal-turn').disabled = (data.myTokens < 4); }
+                    if (document.getElementById('btn-sabotage-blackhole')) { document.getElementById('btn-sabotage-blackhole').style.display = disp2; document.getElementById('btn-sabotage-blackhole').disabled = (data.myTokens < 5); }
                 }
 
                 // DUEL PHASE HANDLING
@@ -1463,11 +1466,11 @@
                 if (data.turnPhase === 'DUEL' && data.currentDuel) {
                     // Mostrar anuncio global si acaba de empezar (y no lo hemos visto aún para este duelo)
                     var duelId = data.currentDuel.challenger + "_" + data.currentDuel.target;
-                    if (window.lastDuelId !== duelId) {
-                        window.lastDuelId = duelId;
-                        var p1 = players.find(x => x.id === data.currentDuel.challenger);
-                        var p2 = players.find(x => x.id === data.currentDuel.target);
-                        document.getElementById('duel-opponent-names').innerHTML = `
+                        if (window.lastDuelId !== duelId) {
+                            window.lastDuelId = duelId;
+                            var p1 = data.players ? data.players.find(x => x.id === data.currentDuel.challenger) : null;
+                            var p2 = data.players ? data.players.find(x => x.id === data.currentDuel.target) : null;
+                            document.getElementById('duel-opponent-names').innerHTML = `
                             <div class="player-name">${p1 ? p1.name : '???'}</div>
                             <div class="vs">VS</div>
                             <div class="player-name">${p2 ? p2.name : '???'}</div>
