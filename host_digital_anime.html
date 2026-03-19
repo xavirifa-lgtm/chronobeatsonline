@@ -689,6 +689,7 @@
         }
 
         function nextTurn() {
+            turnPhase = 'NORMAL';
             // Duelo ya no se activa en nextTurn sino inmediatamente
 
             currentSongIdx++; if(songs[currentSongIdx] && songs[currentSongIdx].id) { var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]'); if(!_pl.includes(songs[currentSongIdx].id)){ _pl.push(songs[currentSongIdx].id); localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl)); } } isRevealed = false;
@@ -738,8 +739,6 @@
                 document.getElementById('player-container').innerHTML = '';
                 syncState();
                 return;
-            } else {
-                turnPhase = 'NORMAL';
             }
             // --- FIN MODO REY CHECK ---
 
@@ -1898,12 +1897,16 @@
                     wantedHtml = '<div class="wanted-poster"><div class="txt1">WANTED</div><div class="txt2">LÍDER</div></div>';
                 }
 
+                var avatarCore = '';
                 if (p.avatar) {
-                    avatarHtml = '<div style="position:relative; display:inline-block; margin-right:12px; vertical-align:middle;">' + 
-                                 wantedHtml +
-                                 '<img src="' + p.avatar + '" style="width:35px; height:35px; border-radius:50%; border:2px solid ' + (p.id === players[activePlayerIdx].id ? 'var(--neon)' : '#555') + ';">' +
-                                 '</div>';
+                    avatarCore = '<img src="' + p.avatar + '" style="width:35px; height:35px; border-radius:50%; border:2px solid ' + (players[activePlayerIdx] && p.id === players[activePlayerIdx].id ? 'var(--neon)' : '#555') + ';">';
+                } else {
+                    var initial = p.name ? p.name.charAt(0).toUpperCase() : '?';
+                    avatarCore = '<div style="width:35px; height:35px; border-radius:50%; background:#222; border:2px solid ' + (players[activePlayerIdx] && p.id === players[activePlayerIdx].id ? 'var(--neon)' : '#555') + '; color:#fff; display:flex; align-items:center; justify-content:center; font-family:\'Bungee\'; font-size:1.2em;">' + initial + '</div>';
                 }
+
+                avatarHtml = '<div style="position:relative; display:inline-block; margin-right:12px; vertical-align:middle;">' + 
+                             wantedHtml + avatarCore + '</div>';
 
                 h += '<div class="leader-item ' + (p.id === players[activePlayerIdx].id ? 'active' : '') + '" style="display:flex; align-items:center; margin-bottom:10px; position:relative;">' + 
                      avatarHtml + 

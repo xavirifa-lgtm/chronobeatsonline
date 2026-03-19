@@ -1299,6 +1299,19 @@
                 updateMarket(data);
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('game-screen').style.display = 'flex';
+
+                // Vibración al inicio de turno PROPIO o al entrar en DUELO
+                var isMyTurnNow = (data.activePlayer && data.activePlayer.id === myId);
+                var wasMyTurnBefore = (lastState && lastState.activePlayer && lastState.activePlayer.id === myId);
+                var phaseChangedToDuel = (data.turnPhase === 'DUEL' && (!lastState || lastState.turnPhase !== 'DUEL'));
+
+                if (navigator.vibrate) {
+                    if (isMyTurnNow && !wasMyTurnBefore) {
+                        navigator.vibrate([100, 50, 100]); // Pulsación triple suave para avisar
+                    } else if (phaseChangedToDuel) {
+                        navigator.vibrate([400]); // Vibración larga para duelo
+                    }
+                }
                 document.getElementById('cur-player').innerText = data.activePlayer && data.activePlayer.name ? data.activePlayer.name : "---";
 
                 // LOGICA DEL MANDO HOST
