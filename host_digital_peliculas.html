@@ -481,7 +481,10 @@
 
         document.getElementById('join-code').innerText = roomCode;
 
-        // Eliminadas funciones de YT API
+        function updateTokens(player, delta) {
+            if (!player) return;
+            player.tokens = Math.max(0, Math.min(5, (player.tokens || 0) + delta));
+        }
 
         function initPeer() {
             peer = new Peer("CB-HOST-" + roomCode, {
@@ -779,21 +782,31 @@
                 loserMsg: loserPhrases[Math.floor(Math.random() * loserPhrases.length)]
             };
             
-            // Awarding
-            winner.score++;
-            winner.cards.push(s.year);
-            winner.cards.sort();
-            
-            // Stealing tokens
-            var stolen = Math.min(loser.tokens, 2);
-            loser.tokens -= stolen;
-            winner.tokens += stolen;
-            
-            document.getElementById('host-instructions').innerHTML = "<div style='color:var(--gold); font-family:Bungee; font-size:1.8em;'>¡GANADOR: " + winner.name + "!</div><div style='font-size:0.9em; margin-bottom:10px;'>" + reason + "</div><div style='color:var(--neon);'>Se lleva la carta y " + stolen + " fichas del rival.</div>";
+            if (winner && loser) {
+                // Awarding
+                winner.score++;
+                winner.cards.push(s.year);
+                winner.cards.sort();
+                
+                // Stealing tokens
+                var stolen = Math.min(loser.tokens, 2);
+                updateTokens(loser, -stolen);
+                updateTokens(winner, stolen);
+                
+                document.getElementById('host-instructions').innerHTML = "<div style='color:var(--gold); font-family:Bungee; font-size:1.8em;'>¡GANADOR: " + winner.name + "!</div><div style='font-size:0.9em; margin-bottom:10px;'>" + reason + "</div><div style='color:var(--neon);'>Se lleva la carta y " + stolen + " fichas del rival.</div>";
+            }
             document.getElementById('validation-buttons').style.display = 'flex';
-            document.getElementById('validation-buttons').innerHTML = '<button class="btn-val btn-ok" onclick="currentDuel=null; turnPhase=\'NORMAL\'; activePlayerIdx=(activePlayerIdx+1)%players.length; nextTurn();">SIGUIENTE TURNO</button>';
+            document.getElementById('validation-buttons').innerHTML = '<button class="btn-val btn-ok" onclick="finishDuel()">ACEPTAR RESULTADO</button>';
             
+            turnPhase = 'NORMAL';
             syncState();
+        }
+
+        function finishDuel() {
+            turnPhase = 'NORMAL';
+            currentDuel = null;
+            duelTriggered = false;
+            nextTurn();
         }
 
         function playBuzzerWebAudio() {
@@ -845,10 +858,9 @@
                     break;
                 case 'SABOTAGE_DUEL':
                     if (turnPhase === 'DUEL' || duelTriggered) return;
-                    // Retar a duelo (3 fichas de coste)
-                    var p = players.find(function (pl) { return pl.id === peerId; });
-                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 3 && activeGuess === null && isPlaying && !isRevealed) {
-                        p.tokens -= 3;
+                    var p = players.find(x => x.id === peerId);
+                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 3 && (!turnPhase || turnPhase === 'NORMAL') && !queuedDuel && !currentDuel) {
+                        updateTokens(p, -3);
                         duelTriggered = true;
                         var target = players[activePlayerIdx];
                         
@@ -918,7 +930,7 @@
                     }
                     var p = players.find(function (pl) { return pl.id === peerId; });
                     if (p && p.tokens >= 1 && p.id !== players[activePlayerIdx].id && isPlaying) {
-                        p.tokens--;
+                        updateTokens(p, -1);
                         muteTimeRemaining += 15000;
 
                         if (!isMuted) {
@@ -973,7 +985,7 @@
                 case 'RELOAD_SONG':
                     var p = players.find(function (pl) { return pl.id === peerId; });
                     if (p && p.tokens >= 1 && p.canReload) {
-                        p.tokens--;
+                        updateTokens(p, -1);
                         p.canReload = false; // Solo uno por turno
                         isPlaying = false;
                         container.innerHTML = '<div id="youtube-player"></div>'; // Parar música de verdad
@@ -1013,7 +1025,7 @@
                 case 'AUTO_WIN':
                     var p = players.find(function (pl) { return pl.id === peerId; });
                     if (p && p.tokens >= 3) {
-                        p.tokens -= 3;
+                        updateTokens(p, -3);
                         validateResult(true, false);
                     }
                     break;
@@ -1028,7 +1040,7 @@
 
                     if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 2 && currentBets[peerId] === undefined && !slotOccupied && activeGuess !== null) {
                         console.log("[OK] Apuesta (Duelo) aceptada para", p.name);
-                        p.tokens -= 2;
+                        updateTokens(p, -2);
                         currentBets[peerId] = valNum;
                         syncState();
                         console.log("[FAIL] Apuesta rechazada. p:", !!p, "Tokens:", p ? p.tokens : 0, "Ya apostó?", p ? currentBets[peerId] !== undefined : false, "Slot ocupado?", slotOccupied, "Guess es", activeGuess);
@@ -1037,7 +1049,7 @@
                 case 'BET_AGAINST_ACTIVE':
                     var p = players.find(function (pl) { return pl.id === peerId; });
                     if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 1 && !bettingAgainst.includes(peerId) && isPlaying && !isRevealed && (!turnPhase || turnPhase === 'NORMAL')) {
-                        p.tokens--;
+                        updateTokens(p, -1);
                         bettingAgainst.push(peerId);
 
                         // Mostrar mensaje flotante en el host
@@ -1062,7 +1074,7 @@
                     }
                     var p = players.find(function (pl) { return pl.id === peerId; });
                     if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 2 && !panicActive && isPlaying && !isRevealed && (!turnPhase || turnPhase === 'NORMAL')) {
-                        p.tokens -= 2;
+                        updateTokens(p, -2);
                         panicActive = true;
                         panicTimer = 10;
 
@@ -1096,7 +1108,7 @@
                 case 'SABOTAGE_BUZZER':
                     var p = players.find(function (pl) { return pl.id === peerId; });
                     if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 1 && isPlaying && !isRevealed && (!turnPhase || turnPhase === 'NORMAL')) {
-                        p.tokens -= 1;
+                        updateTokens(p, -1);
                         playBuzzerWebAudio();
                         syncState();
                     }
@@ -1113,7 +1125,7 @@
                     }
                     var p = players.find(function (pl) { return pl.id === peerId; });
                     if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 2 && !isFogActive && (!turnPhase || turnPhase === 'NORMAL')) {
-                        p.tokens -= 2;
+                        updateTokens(p, -2);
                         isFogActive = true;
 
                         document.getElementById('host-instructions').innerHTML = "<span style='color:#aaaaaa; font-size:1.5em; font-family:Bungee;'>¡JAJAJA! ¡" + p.name + " HA LANZADO NIEBLA TEMPORAL!</span>";
@@ -1136,7 +1148,7 @@
                     }
                     var p = players.find(function (pl) { return pl.id === peerId; });
                     if (p && p.tokens >= 3 && activeGuess === null && isPlaying && !isRevealed && (!turnPhase || turnPhase === 'NORMAL')) {
-                        p.tokens -= 3;
+                        updateTokens(p, -3);
                         isPlaying = false;
                         container.innerHTML = '<div id="youtube-player"></div>';
                         currentSongIdx++; if(songs[currentSongIdx] && songs[currentSongIdx].id) { var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]'); if(!_pl.includes(songs[currentSongIdx].id)){ _pl.push(songs[currentSongIdx].id); localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl)); } }
@@ -1170,7 +1182,7 @@
                     }
                     var p = players.find(function (pl) { return pl.id === peerId; });
                     if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 1 && players[activePlayerIdx].canReload && (!turnPhase || turnPhase === 'NORMAL')) {
-                        p.tokens -= 1;
+                        updateTokens(p, -1);
                         players[activePlayerIdx].canReload = false;
 
                         document.getElementById('host-instructions').innerHTML = "<span style='color:#ff8800; font-size:1.5em; font-family:Bungee;'>¡" + p.name + " HA VETADO LA RECARGA!</span>";
@@ -1184,7 +1196,7 @@
                 case 'SABOTAGE_STEAL_TURN':
                     var p = players.find(function (pl) { return pl.id === peerId; });
                     if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 4 && isPlaying && !isRevealed) {
-                        p.tokens -= 4;
+                        updateTokens(p, -4);
                         var oldActive = players[activePlayerIdx];
                         activePlayerIdx = players.indexOf(p);
 
@@ -1206,7 +1218,7 @@
                     if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 5 && (!turnPhase || turnPhase === 'NORMAL')) {
                         var validTargets = players.filter(function (t) { return t.id !== p.id && t.score > 1; });
                         if (validTargets.length > 0) {
-                            p.tokens -= 5;
+                            updateTokens(p, -5);
                             var target = validTargets[Math.floor(Math.random() * validTargets.length)];
                             target.score -= 1;
                             var cardIdx = Math.floor(Math.random() * target.cards.length);
@@ -1225,10 +1237,10 @@
                     if (p && p.tokens >= 4) {
                         var possibleTargets = players.filter(function (pt) { return pt.id !== peerId && pt.tokens > 0; });
                         if (possibleTargets.length > 0) {
-                            p.tokens -= 4; // Pay the cost
+                            updateTokens(p, -4); // Pay the cost
                             var target = possibleTargets[Math.floor(Math.random() * possibleTargets.length)];
-                            target.tokens -= 1;
-                            p.tokens += 1;
+                            updateTokens(target, -1);
+                            updateTokens(p, 1);
 
                             // Send target an alert
                             var tConn = connections[target.id];
@@ -1349,10 +1361,30 @@
                         setJoputismo(parseInt(value));
                     }
                     break;
+                case 'REMOTE_SET_GAME_MODE':
+                    if (turnPhase === 'LOBBY') {
+                        gameMode = value;
+                        document.getElementById('game-mode-select').value = value;
+                        syncState();
+                    }
+                    break;
+                case 'REMOTE_KING_RESOLVE':
+                    resolveKingMode(value === 'true' || value === true);
+                    break;
+                case 'REMOTE_NEXT_TURN':
+                    if (turnPhase === 'DUEL' && !currentDuel) {
+                        nextTurn();
+                    } else if (isRevealed) {
+                        nextTurn();
+                    }
+                    break;
+                case 'REMOTE_DUEL_FINISH':
+                    finishDuel();
+                    break;
                 case 'MARKET_WILDCARD':
                     var p = players.find(function (pl) { return pl.id === peerId; });
                     if (p && p.id === activeP.id && p.tokens >= 1) {
-                        p.tokens -= 1;
+                        updateTokens(p, -1);
                         if (value === 'artist') {
                             document.getElementById('ui-card-artist').innerText = s.artist;
                             document.getElementById('ui-card-artist').style.color = "var(--gold)";
@@ -1366,7 +1398,7 @@
                 case 'MARKET_DECADE':
                     var p = players.find(function (pl) { return pl.id === peerId; });
                     if (p && p.id === activeP.id && p.tokens >= 1) {
-                        p.tokens -= 1;
+                        updateTokens(p, -1);
                         var sYear = parseInt(s.year);
                         var decadeStr = "Desconocida";
                         if (!isNaN(sYear)) {
@@ -1381,7 +1413,7 @@
                 case 'MARKET_SHIELD':
                     var p = players.find(function (pl) { return pl.id === peerId; });
                     if (p && p.tokens >= 3 && !hasShield[p.id]) {
-                        p.tokens -= 3;
+                        updateTokens(p, -3);
                         hasShield[p.id] = true;
                         try {
                             if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "ESCUDO ACTIVADO! Tu proximo sabotaje enemigo será neutralizado." });
@@ -1480,8 +1512,8 @@
         function validateResult(isCardOk, isTokenOk) {
             if (turnPhase === 'DUEL') return;
             
-            if (isTokenOk && players[activePlayerIdx].tokens < 5) {
-                players[activePlayerIdx].tokens++;
+            if (isTokenOk) {
+                updateTokens(players[activePlayerIdx], 1);
             }
 
             // RESOLVER APUESTAS "NI DE COÑA"
@@ -1543,8 +1575,7 @@
                     bettingAgainst.forEach(function (pid) {
                         var p = players.find(x => x.id === pid);
                         if (p) {
-                            p.tokens += 3;
-                            if (p.tokens > 5) p.tokens = 5; // Limite de 5 fichas
+                            updateTokens(p, 3);
                             if (connections[pid]) {
                                 connections[pid].send({ type: 'BET_RESULT', msg: "¡SABÍAS QUE IBA A FALLAR Y HAS GANADO!\n\nRecompensa: +3 FICHAS AZULES." });
                             }
