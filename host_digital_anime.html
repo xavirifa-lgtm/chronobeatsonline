@@ -690,6 +690,8 @@
 
         function nextTurn() {
             turnPhase = 'NORMAL';
+            currentDuel = null;
+            duelResult = null;
             // Duelo ya no se activa en nextTurn sino inmediatamente
 
             currentSongIdx++; if(songs[currentSongIdx] && songs[currentSongIdx].id) { var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]'); if(!_pl.includes(songs[currentSongIdx].id)){ _pl.push(songs[currentSongIdx].id); localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl)); } } isRevealed = false;
@@ -1282,6 +1284,16 @@
                         document.getElementById('validation-buttons').style.display = 'none';
 
                         document.getElementById('host-instructions').innerHTML = "<span style='color:#ff00ff; font-size:1.5em; font-family:Bungee;'>¡" + p.name + " HA OBLIGADO A CAMBIAR LA CANCIÓN!</span>";
+                        
+                        // NOTIFICAR AL JUGADOR SALTADO (V79)
+                        var targetConn = connections[activeP.id];
+                        if (targetConn) {
+                            targetConn.send({
+                                type: 'SABOTAGE_SKIP_ALERT',
+                                msg: "¡" + p.name + " HA SALTADO TU CANCIÓN! ⏭️"
+                            });
+                        }
+
                         setTimeout(function () {
                             if (!isRevealed && !panicActive) document.getElementById('host-instructions').innerText = "CANCIÓN CAMBIADA (DALE A PLAY)";
                         }, 4000);
@@ -1342,8 +1354,8 @@
                             target.score -= 1;
                             var cardIdx = Math.floor(Math.random() * target.cards.length);
                             target.cards.splice(cardIdx, 1);
-
-                            document.getElementById('host-instructions').innerHTML = "<span style='color:#9900ff; font-size:1.5em; font-family:Bungee;'>¡" + p.name + " CREÓ UN AGUJERO NEGRO Y DESTRUYÓ UNA CARTA DE " + target.name + "!</span>";
+                            triggerFlash();
+                            document.getElementById('host-instructions').innerHTML = "<span style='color:var(--gold); font-size:1.5em; font-family:Bungee;'>¡" + p.name + " ACTIVÓ EL RETROCESO TEMPORAL!</span>";
                             setTimeout(function () {
                                 if (!isRevealed && !panicActive) document.getElementById('host-instructions').innerText = (isMuted ? "REPRODUCIENDO (MUTE)" : "REPRODUCIENDO");
                             }, 4000);
@@ -1390,6 +1402,7 @@
                                 });
                             }
 
+                            triggerFlash();
                             document.getElementById('host-instructions').innerHTML = "<span style='color:#ffff00; font-size:1.2em;'>¡" + p.name + " HA ROBADO A " + target.name + "!</span>";
                             setTimeout(function () {
                                 if (!isRevealed && !panicActive) document.getElementById('host-instructions').innerText = (isMuted ? "REPRODUCIENDO (MUTE)" : "REPRODUCIENDO");
@@ -1836,8 +1849,13 @@
 
             var currentJudgeId = 'ALL';
             if (document.getElementById('lobby').style.display === 'none' && players.length > 0) {
-                var judgeIdx = (activePlayerIdx + 1) % players.length;
-                currentJudgeId = players[judgeIdx].id;
+                // El usuario prefiere que el mando pase al SIGUIENTE jugador para validar
+                if (turnPhase === 'NORMAL' || turnPhase === 'KING_GUESS' || turnPhase === 'KING_SELECTION') {
+                    var judgeIdx = (activePlayerIdx + 1) % players.length;
+                    currentJudgeId = players[judgeIdx] ? players[judgeIdx].id : 'ALL';
+                } else {
+                    currentJudgeId = 'ALL';
+                }
             }
 
             for (var id in connections) {
@@ -1893,7 +1911,8 @@
 
                 var avatarHtml = '';
                 var wantedHtml = '';
-                if (p.score === maxScore && maxScore > 2) {
+                // Mostrar cartel de SE BUSCA al que va ganando (y tenga al menos 1 punto para que sea emocionante)
+                if (p.score === maxScore && maxScore > 0) {
                     wantedHtml = '<div class="wanted-poster"><div class="txt1">WANTED</div><div class="txt2">LÍDER</div></div>';
                 }
 
@@ -1901,8 +1920,7 @@
                 if (p.avatar) {
                     avatarCore = '<img src="' + p.avatar + '" style="width:35px; height:35px; border-radius:50%; border:2px solid ' + (players[activePlayerIdx] && p.id === players[activePlayerIdx].id ? 'var(--neon)' : '#555') + ';">';
                 } else {
-                    var initial = p.name ? p.name.charAt(0).toUpperCase() : '?';
-                    avatarCore = '<div style="width:35px; height:35px; border-radius:50%; background:#222; border:2px solid ' + (players[activePlayerIdx] && p.id === players[activePlayerIdx].id ? 'var(--neon)' : '#555') + '; color:#fff; display:flex; align-items:center; justify-content:center; font-family:\'Bungee\'; font-size:1.2em;">' + initial + '</div>';
+                    avatarCore = '<div style="width:35px; height:35px; border-radius:50%; background:#222; border:2px solid ' + (players[activePlayerIdx] && p.id === players[activePlayerIdx].id ? 'var(--neon)' : '#555') + '; color:#fff; display:flex; align-items:center; justify-content:center; font-family:\'Bungee\'; font-size:1.24em; box-shadow:0 0 5px rgba(0,0,0,0.5);">?</div>';
                 }
 
                 avatarHtml = '<div style="position:relative; display:inline-block; margin-right:12px; vertical-align:middle;">' + 

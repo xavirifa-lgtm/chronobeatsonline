@@ -404,6 +404,32 @@
             box-shadow: 0 0 8px #00f2fe, 0 0 15px #00f2fe;
         }
 
+        /* V79: Mejora de botones deshabilitados */
+        .spec-btn:disabled, .btn:disabled {
+            opacity: 0.4;
+            filter: grayscale(1);
+            cursor: not-allowed !important;
+            border-color: #444 !important;
+            color: #444 !important;
+            box-shadow: none !important;
+        }
+
+        /* V79: Efecto Niebla Temporal */
+        #fog-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: url('https://www.transparenttextures.com/patterns/fog.png'), rgba(255,255,255,0.1);
+            z-index: 15000;
+            pointer-events: none;
+            animation: fog-move 10s linear infinite;
+            opacity: 0.6;
+        }
+        @keyframes fog-move {
+            from { background-position: 0 0; }
+            to { background-position: 1000px 1000px; }
+        }
+
         /* Slots de apuesta */
         .bet-slot {
             width: 30px;
@@ -822,6 +848,7 @@
     <div id="game-screen">
         <!-- PESTAÑA JUEGO -->
         <div id="tab-game" class="tab-content active">
+            <div id="fog-overlay"></div>
             <div id="leaderboard-info">
                 <div class="leader-row">LÍDER: <span id="lb-leader-name">---</span> (<span id="lb-leader-cards">0</span>)</div>
                 <div class="me-row">YO: <span id="lb-me-cards">0</span> CARTAS</div>
@@ -1277,6 +1304,11 @@
         function handle(data) {
             console.log("Evento:", data.type, data);
 
+            if (data.type === 'SABOTAGE_SKIP_ALERT') {
+                showCustomAlert(data.msg);
+                return;
+            }
+
             if (data.type === 'BET_RESULT') {
                 if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
                 showCustomAlert(data.msg);
@@ -1294,7 +1326,7 @@
                 }
             }
 
-            lastState = data;
+            // State handling moved to end
             if (data.type === 'STATE_UPDATE') {
                 updateMarket(data);
                 document.getElementById('login-screen').style.display = 'none';
@@ -1689,6 +1721,14 @@
                         document.getElementById('panic-timer').style.color = 'white';
                     }
 
+                    // FOG OVERLAY CHECK (V79)
+                    var fogOverlay = document.getElementById('fog-overlay');
+                    if (data.isFogActive && isMyTurn) {
+                        fogOverlay.style.display = 'block';
+                    } else {
+                        fogOverlay.style.display = 'none';
+                    }
+
                     var btnSabotageBet = document.getElementById('btn-sabotage-bet');
                     if (btnSabotageBet) {
                         var alreadyBet = data.bettingAgainst && data.bettingAgainst.includes(myId);
@@ -1702,6 +1742,7 @@
                         }
                     }
                 }
+                lastState = data;
             }
         }
 
