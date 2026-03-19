@@ -907,6 +907,7 @@
                     <button class="spec-btn" id="btn-sabotage-bet" style="background:var(--bg); border-color:#00f2fe; color:#00f2fe;" onclick="send('BET_AGAINST_ACTIVE')">¡NI DE COÑA! (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
                     <button class="spec-btn" id="btn-sabotage-buzzer" style="background:var(--bg); border-color:#00ff00; color:#00ff00;" onclick="send('SABOTAGE_BUZZER')">¡ZUMBIDO! (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
                     <button class="spec-btn" id="btn-sabotage-duel" style="background:var(--bg); border:2px dashed var(--gold); color:var(--gold);" onclick="if(lastState && lastState.myTokens >= 3) { send('SABOTAGE_DUEL'); } else { showCustomAlert('Necesitas al menos 3 fichas para retar a duelo (1 de coste + 2 de garantía).'); }">🔫 DUELO 🔫 (1 <span class="neon-chip" style="width:10px;height:10px; background:var(--gold);"></span>)</button>
+                    <button class="spec-btn" id="btn-sabotage-russian-roulette" style="background:var(--bg); border:2px solid #ff0055; color:#ff0055;" onclick="send('SABOTAGE_RUSSIAN_ROULETTE')">🔫 RULETA RUSA 🔫 (2 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
                     <button class="spec-btn" id="btn-sabotage-veto" style="background:var(--bg); border-color:#ff8800; color:#ff8800;" onclick="send('SABOTAGE_VETO')">VETO CAMBIAR (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
                     <button class="spec-btn" id="btn-sabotage-skip" style="background:var(--bg); border-color:#ff00ff; color:#ff00ff;" onclick="send('SABOTAGE_FORCE_SKIP')">FORZAR SALTO (3 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
                     <button class="spec-btn" id="btn-sabotage-panic" style="background:var(--bg); border-color:#ff0000; color:#ff0000;" onclick="send('SABOTAGE_PANIC')">PÁNICO 10s (2 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
@@ -1265,6 +1266,7 @@
         }
 
         function send(action, value) {
+            if (navigator.vibrate) navigator.vibrate(40);
             if (conn && conn.open) {
                 conn.send({ type: 'COMMAND', action: action, value: value });
             } else {
@@ -1276,6 +1278,7 @@
             console.log("Evento:", data.type, data);
 
             if (data.type === 'BET_RESULT') {
+                if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
                 showCustomAlert(data.msg);
                 return;
             }
@@ -1472,6 +1475,10 @@
                     if (document.getElementById('btn-sabotage-steal-token')) { document.getElementById('btn-sabotage-steal-token').style.display = disp2; document.getElementById('btn-sabotage-steal-token').disabled = (data.myTokens < 4); }
                     if (document.getElementById('btn-sabotage-steal-turn')) { document.getElementById('btn-sabotage-steal-turn').style.display = disp2; document.getElementById('btn-sabotage-steal-turn').disabled = (data.myTokens < 4); }
                     if (document.getElementById('btn-sabotage-blackhole')) { document.getElementById('btn-sabotage-blackhole').style.display = disp2; document.getElementById('btn-sabotage-blackhole').disabled = (data.myTokens < 5); }
+                    if (document.getElementById('btn-sabotage-russian-roulette')) {
+                         document.getElementById('btn-sabotage-russian-roulette').style.display = 'flex';
+                         document.getElementById('btn-sabotage-russian-roulette').disabled = (data.myTokens < 2);
+                    }
                 }
 
                 // DUEL PHASE HANDLING

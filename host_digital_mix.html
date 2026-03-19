@@ -334,11 +334,59 @@
             box-shadow: 0 0 40px var(--neon, #00f2ff);
             transform: scale(1.1);
         }
+        .wanted-poster {
+            position: absolute;
+            width: 80px;
+            height: 100px;
+            background: #d4a76a;
+            border: 2px solid #5d4037;
+            border-radius: 5px;
+            top: -50px;
+            left: 50%;
+            transform: translateX(-50%) rotate(-5deg);
+            z-index: 10;
+            font-family: 'Bungee', cursive;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            pointer-events: none;
+            box-shadow: 3px 3px 10px rgba(0,0,0,0.6);
+            background-image: radial-gradient(circle at 10% 20%, rgba(0,0,0,0.1) 0%, transparent 50%);
+        }
+        .wanted-poster::after {
+            content: '';
+            position: absolute;
+            top: 2px; left: 2px; right: 2px; bottom: 2px;
+            border: 1px solid rgba(93, 64, 55, 0.3);
+            pointer-events: none;
+        }
+        .wanted-poster .txt1 { font-size: 10px; color: #5d4037; margin-bottom: 5px; letter-spacing: 1px; }
+        .wanted-poster .txt2 { font-size: 16px; color: #b71c1c; font-weight: bold; text-shadow: 1px 1px 0 #000; }
+
+        #flash-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: white;
+            z-index: 99999;
+            pointer-events: none;
+            opacity: 0;
+        }
+        @keyframes gunshot-flash {
+            0% { opacity: 0; }
+            10% { opacity: 0.9; }
+            100% { opacity: 0; }
+        }
+        .animate-flash {
+            animation: gunshot-flash 0.4s ease-out forwards;
+        }
     </style>
 </head>
 
 <body>
     <a href="index.html" class="btn-hub" title="Volver al Hub">H</a>
+    <div id="flash-overlay"></div>
     <div id="winner-screen">
         <h1>¡TENEMOS GANADOR!</h1>
         <div id="winner-avatar-img" style="margin: 20px 0;"></div>
@@ -853,6 +901,7 @@
         }
 
         function finishDuel() {
+            triggerFlash();
             turnPhase = 'NORMAL';
             currentDuel = null;
             duelTriggered = false;
@@ -893,6 +942,54 @@
                     document.getElementById('host-instructions').innerText = "¿ACERTÓ?";
                     revealData();
                     syncState();
+                    break;
+                case 'SABOTAGE_RUSSIAN_ROULETTE':
+                    var p = players.find(x => x.id === peerId);
+                    if (p && p.tokens >= 2 && (!turnPhase || turnPhase === 'NORMAL')) {
+                        updateTokens(p, -2);
+                        playGunshot();
+                        triggerFlash();
+                        
+                        // Pick a random target (someone else)
+                        var otherPlayers = players.filter(x => x.id !== p.id);
+                        var target = otherPlayers.length > 0 ? otherPlayers[Math.floor(Math.random() * otherPlayers.length)] : null;
+                        
+                        var result = Math.floor(Math.random() * 4); // 0, 1, 2, 3
+                        var msgP = "";
+                        var msgT = "";
+                        
+                        if (result === 0) { // Robar 1 carta
+                            if (target && target.cards && target.cards.length > 0) {
+                                var card = target.cards.pop();
+                                p.cards.push(card);
+                                msgP = "¡ZAS! Le has mangado una carta a " + target.name + ". ¡Vaya suerte de forajido!";
+                                msgT = "¡MALAS NOTICIAS! " + p.name + " te ha levantado una carta en la Ruleta Rusa. ¡Es un mangante!";
+                            } else {
+                                msgP = "Has intentado mangar una carta a " + (target ? target.name : "nadie") + " pero no tenía nada. ¡Pólvora mojada!";
+                            }
+                        } else if (result === 1) { // Robar 1 ficha
+                            if (target && target.tokens > 0) {
+                                updateTokens(target, -1);
+                                updateTokens(p, 1);
+                                msgP = "¡Dichosa suerte! Le has birlado una ficha a " + target.name + ".";
+                                msgT = "¡AY! " + p.name + " te ha robado una ficha en la Ruleta Rusa. ¡Vigila tu bolsa!";
+                            } else {
+                                msgP = "¡Vaya! Has ganado un hueco vacío. " + (target ? target.name : "nadie") + " no tiene ni un centavo.";
+                            }
+                        } else if (result === 2) { // Perder 1 ficha
+                            updateTokens(p, -1);
+                            msgP = "¡BOOM! El tiro te ha rozado la oreja... Pierdes 1 ficha extra por el susto.";
+                        } else if (result === 3) { // Perder 2 fichas
+                            updateTokens(p, -2);
+                            msgP = "¡CRITICAL HIT! Te has pegado un tiro en el pie tú solo. Pierdes 2 fichas extras.";
+                        }
+
+                        if (msgP) try { connections[p.id].send({ type: 'BET_RESULT', msg: msgP }); } catch (e) { }
+                        if (target && msgT) try { connections[target.id].send({ type: 'BET_RESULT', msg: msgT }); } catch (e) { }
+                        
+                        document.getElementById('host-instructions').innerHTML = "<span style='color:#ff0055; font-size:1.5em; font-family:Bungee;'>¡" + p.name + " JUGÓ A LA RULETA RUSA!</span>";
+                        syncState();
+                    }
                     break;
                 case 'SABOTAGE_MUTE':
                     if (hasShield[activeP.id]) {
@@ -1477,6 +1574,7 @@
         }
 
         function resolveKingMode(won) {
+            triggerFlash();
             document.getElementById('host-instructions').innerHTML = "CARGANDO SIGUIENTE FASE...";
             if (won && activePlayerIdx < players.length) {
                 showWinner(players[activePlayerIdx].name);
@@ -1815,15 +1913,31 @@
         }
 
         function updateUI() {
-            var h = ""; players.slice().sort(function (a, b) { return b.score - a.score }).forEach(function (p) {
+            var sortedPlayers = players.slice().sort(function (a, b) { return b.score - a.score });
+            var maxScore = sortedPlayers.length > 0 ? sortedPlayers[0].score : 0;
+            var h = ""; 
+            
+            sortedPlayers.forEach(function (p) {
                 var chipsHtml = ""; for (var i = 0; i < p.tokens; i++) chipsHtml += '<span class="neon-chip"></span>';
 
                 var avatarHtml = '';
-                if (p.avatar) {
-                    avatarHtml = '<img src="' + p.avatar + '" style="width:25px; height:25px; border-radius:50%; vertical-align:middle; margin-right:8px; border:1px solid ' + (p.id === players[activePlayerIdx].id ? 'var(--neon)' : '#555') + ';">';
+                var wantedHtml = '';
+                // Mostrar cartel de SE BUSCA al que va ganando (y tenga al menos 3 puntos para que sea emocionante)
+                if (p.score === maxScore && maxScore > 2) {
+                    wantedHtml = '<div class="wanted-poster"><div class="txt1">WANTED</div><div class="txt2">LÍDER</div></div>';
                 }
 
-                h += '<div class="leader-item ' + (p.id === players[activePlayerIdx].id ? 'active' : '') + '" style="align-items:center;"><span>' + avatarHtml + p.name + ' (' + chipsHtml + ')</span><span class="score">' + p.score + ' p</span></div>';
+                if (p.avatar) {
+                    avatarHtml = '<div style="position:relative; display:inline-block; margin-right:12px; vertical-align:middle;">' + 
+                                 wantedHtml +
+                                 '<img src="' + p.avatar + '" style="width:35px; height:35px; border-radius:50%; border:2px solid ' + (p.id === players[activePlayerIdx].id ? 'var(--neon)' : '#555') + ';">' +
+                                 '</div>';
+                }
+
+                h += '<div class="leader-item ' + (p.id === players[activePlayerIdx].id ? 'active' : '') + '" style="display:flex; align-items:center; margin-bottom:10px; position:relative;">' + 
+                     avatarHtml + 
+                     '<span style="flex:1; font-family:\'Bungee\'; font-size:0.8em;">' + p.name + '<br><span style="opacity:0.6; font-size:0.7em;">' + chipsHtml + '</span></span>' + 
+                     '<span class="score" style="font-family:\'Bungee\'; color:var(--gold);">' + p.score + ' p</span></div>';
             });
             document.getElementById('leaderboard-list').innerHTML = h;
 
@@ -1883,6 +1997,14 @@
                     refreshing = true;
                 }
             });
+        }
+        function triggerFlash() {
+            let overlay = document.getElementById('flash-overlay');
+            if (overlay) {
+                overlay.classList.remove('animate-flash');
+                void overlay.offsetWidth; // Force reflow
+                overlay.classList.add('animate-flash');
+            }
         }
     </script>
 </body>
