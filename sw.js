@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cb-digital-v84';
+const CACHE_NAME = 'cb-digital-v85';
 const ASSETS = [
   './',
   './index.html',
