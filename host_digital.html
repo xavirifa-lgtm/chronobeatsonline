@@ -621,6 +621,12 @@
                 uniqueIds.add(s.id);
                 return true;
             }).sort(function () { return Math.random() - 0.5; });
+
+            // V79: Si quedan pocas canciones disponibles, reseteamos el historial (Safety Net)
+            if (songs.length < 5 && playedIds.length > 0) {
+                localStorage.removeItem('CB_PlayedSongs');
+                location.reload();
+            }
         });
 
         function updateLobby() {
