@@ -1465,7 +1465,7 @@
                 // lastState will be updated at the end of handle()
                 // Identificar si es mi turno usando el ID de PeerJS
                 var isMyTurn = (data.activePlayer && data.activePlayer.id === myId);
-                console.log("¿Es mi turno?", isMyTurn, "Mi ID:", myId, "ID Activo:", data.activePlayer.id);
+                console.log("¿Es mi turno?", isMyTurn, "Mi ID:", myId, "ID Activo:", data.activePlayer ? data.activePlayer.id : "none");
 
                 var isKingMode = (data.turnPhase && data.turnPhase !== 'NORMAL');
                 var normalCardContainer = document.getElementById('normal-card-container');
