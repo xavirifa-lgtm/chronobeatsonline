@@ -336,12 +336,12 @@
         }
         .wanted-poster {
             position: absolute;
-            width: 80px;
-            height: 100px;
-            background: #d4a76a;
+            width: 70px;
+            height: 90px;
+            background: #e0c9a6;
             border: 2px solid #5d4037;
             border-radius: 5px;
-            top: -50px;
+            top: -75px;
             left: 50%;
             transform: translateX(-50%) rotate(-5deg);
             z-index: 10;
@@ -349,11 +349,9 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            line-height: 1;
-            pointer-events: none;
+            padding-top: 5px;
             box-shadow: 3px 3px 10px rgba(0,0,0,0.6);
-            background-image: radial-gradient(circle at 10% 20%, rgba(0,0,0,0.1) 0%, transparent 50%);
+            background-image: repeating-linear-gradient(45deg, rgba(0,0,0,0.02) 0, rgba(0,0,0,0.02) 1px, transparent 1px, transparent 10px);
         }
         .wanted-poster::after {
             content: '';
@@ -362,8 +360,21 @@
             border: 1px solid rgba(93, 64, 55, 0.3);
             pointer-events: none;
         }
-        .wanted-poster .txt1 { font-size: 10px; color: #5d4037; margin-bottom: 5px; letter-spacing: 1px; }
-        .wanted-poster .txt2 { font-size: 16px; color: #b71c1c; font-weight: bold; text-shadow: 1px 1px 0 #000; }
+        .wanted-poster .txt1 { font-size: 8px; color: #5d4037; margin-bottom: 2px; letter-spacing: 1px; }
+        .wanted-poster .txt2 { font-size: 11px; color: #b71c1c; font-weight: bold; margin-bottom: 5px; }
+        .wanted-img-placeholder {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.1);
+            border: 1px solid #5d4037;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .wanted-img-placeholder img { width: 100%; height: 100%; object-fit: cover; }
+        .wanted-img-placeholder .initial { font-size: 1.5em; color: #5d4037; }
 
         #flash-overlay {
             position: fixed;
@@ -1182,6 +1193,16 @@
 
                         var oldText = document.getElementById('host-instructions').innerText;
                         document.getElementById('host-instructions').innerHTML = "<span style='color:#ff0000; font-size:1.5em; font-family:Bungee;'>¡" + p.name + " HA LANZADO UN ATAQUE DE PÁNICO!</span>";
+                        
+                        // NOTIFICAR AL JUGADOR AFECTADO (V86)
+                        var targetConn = connections[activeP.id];
+                        if (targetConn) {
+                            targetConn.send({
+                                type: 'SABOTAGE_SKIP_ALERT',
+                                msg: "¡" + p.name + " HA SEMBRADO EL PÁNICO EN TU TURNO! 😱"
+                            });
+                        }
+
                         setTimeout(function () {
                             if (!isRevealed && panicActive) document.getElementById('host-instructions').innerText = (isMuted ? "REPRODUCIENDO (MUTE)" : "REPRODUCIENDO");
                         }, 3000);
@@ -1256,6 +1277,16 @@
                         isFogActive = true;
 
                         document.getElementById('host-instructions').innerHTML = "<span style='color:#aaaaaa; font-size:1.5em; font-family:Bungee;'>¡JAJAJA! ¡" + p.name + " HA LANZADO NIEBLA TEMPORAL!</span>";
+                        
+                        // NOTIFICAR AL JUGADOR AFECTADO (V86)
+                        var targetConn = connections[activeP.id];
+                        if (targetConn) {
+                            targetConn.send({
+                                type: 'SABOTAGE_SKIP_ALERT',
+                                msg: "¡" + p.name + " HA LANZADO NIEBLA SOBRE TU TURNO! 🌫️"
+                            });
+                        }
+
                         setTimeout(function () {
                             if (!isRevealed && !panicActive) document.getElementById('host-instructions').innerText = (isMuted ? "REPRODUCIENDO (MUTE)" : "REPRODUCIENDO");
                         }, 3000);
@@ -1894,7 +1925,8 @@
                     currentDuel: currentDuel,
                     duelResult: duelResult,
                     hasShield: hasShield,
-                    duelTriggered: duelTriggered
+                    duelTriggered: duelTriggered,
+                    gameStarted: document.getElementById('lobby').style.display === 'none'
                 };
                 try {
                     if (connections[id] && connections[id].open) {
@@ -1917,16 +1949,17 @@
 
                 var avatarHtml = '';
                 var wantedHtml = '';
-                // Mostrar cartel de SE BUSCA al que va ganando (y tenga al menos 1 punto para que sea emocionante)
-                if (p.score === maxScore && maxScore > 0) {
-                    wantedHtml = '<div class="wanted-poster"><div class="txt1">WANTED</div><div class="txt2">LÍDER</div></div>';
-                }
-
                 var avatarCore = '';
                 if (p.avatar) {
-                    avatarCore = '<img src="' + p.avatar + '" style="width:35px; height:35px; border-radius:50%; border:2px solid ' + (players[activePlayerIdx] && p.id === players[activePlayerIdx].id ? 'var(--neon)' : '#555') + ';">';
+                    avatarCore = '<img src="' + p.avatar + '" style="width:35px; height:35px; border-radius:50%; border:2px solid ' + (players[activePlayerIdx] && p.id === players[activePlayerIdx].id ? 'var(--neon)' : '#555') + '; object-fit:cover;">';
                 } else {
-                    avatarCore = '<div style="width:35px; height:35px; border-radius:50%; background:#222; border:2px solid ' + (players[activePlayerIdx] && p.id === players[activePlayerIdx].id ? 'var(--neon)' : '#555') + '; color:#fff; display:flex; align-items:center; justify-content:center; font-family:\'Bungee\'; font-size:1.24em; box-shadow:0 0 5px rgba(0,0,0,0.5);">?</div>';
+                    avatarCore = '<div style="width:35px; height:35px; border-radius:50%; background:#222; border:2px solid ' + (players[activePlayerIdx] && p.id === players[activePlayerIdx].id ? 'var(--neon)' : '#555') + '; color:#fff; display:flex; align-items:center; justify-content:center; font-family:\'Bungee\'; font-size:1.2em; box-shadow:0 0 5px rgba(0,0,0,0.5);">?</div>';
+                }
+
+                // Mostrar cartel de SE BUSCA al que va ganando
+                if (p.score === maxScore && maxScore > 0) {
+                    var wantedAvatar = p.avatar ? '<img src="' + p.avatar + '">' : '<div class="initial">' + p.name.charAt(0).toUpperCase() + '</div>';
+                    wantedHtml = '<div class="wanted-poster"><div class="txt1">WANTED</div><div class="txt2">LÍDER</div><div class="wanted-img-placeholder">' + wantedAvatar + '</div></div>';
                 }
 
                 avatarHtml = '<div style="position:relative; display:inline-block; margin-right:12px; vertical-align:middle;">' + 
