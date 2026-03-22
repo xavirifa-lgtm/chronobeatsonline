@@ -1495,7 +1495,7 @@
                     var btnMute = document.getElementById('btn-sabotage-mute');
                     if (btnMute) { btnMute.style.display = 'flex'; btnMute.disabled = (data.myTokens < 1); }
                     var btnBet = document.getElementById('btn-sabotage-bet');
-                    if (btnBet) btnBet.style.display = 'flex';
+                    if (btnBet) { btnBet.style.display = 'flex'; btnBet.disabled = (data.myTokens < 1); }
 
                     let disp1 = jLevel >= 1 ? 'flex' : 'none';
                     if (document.getElementById('btn-sabotage-buzzer')) { document.getElementById('btn-sabotage-buzzer').style.display = disp1; document.getElementById('btn-sabotage-buzzer').disabled = (data.myTokens < 1); }

@@ -524,6 +524,7 @@
         var turnPhase = 'NORMAL'; // 'NORMAL', 'KING_SELECTION', 'KING_GUESS', 'KING_GUESS_RESULT'
         var kingOptions = []; // Array de opciones para los retadores
         var cheatsEnabled = true;
+        var gameStarted = false;
 
         // Seguimiento de tiempo para skips manuales
         var segundosAcumulados = 0;
@@ -702,6 +703,7 @@
 
             document.getElementById('lobby').style.display = 'none';
             document.getElementById('dashboard').style.display = 'grid';
+            gameStarted = true;
             nextTurn();
         }
 
@@ -1152,11 +1154,13 @@
                     var slotOccupied = (activeGuess == valNum);
                     for (var pid in currentBets) { if (currentBets[pid] == valNum) slotOccupied = true; }
 
-                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 2 && currentBets[peerId] === undefined && !slotOccupied && activeGuess !== null) {
+                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 1 && currentBets[peerId] === undefined && !slotOccupied && activeGuess !== null) {
                         console.log("[OK] Apuesta (Duelo) aceptada para", p.name);
-                        updateTokens(p, -2);
+                        updateTokens(p, -1);
                         currentBets[peerId] = valNum;
                         syncState();
+                    } else {
+                        console.log("[FAIL] Apuesta rechazada. p:", !!p, "Tokens:", p ? p.tokens : 0, "Ya apostó?", p ? currentBets[peerId] !== undefined : false, "Slot ocupado?", slotOccupied, "Guess es", activeGuess);
                     }
                     break;
                 case 'BET_AGAINST_ACTIVE':
@@ -1511,6 +1515,35 @@
                     if (turnPhase === 'LOBBY' || players.length === 0) {
                         setJoputismo(parseInt(value));
                     }
+                    break;
+                case 'REMOTE_START_GAME':
+                    if (!gameStarted) {
+                        startGame();
+                    }
+                    break;
+                case 'REMOTE_JOPUTISMO':
+                    setJoputismo(value);
+                    syncState();
+                    break;
+                case 'REMOTE_REVEAL':
+                    if (turnPhase !== 'LOBBY' && !isRevealed) {
+                        revealData();
+                    }
+                    break;
+                case 'REMOTE_CORRECT':
+                    validateResult(true, false);
+                    break;
+                case 'REMOTE_CORRECT_TOKEN':
+                    validateResult(true, true);
+                    break;
+                case 'REMOTE_INCORRECT':
+                    validateResult(false, false);
+                    break;
+                case 'REMOTE_INCORRECT_TOKEN':
+                    validateResult(false, true);
+                    break;
+                case 'REMOTE_SYSTEM_ERROR':
+                    reportSystemError();
                     break;
                 case 'REMOTE_SET_GAME_MODE':
                     if (turnPhase === 'LOBBY') {
