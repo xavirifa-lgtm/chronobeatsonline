@@ -863,6 +863,7 @@
                 <div id="card" class="card">
                     <div class="card-face card-front">
                         <div style="font-family:'Bungee';color:var(--neon);opacity:0.2;font-size:1.8em;text-align:center;line-height:0.95;word-wrap:break-word;width:100%">CHRONO<br>BEATS</div>
+                        <div id="card-mode-label" style="font-family:'Bungee';color:var(--neon);opacity:0.5;font-size:0.6em;text-align:center;margin-top:15px;width:100%"></div>
                     </div>
                     <div class="card-face card-back">
                         <div id="c-artist">ARTISTA</div>
@@ -1317,6 +1318,16 @@
             // State handling moved to end
             if (data.type === 'STATE_UPDATE') {
                 updateMarket(data);
+                
+                var cardModeLabel = document.getElementById('card-mode-label');
+                if (cardModeLabel) {
+                    var cType = data.currentType || 'orig';
+                    if (cType === 'orig') cardModeLabel.innerText = "ORIGINAL";
+                    else if (cType === 'anime') cardModeLabel.innerText = "ANIME";
+                    else if (cType === 'movies') cardModeLabel.innerText = "MOVIES";
+                    else cardModeLabel.innerText = "MIX";
+                }
+
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('game-screen').style.display = 'flex';
 
@@ -1492,6 +1503,20 @@
                     if (sabotageStatusMsg) sabotageStatusMsg.style.display = 'block';
                     
                     document.getElementById('btn-autowin').style.display = (!data.isPlaying) ? 'block' : 'none';
+                    var btnPlayInfo = document.querySelector('.btn-play');
+                    if (btnPlayInfo) {
+                        if (data.isPlaying) {
+                            btnPlayInfo.style.background = 'var(--neon)';
+                            btnPlayInfo.style.color = '#000';
+                            btnPlayInfo.style.boxShadow = '0 0 15px var(--neon)';
+                            btnPlayInfo.innerText = "SONANDO...";
+                        } else {
+                            btnPlayInfo.style.background = 'transparent';
+                            btnPlayInfo.style.color = 'var(--neon)';
+                            btnPlayInfo.style.boxShadow = 'none';
+                            btnPlayInfo.innerText = "PLAY";
+                        }
+                    }
                     document.getElementById('btn-error-track').style.display = (data.isPlaying) ? 'block' : 'none';
                     document.getElementById('btn-reload').style.display = (data.isPlaying && data.canReload) ? 'block' : 'none';
                 } else {
@@ -1732,15 +1757,31 @@
                     }
 
                     var btnSabotageBet = document.getElementById('btn-sabotage-bet');
+                    var btnSabotageBetFor = document.getElementById('btn-sabotage-bet-for');
+                    var alreadyBetAgainst = data.bettingAgainst && data.bettingAgainst.includes(myId);
+                    var alreadyBetFor = data.bettingFor && data.bettingFor.includes(myId);
+                    var hasBetAny = alreadyBetAgainst || alreadyBetFor;
+
                     if (btnSabotageBet) {
-                        var alreadyBet = data.bettingAgainst && data.bettingAgainst.includes(myId);
-                        btnSabotageBet.disabled = (data.myTokens < 1 || alreadyBet);
-                        if (alreadyBet || data.myTokens < 1) {
+                        btnSabotageBet.disabled = (data.myTokens < 1 || hasBetAny || isActionLocked);
+                        if (hasBetAny || data.myTokens < 1) {
                             btnSabotageBet.style.opacity = '0.5';
-                            if (alreadyBet) btnSabotageBet.innerText = "APUESTA HECHA";
+                            if (alreadyBetAgainst) btnSabotageBet.innerText = "APUESTA HECHA";
+                            else if (alreadyBetFor) btnSabotageBet.innerText = "BLOQUEADO";
                         } else {
                             btnSabotageBet.style.opacity = '1';
                             btnSabotageBet.innerHTML = '¡NI DE COÑA! (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)';
+                        }
+                    }
+                    if (btnSabotageBetFor) {
+                        btnSabotageBetFor.disabled = (data.myTokens < 1 || hasBetAny || isActionLocked);
+                        if (hasBetAny || data.myTokens < 1) {
+                            btnSabotageBetFor.style.opacity = '0.5';
+                            if (alreadyBetFor) btnSabotageBetFor.innerText = "APUESTA HECHA";
+                            else if (alreadyBetAgainst) btnSabotageBetFor.innerText = "BLOQUEADO";
+                        } else {
+                            btnSabotageBetFor.style.opacity = '1';
+                            btnSabotageBetFor.innerHTML = '¡ESTOY CONTIGO! (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)';
                         }
                     }
                 }

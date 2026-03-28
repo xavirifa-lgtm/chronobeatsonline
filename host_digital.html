@@ -854,7 +854,7 @@
                 // Awarding
                 winner.score++;
                 winner.cards.push(s.year);
-                winner.cards.sort();
+                winner.cards.sort(function(a, b){return a - b});
                 
                 // Stealing tokens
                 var stolen = Math.min(loser.tokens, 2);

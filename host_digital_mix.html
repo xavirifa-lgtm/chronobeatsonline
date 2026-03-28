@@ -905,6 +905,7 @@
                 // Premio: Gana la carta
                 winner.score++;
                 winner.cards.push(actualYear);
+                winner.cards.sort(function(a, b){return a - b});
                 
                 // Robo: 2 fichas al oponente (Capped at 5)
                 var theft = Math.min(loser.tokens, 2);
