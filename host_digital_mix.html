@@ -786,7 +786,7 @@
             isFogActive = false;
 
             // --- INICIO MODO REY CHECK ---
-            if (gameMode === 'rey' && players[activePlayerIdx] && players[activePlayerIdx].score >= 10) {
+            if (gameMode === 'rey' && players.length >= 3 && players[activePlayerIdx] && players[activePlayerIdx].score >= 10) {
                 turnPhase = 'KING_SELECTION';
                 kingOptions = [];
                 // Calcular un número de cartas igual a (players.length - 1)
@@ -806,6 +806,7 @@
                 document.getElementById('ui-current-player').innerText = players[activePlayerIdx].name + " (REY)";
                 document.getElementById('host-instructions').innerText = "ESPERANDO A QUE LOS JUGADORES ELIJAN QUÉ CARTA TE TOCA...";
                 document.getElementById('player-container').innerHTML = '';
+                applyTheme('mix');
                 syncState();
                 return;
             }
@@ -1080,6 +1081,7 @@
                     if (p && p.tokens >= 1 && p.canReload) {
                         updateTokens(p, -1);
                         p.canReload = false; // Solo uno por turno
+                        refundBets();
                         isPlaying = false;
                         container.innerHTML = '<div id="youtube-player"></div>'; // Parar música de verdad
                         currentSongIdx++; if(songs[currentSongIdx] && songs[currentSongIdx].id) { var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]'); if(!_pl.includes(songs[currentSongIdx].id)){ _pl.push(songs[currentSongIdx].id); localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl)); } } // Descartar y pasar a la siguiente
@@ -1100,6 +1102,7 @@
                 case 'SYSTEM_ERROR_TRACK':
                     var p = players.find(function (pl) { return pl.id === peerId; });
                     if (p && isPlaying) {
+                        refundBets();
                         isPlaying = false;
                         container.innerHTML = '<div id="youtube-player"></div>';
                         currentSongIdx++; if(songs[currentSongIdx] && songs[currentSongIdx].id) { var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]'); if(!_pl.includes(songs[currentSongIdx].id)){ _pl.push(songs[currentSongIdx].id); localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl)); } }
@@ -1281,6 +1284,7 @@
                     var p = players.find(function (pl) { return pl.id === peerId; });
                     if (p && p.tokens >= 3 && activeGuess === null && isPlaying && !isRevealed && (!turnPhase || turnPhase === 'NORMAL')) {
                         updateTokens(p, -3);
+                        refundBets();
                         isPlaying = false;
                         container.innerHTML = '<div id="youtube-player"></div>';
                         currentSongIdx++; if(songs[currentSongIdx] && songs[currentSongIdx].id) { var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]'); if(!_pl.includes(songs[currentSongIdx].id)){ _pl.push(songs[currentSongIdx].id); localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl)); } }
@@ -1503,6 +1507,7 @@
                     if (indexElegido >= 0 && indexElegido < kingOptions.length) {
                         var cartaElegida = kingOptions[indexElegido];
                         songs[currentSongIdx] = cartaElegida;
+                        applyTheme(cartaElegida.type ? cartaElegida.type : 'mix');
 
                         turnPhase = 'KING_GUESS';
                         document.getElementById('ui-card-artist').innerText = "????";
@@ -1683,7 +1688,29 @@
             }
         }
 
+        function refundBets() {
+            var refunded = false;
+            if (bettingAgainst.length > 0) {
+                bettingAgainst.forEach(function(pid) {
+                    var p = players.find(pl => pl.id === pid);
+                    if(p) updateTokens(p, 1);
+                });
+                refunded = true;
+            }
+            if (bettingFor.length > 0) {
+                bettingFor.forEach(function(pid) {
+                    var p = players.find(pl => pl.id === pid);
+                    if(p) updateTokens(p, 1);
+                });
+                refunded = true;
+            }
+            bettingAgainst = [];
+            bettingFor = [];
+            if (refunded) syncState();
+        }
+
         function reportSystemError() {
+            refundBets();
             var s = songs[currentSongIdx];
             if (!s || !s.id) return;
             var newYear = prompt("ERROR EN DATOS: " + s.artist + " - " + s.song + "\nIntroduce el AÑO CORRECTO para registro:");
@@ -1706,6 +1733,10 @@
 
                 window.location.href = mailtoUrl;
                 alert("¡Error registrado! Se ha preparado un email para " + recipient + ".\nSe descarta esta canción y repites el turno.");
+            }
+            if (turnPhase === 'KING_GUESS' || turnPhase === 'KING_GUESS_RESULT' || turnPhase === 'KING_SELECTION') {
+                activePlayerIdx--;
+                if (activePlayerIdx < 0) activePlayerIdx = players.length - 1;
             }
             nextTurn();
         }

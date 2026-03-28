@@ -1271,6 +1271,16 @@
                         COMODÍN CANCIÓN (${myWildcards} 🃏)
                      </button>`;
 
+            // NI DE COÑA (1🔘)
+            html += `<button class="market-btn" id="btn-nidecona" ${(!canBet || myTokens < 1 || isMyTurn) ? 'disabled' : ''} onclick="send('MARKET_BET', 'against')">
+                        ¡NI DE COÑA! (1 <span class="neon-chip"></span>)
+                     </button>`;
+
+            // ESTOY CONTIGO (1🔘)
+            html += `<button class="market-btn" id="btn-estoycontigo" ${(!canBet || myTokens < 1 || isMyTurn) ? 'disabled' : ''} onclick="send('MARKET_BET', 'for')">
+                        ¡ESTOY CONTIGO! (1 <span class="neon-chip"></span>)
+                     </button>`;
+
             // PISTA DÉCADA (1🔘)
             html += `<button class="market-btn" ${(!isMyTurn || myTokens < 1) ? 'disabled' : ''} onclick="send('MARKET_DECADE')">
                         PISTA DÉCADA (1 <span class="neon-chip"></span>)
@@ -1459,6 +1469,7 @@
                             html += "<p style='font-size:0.8em; color:var(--neon); margin-bottom:15px;'>(Escucha la canción. Margen de error: +/- 2 años)</p>";
                             html += "<input type='number' id='king-guess-input' placeholder='AÑO' style='font-size:1.5em; text-align:center;'>";
                             html += "<button class='btn' style='margin-top:10px;' onclick=\"var y = document.getElementById('king-guess-input').value; if(y) send('KING_GUESS', y);\">CONFIRMAR AÑO</button>";
+                            html += "<button class='btn btn-error-track' style='margin-top:15px; background:transparent; border:2px solid #ff0055; color:#ff0055; padding:10px; font-size:0.8em;' onclick=\"send('SYSTEM_ERROR_TRACK')\">⚠️ ERROR DE VIDEO (SALTAR)</button>";
                             kingModeUi.innerHTML = html;
                         } else {
                             kingModeUi.innerHTML = "<h3 style='color:var(--neon);font-family:Bungee;'>CARTA ENVIADA</h3><p>EL REY ESTÁ ADIVINANDO EL AÑO...</p>";
