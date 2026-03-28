@@ -720,7 +720,8 @@
             <p><strong style="color:var(--neon);">OBJETIVO:</strong> Coloca las canciones en el orden correcto en tu cronología. Gana quien llegue a 10 cartas.</p>
             <p><strong style="color:var(--neon);">TURNO NORMAL:</strong> Escucha la canción y colócala en tu cronología personal.</p>
             <p><strong style="color:var(--gold);">FICHAS AZULES (🔵):</strong> Sirven para sabotear. Se ganan al acertar en un Duelo, por bonos del Host o en el Mercado.</p>
-            <p><strong style="color:var(--accent);">¡NI DE COÑA! (1🔵):</strong> Apuesta contra el jugador activo si crees que se equivoca. Si falla y tú sabes el año exacto, ¡le robas la carta!</p>
+            <p><strong style="color:var(--accent);">¡NI DE COÑA! (1🔵):</strong> Apuesta contra el jugador activo si crees que se equivoca. Si falla, ganas +3 fichas.</p>
+            <p><strong style="color:#00ff88;">¡ESTOY CONTIGO! (1🔵):</strong> Apuesta a favor del jugador activo si crees que va a acertar. Si acierta, ganas +3 fichas.</p>
             <p><strong style="color:var(--gold);">DUELOS (1🔵):</strong> Reta a un rival a un duelo Western 🔫. Introducid el año a ciegas. Quien esté más cerca gana la carta. (Requiere 3🔵 para disparar: 1 de coste + 2 de garantía).</p>
 
             <h3
@@ -870,6 +871,9 @@
                     </div>
                 </div>
                 <div id="wait-msg">ESPERANDO SIGUIENTE TRACK...</div>
+                <div id="host-start-game-btn" style="display:none; margin-top: 15px; width: 100%;">
+                    <button class="btn pulse" style="background:#ff00ff; color:white; border-color:#ff00ff; padding:20px; font-size:1.2em; width:100%; box-shadow: 0 0 15px #ff00ff;" onclick="send('REMOTE_START_GAME')">▶ INICIAR PARTIDA</button>
+                </div>
             </div>
 
             <div class="collection-summary" id="normal-collection">
@@ -914,6 +918,7 @@
                 <div id="sabotage-grid">
                     <button class="spec-btn" id="btn-sabotage-mute" style="background:var(--bg); border-color:#ff0055; color:#ff0055;" onclick="send('SABOTAGE_MUTE')">MUTE 15s (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
                     <button class="spec-btn" id="btn-sabotage-bet" style="background:var(--bg); border-color:#00f2fe; color:#00f2fe;" onclick="send('BET_AGAINST_ACTIVE')">¡NI DE COÑA! (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
+                    <button class="spec-btn" id="btn-sabotage-bet-for" style="background:var(--bg); border-color:#00ff88; color:#00ff88;" onclick="send('BET_FOR_ACTIVE')">¡ESTOY CONTIGO! (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
                     <button class="spec-btn" id="btn-sabotage-buzzer" style="background:var(--bg); border-color:#00ff00; color:#00ff00;" onclick="send('SABOTAGE_BUZZER')">¡ZUMBIDO! (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
                     <button class="spec-btn" id="btn-sabotage-duel" style="background:var(--bg); border:2px dashed var(--gold); color:var(--gold);" onclick="if(lastState && lastState.myTokens >= 3) { send('SABOTAGE_DUEL'); } else { showCustomAlert('Necesitas al menos 3 fichas para retar a duelo (1 de coste + 2 de garantía).'); }">🔫 DUELO 🔫 (1 <span class="neon-chip" style="width:10px;height:10px; background:var(--gold);"></span>)</button>
                     <button class="spec-btn" id="btn-sabotage-russian-roulette" style="background:var(--bg); border:2px solid #ff0055; color:#ff0055;" onclick="send('SABOTAGE_RUSSIAN_ROULETTE')">🔫 RULETA RUSA 🔫 (2 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
@@ -1594,11 +1599,18 @@
                 if (!data.duelResult) window.feedbackShown = false;
 
                 var wm = document.getElementById('wait-msg');
-                if (!isMyTurn && !isKingMode) {
-                    wm.style.display = 'block';
-                    wm.innerText = "ESPERANDO SIGUIENTE TRACK...";
-                } else {
+                var startBtn = document.getElementById('host-start-game-btn');
+                if (!data.gameStarted && data.judgeId === 'ALL') {
                     wm.style.display = 'none';
+                    if(startBtn) startBtn.style.display = 'block';
+                } else {
+                    if(startBtn) startBtn.style.display = 'none';
+                    if (!isMyTurn && !isKingMode) {
+                        wm.style.display = 'block';
+                        wm.innerText = "ESPERANDO SIGUIENTE TRACK...";
+                    } else {
+                        wm.style.display = 'none';
+                    }
                 }
 
                 if (data.revealed && !isKingMode) {

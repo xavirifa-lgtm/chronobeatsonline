@@ -514,6 +514,7 @@
         var currentBets = {}; // playerId -> slotIndex
         var activeGuess = null; // slotIndex del jugador activo
         var bettingAgainst = []; // IDs de los jugadores que han apostado contra el jugador activo
+        var bettingFor = []; // IDs de los jugadores que han apostado a favor del jugador activo
         var queuedDuel = null;
         var currentDuel = null;
         var duelResult = null; // Para mensajes de fin de duelo
@@ -722,6 +723,7 @@
             currentBets = {}; var rb=document.getElementById('btn-report-error'); if(rb) rb.style.display='block'; // al cambiar de turno
             activeGuess = null; // Limpiar adivinanza
             bettingAgainst = []; // Limpiar apuestas de "ni de coña"
+            bettingFor = []; // Limpiar apuestas de "estoy contigo"
             duelTriggered = false; // Reset duel flag
 
             isMuted = false;
@@ -1062,13 +1064,29 @@
                     break;
                 case 'BET_AGAINST_ACTIVE':
                     var p = players.find(function (pl) { return pl.id === peerId; });
-                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 1 && !bettingAgainst.includes(peerId) && isPlaying && !isRevealed && (!turnPhase || turnPhase === 'NORMAL')) {
+                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 1 && !bettingAgainst.includes(peerId) && !bettingFor.includes(peerId) && isPlaying && !isRevealed && (!turnPhase || turnPhase === 'NORMAL')) {
                         updateTokens(p, -1);
                         bettingAgainst.push(peerId);
 
                         // Mostrar mensaje flotante en el host
                         var oldText = document.getElementById('host-instructions').innerText;
                         document.getElementById('host-instructions').innerHTML = "<span style='color:#ff0055; font-size:1.2em;'>¡" + p.name + " DUDA DE QUE LO SEPA!</span>";
+                        setTimeout(function () {
+                            if (!isRevealed) document.getElementById('host-instructions').innerText = (isMuted ? "REPRODUCIENDO (MUTE)" : "REPRODUCIENDO");
+                        }, 3000);
+
+                        syncState();
+                    }
+                    break;
+                case 'BET_FOR_ACTIVE':
+                    var p = players.find(function (pl) { return pl.id === peerId; });
+                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 1 && !bettingFor.includes(peerId) && !bettingAgainst.includes(peerId) && isPlaying && !isRevealed && (!turnPhase || turnPhase === 'NORMAL')) {
+                        updateTokens(p, -1);
+                        bettingFor.push(peerId);
+
+                        // Mostrar mensaje flotante en el host
+                        var oldText = document.getElementById('host-instructions').innerText;
+                        document.getElementById('host-instructions').innerHTML = "<span style='color:#00ff88; font-size:1.2em;'>¡" + p.name + " ESTÁ CON EL MAESTRO!</span>";
                         setTimeout(function () {
                             if (!isRevealed) document.getElementById('host-instructions').innerText = (isMuted ? "REPRODUCIENDO (MUTE)" : "REPRODUCIENDO");
                         }, 3000);
@@ -1300,6 +1318,7 @@
                         currentBets = {};
                         activeGuess = null;
                         bettingAgainst = [];
+                        bettingFor = [];
 
                         document.getElementById('host-instructions').innerHTML = "<span style='color:#00f2fe; font-size:1.5em; font-family:Bungee;'>¡" + p.name + " HA ROBADO EL TURNO A " + oldActive.name + "!</span>";
                         setTimeout(function () {
@@ -1691,10 +1710,10 @@
                 updateTokens(players[activePlayerIdx], 1);
             }
 
-            // RESOLVER APUESTAS "NI DE COÑA"
-            if (bettingAgainst && bettingAgainst.length > 0) {
+            // RESOLVER APUESTAS "NI DE COÑA" y "ESTOY CONTIGO"
+            if ((bettingAgainst && bettingAgainst.length > 0) || (bettingFor && bettingFor.length > 0)) {
                 if (isCardOk) {
-                    // El jugador activo ACIERTA: los que apostaron pierden.
+                    // El jugador activo ACIERTA: los que apostaron en contra pierden. los que apostaron a favor ganan.
                     var losesPhrases = [
                         "Has dudado de un puto experto... y has perdido.",
                         "¿Ni de coña? Ni de coña vas a recuperar esa ficha, pringao.",
@@ -1739,23 +1758,53 @@
                         "La próxima vez guarda la ficha, que igual te hace falta para no dar pena.",
                         "Que ponga la música y tú pones las fichas perdidas. Trato justo."
                     ];
-                    bettingAgainst.forEach(function (pid) {
-                        if (connections[pid]) {
-                            var msg = losesPhrases[Math.floor(Math.random() * losesPhrases.length)];
-                            connections[pid].send({ type: 'BET_RESULT', msg: "JAJAJAJA...\n\n" + msg });
-                        }
-                    });
-                } else {
-                    // El jugador activo FALLA: los que apostaron ganan +3 fichas.
-                    bettingAgainst.forEach(function (pid) {
-                        var p = players.find(x => x.id === pid);
-                        if (p) {
-                            updateTokens(p, 3);
+                    if (bettingAgainst) {
+                        bettingAgainst.forEach(function (pid) {
                             if (connections[pid]) {
-                                connections[pid].send({ type: 'BET_RESULT', msg: "¡SABÍAS QUE IBA A FALLAR Y HAS GANADO!\n\nRecompensa: +3 FICHAS AZULES." });
+                                var msg = losesPhrases[Math.floor(Math.random() * losesPhrases.length)];
+                                connections[pid].send({ type: 'BET_RESULT', msg: "JAJAJAJA...\n\n" + msg });
                             }
-                        }
-                    });
+                        });
+                    }
+                    if (bettingFor) {
+                        bettingFor.forEach(function (pid) {
+                            var p = players.find(x => x.id === pid);
+                            if (p) {
+                                updateTokens(p, 3);
+                                if (connections[pid]) {
+                                    connections[pid].send({ type: 'BET_RESULT', msg: "¡SABÍAS QUE IBA A ACERTAR Y HAS GANADO!\n\nRecompensa: +3 FICHAS AZULES." });
+                                }
+                            }
+                        });
+                    }
+                } else {
+                    // El jugador activo FALLA: los que apostaron en contra ganan. los que apostaron a favor pierden.
+                    if (bettingAgainst) {
+                        bettingAgainst.forEach(function (pid) {
+                            var p = players.find(x => x.id === pid);
+                            if (p) {
+                                updateTokens(p, 3);
+                                if (connections[pid]) {
+                                    connections[pid].send({ type: 'BET_RESULT', msg: "¡SABÍAS QUE IBA A FALLAR Y HAS GANADO!\n\nRecompensa: +3 FICHAS AZULES." });
+                                }
+                            }
+                        });
+                    }
+                    if (bettingFor) {
+                        var losesPhrasesFor = [
+                            "Confiaste en un inútil y has pagado el pato.",
+                            "Tanta fe para nada. Menudo patinazo.",
+                            "Ni estando contigo logra acertar. Ficha perdida.",
+                            "Has apostado al caballo perdedor.",
+                            "Qué mala vista tienes para elegir aliados."
+                        ];
+                        bettingFor.forEach(function (pid) {
+                            if (connections[pid]) {
+                                var msg = losesPhrasesFor[Math.floor(Math.random() * losesPhrasesFor.length)];
+                                connections[pid].send({ type: 'BET_RESULT', msg: "JAJAJAJA...\n\n" + msg });
+                            }
+                        });
+                    }
                 }
             }
 
@@ -1924,6 +1973,7 @@
                     isFogActive: isFogActive,
                     joputismoLevel: joputismoLevel,
                     bettingAgainst: bettingAgainst,
+                    bettingFor: bettingFor,
                     myCards: p ? p.cards : [],
                     myTokens: p ? p.tokens : 0,
                     canReload: p ? p.canReload : false,
