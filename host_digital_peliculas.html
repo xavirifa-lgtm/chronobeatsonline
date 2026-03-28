@@ -584,7 +584,7 @@
                             connections[conn.peer] = conn;
                             syncState(); // Force state sync to reconnecting player
                         } else {
-                            players.push({ id: conn.peer, name: data.name, avatar: data.avatar || null, score: 1, cards: [], tokens: 2, canReload: true });
+                            players.push({ id: conn.peer, name: data.name, avatar: data.avatar || null, score: 1, cards: [], tokens: 2, canReload: true, wildcards: 3 });
                             connections[conn.peer] = conn;
                         }
                         updateLobby();
@@ -1586,8 +1586,9 @@
                     break;
                 case 'MARKET_WILDCARD':
                     var p = players.find(function (pl) { return pl.id === peerId; });
-                    if (p && p.id === activeP.id && p.tokens >= 1) {
-                        updateTokens(p, -1);
+                    if (p && p.id === activeP.id && (p.wildcards === undefined || p.wildcards > 0)) {
+                        if (p.wildcards === undefined) p.wildcards = 3;
+                        p.wildcards--;
                         if (value === 'artist') {
                             document.getElementById('ui-card-artist').innerText = s.artist;
                             document.getElementById('ui-card-artist').style.color = "var(--gold)";
@@ -1780,9 +1781,9 @@
                         bettingFor.forEach(function (pid) {
                             var p = players.find(x => x.id === pid);
                             if (p) {
-                                updateTokens(p, 3);
+                                updateTokens(p, 2);
                                 if (connections[pid]) {
-                                    connections[pid].send({ type: 'BET_RESULT', msg: "¡SABÍAS QUE IBA A ACERTAR Y HAS GANADO!\n\nRecompensa: +3 FICHAS AZULES." });
+                                    connections[pid].send({ type: 'BET_RESULT', msg: "¡SABÍAS QUE IBA A ACERTAR Y HAS GANADO!\n\nRecompensa: +2 FICHAS AZULES." });
                                 }
                             }
                         });
@@ -1793,9 +1794,9 @@
                         bettingAgainst.forEach(function (pid) {
                             var p = players.find(x => x.id === pid);
                             if (p) {
-                                updateTokens(p, 3);
+                                updateTokens(p, 2);
                                 if (connections[pid]) {
-                                    connections[pid].send({ type: 'BET_RESULT', msg: "¡SABÍAS QUE IBA A FALLAR Y HAS GANADO!\n\nRecompensa: +3 FICHAS AZULES." });
+                                    connections[pid].send({ type: 'BET_RESULT', msg: "¡SABÍAS QUE IBA A FALLAR Y HAS GANADO!\n\nRecompensa: +2 FICHAS AZULES." });
                                 }
                             }
                         });
@@ -1986,6 +1987,7 @@
                     bettingFor: bettingFor,
                     myCards: p ? p.cards : [],
                     myTokens: p ? p.tokens : 0,
+                    myWildcards: p && p.wildcards !== undefined ? p.wildcards : 3,
                     canReload: p ? p.canReload : false,
                     activeTimeline: players[activePlayerIdx] ? players[activePlayerIdx].cards : [],
                     currentBets: currentBets,

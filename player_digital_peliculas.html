@@ -1247,18 +1247,19 @@
 
             const isMyTurn = (state.activePlayer && state.activePlayer.id === myId);
             const myTokens = state.myTokens || 0;
+            const myWildcards = state.myWildcards !== undefined ? state.myWildcards : 3;
             const hasActiveShield = state.hasShield && state.hasShield[myId];
 
             let html = "";
 
-            // COMODÍN ARTISTA (1🔘)
-            html += `<button class="market-btn" ${(!isMyTurn || myTokens < 1) ? 'disabled' : ''} onclick="send('MARKET_WILDCARD', 'artist')">
-                        COMODÍN ARTISTA (1 <span class="neon-chip"></span>)
+            // COMODÍN ARTISTA (Limitado a 3 usos gratis, compartido con Canción)
+            html += `<button class="market-btn" ${(!isMyTurn || myWildcards < 1) ? 'disabled' : ''} onclick="send('MARKET_WILDCARD', 'artist')">
+                        COMODÍN ARTISTA (${myWildcards} 🃏)
                      </button>`;
 
-            // COMODÍN CANCIÓN (1🔘)
-            html += `<button class="market-btn" ${(!isMyTurn || myTokens < 1) ? 'disabled' : ''} onclick="send('MARKET_WILDCARD', 'song')">
-                        COMODÍN CANCIÓN (1 <span class="neon-chip"></span>)
+            // COMODÍN CANCIÓN
+            html += `<button class="market-btn" ${(!isMyTurn || myWildcards < 1) ? 'disabled' : ''} onclick="send('MARKET_WILDCARD', 'song')">
+                        COMODÍN CANCIÓN (${myWildcards} 🃏)
                      </button>`;
 
             // PISTA DÉCADA (1🔘)
