@@ -1980,7 +1980,7 @@
             }
 
             for (var id in connections) {
-                var p = players.find(p => p.id === id);
+                var p = players.find(px => px.id.toLowerCase() === id.toLowerCase());
                 var state = {
                     type: 'STATE_UPDATE',
                     players: players,

@@ -1328,7 +1328,8 @@
 
             // State handling moved to end
             if (data.type === 'STATE_UPDATE') {
-                updateMarket(data);
+                try {
+                    updateMarket(data);
                 
                 var cardModeLabel = document.getElementById('card-mode-label');
                 if (cardModeLabel) {
@@ -1359,7 +1360,7 @@
                 // LOGICA DEL MANDO HOST
                 var fab = document.getElementById('fab-remote');
                 var rContainer = document.getElementById('remote-controls-container');
-                if (data.judgeId === 'ALL' || data.judgeId === myId) {
+                if (data.judgeId === 'ALL' || (data.judgeId && myId && data.judgeId.toLowerCase() === myId.toLowerCase())) {
                     fab.style.display = 'flex';
                     fab.style.filter = 'none';
                     fab.style.opacity = '1';
@@ -1797,7 +1798,18 @@
                         }
                     }
                 }
-                lastState = data;
+                    lastState = data;
+                } catch (err) {
+                    console.error("CRITICAL UI ERROR:", err);
+                    var errDiv = document.getElementById('debug-error-box');
+                    if (!errDiv) {
+                        errDiv = document.createElement('div');
+                        errDiv.id = 'debug-error-box';
+                        errDiv.style = 'position:fixed; top:0; left:0; width:100%; background:rgba(255,0,0,0.9); color:white; padding:15px; font-family:monospace; z-index:99999; font-size:12px; word-break:break-all; text-align:left;';
+                        document.body.appendChild(errDiv);
+                    }
+                    errDiv.innerHTML = '<b>⚠️ ERROR DE RENDERIZADO:</b><br>' + err.message + '<br><br><small>' + err.stack.substring(0, 200) + '...</small><br><br><button onclick="this.parentElement.remove()" style="background:white; color:red; border:none; padding:5px 10px; border-radius:5px;">CERRAR</button>';
+                }
             }
         }
 
