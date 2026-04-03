@@ -1254,7 +1254,7 @@
             const container = document.getElementById('market-container');
             if (!container) return;
 
-            const isMyTurn = (state.activePlayer && state.activePlayer.id === myId);
+            const isMyTurn = (state.activePlayer && state.activePlayer.id && myId && state.activePlayer.id.toLowerCase() === myId.toLowerCase());
             const myTokens = state.myTokens || 0;
             const myWildcards = state.myWildcards !== undefined ? state.myWildcards : 3;
             const hasActiveShield = state.hasShield && state.hasShield[myId];
@@ -1272,12 +1272,12 @@
                      </button>`;
 
             // NI DE COÑA (1🔘)
-            html += `<button class="market-btn" id="btn-nidecona" ${(!canBet || myTokens < 1 || isMyTurn) ? 'disabled' : ''} onclick="send('MARKET_BET', 'against')">
+            html += `<button class="market-btn" id="btn-nidecona" ${(!state.canBet || myTokens < 1 || isMyTurn) ? 'disabled' : ''} onclick="send('MARKET_BET', 'against')">
                         ¡NI DE COÑA! (1 <span class="neon-chip"></span>)
                      </button>`;
 
             // ESTOY CONTIGO (1🔘)
-            html += `<button class="market-btn" id="btn-estoycontigo" ${(!canBet || myTokens < 1 || isMyTurn) ? 'disabled' : ''} onclick="send('MARKET_BET', 'for')">
+            html += `<button class="market-btn" id="btn-estoycontigo" ${(!state.canBet || myTokens < 1 || isMyTurn) ? 'disabled' : ''} onclick="send('MARKET_BET', 'for')">
                         ¡ESTOY CONTIGO! (1 <span class="neon-chip"></span>)
                      </button>`;
 
@@ -1342,8 +1342,8 @@
                 document.getElementById('game-screen').style.display = 'flex';
 
                 // Vibración al inicio de turno PROPIO o al entrar en DUELO
-                var isMyTurnNow = (data.activePlayer && data.activePlayer.id === myId);
-                var wasMyTurnBefore = (lastState && lastState.activePlayer && lastState.activePlayer.id === myId);
+                var isMyTurnNow = (data.activePlayer && data.activePlayer.id && myId && data.activePlayer.id.toLowerCase() === myId.toLowerCase());
+                var wasMyTurnBefore = (lastState && lastState.activePlayer && lastState.activePlayer.id && myId && lastState.activePlayer.id.toLowerCase() === myId.toLowerCase());
                 var phaseChangedToDuel = (data.turnPhase === 'DUEL' && (!lastState || lastState.turnPhase !== 'DUEL'));
 
                 if (navigator.vibrate) {
