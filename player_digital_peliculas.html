@@ -1436,8 +1436,8 @@
                 }
 
                 // Identificar si es mi turno usando el ID de PeerJS
-                var isMyTurn = (data.activePlayer && data.activePlayer.id === myId);
-                console.log("¿Es mi turno?", isMyTurn, "Mi ID:", myId, "ID Activo:", data.activePlayer ? data.activePlayer.id : "none");
+                var isMyTurn = (data.activePlayer && data.activePlayer.id && myId && data.activePlayer.id.toLowerCase() === myId.toLowerCase());
+                console.log("¿Mi Turno?", isMyTurn, "ID Host:", data.activePlayer ? data.activePlayer.id : "null", "Mi ID:", myId);
 
                 var isKingMode = (data.turnPhase && data.turnPhase !== 'NORMAL');
                 var normalCardContainer = document.getElementById('normal-card-container');
