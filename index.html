@@ -108,14 +108,14 @@
 
         /* Glass Grain Texture */
         .game-card, .btn, #custom-alert > div, #custom-confirm > div {
-            background: var(--glass) !important;
-            backdrop-filter: blur(25px) saturate(200%) !important;
-            -webkit-backdrop-filter: blur(25px) saturate(200%) !important;
-            border: 1px solid rgba(255,255,255,0.1) !important;
-            border-image: var(--glass-border) 1 !important;
+            background: var(--glass);
+            backdrop-filter: blur(25px) saturate(200%);
+            -webkit-backdrop-filter: blur(25px) saturate(200%);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-image: var(--glass-border) 1;
             position: relative;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.5) !important;
-            box-sizing: border-box !important;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            box-sizing: border-box;
         }
 
         /* Grainy Overlay */
@@ -174,7 +174,8 @@
 
         .card-original:hover {
             box-shadow: 0 10px 40px rgba(0, 242, 254, 0.4), inset 0 0 20px rgba(0, 242, 254, 0.2);
-            background: #0a1616;
+            background: rgba(0, 242, 254, 0.05);
+            border-color: var(--neon);
         }
 
         .card-original .card-logo {
@@ -190,10 +191,12 @@
 
         .card-anime:hover {
             box-shadow: 0 10px 40px rgba(255, 0, 255, 0.4), inset 0 0 20px rgba(255, 0, 255, 0.2);
-            background: #160a16;
+            background: rgba(255, 0, 255, 0.05);
+            border-color: #ff00ff;
         }
 
         .card-anime .card-logo {
+            font-family: 'Shojumaru';
             text-shadow: 0 0 15px #ff00ff;
         }
 
@@ -206,7 +209,8 @@
 
         .card-movies:hover {
             box-shadow: 0 10px 40px rgba(255, 170, 0, 0.4), inset 0 0 20px rgba(255, 170, 0, 0.2);
-            background: #16120a;
+            background: rgba(255, 170, 0, 0.05);
+            border-color: #ffaa00;
         }
 
         .card-movies .card-logo {
@@ -223,7 +227,8 @@
 
         .card-mix:hover {
             box-shadow: 0 10px 40px rgba(0, 255, 0, 0.4), inset 0 0 20px rgba(0, 255, 0, 0.2);
-            background: #0a160a;
+            background: rgba(0, 255, 0, 0.05);
+            border-color: #00ff00;
         }
 
         .card-mix .card-logo {
@@ -240,7 +245,8 @@
         }
         .card-games:hover {
             box-shadow: 0 10px 40px rgba(191, 0, 255, 0.4), inset 0 0 20px rgba(191, 0, 255, 0.2);
-            background: #120a16;
+            background: rgba(191, 0, 255, 0.05);
+            border-color: #bf00ff;
         }
         .card-games .card-logo {
             font-family: 'Press Start 2P';
@@ -327,19 +333,55 @@
     <div id="role-modal">
         <div id="role-modal-content">
             <h2 id="selected-mode-title">MODO SELECCIONADO</h2>
+            
+            <!-- Mix Selection Area (Hidden by default) -->
+            <div id="mix-selection-area" style="display:none; margin-bottom: 30px;">
+                <p style="font-size:0.8em; margin-bottom:15px; color:#888;">ELITE MIX: ELIGE LISTAS</p>
+                <div class="mix-grid">
+                    <button class="mix-chip active" data-type="orig" onclick="toggleMix(this)">ORIGINAL</button>
+                    <button class="mix-chip active" data-type="movies" onclick="toggleMix(this)">PELIS</button>
+                    <button class="mix-chip active" data-type="anime" onclick="toggleMix(this)">ANIME</button>
+                    <button class="mix-chip active" data-type="videojuegos" onclick="toggleMix(this)">GAMER</button>
+                </div>
+            </div>
+
             <div class="role-options">
                 <button onclick="goToGame('host')" class="role-btn btn-host">
-                    <span class="role-icon">📱</span>
-                    <span class="role-text">CONTROL<br><small>(Tablet / PC)</small></span>
+                    <span class="role-text">CENTRO DE CONTROL<br><small>(Tablet / PC)</small></span>
                 </button>
                 <button onclick="goToGame('player')" class="role-btn btn-player">
-                    <span class="role-icon">🎮</span>
-                    <span class="role-text">MANDO<br><small>(Móvil)</small></span>
+                    <span class="role-text">MANDO JUGADOR<br><small>(Móvil)</small></span>
                 </button>
             </div>
             <button onclick="closeRoleModal()" class="btn-cancel">VOLVER AL MENÚ</button>
         </div>
     </div>
+
+    <style>
+        .mix-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .mix-chip {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid #333;
+            color: #555;
+            padding: 10px;
+            border-radius: 10px;
+            font-family: 'Montserrat';
+            font-weight: 700;
+            font-size: 0.7em;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .mix-chip.active {
+            border-color: #00ff00;
+            color: #00ff00;
+            background: rgba(0,255,0,0.1);
+            box-shadow: 0 0 10px rgba(0,255,0,0.2);
+        }
+    </style>
 
     <style>
         #role-modal {
@@ -444,7 +486,20 @@
                 'mix': 'MIX MODE'
             };
             document.getElementById('selected-mode-title').innerText = names[mode];
+            
+            // Show/Hide Mix Selection
+            const mixArea = document.getElementById('mix-selection-area');
+            if (mode === 'mix') {
+                mixArea.style.display = 'block';
+            } else {
+                mixArea.style.display = 'none';
+            }
+
             document.getElementById('role-modal').style.display = 'flex';
+        }
+
+        function toggleMix(btn) {
+            btn.classList.toggle('active');
         }
 
         function closeRoleModal() {
@@ -455,7 +510,19 @@
             let prefix = role === 'host' ? 'host_digital' : 'player_digital';
             let suffix = '';
             
-            if (currentMode !== 'original') {
+            if (currentMode === 'mix') {
+                if (role === 'host') {
+                    const activeTypes = Array.from(document.querySelectorAll('.mix-chip.active'))
+                                             .map(b => b.dataset.type);
+                    if (activeTypes.length === 0) {
+                        alert("Elige al menos un modo para mezclar");
+                        return;
+                    }
+                    window.location.href = `host_digital_mix.html?mix=${activeTypes.join(',')}`;
+                    return;
+                }
+                suffix = '_mix';
+            } else if (currentMode !== 'original') {
                 suffix = '_' + currentMode;
             }
             
