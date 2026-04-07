@@ -735,7 +735,7 @@
     
         
         
-        /* --- HYPER-PREMIUM UI V1.4: MESH & CRYSTAL --- */
+        /* --- HYPER-PREMIUM UI V1.5: MESH & CRYSTAL --- */
         :root {
             --glass: rgba(20, 20, 20, 0.45);
             --glass-border: rgba(255, 255, 255, 0.15);
@@ -781,7 +781,7 @@
         }
 
         /* Intense Glass Effect */
-        input, .collection-summary, .card-row, .modal-content, .btn-secondary, .ctrl-btn, .spec-btn, .sk-btn, .market-btn, #sabotage-grid .spec-btn, .tab-bar, .duel-mode-ui, #custom-alert > div, #custom-confirm > div {
+        input, .collection-summary, .card-row, .modal-content, .btn-secondary, .ctrl-btn, .spec-btn, .sk-btn, .market-btn, #sabotage-grid .spec-btn, .duel-mode-ui, #custom-alert > div, #custom-confirm > div {
             background: var(--glass) !important;
             backdrop-filter: blur(25px) saturate(200%) brightness(1.1) !important;
             -webkit-backdrop-filter: blur(25px) saturate(200%) brightness(1.1) !important;
@@ -813,6 +813,20 @@
 
         .tab-bar {
             border-top: 1px solid rgba(255,255,255,0.2) !important;
+        }
+
+
+        /* Tab Bar Specific (Full Width) */
+        .tab-bar {
+            background: var(--glass) !important;
+            backdrop-filter: blur(25px) saturate(200%) brightness(1.1) !important;
+            -webkit-backdrop-filter: blur(25px) saturate(200%) brightness(1.1) !important;
+            border-top: 1px solid var(--glass-border) !important;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.4) !important;
+            left: 0 !important;
+            right: 0 !important;
+            width: 100% !important;
+            border-radius: 0 !important;
         }
 
 </style>
@@ -929,7 +943,7 @@
     <a href="index.html" class="btn-hub" title="Volver al Hub">H</a>
     <div id="login-screen">
         <div class="logo" style="font-family:'Bungee'; color:var(--neon); text-shadow: 0 0 10px var(--neon);">
-            CHRONOBEATS <span style="font-size:0.4em; opacity:0.6; vertical-align:top; color:#aaa; font-family:Montserrat;">V1.4</span></div>
+            CHRONOBEATS <span style="font-size:0.4em; opacity:0.6; vertical-align:top; color:#aaa; font-family:Montserrat;">V1.5</span></div>
 
         <div id="avatar-container" onclick="document.getElementById('avatar-input').click()"
             style="display:flex; flex-direction:column; align-items:center; margin-bottom:15px; cursor:pointer;">
