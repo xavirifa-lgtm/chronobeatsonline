@@ -57,7 +57,6 @@
             grid-template-columns: repeat(3, 1fr);
             gap: 6px;
             width: 100%;
-            max-width: 320px;
             margin-top: 10px;
         }
 
@@ -67,7 +66,6 @@
             grid-template-columns: repeat(3, 1fr);
             gap: 4px;
             width: 100%;
-            max-width: 320px;
             margin-top: 5px;
         }
 
@@ -440,6 +438,8 @@
             border-image: var(--glass-border) 1 !important;
             position: relative;
             box-shadow: 0 15px 35px rgba(0,0,0,0.5) !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
         }
 
         /* Grainy Overlay */
