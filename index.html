@@ -36,18 +36,17 @@
             margin-bottom: 30px;
             letter-spacing: 2px;
             text-shadow: 0 0 20px rgba(255,255,255,0.3);
+            width: 100%;
         }
 
         .cards-container {
             display: flex;
             gap: 15px;
-            flex-wrap: nowrap;
+            flex-wrap: wrap;
             justify-content: center;
             width: 100%;
-            max-width: 1400px;
             padding: 20px;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
+            box-sizing: border-box;
         }
 
         .game-card {
@@ -67,8 +66,86 @@
             text-align: center;
         }
 
-        .game-card:hover {
-            transform: translateY(-15px) scale(1.05);
+        @keyframes shine {
+            from { transform: translateX(-100%); }
+            to { transform: translateX(100%); }
+        }
+
+        /* --- ELITE-PREMIUM UI V1.6: AURORA & TEXTURE --- */
+        :root {
+            --glass: rgba(15, 15, 15, 0.5);
+            --glass-border: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0.2) 100%);
+            --aurora-1: hsla(180, 100%, 15%, 0.15);
+            --aurora-2: hsla(280, 100%, 15%, 0.15);
+            --aurora-3: hsla(220, 100%, 15%, 0.15);
+        }
+
+        body {
+            background: #020202 !important;
+            background-image: 
+                radial-gradient(circle at 20% 30%, var(--aurora-1), transparent 40%),
+                radial-gradient(circle at 80% 70%, var(--aurora-2), transparent 40%),
+                radial-gradient(circle at 50% 50%, var(--aurora-3), transparent 60%) !important;
+            background-attachment: fixed !important;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.4) 100%);
+            animation: aurora-orbit 30s linear infinite;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        @keyframes aurora-orbit {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Glass Grain Texture */
+        .game-card, .btn, #custom-alert > div, #custom-confirm > div {
+            background: var(--glass) !important;
+            backdrop-filter: blur(25px) saturate(200%) !important;
+            -webkit-backdrop-filter: blur(25px) saturate(200%) !important;
+            border: 1px solid rgba(255,255,255,0.1) !important;
+            border-image: var(--glass-border) 1 !important;
+            position: relative;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5) !important;
+            box-sizing: border-box !important;
+        }
+
+        /* Grainy Overlay */
+        .game-card::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            opacity: 0.03;
+            pointer-events: none;
+            mix-blend-mode: overlay;
+            border-radius: inherit;
+        }
+
+        /* Bokeh Particles */
+        .bokeh {
+            position: fixed;
+            width: 10px; height: 10px;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.1;
+            filter: blur(5px);
+            z-index: -1;
+            animation: float-bokeh 10s infinite ease-in-out;
+        }
+
+        @keyframes float-bokeh {
+            0% { transform: translate(0, 0); opacity: 0; }
+            50% { opacity: 0.2; }
+            100% { transform: translate(100px, -100px); opacity: 0; }
         }
 
         .card-logo {
@@ -210,43 +287,181 @@
     <div class="hub-title">CHOOSE YOUR EDITION</div>
 
     <div class="cards-container">
-        <a href="indexchrono.html" class="game-card card-original">
+        <div onclick="selectMode('original')" class="game-card card-original">
             <div class="card-logo">
                 CHRONO<br>BEATS
                 <span class="card-sub">MODO ORIGINAL</span>
             </div>
-        </a>
+        </div>
 
-        <a href="indexchronoanime.html" class="game-card card-anime">
+        <div onclick="selectMode('anime')" class="game-card card-anime">
             <div class="card-logo">
                 CHRONO<br>BEATS
                 <span class="card-sub">ANIME VERSION</span>
             </div>
-        </a>
+        </div>
 
-        <a href="indexchronomovies.html" class="game-card card-movies">
+        <div onclick="selectMode('peliculas')" class="game-card card-movies">
             <div class="card-logo">
                 CHRONO<br>BEATS
                 <span class="card-sub">MOVIES & TV SHOWS</span>
             </div>
-        </a>
+        </div>
 
-        <a href="indexchronovideojuegos.html" class="game-card card-games">
+        <div onclick="selectMode('videojuegos')" class="game-card card-games">
             <div class="card-logo">
                 CHRONO<br>BEATS
                 <span class="card-sub">GAMER EDITION</span>
             </div>
-        </a>
+        </div>
 
-        <a href="indexchronomix.html" class="game-card card-mix">
+        <div onclick="selectMode('mix')" class="game-card card-mix">
             <div class="card-logo">
                 CHRONO<br>BEATS
                 <span class="card-sub">MIX MODE</span>
             </div>
-        </a>
+        </div>
     </div>
 
+    <!-- ROLE SELECTOR MODAL -->
+    <div id="role-modal">
+        <div id="role-modal-content">
+            <h2 id="selected-mode-title">MODO SELECCIONADO</h2>
+            <div class="role-options">
+                <button onclick="goToGame('host')" class="role-btn btn-host">
+                    <span class="role-icon">📱</span>
+                    <span class="role-text">CONTROL<br><small>(Tablet / PC)</small></span>
+                </button>
+                <button onclick="goToGame('player')" class="role-btn btn-player">
+                    <span class="role-icon">🎮</span>
+                    <span class="role-text">MANDO<br><small>(Móvil)</small></span>
+                </button>
+            </div>
+            <button onclick="closeRoleModal()" class="btn-cancel">VOLVER AL MENÚ</button>
+        </div>
+    </div>
+
+    <style>
+        #role-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 10000;
+            backdrop-filter: blur(15px);
+            align-items: center; justify-content: center;
+            padding: 20px;
+        }
+
+        #role-modal-content {
+            width: 100%;
+            max-width: 450px;
+            padding: 40px 20px;
+            text-align: center;
+            border-radius: 30px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        #selected-mode-title {
+            font-family: 'Bungee';
+            font-size: 1.5em;
+            margin-bottom: 40px;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+
+        .role-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .role-btn {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: 0.3s;
+            border: 2px solid transparent;
+            padding: 10px;
+        }
+
+        .role-btn:hover {
+            transform: translateY(-5px);
+            background: rgba(255,255,255,0.05);
+        }
+
+        .btn-host { border-color: var(--neon); color: var(--neon); }
+        .btn-player { border-color: var(--gold); color: var(--gold); }
+
+        .role-icon { font-size: 2.5em; margin-bottom: 15px; }
+        .role-text { font-family: 'Bungee'; font-size: 0.8em; line-height: 1.2; text-transform: uppercase; }
+        .role-text small { font-family: 'Montserrat'; font-size: 0.7em; opacity: 0.6; }
+
+        .btn-cancel {
+            background: transparent;
+            border: 1px solid #444;
+            color: #888;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-family: 'Montserrat';
+            font-weight: 700;
+            font-size: 0.8em;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-cancel:hover {
+            color: #fff;
+            border-color: #888;
+        }
+
+        @media (max-width: 480px) {
+            .role-options {
+                grid-template-columns: 1fr;
+            }
+            .role-btn {
+                aspect-ratio: auto;
+                padding: 30px;
+            }
+        }
+    </style>
+
     <script>
+        let currentMode = '';
+
+        function selectMode(mode) {
+            currentMode = mode;
+            const names = {
+                'original': 'MODO ORIGINAL',
+                'anime': 'ANIME VERSION',
+                'peliculas': 'MOVIES & TV',
+                'videojuegos': 'GAMER EDITION',
+                'mix': 'MIX MODE'
+            };
+            document.getElementById('selected-mode-title').innerText = names[mode];
+            document.getElementById('role-modal').style.display = 'flex';
+        }
+
+        function closeRoleModal() {
+            document.getElementById('role-modal').style.display = 'none';
+        }
+
+        function goToGame(role) {
+            let prefix = role === 'host' ? 'host_digital' : 'player_digital';
+            let suffix = '';
+            
+            if (currentMode !== 'original') {
+                suffix = '_' + currentMode;
+            }
+            
+            window.location.href = `${prefix}${suffix}.html`;
+        }
+
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js').then(reg => {
