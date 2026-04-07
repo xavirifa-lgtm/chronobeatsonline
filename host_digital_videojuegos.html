@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <meta name="theme-color" content="#bf00ff">
+    <title>HOST - CHRONOBEATS VIDEOJUEGOS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Montserrat:wght@400;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --neon: #bf00ff;
+            --bg: #0d0d0d;
+            --accent: #ff0055;
+            --gold: #ffd700;
+        }
+
+        body {
+            background: var(--bg);
+            color: #fff;
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .logo {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.2em;
+            color: var(--neon);
+            text-shadow: 0 0 20px var(--neon);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        #lobby {
+            text-align: center;
+            max-width: 600px;
+            margin: auto;
+            padding-top: 50px;
+        }
+
+        .room-code {
+            font-family: 'Bungee';
+            font-size: 4em;
+            color: var(--gold);
+            letter-spacing: 10px;
+            margin: 20px 0;
+        }
+
+        .player-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .player-tag {
+            background: #222;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid #444;
+            font-family: 'Bungee';
+            font-size: 0.8em;
+        }
+
+        #dashboard {
+            display: none;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        .sidebar {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 20px;
+            border-radius: 20px;
+            border: 1px solid #333;
+        }
+
+        .active-player-name {
+            font-family: 'Bungee';
+            font-size: 1.5em;
+            color: var(--neon);
+        }
+
+        .leader-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            background: #111;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .leader-item.active {
+            border-left: 4px solid var(--neon);
+        }
+
+        #player-container {
+            position: absolute;
+            top: -999px;
+            left: -999px;
+            opacity: 0.1;
+        }
+
+        #player-container iframe {
+            width: 1px;
+            height: 1px;
+            border: none;
+        }
+
+        .validation-area {
+            background: #111;
+            padding: 20px;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .val-card {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid var(--neon);
+            width: 100%;
+            text-align: center;
+        }
+
+        .reveal-btn {
+            background: var(--gold);
+            color: #000;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-family: 'Bungee';
+            cursor: pointer;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .btn-val {
+            flex: 1;
+            padding: 20px;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Bungee';
+            font-size: 1em;
+            cursor: pointer;
+        }
+
+        .btn-ok {
+            background: #00ff88;
+        }
+
+        .btn-fail {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .timeline-grid {
+            display: grid;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .player-row {
+            background: #161616;
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .slots {
+            display: flex;
+            gap: 5px;
+            overflow-x: auto;
+        }
+
+        .slot {
+            min-width: 45px;
+            height: 25px;
+            background: #222;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            color: #666;
+        }
+
+        .slot.filled {
+            background: var(--neon);
+            color: #000;
+            font-weight: bold;
+            border: 1px solid #fff;
+        }
+
+        .btn-start {
+            background: var(--neon);
+            color: #000;
+            border: none;
+            padding: 20px 60px;
+            border-radius: 50px;
+            font-family: 'Press Start 2P';
+            font-size: 1.1em;
+            cursor: pointer;
+        }
+
+        /* Pantalla Ganador */
+        #winner-screen {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        #winner-screen h1 {
+            font-family: 'Bungee';
+            font-size: 4em;
+            color: var(--gold);
+            margin: 0;
+        }
+
+        .neon-chip {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background: #00f2fe;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #00f2fe, 0 0 15px #00f2fe;
+            margin: 0 3px;
+            vertical-align: middle;
+        }
+
+        /* Hub Button */
+        .btn-hub {
+            position: fixed;
+            top: calc(20px + env(safe-area-inset-top, 0px));
+            left: 20px;
+            z-index: 10000;
+            width: 55px;
+            height: 55px;
+            background: #000;
+            border: 2px solid var(--neon, #00f2ff);
+            border-radius: 50%;
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+            color: var(--neon, #00f2ff);
+            text-decoration: none;
+            font-family: 'Bungee';
+            font-size: 1.5em;
+            box-shadow: 0 0 20px rgba(191, 0, 255, 0.5);
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        /* --- ELITE-PREMIUM UI V1.6: AURORA & TEXTURE --- */
+        :root {
+            --glass: rgba(15, 15, 15, 0.5);
+            --glass-border: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0.2) 100%);
+            --aurora-1: hsla(280, 100%, 15%, 0.15);
+            --aurora-2: hsla(300, 100%, 15%, 0.15);
+            --aurora-3: hsla(260, 100%, 15%, 0.15);
+        }
+
+        body {
+            background: #020202 !important;
+            background-image: 
+                radial-gradient(circle at 20% 30%, var(--aurora-1), transparent 40%),
+                radial-gradient(circle at 80% 70%, var(--aurora-2), transparent 40%),
+                radial-gradient(circle at 50% 50%, var(--aurora-3), transparent 60%) !important;
+            background-attachment: fixed !important;
+        }
+
+        input, .modal-content, .card-face, .sidebar, .validation-area, .val-card {
+            background: var(--glass) !important;
+            backdrop-filter: blur(25px) saturate(200%) !important;
+            -webkit-backdrop-filter: blur(25px) saturate(200%) !important;
+            border: 1px solid rgba(255,255,255,0.1) !important;
+            border-image: var(--glass-border) 1 !important;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5) !important;
+        }
+    </style>
+</head>
+
+<body>
+    <a href="index.html" class="btn-hub" title="Volver al Hub">H</a>
+    <div id="flash-overlay"></div>
+    <div id="winner-screen">
+        <h1 style="font-family:'Press Start 2P'; font-size:2em;">WINNER!</h1>
+        <div id="winner-avatar-img" style="margin: 20px 0;"></div>
+        <h2 id="winner-name" style="font-family:'Bungee'; color:var(--neon); font-size:2.5em;">---</h2>
+        <button class="btn-start" onclick="location.reload()" style="margin-top:30px">PLAY AGAIN</button>
+    </div>
+    <div class="logo">CHRONOBEATS <span style="font-size:0.6em; opacity:0.6;">GAMER EDITION</span></div>
+    
+    <div id="lobby">
+        <div class="room-code" id="join-code">------</div>
+        <div class="player-list" id="lobby-players" style="margin-bottom: 20px;"></div>
+
+        <div id="mode-selector" style="margin-bottom: 20px;">
+            <label style="font-family: 'Bungee'; color: var(--neon); font-size: 1.2em;">MODO DE JUEGO</label>
+            <select id="game-mode-select" style="padding: 10px; font-family: 'Montserrat'; background: #222; color: #fff; border: 1px solid var(--neon);">
+                <option value="normal">CLÁSICO</option>
+                <option value="rey">MODO REY</option>
+            </select>
+        </div>
+
+        <button class="btn-start" onclick="startGame()" style="display:none; margin-top: 20px;" id="start-btn">START GAME</button>
+    </div>
+
+    <div id="dashboard">
+        <div class="sidebar">
+            <div style="text-align:center; margin-bottom:10px;">
+                <p style="font-size: 0.7em; color: #888;">TURNO DE:</p>
+                <div class="active-player-name" id="ui-current-player">---</div>
+            </div>
+            <div id="leaderboard-list"></div>
+        </div>
+        <div class="main-content">
+            <div id="player-container">
+                <div id="youtube-player"></div>
+            </div>
+            <div class="validation-area">
+                <div class="val-card" id="val-card-ui" style="display:none;">
+                    <p style="font-size: 0.7em; color: var(--neon); margin-bottom: 5px;">JUEGO EN CURSO <span style="font-size: 0.8em; opacity: 0.8;"> - GAMER EDITION</span></p>
+                    <p id="ui-card-artist" style="font-size: 0.9em; color: #aaa; margin: 0; font-weight: bold;">ESTUDIO / COMPOSITOR</p>
+                    <h3 id="ui-card-song" style="margin: 5px 0; font-size: 1.4em; font-family: 'Press Start 2P';">VIDEOJUEGO</h3>
+                    <div id="ui-card-year" style="font-family: 'Press Start 2P', cursive; font-size: 3.5em; color: var(--accent); margin-top: 5px; line-height: 1;">????</div>
+                    <button class="reveal-btn" id="btn-reveal-host" onclick="revealData()" style="display:block; margin: 15px auto;">REVELAR DATOS</button>
+                    <div class="actions" id="validation-buttons" style="display:none; gap: 10px; width: 100%; margin-top: 15px;">
+                        <button class="btn-val btn-ok" onclick="validateResult(true, false)">ACERTÓ</button>
+                        <button class="btn-val btn-ok" style="background:#ffd700;" onclick="validateResult(true, true)">ACERTÓ TODO</button>
+                        <button class="btn-val btn-fail" onclick="validateResult(false, false)">FALLÓ</button>
+                    </div>
+                </div>
+                <div id="host-instructions">ESPERANDO ACCIÓN...</div>
+                <div id="active-player-inventory" class="active-player-cards" style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-top:10px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="timeline-grid" id="global-timelines" style="margin-top:20px;"></div>
+
+    <script>
+        var peer, roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+        var players = [], connections = {}, songs = [], currentSongIdx = -1, activePlayerIdx = 0, isRevealed = false;
+        var hasShield = {}, currentBets = {}, activeGuess = null, bettingAgainst = [], bettingFor = [], turnPhase = 'NORMAL', kingOptions = [], isPlaying = false, isFogActive = false;
+
+        document.getElementById('join-code').innerText = roomCode;
+
+        function updateTokens(player, delta) { if (player) player.tokens = Math.max(0, Math.min(5, (player.tokens || 0) + delta)); }
+
+        function initPeer() {
+            peer = new Peer("CB-HOST-" + roomCode);
+            peer.on('connection', function (conn) {
+                conn.on('data', function (data) {
+                    if (data.type === 'JOIN') {
+                        var existing = players.find(p => p.name === data.name);
+                        if (existing) { existing.id = conn.peer; connections[conn.peer] = conn; }
+                        else { players.push({ id: conn.peer, name: data.name, avatar: data.avatar, score: 1, cards: [], tokens: 2, canReload: true }); connections[conn.peer] = conn; }
+                        updateLobby();
+                    } else if (data.type === 'COMMAND') handlePlayerCommand(conn.peer, data.action, data.value);
+                });
+            });
+        }
+        initPeer();
+
+        fetch('lista_videojuegos.txt?v=' + new Date().getTime()).then(r => r.text()).then(t => {
+            var lines = t.split('\n').filter(l => l.trim() !== '');
+            songs = lines.map(l => {
+                var p = l.split('|');
+                return { artist: p[0], song: p[1], year: p[2], id: p[3] };
+            }).sort(() => Math.random() - 0.5);
+        });
+
+        function updateLobby() {
+            var h = ""; players.forEach(p => h += '<div class="player-tag">' + p.name + '</div>');
+            document.getElementById('lobby-players').innerHTML = h;
+            if (players.length >= 1) document.getElementById('start-btn').style.display = 'inline-block';
+        }
+
+        function startGame() {
+            gameMode = document.getElementById('game-mode-select').value;
+            players.forEach(p => { 
+                currentSongIdx++; 
+                if(songs[currentSongIdx]) p.cards.push(songs[currentSongIdx].year); 
+            });
+            document.getElementById('lobby').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'grid';
+            nextTurn();
+        }
+
+        function nextTurn() {
+            turnPhase = 'NORMAL'; currentSongIdx++; isRevealed = false; isPlaying = false; activeGuess = null; bettingAgainst = []; bettingFor = []; isFogActive = false;
+            var s = songs[currentSongIdx];
+            document.getElementById('ui-card-artist').innerText = "????";
+            document.getElementById('ui-card-song').innerText = "????";
+            document.getElementById('ui-card-year').innerText = "????";
+            document.getElementById('btn-reveal-host').style.display = 'block';
+            document.getElementById('val-card-ui').style.display = 'block';
+            document.getElementById('validation-buttons').style.display = 'none';
+            document.getElementById('ui-current-player').innerText = players[activePlayerIdx].name;
+            document.getElementById('host-instructions').innerText = "ESPERANDO PLAY...";
+            syncState();
+        }
+
+        function revealData() {
+            isRevealed = true;
+            var s = songs[currentSongIdx];
+            document.getElementById('ui-card-artist').innerText = s.artist;
+            document.getElementById('ui-card-song').innerText = s.song;
+            document.getElementById('ui-card-year').innerText = s.year;
+            document.getElementById('btn-reveal-host').style.display = 'none';
+            document.getElementById('validation-buttons').style.display = 'flex';
+            document.getElementById('host-instructions').innerText = "¿POSICIÓN CORRECTA?";
+            syncState();
+        }
+
+        function validateResult(isCardOk, isTokenOk) {
+            if (isTokenOk) updateTokens(players[activePlayerIdx], 1);
+            if (isCardOk) {
+                players[activePlayerIdx].score++;
+                players[activePlayerIdx].cards.push(songs[currentSongIdx].year);
+                players[activePlayerIdx].cards.sort();
+                if (players[activePlayerIdx].score >= 10) { showWinner(players[activePlayerIdx].name); return; }
+            }
+            activePlayerIdx = (activePlayerIdx + 1) % players.length;
+            nextTurn();
+        }
+
+        function showWinner(name) {
+            document.getElementById('winner-name').innerText = name;
+            document.getElementById('winner-screen').style.display = 'flex';
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+        }
+
+        function handlePlayerCommand(peerId, action, value) {
+            var activeP = players[activePlayerIdx];
+            var s = songs[currentSongIdx];
+            if (action === 'PLAY' && peerId === activeP.id) {
+                isPlaying = true;
+                document.getElementById('player-container').innerHTML = '<iframe src="https://www.youtube.com/embed/' + s.id + '?autoplay=1" allow="autoplay"></iframe>';
+                document.getElementById('host-instructions').innerText = "REPRODUCIENDO...";
+                syncState();
+            } else if (action === 'STOP' && peerId === activeP.id) {
+                isPlaying = false;
+                document.getElementById('player-container').innerHTML = '';
+                revealData();
+            } else if (action === 'GUESS' && peerId === activeP.id) {
+                activeGuess = parseInt(value);
+                syncState();
+            }
+        }
+
+        function syncState() {
+            players.forEach(p => {
+                var state = { type: 'STATE_UPDATE', players: players, activePlayer: activePId(), currentTrack: songs[currentSongIdx], revealed: isRevealed, isPlaying: isPlaying, turnPhase: turnPhase, activeTimeline: players[activePlayerIdx].cards, activeGuess: activeGuess };
+                if (connections[p.id]) connections[p.id].send(state);
+            });
+            updateUI();
+        }
+
+        function activePId() { return players[activePlayerIdx] ? players[activePlayerIdx].id : null; }
+
+        function updateUI() {
+            var h = ""; players.sort((a,b)=>b.score-a.score).forEach(p => {
+                h += '<div class="leader-item '+(p.id===activePId()?'active':'')+'"><span>'+p.name+'</span><span>'+p.score+' p</span></div>';
+            });
+            document.getElementById('leaderboard-list').innerHTML = h;
+            var c = ""; players[activePlayerIdx].cards.forEach(y => c += '<div style="background:#222; padding:5px; border-radius:5px; font-size:0.8em; border:1px solid var(--neon);">'+y+'</div>');
+            document.getElementById('active-player-inventory').innerHTML = c;
+        }
+    </script>
+</body>
+</html>

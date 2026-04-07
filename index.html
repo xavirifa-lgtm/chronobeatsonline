@@ -1,144 +1,118 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icon-192.png">
-    <meta name="theme-color" content="#00f2ff">
-    <title>CHRONOBEATS - HUB</title>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Bungee&family=Shojumaru&family=Limelight&family=Montserrat:wght@400;700&display=swap"
-        rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>CHRONOBEATS - Game Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Montserrat:wght@400;700&family=Limelight&family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg: #050505;
+            --neon: #00f2fe;
+            --gold: #ffaa00;
+            --accent: #ff0055;
+        }
+
         body {
-            background: #000;
+            background: var(--bg);
             color: #fff;
             font-family: 'Montserrat', sans-serif;
+            margin: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
-            height: 100dvh;
-            margin: 0;
-            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-            box-sizing: border-box;
+            min-height: 100vh;
             overflow: hidden;
         }
 
         .hub-title {
             font-family: 'Bungee';
-            font-size: 2em;
+            font-size: 3em;
             color: #fff;
-            letter-spacing: 5px;
-            margin-bottom: 50px;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
             text-align: center;
+            margin-bottom: 50px;
+            letter-spacing: 2px;
+            text-shadow: 0 0 20px rgba(255,255,255,0.3);
         }
 
         .cards-container {
             display: flex;
-            flex-wrap: wrap;
             gap: 30px;
+            flex-wrap: wrap;
             justify-content: center;
-            max-width: 1300px;
+            max-width: 1200px;
+            padding: 20px;
         }
 
         .game-card {
-            width: 270px;
-            height: 400px;
-            background: #090909;
+            width: 280px;
+            height: 380px;
+            background: #111;
+            border: 2px solid #333;
             border-radius: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             text-decoration: none;
-            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             overflow: hidden;
-            border: 2px solid transparent;
-        }
-
-        .game-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            opacity: 0.05;
-            background: radial-gradient(circle at center, currentColor 0%, transparent 70%);
-            transition: 0.4s;
+            text-align: center;
         }
 
         .game-card:hover {
             transform: translateY(-15px) scale(1.05);
-            z-index: 10;
-        }
-
-        .game-card:hover::before {
-            opacity: 0.15;
         }
 
         .card-logo {
-            font-size: 2.8em;
-            text-align: center;
-            line-height: 1.1;
-            padding: 20px;
-            position: relative;
+            font-family: 'Bungee';
+            font-size: 2.5em;
+            line-height: 0.9;
+            margin-bottom: 20px;
             z-index: 2;
         }
 
         .card-sub {
-            font-family: 'Montserrat';
-            font-size: 0.3em;
-            color: #fff;
             display: block;
-            margin-top: 15px;
+            font-size: 0.35em;
+            font-family: 'Montserrat';
+            font-weight: 700;
+            margin-top: 10px;
             letter-spacing: 2px;
-            opacity: 0.8;
-            text-shadow: none;
         }
 
         /* Original */
         .card-original {
-            border-color: #00f2ff;
-            color: #00f2ff;
-            box-shadow: 0 0 20px rgba(0, 242, 255, 0.1);
+            border-color: var(--neon);
+            color: var(--neon);
+            box-shadow: 0 0 20px rgba(0, 242, 254, 0.1);
         }
 
         .card-original:hover {
-            box-shadow: 0 10px 40px rgba(0, 242, 255, 0.4), inset 0 0 20px rgba(0, 242, 255, 0.2);
-            background: #0a1516;
+            box-shadow: 0 10px 40px rgba(0, 242, 254, 0.4), inset 0 0 20px rgba(0, 242, 254, 0.2);
+            background: #0a1616;
         }
 
         .card-original .card-logo {
-            font-family: 'Bungee';
-            text-shadow: 0 0 15px #00f2ff;
+            text-shadow: 0 0 15px var(--neon);
         }
 
         /* Anime */
         .card-anime {
-            border-color: #ff00cc;
-            color: #ff00cc;
-            box-shadow: 0 0 20px rgba(255, 0, 204, 0.1);
+            border-color: #ff00ff;
+            color: #ff00ff;
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.1);
         }
 
         .card-anime:hover {
-            box-shadow: 0 10px 40px rgba(255, 0, 204, 0.4), inset 0 0 20px rgba(255, 0, 204, 0.2);
-            background: #160a12;
+            box-shadow: 0 10px 40px rgba(255, 0, 255, 0.4), inset 0 0 20px rgba(255, 0, 255, 0.2);
+            background: #160a16;
         }
 
         .card-anime .card-logo {
-            font-family: 'Shojumaru';
-            text-shadow: 0 0 15px #ff00cc;
-            font-size: 2.5em;
+            text-shadow: 0 0 15px #ff00ff;
         }
 
         /* Movies */
@@ -176,6 +150,22 @@
             text-shadow: 0 0 15px #00ff00;
         }
 
+        /* Videojuegos */
+        .card-games {
+            border-color: #bf00ff;
+            color: #bf00ff;
+            box-shadow: 0 0 20px rgba(191, 0, 255, 0.1);
+        }
+        .card-games:hover {
+            box-shadow: 0 10px 40px rgba(191, 0, 255, 0.4), inset 0 0 20px rgba(191, 0, 255, 0.2);
+            background: #120a16;
+        }
+        .card-games .card-logo {
+            font-family: 'Press Start 2P';
+            font-size: 1.5em; 
+            text-shadow: 0 0 15px #bf00ff;
+        }
+
         @media (max-width: 768px) {
             body {
                 overflow-y: auto;
@@ -190,14 +180,15 @@
 
             .game-card {
                 width: 90%;
-                height: 200px;
+                height: 180px;
             }
 
             .card-logo {
                 font-size: 2em;
             }
         }
-    </style>
+    
+</style>
 </head>
 
 <body>
@@ -231,6 +222,13 @@
                 <span class="card-sub">MIX MODE</span>
             </div>
         </a>
+
+        <a href="indexchronogames.html" class="game-card card-games">
+            <div class="card-logo">
+                CHRONO<br>BEATS
+                <span class="card-sub">GAMER EDITION</span>
+            </div>
+        </a>
     </div>
 
     <script>
@@ -258,5 +256,4 @@
         }
     </script>
 </body>
-
 </html>

@@ -1,11 +1,7 @@
-const CACHE_NAME = 'cb-digital-v107';
+const CACHE_NAME = 'cb-digital-v111';
 const ASSETS = [
   './',
   './index.html',
-  './indexchrono.html',
-  './indexchronoanime.html',
-  './indexchronomovies.html',
-  './indexchronomix.html',
   './player_digital.html',
   './host_digital.html',
   './player_digital_anime.html',
@@ -14,9 +10,12 @@ const ASSETS = [
   './host_digital_peliculas.html',
   './player_digital_mix.html',
   './host_digital_mix.html',
+  './player_digital_videojuegos.html',
+  './host_digital_videojuegos.html',
   './lista_final.txt',
   './lista_final_anime.txt',
   './lista_final_pelis.txt',
+  './lista_videojuegos.txt',
   './manifest.json',
   './icon-192.png',
   './icon-512.png'
