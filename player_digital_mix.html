@@ -1410,6 +1410,7 @@
             if (type === 'orig') color = '#00f2ff';
             if (type === 'anime') color = '#ff00cc';
             if (type === 'movies') color = '#ffaa00';
+            if (type === 'videojuegos') color = '#bf00ff';
             
             document.documentElement.style.setProperty('--neon', color);
             let metaTheme = document.querySelector('meta[name="theme-color"]');
@@ -1504,12 +1505,27 @@
                     updateMarket(data);
                 
                 var cardModeLabel = document.getElementById('card-mode-label');
+                const artistLabel = document.getElementById('c-artist');
+                const songLabel = document.getElementById('c-song');
+                
                 if (cardModeLabel) {
-                    var cType = data.currentType || 'orig';
-                    if (cType === 'orig') cardModeLabel.innerText = "ORIGINAL";
-                    else if (cType === 'anime') cardModeLabel.innerText = "ANIME";
-                    else if (cType === 'movies') cardModeLabel.innerText = "MOVIES";
-                    else cardModeLabel.innerText = "MIX";
+                    if (data.currentType === 'videojuegos') {
+                        cardModeLabel.innerText = "VIDEOGAMES";
+                        if (artistLabel) artistLabel.innerText = "ESTUDIO";
+                        if (songLabel) songLabel.innerText = "JUEGO";
+                    } else if (data.currentType === 'anime') {
+                        cardModeLabel.innerText = "ANIME";
+                        if (artistLabel) artistLabel.innerText = "ESTUDIO";
+                        if (songLabel) songLabel.innerText = "ANIME";
+                    } else if (data.currentType === 'movies') {
+                        cardModeLabel.innerText = "MOVIES";
+                        if (artistLabel) artistLabel.innerText = "ESTUDIO";
+                        if (songLabel) songLabel.innerText = "PELÍCULA / SERIE";
+                    } else {
+                        cardModeLabel.innerText = "ORIGINAL";
+                        if (artistLabel) artistLabel.innerText = "ARTISTA";
+                        if (songLabel) songLabel.innerText = "CANCIÓN";
+                    }
                 }
 
                 document.getElementById('login-screen').style.display = 'none';

@@ -23,31 +23,40 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            overflow: hidden;
+            overflow-x: hidden;
+            overflow-y: auto;
         }
 
         .hub-title {
+            padding-top: 20px;
             font-family: 'Bungee';
             font-size: 3em;
             color: #fff;
             text-align: center;
-            margin-bottom: 50px;
+            margin-bottom: 30px;
             letter-spacing: 2px;
             text-shadow: 0 0 20px rgba(255,255,255,0.3);
         }
 
         .cards-container {
             display: flex;
-            gap: 30px;
-            flex-wrap: wrap;
-            justify-content: center;
-            max-width: 1200px;
-            padding: 20px;
+            gap: 12px;
+            flex-wrap: nowrap;
+            justify-content: flex-start; /* Permitir scroll si es necesario */
+            width: 95%;
+            max-width: 1400px;
+            padding: 30px 10px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none; /* Ocultar scrollbar en Firefox */
+        }
+        .cards-container::-webkit-scrollbar {
+            display: none; /* Ocultar scrollbar en Chrome/Safari */
         }
 
         .game-card {
-            width: 280px;
-            height: 380px;
+            flex: 0 0 200px; /* Reducido de 220px */
+            height: 280px; /* Reducido de 320px */
             background: #111;
             border: 2px solid #333;
             border-radius: 20px;
@@ -168,23 +177,30 @@
 
         @media (max-width: 768px) {
             body {
+                overflow-x: hidden;
                 overflow-y: auto;
-                justify-content: flex-start;
-                padding-top: 40px;
+                justify-content: center;
+                padding-top: 20px;
             }
 
             .hub-title {
-                font-size: 1.5em;
-                margin-bottom: 30px;
+                font-size: 1.8em;
+                margin-bottom: 20px;
+            }
+
+            .cards-container {
+                justify-content: flex-start;
+                padding-left: 20px;
+                padding-right: 20px;
             }
 
             .game-card {
-                width: 90%;
-                height: 180px;
+                flex: 0 0 160px; /* Más estrechas en móvil para que se vean más de una */
+                height: 220px;
             }
 
             .card-logo {
-                font-size: 2em;
+                font-size: 1.8em;
             }
         }
     
@@ -223,7 +239,7 @@
             </div>
         </a>
 
-        <a href="indexchronogames.html" class="game-card card-games">
+        <a href="indexchronovideojuegos.html" class="game-card card-games">
             <div class="card-logo">
                 CHRONO<br>BEATS
                 <span class="card-sub">GAMER EDITION</span>

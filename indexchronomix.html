@@ -160,10 +160,11 @@
     <div id="mix-selector-modal">
         <div class="mix-modal-content">
             <h2>ELIJA LAS LISTAS A MEZCLAR</h2>
-            <button class="mix-option" onclick="startHost('orig,anime,movies')">MIX TOTAL</button>
-            <button class="mix-option" onclick="startHost('orig,anime')">CLÁSICO + ANIME</button>
-            <button class="mix-option" onclick="startHost('orig,movies')">CLÁSICO + PELIS</button>
-            <button class="mix-option" onclick="startHost('anime,movies')">ANIME + PELIS</button>
+            <button class="mix-option" onclick="startHost('orig,anime,movies,videojuegos')" style="border-color:#bf00ff; color:#bf00ff;">TODO + GAMER EDITION</button>
+            <button class="mix-option" onclick="startHost('orig,anime,movies')">MIX ORIGINAL</button>
+            <button class="mix-option" onclick="startHost('orig,videojuegos')">CLÁSICO + GAMER</button>
+            <button class="mix-option" onclick="startHost('anime,videojuegos')">ANIME + GAMER</button>
+            <button class="mix-option" onclick="startHost('movies,videojuegos')">PELIS + GAMER</button>
             <div class="mix-close" onclick="closeMixSelector()">Cancelar</div>
         </div>
     </div>
