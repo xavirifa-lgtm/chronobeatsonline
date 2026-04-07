@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cb-digital-v114';
+const CACHE_NAME = 'chronobeats-luxe-v115';
 const ASSETS = [
   './',
   './index.html',
