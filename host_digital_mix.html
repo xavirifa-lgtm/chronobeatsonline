@@ -709,12 +709,18 @@
         initPeer();
 
         async function loadMixSongs() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const mixParam = urlParams.get('mix') || 'orig,anime,movies,videojuegos';
+            const selectedTypes = mixParam.split(',');
+            const limitPerType = Math.floor(60 / selectedTypes.length);
+
             const listFiles = [
                 { url: 'lista_final.txt', type: 'orig' },
                 { url: 'lista_final_anime.txt', type: 'anime' },
                 { url: 'lista_final_pelis.txt', type: 'movies' },
                 { url: 'lista_videojuegos.txt', type: 'videojuegos' }
-            ];
+            ].filter(f => selectedTypes.includes(f.type));
+
             let allSongs = [];
             let uniqueIds = new Set();
             let playedIds = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]');
@@ -724,17 +730,26 @@
                     let r = await fetch(f.url + '?v=' + Date.now());
                     let t = await r.text();
                     let lines = t.replace(/\r/g, '').split('\n').filter(l => l.includes('|'));
+                    
+                    let typeSongs = [];
                     lines.forEach(l => {
                         let p = l.split('|');
                         let m = p[3] ? p[3].match(/[?&]v=([^&#]+)|youtu\.be\/([^?&#]+)/) : null;
                         if (m && !uniqueIds.has(m[1]||m[2]) && !playedIds.includes(m[1]||m[2])) {
-                            allSongs.push({ artist: p[0], song: p[1], year: p[2], id: m[1] || m[2], type: f.type });
+                            typeSongs.push({ artist: p[0], song: p[1], year: p[2], id: m[1] || m[2], type: f.type });
                             uniqueIds.add(m[1]||m[2]);
                         }
                     });
+
+                    // Barajamos internamente esta categoría y cogemos solo el límite
+                    typeSongs.sort(() => Math.random() - 0.5);
+                    allSongs = allSongs.concat(typeSongs.slice(0, limitPerType));
+                    
                 } catch(e) { console.error("Error loading " + f.url, e); }
             }
+            // Barajado final para mezclar las categorías
             songs = allSongs.sort(() => Math.random() - 0.5);
+            
             if (songs.length < 5 && playedIds.length > 0) {
                 localStorage.removeItem('CB_PlayedSongs');
                 location.reload();

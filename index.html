@@ -40,23 +40,19 @@
 
         .cards-container {
             display: flex;
-            gap: 12px;
+            gap: 15px;
             flex-wrap: nowrap;
-            justify-content: flex-start; /* Permitir scroll si es necesario */
-            width: 95%;
+            justify-content: center;
+            width: 100%;
             max-width: 1400px;
-            padding: 30px 10px;
+            padding: 20px;
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
-            scrollbar-width: none; /* Ocultar scrollbar en Firefox */
-        }
-        .cards-container::-webkit-scrollbar {
-            display: none; /* Ocultar scrollbar en Chrome/Safari */
         }
 
         .game-card {
-            flex: 0 0 200px; /* Reducido de 220px */
-            height: 280px; /* Reducido de 320px */
+            flex: 0 0 230px;
+            height: 360px;
             background: #111;
             border: 2px solid #333;
             border-radius: 20px;
@@ -179,28 +175,31 @@
             body {
                 overflow-x: hidden;
                 overflow-y: auto;
-                justify-content: center;
-                padding-top: 20px;
+                justify-content: flex-start;
+                padding: 40px 0;
             }
 
             .hub-title {
-                font-size: 1.8em;
-                margin-bottom: 20px;
+                font-size: 1.5em;
+                margin-bottom: 30px;
             }
 
             .cards-container {
-                justify-content: flex-start;
-                padding-left: 20px;
-                padding-right: 20px;
+                flex-direction: column;
+                align-items: center;
+                gap: 25px;
+                padding: 20px 0;
+                overflow-x: hidden;
             }
 
             .game-card {
-                flex: 0 0 160px; /* Más estrechas en móvil para que se vean más de una */
-                height: 220px;
+                flex: 0 0 auto;
+                width: 85%;
+                height: 200px;
             }
 
             .card-logo {
-                font-size: 1.8em;
+                font-size: 2.2em;
             }
         }
     
