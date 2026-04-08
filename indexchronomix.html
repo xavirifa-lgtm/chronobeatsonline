@@ -161,10 +161,28 @@
         </div>
     </div>
 
+    <style>
+        .mix-chip[data-type="orig"].active { border-color: #00f2ff; color: #00f2ff; background: rgba(0, 242, 255, 0.1); box-shadow: 0 0 15px rgba(0, 242, 255, 0.2); }
+        .mix-chip[data-type="movies"].active { border-color: #ffaa00; color: #ffaa00; background: rgba(255, 170, 0, 0.1); box-shadow: 0 0 15px rgba(255, 170, 0, 0.2); }
+        .mix-chip[data-type="anime"].active { border-color: #ff00cc; color: #ff00cc; background: rgba(255, 0, 204, 0.1); box-shadow: 0 0 15px rgba(255, 0, 204, 0.2); }
+        .mix-chip[data-type="videojuegos"].active { border-color: #bf00ff; color: #bf00ff; background: rgba(191, 0, 255, 0.1); box-shadow: 0 0 15px rgba(191, 0, 255, 0.2); }
+        
+        /* Asegurar simetría en botones */
+        .btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 80px;
+            padding: 0; 
+            line-height: 1.2;
+        }
+    </style>
+
     <div class="btn-container">
         <button onclick="goToHost()" class="btn" style="cursor:pointer; font-family:inherit;">CENTRO DE CONTROL<br><span style="font-size:0.7em; opacity:0.7; font-weight:400;">(Tablet / PC)</span></button>
         <a href="player_digital_mix.html" class="btn">MANDO JUGADOR<br><span style="font-size:0.7em; opacity:0.7; font-weight:400;">(Móvil)</span></a>
-        <a href="index.html" class="btn btn-back">VOLVER AL MENÚ</a>
+        <a href="index.html" class="btn btn-back" style="height:auto; padding: 15px;">VOLVER AL MENÚ</a>
     </div>
 
     <script>

@@ -75,9 +75,9 @@
         :root {
             --glass: rgba(15, 15, 15, 0.5);
             --glass-border: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0.2) 100%);
-            --aurora-1: hsla(180, 100%, 15%, 0.15);
-            --aurora-2: hsla(280, 100%, 15%, 0.15);
-            --aurora-3: hsla(220, 100%, 15%, 0.15);
+            --aurora-1: hsla(180, 100%, 20%, 0.35);
+            --aurora-2: hsla(280, 100%, 20%, 0.35);
+            --aurora-3: hsla(220, 100%, 20%, 0.35);
         }
 
         body {
@@ -111,7 +111,6 @@
             background: var(--glass);
             backdrop-filter: blur(25px) saturate(200%);
             -webkit-backdrop-filter: blur(25px) saturate(200%);
-            border: 1px solid rgba(255,255,255,0.1);
             border-image: var(--glass-border) 1;
             position: relative;
             box-shadow: 0 15px 35px rgba(0,0,0,0.5);
@@ -239,7 +238,7 @@
 
         /* Videojuegos */
         .card-games {
-            border-color: #bf00ff;
+            border: 2px solid #bf00ff;
             color: #bf00ff;
             box-shadow: 0 0 20px rgba(191, 0, 255, 0.1);
         }
@@ -250,8 +249,11 @@
         }
         .card-games .card-logo {
             font-family: 'Press Start 2P';
-            font-size: 1.5em; 
+            font-size: 2.2em; /* Incrementado para impacto visual */
             text-shadow: 0 0 15px #bf00ff;
+        }
+        .card-games .card-sub {
+            font-size: 0.5em; /* Proporcionalmente más grande */
         }
 
         @media (max-width: 768px) {
