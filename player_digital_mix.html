@@ -10,7 +10,7 @@
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon-192.png">
     <meta name="theme-color" content="#00ff00">
-    <title>PLAYER - CHRONOBEATS DIGITAL</title>
+    <title>PLAYER - CHRONOBEATS MIX</title>
     <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Montserrat:wght@400;700&display=swap"
         rel="stylesheet">
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
@@ -20,6 +20,8 @@
             --bg: #0d0d0d;
             --accent: #ff0055;
             --gold: #ffd700;
+            --glass: rgba(15, 15, 15, 0.7);
+            --glass-border: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0.1) 100%);
         }
 
         * {
@@ -28,7 +30,9 @@
         }
 
         body {
-            background: var(--bg);
+            background: #020202;
+            background-image: radial-gradient(circle at 20% 30%, hsla(120, 100%, 15%, 0.15), transparent 40%),
+                              radial-gradient(circle at 80% 70%, hsla(280, 100%, 15%, 0.15), transparent 40%);
             color: #fff;
             font-family: 'Montserrat', sans-serif;
             margin: 0;
@@ -38,16 +42,14 @@
             flex-direction: column;
             overflow: hidden;
             padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-            padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 35px);
         }
 
-        /* TABS CSS */
         .tab-bar {
             display: flex;
-            background: rgba(0,0,0,0.9);
-            backdrop-filter: blur(10px);
-            border-top: 1px solid #333;
-            height: 65px;
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255,255,255,0.1);
+            height: 70px;
             position: fixed;
             bottom: 0;
             left: 0;
@@ -64,14 +66,11 @@
             justify-content: center;
             color: #666;
             font-family: 'Bungee';
-            font-size: 0.7em; /* Un poco más grande */
+            font-size: 0.7em;
             cursor: pointer;
             transition: 0.3s;
-            border: none;
             background: none;
-            gap: 2px;
-            padding: 8px 0;
-            height: 100%;
+            border: none;
         }
 
         .tab-btn.active {
@@ -84,45 +83,14 @@
             width: 100%;
             height: 100%;
             overflow-y: auto;
-            padding: 15px;
-            padding-bottom: 90px;
+            padding: 20px;
+            padding-bottom: 100px;
             flex-direction: column;
             align-items: center;
         }
 
         .tab-content.active {
             display: flex;
-        }
-
-
-        #login-screen {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .logo {
-            font-family: 'Bungee';
-            font-size: 2em;
-            color: var(--neon);
-            text-shadow: 0 0 20px var(--neon);
-            margin-bottom: 20px;
-        }
-
-        input {
-            background: #1a1a1a;
-            border: 2px solid #333;
-            color: #fff;
-            padding: 15px;
-            border-radius: 12px;
-            width: 100%;
-            margin-bottom: 12px;
-            font-family: 'Bungee';
-            text-align: center;
-            font-size: 1.1em;
         }
 
         .btn {
@@ -134,172 +102,37 @@
             font-family: 'Bungee';
             width: 100%;
             cursor: pointer;
-            font-size: 1.2em;
-            box-shadow: 0 0 20px rgba(0, 242, 255, 0.3);
+            font-size: 1.1em;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
             transition: 0.3s;
+            text-transform: uppercase;
         }
 
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-        #game-screen {
-            display: none;
-            flex: 1;
-            min-height: 0;
-            flex-direction: column;
-            padding: 10px;
-            align-items: center;
-            justify-content: flex-start;
-            overflow-y: auto;
-        }
-
-        #turn-status {
-            font-family: 'Bungee';
-            color: var(--neon);
-            font-size: 0.8em;
-            margin: 10px 0;
-            letter-spacing: 1px;
-        }
-
-        .music-controls {
-            display: none;
-            grid-template-columns: 1fr; /* Una sola columna para ocupar todo el ancho */
-            gap: 12px;
-            width: 100%;
-            margin-bottom: 20px;
-        }
-
-        .skip-controls {
-            display: none;
-            grid-template-rows: repeat(2, 1fr);
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            width: 100%;
-            margin-bottom: 20px;
-        }
-
-        .ctrl-btn {
-            background: #1a1a1a;
-            border: 2px solid #444;
-            color: #fff;
-            padding: 15px 5px;
-            border-radius: 10px;
-            font-family: 'Bungee';
-            font-size: 0.85em;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .btn-play {
-            border-color: var(--neon);
-            color: var(--neon);
-        }
-
-        .btn-play.playing {
-            background: var(--neon) !important;
-            color: #000 !important;
-            font-weight: 900 !important;
-            box-shadow: 0 0 30px var(--neon), inset 0 0 10px rgba(255,255,255,0.5) !important;
-            text-shadow: none !important;
-            animation: pulse-active 1.5s infinite;
-        }
-
-        @keyframes pulse-active {
-            0% { transform: scale(1); box-shadow: 0 0 20px var(--neon); }
-            50% { transform: scale(1.03); box-shadow: 0 0 40px var(--neon); }
-            100% { transform: scale(1); box-shadow: 0 0 20px var(--neon); }
-        }
-
-        .neon-chip {
-            display: inline-block;
-            width: 12px;
-            height: 12px;
-            background: var(--neon);
-            border-radius: 50%;
-            box-shadow: 0 0 10px var(--neon);
-            vertical-align: middle;
-            margin: 0 1px;
-        }
-
-        .market-btn {
-            background: #111;
-            border: 1px solid #333;
+        input {
+            background: var(--glass);
+            border: 1px solid rgba(255,255,255,0.1);
             color: #fff;
             padding: 15px;
             border-radius: 12px;
-            font-family: 'Bungee';
-            font-size: 0.9em;
-            cursor: pointer;
-            transition: 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .market-btn:not(:disabled):hover {
-            border-color: var(--neon);
-            box-shadow: 0 0 10px var(--neon);
-        }
-
-        .market-btn:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-            filter: grayscale(1);
-        }
-
-        .btn-stop {
-            border-color: var(--accent);
-            color: var(--accent);
-        }
-
-        .sk-btn {
-            background: #050505;
-            border: 1px solid #333;
-            color: #fff;
-            padding: 12px 2px;
-            border-radius: 8px;
-            font-family: 'Bungee';
-            font-size: 0.75em;
-            cursor: pointer;
-        }
-
-        .sk-fwd {
-            color: var(--neon);
-            border-color: rgba(0, 242, 255, 0.3);
-        }
-
-        .sk-back {
-            color: var(--accent);
-            border-color: rgba(255, 0, 85, 0.3);
-        }
-
-        #bet-btn {
-            display: none;
-            background: transparent;
-            border: 2px dashed var(--gold);
-            color: var(--gold);
-            padding: 15px;
             width: 100%;
             margin-bottom: 15px;
             font-family: 'Bungee';
-            font-size: 0.9em;
-            border-radius: 15px;
-            cursor: pointer;
+            text-align: center;
+            font-size: 1.1em;
+            backdrop-filter: blur(10px);
         }
 
         .card-container {
-            height: 280px; /* Altura fija para evitar desplazamientos */
+            height: 280px;
             perspective: 1000px;
             display: flex;
             align-items: center;
             justify-content: center;
             width: 100%;
-            margin: 10px 0;
+            margin: 15px 0;
             position: relative;
-            flex-shrink: 0; /* No se encoge */
         }
 
         .card {
@@ -310,933 +143,261 @@
             transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .card.flipped {
-            transform: rotateY(180deg);
-        }
+        .card.flipped { transform: rotateY(180deg); }
 
         .card-face {
             position: absolute;
             width: 100%;
             height: 100%;
             backface-visibility: hidden;
-            border-radius: 15px;
+            border-radius: 20px;
             border: 2px solid var(--neon);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 15px;
-            text-align: center;
+            padding: 20px;
+            background: var(--glass);
+            backdrop-filter: blur(15px);
         }
 
-        .card-front {
-            background: #111;
-            box-shadow: inset 0 0 30px rgba(0, 242, 255, 0.05);
-        }
+        .card-back { transform: rotateY(180deg); border-color: var(--accent); }
 
-        .card-back {
-            background: #1a1a1a;
-            transform: rotateY(180deg);
-            border-color: var(--accent);
-        }
-
-        #c-artist {
-            font-size: 0.7em;
-            color: #aaa;
-            text-transform: uppercase;
-            margin-bottom: 5px;
-            line-height: 1.2;
-        }
-
-        #c-song {
-            font-family: 'Bungee';
-            font-size: 1em;
-            margin-bottom: 10px;
-            line-height: 1.2;
-        }
-
-        #c-year {
-            font-family: 'Bungee';
-            font-size: 4em;
-            color: var(--accent);
-            line-height: 0.9;
-        }
-
-
-        #wait-msg {
-            font-family: 'Bungee';
-            opacity: 0.4;
-            font-size: 0.8em;
-            text-align: center;
-            margin-top: 15px;
-            color: #888;
-        }
-
-        .collection-summary {
-            width: 100%;
-            margin-top: 20px;
-            margin-top: auto;
-            background: #1a1a1a;
-            padding: 15px;
-            border-radius: 12px;
-            text-align: center;
-            flex-shrink: 0;
-        }
-
-        .collection-summary h4 {
-            font-family: 'Bungee';
-            font-size: 0.7em;
-            margin: 0 0 10px 0;
-            color: var(--neon);
-            text-align: center;
-        }
-
-        .vertical-cards {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .card-row {
-            background: #1a1a1a;
-            border: 1px solid #333;
-            padding: 5px;
-            border-radius: 6px;
-            font-family: 'Bungee';
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 0.9em;
-            color: #fff;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-            width: 80px;
-            margin: 0 auto;
-        }
-
-        .special-actions {
-            display: flex;
-            gap: 10px;
-            width: 100%;
-            margin-bottom: 10px;
-            justify-content: center;
-        }
-
-        .spec-btn {
-            background: #222;
-            border: 1px solid var(--gold);
-            color: var(--gold);
-            padding: 10px;
-            border-radius: 8px;
-            font-family: 'Bungee';
-            font-size: 0.7em;
-            cursor: pointer;
-            flex: 1;
-        }
-
+        #c-year { font-family: 'Bungee'; font-size: 4em; color: var(--accent); line-height: 1; }
+        
         .chip-display {
             font-family: 'Bungee';
             color: var(--gold);
             font-size: 0.9em;
-            margin-bottom: 5px;
-            text-shadow: 0 0 5px #00f2fe;
+            margin-bottom: 10px;
             display: flex;
             align-items: center;
-            justify-content: center;
             gap: 5px;
         }
 
         .neon-chip {
-            display: inline-block;
-            width: 12px;
-            height: 12px;
+            width: 12px; height: 12px;
             background: #00f2fe;
             border-radius: 50%;
-            box-shadow: 0 0 8px #00f2fe, 0 0 15px #00f2fe;
+            box-shadow: 0 0 10px #00f2fe;
         }
 
-        /* V79: Mejora de botones deshabilitados */
-        .spec-btn:disabled, .btn:disabled {
-            opacity: 0.4;
-            filter: grayscale(1);
-            cursor: not-allowed !important;
-            border-color: #444 !important;
-            color: #444 !important;
-            box-shadow: none !important;
+        .special-actions { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 320px; }
+        .spec-btn {
+            background: var(--glass);
+            border: 1px solid var(--neon);
+            color: var(--neon);
+            padding: 12px;
+            border-radius: 10px;
+            font-family: 'Bungee';
+            font-size: 0.8em;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
         }
 
-        /* V79: Efecto Niebla Temporal */
-        #fog-overlay {
+        /* Overlays */
+        .overlay-full {
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: url('https://www.transparenttextures.com/patterns/fog.png'), rgba(255,255,255,0.1);
-            z-index: 15000;
-            pointer-events: none;
-            animation: fog-move 10s linear infinite;
-            opacity: 0.6;
-        }
-        @keyframes fog-move {
-            from { background-position: 0 0; }
-            to { background-position: 1000px 1000px; }
-        }
-
-        /* Slots de apuesta */
-        .bet-slot {
-            width: 30px;
-            height: 30px;
-            background: rgba(0, 242, 254, 0.1);
-            border: 2px dashed #00f2fe;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            margin: 4px auto;
-            font-size: 0.6em;
-            color: #00f2fe;
-            font-family: 'Bungee';
-            transition: 0.3s;
-        }
-
-        .bet-slot.occupied {
-            background: #00f2fe;
-            color: #000;
-            border-style: solid;
-            box-shadow: 0 0 8px #00f2fe;
-        }
-
-        .bet-slot.my-bet {
-            background: var(--gold);
-            border-color: var(--gold);
-            color: #000;
-            box-shadow: 0 0 12px var(--gold);
-        }
-
-        .bet-slot.active-guess {
-            background: #fff;
-            border-color: #fff;
-            box-shadow: 0 0 15px #fff;
-            color: #000;
-            border-style: solid;
-        }
-
-        .bet-slot.blocked {
-            opacity: 0.3;
-            cursor: not-allowed;
-            border-color: #444;
-        }
-
-        .bet-slot:active {
-            transform: scale(0.9);
-        }
-
-        .spec-btn:disabled {
-            opacity: 0.4;
-            pointer-events: none;
-            border-color: #444;
-            color: #444;
-        }
-
-        #sabotage-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            width: 100%;
-            margin-top: 10px;
-        }
-
-        #sabotage-grid .spec-btn {
-            margin-top: 0 !important;
-            padding: 12px 5px;
-            font-size: 0.7em;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: row;
-            flex-wrap: wrap;
-            gap: 5px;
-            text-align: center;
-        }
-
-        .spec-btn#btn-reload {
-            border-color: #00f2fe;
-            color: #00f2fe;
-            box-shadow: 0 0 10px rgba(0, 242, 254, 0.2);
-        }
-
-        #leaderboard-info {
-            font-family: 'Bungee';
-            font-size: 0.7em;
-            color: #888;
-            margin-bottom: 5px;
-            text-align: center;
-            width: 100%;
-        }
-
-        .leader-row {
-            color: var(--gold);
-            margin-bottom: 2px;
-        }
-
-        .me-row {
-            color: var(--neon);
-        }
-
-        .btn-error-track {
-            border-color: #ff3333 !important;
-            color: #ff3333 !important;
-            box-shadow: 0 0 10px rgba(255, 51, 51, 0.2) !important;
-            flex: 1;
-        }
-
-        /* Hub Button */
-        .btn-hub {
-            position: fixed;
-            top: calc(20px + env(safe-area-inset-top, 0px));
-            left: 20px;
-            z-index: 10000;
-            width: 50px;
-            height: 50px;
-            background: #000;
-            border: 2px solid var(--neon, #00f2ff);
-            border-radius: 50%;
-            display: flex !important;
-            align-items: center;
-            justify-content: center;
-            color: var(--neon, #00f2ff);
-            text-decoration: none;
-            font-family: 'Bungee';
-            font-size: 1.5em;
-            box-shadow: 0 0 15px rgba(0, 242, 255, 0.5);
-            transition: 0.3s;
-            cursor: pointer;
-        }
-
-        .btn-hub:hover {
-            background: var(--neon, #00f2ff);
-            color: #000;
-            box-shadow: 0 0 30px var(--neon, #00f2ff);
-            transform: scale(1.1);
-        }
-
-        @media (max-width: 600px) {
-            .btn-hub {
-                width: 40px;
-                height: 40px;
-                font-size: 1.2em;
-                left: 15px;
-                top: calc(15px + env(safe-area-inset-top, 0px));
-            }
-            #fab-rules {
-                top: calc(65px + env(safe-area-inset-top, 0px)) !important;
-                left: 15px !important;
-                width: 40px !important;
-                height: 40px !important;
-                font-size: 1.2em !important;
-            }
-        }
-
-        /* Duel Refinements */
-        .duel-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(0,0,0,0.95);
-            display: none;
+            z-index: 5000;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            z-index: 20000;
             padding: 20px;
             text-align: center;
-            border: 5px solid var(--gold);
-        }
-        .duel-overlay .title {
-            font-family: 'Bungee';
-            font-size: 2.5em;
-            color: var(--gold);
-            text-shadow: 0 0 20px var(--gold);
-            margin-bottom: 20px;
-        }
-        .duel-overlay .vs {
-            font-family: 'Bungee';
-            font-size: 1.2em;
-            color: #fff;
-            margin: 15px 0;
-        }
-        .duel-overlay .player-name {
-            font-family: 'Bungee';
-            font-size: 1.8em;
-            color: var(--neon);
         }
 
-        .duel-feedback {
+        .fab {
             position: fixed;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            width: 90%;
+            width: 50px; height: 50px;
             background: #000;
-            border: 4px solid var(--neon);
-            padding: 30px;
-            text-align: center;
-            z-index: 21000;
+            border: 2px solid var(--neon);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--neon);
+            font-family: 'Bungee';
+            z-index: 4000;
+            box-shadow: 0 0 15px var(--neon);
+        }
+
+        .duel-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.97);
+            z-index: 9999;
             display: none;
-            box-shadow: 0 0 50px rgba(0,255,0,0.5);
-        }
-        .duel-feedback.lose { border-color: #ff0055; box-shadow: 0 0 50px rgba(255,0,85,0.5); }
-        .duel-feedback h2 { font-family: 'Bungee'; margin-bottom: 15px; }
-        .duel-feedback p { font-family: 'Montserrat'; font-style: italic; line-height: 1.4; }
-
-        @keyframes pulse-neon {
-            0% {
-                box-shadow: 0 0 5px var(--neon);
-                border-color: var(--neon);
-            }
-
-            50% {
-                box-shadow: 0 0 20px var(--neon);
-                border-color: #fff;
-            }
-
-            100% {
-                box-shadow: 0 0 5px var(--neon);
-                border-color: var(--neon);
-            }
-        }
-
-        .pulse {
-            animation: pulse-neon 2s infinite;
-        }
-
-        #ai-loading-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            z-index: 10000;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            text-align: center;
-            font-family: 'Bungee';
-            color: var(--neon);
+            border: 4px solid var(--gold);
         }
-
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid rgba(0, 242, 255, 0.1);
-            border-top: 5px solid var(--neon);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
-        }
-
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-    
-        
-        
-        
-        /* --- ELITE-PREMIUM UI V1.6: AURORA & TEXTURE --- */
-        :root {
-            --glass: rgba(15, 15, 15, 0.5);
-            --glass-border: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0.2) 100%);
-            --aurora-1: hsla(180, 100%, 15%, 0.15);
-            --aurora-2: hsla(280, 100%, 15%, 0.15);
-            --aurora-3: hsla(220, 100%, 15%, 0.15);
-        }
-
-        body {
-            background: #020202 !important;
-            background-image: 
-                radial-gradient(circle at 20% 30%, var(--aurora-1), transparent 40%),
-                radial-gradient(circle at 80% 70%, var(--aurora-2), transparent 40%),
-                radial-gradient(circle at 50% 50%, var(--aurora-3), transparent 60%) !important;
-            background-attachment: fixed !important;
-            position: relative;
-            overflow-x: hidden;
-        }
-
-        body::before {
-            content: "";
-            position: fixed;
-            top: -50%; left: -50%; width: 200%; height: 200%;
-            background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.4) 100%);
-            animation: aurora-orbit 30s linear infinite;
-            z-index: -1;
-            pointer-events: none;
-        }
-
-        @keyframes aurora-orbit {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        /* Glass Grain Texture */
-        input, .collection-summary, .card-row, .modal-content, .btn-secondary, .ctrl-btn, .spec-btn, .sk-btn, .market-btn, #sabotage-grid .spec-btn, .tab-bar, .duel-mode-ui, #custom-alert > div, #custom-confirm > div, .card-face {
-            background: var(--glass) !important;
-            backdrop-filter: blur(25px) saturate(200%) !important;
-            -webkit-backdrop-filter: blur(25px) saturate(200%) !important;
-            border: 1px solid rgba(255,255,255,0.1) !important;
-            border-image: var(--glass-border) 1 !important;
-            position: relative;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.5) !important;
-        }
-
-        /* Grainy Overlay */
-        input::before, .collection-summary::before, .modal-content::before, .tab-bar::before, .card-face::before {
-            content: "";
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-            opacity: 0.03;
-            pointer-events: none;
-            mix-blend-mode: overlay;
-            border-radius: inherit;
-        }
-
-        /* Play Button Vibrancy Fix */
-        .btn-play.playing {
-            background: var(--neon) !important;
-            color: #000 !important;
-            font-weight: 900 !important;
-            box-shadow: 0 0 30px var(--neon), inset 0 0 10px rgba(255,255,255,0.5) !important;
-            text-shadow: none !important;
-            animation: pulse-active 1.5s infinite;
-        }
-
-        @keyframes pulse-active {
-            0% { transform: scale(1); box-shadow: 0 0 20px var(--neon); }
-            50% { transform: scale(1.03); box-shadow: 0 0 40px var(--neon); }
-            100% { transform: scale(1); box-shadow: 0 0 20px var(--neon); }
-        }
-
-        /* Bokeh Particles */
-        .bokeh {
-            position: fixed;
-            width: 10px; height: 10px;
-            background: white;
-            border-radius: 50%;
-            opacity: 0.1;
-            filter: blur(5px);
-            z-index: -1;
-            animation: float-bokeh 10s infinite ease-in-out;
-        }
-
-        @keyframes float-bokeh {
-            0% { transform: translate(0, 0); opacity: 0; }
-            50% { opacity: 0.2; }
-            100% { transform: translate(100px, -100px); opacity: 0; }
-        }
-
-</style>
+    </style>
 </head>
 
 <body>
-    <!-- FAB REGLAMENTO -->
-    <div id="fab-rules" onclick="toggleRules()"
-        style="display:flex; position:fixed; top:80px; left:20px; width:50px; height:50px; background:#111; border:2px solid var(--neon); border-radius:50%; z-index:9000; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 0 10px rgba(0,242,255,0.5); font-size:1.5em; transition:0.3s; color:var(--neon); font-family:'Bungee';">
-        ?
+    <div id="fab-rules" class="fab" style="top:20px; left:20px;" onclick="toggleRules()">?</div>
+    <div id="fab-remote" class="fab" style="top:20px; right:20px; display:none;" onclick="toggleRemote()">R</div>
+
+    <div id="rules-overlay" class="overlay-full" style="z-index:8000;">
+        <h2 style="font-family:'Bungee'; color:var(--neon);">SABOTAJES</h2>
+        <ul style="text-align:left; font-size:0.8em; color:#ccc; list-style:none; padding:0; line-height:1.6;">
+            <li><strong>MUTE (1🔵):</strong> Silencia al rival 15s.</li>
+            <li><strong>ZUMBIDO (1🔵):</strong> Vibración molesta al rival.</li>
+            <li><strong>VETO (1🔵):</strong> Impide cambiar carta.</li>
+            <li><strong>PÁNICO (2🔵):</strong> Reloj de 10s para el rival.</li>
+            <li><strong>NIEBLA (2🔵):</strong> Oculta años de cartas.</li>
+            <li><strong>RULETA RUSA (2🔵):</strong> 50% éxito o 50% pierdes ficha.</li>
+            <li><strong>FORZAR SALTO (3🔵):</strong> Salta canción del rival.</li>
+            <li><strong>ROBAR FICHA (4🔵):</strong> Quitas 1 ficha a un rival.</li>
+            <li><strong>ROBAR TURNO (4🔵):</strong> Juegas tú inmediatamente.</li>
+            <li><strong>AGUJERO NEGRO (5🔵):</strong> Borra última carta rival.</li>
+        </ul>
+        <button class="btn" onclick="toggleRules()" style="margin-top:20px; background:#333; color:white;">CERRAR</button>
+        <button class="btn" onclick="if(confirm('¿Forzar actualización?')){caches.keys().then(ns=>{for(let n of ns)caches.delete(n);});location.reload(true);}" style="margin-top:10px; background:var(--accent); color:white; font-size:0.75em;">⚠️ FORZAR ACTUALIZACIÓN</button>
     </div>
 
-    <!-- MANDO DEL HOST (REMOTE) -->
-    <div id="fab-remote" onclick="toggleRemote()"
-        style="display:none; position:fixed; top:20px; right:20px; width:50px; height:50px; background:#111; border:2px solid #555; border-radius:50%; z-index:9000; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 0 10px rgba(0,0,0,0.5); font-size:1.5em; filter:grayscale(100%); transition:0.3s; opacity:0.5; pointer-events:none;">
-        📺
+    <div id="remote-overlay" class="overlay-full" style="z-index:8500;">
+        <h2 style="font-family:'Bungee'; color:var(--neon);">MANDO HOST</h2>
+        <div id="remote-controls-container" style="display:flex; flex-direction:column; gap:12px; width:100%; max-width:300px;"></div>
+        <button class="btn" onclick="toggleRemote()" style="margin-top:30px; background:#333; color:white;">CERRAR MANDO</button>
     </div>
 
-    <div id="rules-overlay"
-        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:9500; align-items:center; justify-content:flex-start; flex-direction:column; padding:20px; text-align:left; overflow-y:auto;">
-        <h2
-            style="font-family:'Bungee'; color:var(--neon); margin-bottom:10px; font-size:2em; text-align:center; width:100%; margin-top:20px;">
-            📖 REGLAS</h2>
-        <div
-            style="color:#ddd; font-family:'Montserrat'; font-size:0.9em; max-width:400px; width:100%; line-height:1.5;">
-            <p><strong style="color:var(--neon);">OBJETIVO:</strong> Coloca las canciones en el orden correcto en tu cronología. Gana quien llegue a 10 cartas.</p>
-            <p><strong style="color:var(--neon);">TURNO NORMAL:</strong> Escucha la canción y colócala en tu cronología personal.</p>
-            <p><strong style="color:var(--gold);">FICHAS AZULES (🔵):</strong> Sirven para sabotear. Se ganan al acertar en un Duelo, por bonos del Host o en el Mercado.</p>
-            <p><strong style="color:var(--accent);">¡NI DE COÑA! (1🔵):</strong> Apuesta contra el jugador activo si crees que se equivoca. Si falla, ganas +3 fichas.</p>
-            <p><strong style="color:#00ff88;">¡ESTOY CONTIGO! (1🔵):</strong> Apuesta a favor del jugador activo si crees que va a acertar. Si acierta, ganas +3 fichas.</p>
-            <p><strong style="color:var(--gold);">DUELOS (1🔵):</strong> Reta a un rival a un duelo Western 🔫. Introducid el año a ciegas. Quien esté más cerca gana la carta. (Requiere 3🔵 para disparar: 1 de coste + 2 de garantía).</p>
-
-            <h3
-                style="color:var(--neon); font-family:'Bungee'; margin-top:20px; border-bottom:1px solid #333; padding-bottom:5px;">
-                SABOTAJES (MERCADO NEGRO)</h3>
-            <ul style="padding-left:15px; margin-top:10px;">
-                <li style="margin-bottom:8px;"><strong style="color:#ff0055;">MUTE 15s (1🔵):</strong> Silencia su música.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#00ff00;">¡ZUMBIDO! (1🔵):</strong> Ruido molesto para despistar.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#ff8800;">VETO CAMBIAR (1🔵):</strong> Bloquea su botón de recarga.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#ff0000;">PÁNICO 10s (2🔵):</strong> Solo tiene 10 segundos para elegir.</li>
-</style>
-</head>
-
-<body>
-    <!-- FAB REGLAMENTO -->
-    <div id="fab-rules" onclick="toggleRules()"
-        style="display:flex; position:fixed; top:80px; left:20px; width:50px; height:50px; background:#111; border:2px solid var(--neon); border-radius:50%; z-index:9000; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 0 10px rgba(0,242,255,0.5); font-size:1.5em; transition:0.3s; color:var(--neon); font-family:'Bungee';">
-        ?
+    <div id="duel-announcement" class="duel-overlay">
+        <div style="font-family:'Bungee'; font-size:3em; color:var(--gold);">¡DUELO!</div>
+        <div id="duel-opponent-names" style="font-size:1.5em; margin-top:20px;"></div>
     </div>
 
-    <!-- MANDO DEL HOST (REMOTE) -->
-    <div id="fab-remote" onclick="toggleRemote()"
-        style="display:none; position:fixed; top:20px; right:20px; width:50px; height:50px; background:#111; border:2px solid #555; border-radius:50%; z-index:9000; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 0 10px rgba(0,0,0,0.5); font-size:1.5em; filter:grayscale(100%); transition:0.3s; opacity:0.5; pointer-events:none;">
-        📺
-    </div>
-
-    <div id="rules-overlay"
-        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:9500; align-items:center; justify-content:flex-start; flex-direction:column; padding:20px; text-align:left; overflow-y:auto;">
-        <h2
-            style="font-family:'Bungee'; color:var(--neon); margin-bottom:10px; font-size:2em; text-align:center; width:100%; margin-top:20px;">
-            📖 REGLAS</h2>
-        <div
-            style="color:#ddd; font-family:'Montserrat'; font-size:0.9em; max-width:400px; width:100%; line-height:1.5;">
-            <p><strong style="color:var(--neon);">OBJETIVO:</strong> Coloca las canciones en el orden correcto en tu cronología. Gana quien llegue a 10 cartas.</p>
-            <p><strong style="color:var(--neon);">TURNO NORMAL:</strong> Escucha la canción y colócala en tu cronología personal.</p>
-            <p><strong style="color:var(--gold);">FICHAS AZULES (🔵):</strong> Sirven para sabotear. Se ganan al acertar en un Duelo, por bonos del Host o en el Mercado.</p>
-            <p><strong style="color:var(--accent);">¡NI DE COÑA! (1🔵):</strong> Apuesta contra el jugador activo si crees que se equivoca. Si falla, ganas +3 fichas.</p>
-            <p><strong style="color:#00ff88;">¡ESTOY CONTIGO! (1🔵):</strong> Apuesta a favor del jugador activo si crees que va a acertar. Si acierta, ganas +3 fichas.</p>
-            <p><strong style="color:var(--gold);">DUELOS (1🔵):</strong> Reta a un rival a un duelo Western 🔫. Introducid el año a ciegas. Quien esté más cerca gana la carta. (Requiere 3🔵 para disparar: 1 de coste + 2 de garantía).</p>
-
-            <h3
-                style="color:var(--neon); font-family:'Bungee'; margin-top:20px; border-bottom:1px solid #333; padding-bottom:5px;">
-                SABOTAJES (MERCADO NEGRO)</h3>
-            <ul style="padding-left:15px; margin-top:10px;">
-                <li style="margin-bottom:8px;"><strong style="color:#ff0055;">MUTE 15s (1🔵):</strong> Silencia su música.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#00ff00;">¡ZUMBIDO! (1🔵):</strong> Ruido molesto para despistar.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#ff8800;">VETO CAMBIAR (1🔵):</strong> Bloquea su botón de recarga.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#ff0000;">PÁNICO 10s (2🔵):</strong> Solo tiene 10 segundos para elegir.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#aaaaaa;">NIEBLA TIEMPO (2🔵):</strong> Borra los años de su pantalla.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#ff0055;">RULETA RUSA (2🔵):</strong> 50% éxito (robos) o 50% fallo (pierdes ficha).</li>
-                <li style="margin-bottom:8px;"><strong style="color:#ff00ff;">FORZAR SALTO (3🔵):</strong> Salta su canción automáticamente.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#ffff00;">ROBAR FICHA (4🔵):</strong> Quita 1 ficha a un rival al azar.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#ff00ff;">ROBAR TURNO (4🔵):</strong> Interrumpe el turno actual y juegas tú.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#9900ff;">AGUJERO NEGRO (5🔵):</strong> Borra su última carta de la cronología.</li>
-            </ul>
-        </div>
-        
-        <button class="btn" onclick="if(confirm('¿Forzar actualización de caché? Se recargará la página.')){ caches.keys().then(names => { for (let name of names) caches.delete(name); }); location.reload(true); }" style="margin-top:10px; background:#ff0055 !important; color:white !important; border-color:#ff0055 !important; width:100% !important; max-width:300px !important; padding:10px !important; font-size:0.8em !important; box-shadow: 0 0 15px rgba(255,0,85,0.4) !important;">⚠️ FORZAR ACTUALIZACIÓN (BORRAR CACHÉ)</button>
-
-        <p style="color:white; font-family:'Bungee'; font-size:1.5em; text-shadow:0 0 10px black;">¡COLOCA TU CARTA
-            RÁPIDO!</p>
-    </div>
-
-    <!-- Overlay de Anuncio de Duelo (Visibilidad Global) -->
-    <div id="duel-announcement" class="duel-overlay" style="display:none;">
-        <div class="title">¡DUELO A MUERTE!</div>
-        <div id="duel-opponent-names"></div>
-        <div style="color: var(--gold); margin-top: 30px; font-family: 'Bungee';">¡PREPARAOS!</div>
-    </div>
-
-    <!-- Pop-up de Resultado Cabrón (Visibilidad Global) -->
-    <div id="duel-feedback-popup" class="duel-feedback" style="display:none;">
+    <div id="duel-feedback-popup" class="overlay-full" style="z-index:10000; background:rgba(0,0,0,0.9);">
         <h2 id="duel-result-title"></h2>
         <p id="duel-result-msg"></p>
-        <button class="btn" style="margin-top: 20px; background: var(--neon); color: #000; font-family: 'Bungee';" onclick="this.parentElement.style.display='none'">VALE...</button>
+        <button class="btn" onclick="this.parentElement.style.display='none'">ENTENDIDO</button>
     </div>
 
-    <div id="ai-loading-overlay">
+    <div id="panic-overlay" class="overlay-full" style="background:rgba(255,0,0,0.85); z-index:9999;">
+        <h1 style="font-family:'Bungee'; font-size:4em; margin:0;">PÁNICO</h1>
+        <div id="panic-timer" style="font-family:'Bungee'; font-size:8em; margin:0;">10</div>
+    </div>
+
+    <div id="ai-loading-overlay" class="overlay-full">
         <div class="spinner"></div>
-        <div style="font-size: 1.2em;">TRANSFORMANDO<br>SELFIE... 🪄✨</div>
-        <div style="font-size: 0.6em; margin-top: 15px; color: #888; font-family: 'Montserrat';">Esto puede tardar unos
-            segundos</div>
+        <h3 style="font-family:'Bungee';">FILTRANDO AVATAR...</h3>
     </div>
-    <a href="index.html" class="btn-hub" title="Volver al Hub">H</a>
+
+    <a href="index.html" class="fab" style="bottom:90px; right:20px; border-color:var(--gold); color:var(--gold);">H</a>
+
     <div id="login-screen">
-        <div class="logo" style="font-family:'Bungee'; color:var(--neon); text-shadow: 0 0 10px var(--neon);">
-            CHRONOBEATS <span style="font-size:0.4em; opacity:0.6; vertical-align:top; color:#aaa; font-family:Montserrat;">V1.6</span></div>
-
-        <div id="avatar-container" onclick="document.getElementById('avatar-input').click()"
-            style="display:flex; flex-direction:column; align-items:center; margin-bottom:15px; cursor:pointer;">
-            <img id="avatar-preview" src="" alt="Avatar"
-                style="display:none; width:100px; height:100px; border-radius:50%; object-fit:cover; border: 3px solid var(--neon); box-shadow: 0 0 15px var(--neon);">
-            <div id="avatar-placeholder" class="pulse"
-                style="width:100px; height:100px; border-radius:50%; border: 3px dashed var(--neon); display:flex; align-items:center; justify-content:center; color:var(--neon); font-size:2.5em; font-family:'Bungee'; background:rgba(0,242,255,0.05); transition: 0.3s;">
-                +
-            </div>
-            <div
-                style="font-size: 0.7em; color: var(--neon); font-family: 'Bungee'; margin-top: 10px; text-shadow: 0 0 5px var(--neon);">
-                ¡HAZTE UN SELFIE!
-            </div>
+        <div class="logo">CHRONOBEATS <span style="font-size:0.4em; color:var(--gold);">MIX</span></div>
+        <div id="avatar-container" onclick="document.getElementById('avatar-input').click()" style="cursor:pointer; margin-bottom:20px;">
+            <img id="avatar-preview" style="display:none; width:100px; height:100px; border-radius:50%; border:2px solid var(--neon);">
+            <div id="avatar-placeholder" style="width:100px; height:100px; border-radius:50%; border:2px dashed var(--neon); display:flex; align-items:center; justify-content:center; font-size:2em;">+</div>
         </div>
-        <input type="file" id="avatar-input" accept="image/*" capture="user" style="display:none;"
-            onchange="handleAvatarSelect(event)">
-
-        <input type="text" id="host-id" placeholder="CÓDIGO SALA" maxlength="6">
+        <input type="file" id="avatar-input" accept="image/*" capture="user" style="display:none;" onchange="handleAvatarSelect(event)">
+        <input type="text" id="host-id" placeholder="CÓDIGO SALA">
         <input type="text" id="player-name" placeholder="TU NOMBRE">
         <button class="btn" id="join-btn" onclick="conectar()">ENTRAR</button>
     </div>
 
-    <div id="game-screen">
-        <!-- PESTAÑA JUEGO -->
-        <div id="tab-game" class="tab-content active" style="display:flex;">
-            <div id="fog-overlay"></div>
-            <div id="leaderboard-info">
-                <div class="leader-row">LÍDER: <span id="lb-leader-name">---</span> (<span id="lb-leader-cards">0</span>)</div>
-                <div class="me-row">YO: <span id="lb-me-cards">0</span> CARTAS</div>
-            </div>
+    <div id="game-screen" style="display:none;">
+        <div id="tab-game" class="tab-content active">
+            <div id="leaderboard-info" style="font-family:Bungee; font-size:0.7em; color:var(--gold); margin-bottom:10px;"></div>
+            <div id="turn-status" style="font-family:Bungee; color:var(--neon); margin-bottom:15px;"></div>
+            <div class="chip-display" id="my-tokens-ui"></div>
             
-            <h4 id="inventory-title" style="margin: 0 0 5px 0; font-family: 'Bungee'; font-size: 0.6em; color: #888; text-align: center;">MIS CARTAS</h4>
-            <div id="turn-status">TURNO DE: <span id="cur-player">---</span></div>
-            
-            <div id="cheat-indicator" style="display:none; position: fixed; top: 80px; left: 50%; transform: translateX(-50%); background: var(--accent); color: #fff; padding: 5px 15px; border-radius: 20px; font-family: 'Bungee'; font-size: 0.8em; z-index: 10000; box-shadow: 0 0 15px var(--accent);">TRUCOS OFF</div>
-            
-            <div class="chip-display" id="my-tokens-ui">MIS FICHAS: <span class="neon-chip"></span><span class="neon-chip"></span></div>
-
-            <!-- Mando de Reproducción (Mover arriba V30) -->
-            <div class="music-controls" id="m-ctrl">
-                <button class="ctrl-btn btn-play" onclick="send('PLAY')">PLAY</button>
-                <button class="ctrl-btn" onclick="send('PAUSE')">PAUSE</button>
-                <button class="ctrl-btn btn-stop" onclick="send('STOP')">STOP</button>
-            </div>
-            <div class="skip-controls" id="s-ctrl">
-                <button class="sk-btn sk-fwd" id="btn-skip-p5" onclick="send('SKIP',5)">+5s</button>
-                <button class="sk-btn sk-fwd" onclick="send('SKIP',10)">+10s</button>
-                <button class="sk-btn sk-fwd" id="btn-skip-p20" onclick="send('SKIP',20)">+20s</button>
-                <button class="sk-btn sk-back" id="btn-skip-m5" onclick="send('SKIP',-5)">-5s</button>
-                <button class="sk-btn sk-back" onclick="send('SKIP',-10)">-10s</button>
-                <button class="sk-btn sk-back" id="btn-skip-m20" onclick="send('SKIP',-20)">-20s</button>
-            </div>
-
-            <div class="card-container" id="normal-card-container">
+            <div class="card-container">
                 <div id="card" class="card">
                     <div class="card-face card-front">
-                        <div style="font-family:'Bungee';color:var(--neon);opacity:0.2;font-size:1.8em;text-align:center;line-height:0.95;word-wrap:break-word;width:100%">CHRONO<br>BEATS</div>
-                        <div id="card-mode-label" style="font-family:'Bungee';color:var(--neon);opacity:0.5;font-size:0.6em;text-align:center;margin-top:15px;width:100%"></div>
+                        <div style="font-family:Bungee; opacity:0.1; font-size:2em;">CHRONOBEATS</div>
                     </div>
                     <div class="card-face card-back">
-                        <div id="c-artist">ARTISTA</div>
-                        <div id="c-song">TÍTULO</div>
-                        <div id="c-year">1999</div>
+                        <div id="c-artist" style="font-size:0.7em; opacity:0.6;"></div>
+                        <div id="c-song" style="font-family:Bungee; margin:10px 0;"></div>
+                        <div id="c-year"></div>
                     </div>
                 </div>
-                <div id="wait-msg">ESPERANDO SIGUIENTE TRACK...</div>
-                <div id="host-start-game-btn" style="display:none; margin-top: 15px; width: 100%;">
-                    <button class="btn pulse" style="background:#ff00ff; color:white; border-color:#ff00ff; padding:20px; font-size:1.2em; width:100%; box-shadow: 0 0 15px #ff00ff;" onclick="send('REMOTE_START_GAME')">▶ INICIAR PARTIDA</button>
-                </div>
             </div>
 
-            <div class="collection-summary" id="normal-collection">
-                <h4>MI CRONOLOGÍA</h4>
-                <div id="my-cards-list" class="vertical-cards"></div>
+            <div class="special-actions" id="special-ctrl">
+                <button class="btn" id="btn-autowin" onclick="send('AUTO_WIN')" style="display:none;">COMPRAR CARTA (3🔵)</button>
+                <button class="btn" id="btn-reload" onclick="send('RELOAD_SONG')" style="display:none; background:var(--gold);">OTRA CANCIÓN (1🔵)</button>
             </div>
 
-            <!-- Mando de Reproducción (Solo Activo) -->
-            
+            <div id="king-mode-ui" style="display:none; flex-direction:column; width:100%;"></div>
 
-            
-
-            <!-- Acciones Especiales (Activo) -->
-            <div class="special-actions" id="special-ctrl" style="display:none; flex-direction:column; gap:10px; width:100%; max-width:340px;">
-                <button class="spec-btn" id="btn-autowin" onclick="send('AUTO_WIN')">COMPRAR CARTA (3 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
-                <button class="spec-btn btn-error-track" id="btn-error-track" onclick="send('SYSTEM_ERROR_TRACK')" style="display:none;">ERROR VIDEO</button>
-                <button class="spec-btn" id="btn-reload" onclick="send('RELOAD_SONG')">CAMBIAR CANCIÓN (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
+            <div id="normal-collection" style="width:100%; margin-top:20px;">
+                <h4 style="font-family:Bungee; font-size:0.7em; color:#666;">MI CRONOLOGÍA</h4>
+                <div id="my-cards-list" style="display:flex; flex-direction:column; gap:5px; align-items:center;"></div>
             </div>
-            
-            <!-- Rey (Global dentro de sabotaje por ahora o oculto) -->
-            <div id="king-mode-ui" style="display: none; width: 100%; max-width: 340px; margin-top: 10px; text-align: center; flex-direction: column; gap: 10px;"></div>
-
-            <!-- DUELO UI -->
-            <div id="duel-mode-ui" style="display: none; width: 100%; max-width: 340px; margin-top: 20px; text-align: center; flex-direction: column; gap: 15px; background: rgba(255, 215, 0, 0.1); padding: 20px; border: 2px solid var(--gold); border-radius: 15px; box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);">
-                <div style="font-family: 'Bungee'; color: var(--gold); font-size: 1.4em; text-shadow: 0 0 10px var(--gold);">🔫 ¡DUELO! 🤠 🔫</div>
-                <div style="font-family: 'Montserrat'; font-size: 0.8em; color: #fff;">Introduce el año que creas correcto:</div>
-                <input type="number" id="duel-year-input" placeholder="Ej: 1995" style="width: 100%; font-size: 1.5em; border-color: var(--gold); background: #000;">
-                <button class="btn" style="background: var(--gold); color: #000; font-family: 'Bungee';" onclick="sendDuelGuess()">🔫 ¡DISPARAR! 🔫</button>
-                <div id="duel-wait-msg" style="display:none; font-size: 0.7em; color: var(--gold); font-family: 'Bungee';">¡DISPARO RECIBIDO! Esperando al rival...</div>
-            </div>
-
         </div>
 
-        <!-- PESTAÑA SABOTAJE -->
         <div id="tab-sabotage" class="tab-content">
             <h2 style="font-family:'Bungee'; color:var(--neon); margin-top:20px;">SABOTAJE</h2>
-            
             <p style="color:#666; font-size:0.8em; text-align:center; margin-bottom:15px;" id="sabotage-status-msg">DISPONIBLE SOLO CUANDO OTROS JUEGAN</p>
 
-            <!-- Cuadrícula de Sabotajes (Rivales) -->
             <div class="special-actions" id="sabotage-ctrl" style="display:none; width:100%; max-width:340px; margin-top:10px;">
-                <div id="sabotage-grid">
-                    <button class="spec-btn" id="btn-sabotage-mute" style="background:var(--bg); border-color:#ff0055; color:#ff0055;" onclick="handleCooldownSabotage('SABOTAGE_MUTE', 'btn-sabotage-mute')">MUTE 15s (0)</button>
-                    <button class="spec-btn" id="btn-sabotage-bet" style="background:var(--bg); border-color:#00f2fe; color:#00f2fe;" onclick="send('BET_AGAINST_ACTIVE')">¡NI DE COÑA! (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
-                    <button class="spec-btn" id="btn-sabotage-bet-for" style="background:var(--bg); border-color:#00ff88; color:#00ff88;" onclick="send('BET_FOR_ACTIVE')">¡ESTOY CONTIGO! (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
-                    <button class="spec-btn" id="btn-sabotage-buzzer" style="background:var(--bg); border-color:#00ff00; color:#00ff00;" onclick="handleCooldownSabotage('SABOTAGE_BUZZER', 'btn-sabotage-buzzer')">¡ZUMBIDO! (0)</button>
-                    <button class="spec-btn" id="btn-sabotage-duel" style="background:var(--bg); border:2px dashed var(--gold); color:var(--gold);" onclick="if(lastState && lastState.myTokens >= 3) { send('SABOTAGE_DUEL'); } else { showCustomAlert('Necesitas al menos 3 fichas para retar a duelo (1 de coste + 2 de garantía).'); }">🔫 DUELO 🔫 (1 <span class="neon-chip" style="width:10px;height:10px; background:var(--gold);"></span>)</button>
-                    <button class="spec-btn" id="btn-sabotage-russian-roulette" style="background:var(--bg); border:2px solid #ff0055; color:#ff0055;" onclick="send('SABOTAGE_RUSSIAN_ROULETTE')">🔫 RULETA RUSA 🔫 (2 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
-                    <button class="spec-btn" id="btn-sabotage-veto" style="background:var(--bg); border-color:#ff8800; color:#ff8800;" onclick="send('SABOTAGE_VETO')">VETO CAMBIAR (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
-                    <button class="spec-btn" id="btn-sabotage-skip" style="background:var(--bg); border-color:#ff00ff; color:#ff00ff;" onclick="send('SABOTAGE_FORCE_SKIP')">FORZAR SALTO (3 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
-                    <button class="spec-btn" id="btn-sabotage-panic" style="background:var(--bg); border-color:#ff0000; color:#ff0000;" onclick="send('SABOTAGE_PANIC')">PÁNICO 10s (2 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
-                    <button class="spec-btn" id="btn-sabotage-fog" style="background:var(--bg); border-color:#aaaaaa; color:#aaaaaa;" onclick="send('SABOTAGE_FOG')">NIEBLA TIEMPO (2 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
-                    <button class="spec-btn" id="btn-sabotage-steal-token" style="background:var(--bg); border-color:#ffff00; color:#ffff00;" onclick="send('SABOTAGE_STEAL_TOKEN')">ROBAR FICHA (4 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
-                    <button class="spec-btn" id="btn-sabotage-steal-turn" style="background:var(--bg); border-color:#ff00ff; color:#ff00ff;" onclick="send('SABOTAGE_STEAL_TURN')">ROBAR TURNO (4 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
-                    <button class="spec-btn" id="btn-sabotage-blackhole" style="background:var(--bg); border-color:#9900ff; color:#9900ff;" onclick="send('SABOTAGE_BLACKHOLE')">AGUJERO NEGRO (5 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
+                <div id="sabotage-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; width:100%;">
+                    <button class="spec-btn" id="btn-sabotage-mute" style="background:var(--bg); border-color:#ff0055; color:#ff0055;" onclick="handleCooldownSabotage('SABOTAGE_MUTE', 'btn-sabotage-mute')">MUTE 15s (1 🔵)</button>
+                    <button class="spec-btn" id="btn-sabotage-bet" style="background:var(--bg); border-color:#00f2fe; color:#00f2fe;" onclick="send('BET_AGAINST_ACTIVE')">¡NI DE COÑA! (1 🔵)</button>
+                    <button class="spec-btn" id="btn-sabotage-bet-for" style="background:var(--bg); border-color:#00ff88; color:#00ff88;" onclick="send('BET_FOR_ACTIVE')">¡ESTOY CONTIGO! (1 🔵)</button>
+                    <button class="spec-btn" id="btn-sabotage-buzzer" style="background:var(--bg); border-color:#00ff00; color:#00ff00;" onclick="handleCooldownSabotage('SABOTAGE_BUZZER', 'btn-sabotage-buzzer')">¡ZUMBIDO! (1 🔵)</button>
+                    <button class="spec-btn" id="btn-sabotage-duel" style="background:var(--bg); border:2px dashed var(--gold); color:var(--gold);" onclick="if(lastState && lastState.myTokens >= 3) { send('SABOTAGE_DUEL'); } else { showCustomAlert('Necesitas al menos 3 fichas para retar a duelo (1 de coste + 2 de garantía).'); }">🔫 DUELO 🔫 (1 🔵)</button>
+                    <button class="spec-btn" id="btn-sabotage-russian-roulette" style="background:var(--bg); border:2px solid #ff0055; color:#ff0055;" onclick="send('SABOTAGE_RUSSIAN_ROULETTE')">🔫 RULETA RUSA 🔫 (2 🔵)</button>
+                    <button class="spec-btn" id="btn-sabotage-veto" style="background:var(--bg); border-color:#ff8800; color:#ff8800;" onclick="send('SABOTAGE_VETO')">VETO CAMBIAR (1 🔵)</button>
+                    <button class="spec-btn" id="btn-sabotage-skip" style="background:var(--bg); border-color:#ff00ff; color:#ff00ff;" onclick="send('SABOTAGE_FORCE_SKIP')">FORZAR SALTO (3 🔵)</button>
+                    <button class="spec-btn" id="btn-sabotage-panic" style="background:var(--bg); border-color:#ff0000; color:#ff0000;" onclick="send('SABOTAGE_PANIC')">PÁNICO 10s (2 🔵)</button>
+                    <button class="spec-btn" id="btn-sabotage-fog" style="background:var(--bg); border-color:#aaaaaa; color:#aaaaaa;" onclick="send('SABOTAGE_FOG')">NIEBLA TIEMPO (2 🔵)</button>
+                    <button class="spec-btn" id="btn-sabotage-steal-token" style="background:var(--bg); border-color:#ffff00; color:#ffff00;" onclick="send('SABOTAGE_STEAL_TOKEN')">ROBAR FICHA (4 🔵)</button>
+                    <button class="spec-btn" id="btn-sabotage-steal-turn" style="background:var(--bg); border-color:#ff00ff; color:#ff00ff;" onclick="send('SABOTAGE_STEAL_TURN')">ROBAR TURNO (4 🔵)</button>
+                    <button class="spec-btn" id="btn-sabotage-blackhole" style="background:var(--bg); border-color:#9900ff; color:#9900ff;" onclick="send('SABOTAGE_BLACKHOLE')">AGUJERO NEGRO (5 🔵)</button>
                 </div>
             </div>
         </div>
 
-        <!-- PESTAÑA MERCADO -->
         <div id="tab-market" class="tab-content">
-            <h2 style="font-family:'Bungee'; color:var(--gold); margin-top:20px;">MERCADO NEGRO</h2>
-            <div id="market-container" style="display:flex; flex-direction:column; gap:15px; width:100%; max-width:340px; margin-top:20px;">
-                <!-- Se rellena dinámicamente -->
-            </div>
+            <h2 style="font-family:Bungee; color:var(--gold);">MERCADO</h2>
+            <div id="market-container" style="display:flex; flex-direction:column; gap:10px; width:100%;"></div>
         </div>
 
-        <!-- BARRA DE PESTAÑAS -->
         <div class="tab-bar">
-            <div class="tab-btn active" onclick="switchTab('tab-game', this)">
-                <span style="font-size:1.4em">🎸</span>
-                <span>JUEGO</span>
-            </div>
-            <div class="tab-btn" onclick="switchTab('tab-sabotage', this)">
-                <span style="font-size:1.4em">💀</span>
-                <span>SABOTAJE</span>
-            </div>
-            <div class="tab-btn" onclick="switchTab('tab-market', this)">
-                <span style="font-size:1.4em">💰</span>
-                <span>MERCADO</span>
-            </div>
+            <div class="tab-btn active" onclick="switchTab('tab-game', this)">🎸 <span>JUEGO</span></div>
+            <div class="tab-btn" onclick="switchTab('tab-sabotage', this)">💀 <span>SABOTAJE</span></div>
+            <div class="tab-btn" onclick="switchTab('tab-market', this)">💰 <span>MERCADO</span></div>
         </div>
     </div>
 
-    <div id="custom-alert"
-        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:20000; align-items:center; justify-content:center; flex-direction:column;">
-        <div
-            style="background:#111; border:2px solid var(--neon); border-radius:15px; padding:20px; width:80%; max-width:350px; text-align:center; box-shadow: 0 0 20px var(--neon);">
-            <h3 style="font-family:'Bungee'; color:var(--neon); margin-top:0;">AVISO</h3>
-            <p id="custom-alert-msg" style="font-size:1em; margin-bottom:20px;"></p>
-            <button class="btn"
-                onclick="document.getElementById('custom-alert').style.display='none'">ENTENDIDO</button>
-        </div>
-    </div>
-
-    <div id="custom-confirm"
-        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:20000; align-items:center; justify-content:center; flex-direction:column;">
-        <div
-            style="background:#111; border:2px solid var(--gold); border-radius:15px; padding:20px; width:80%; max-width:350px; text-align:center; box-shadow: 0 0 20px var(--gold);">
-            <h3 style="font-family:'Bungee'; color:var(--gold); margin-top:0;">CONFIRMAR</h3>
-            <p id="custom-confirm-msg" style="font-size:1em; margin-bottom:20px;"></p>
-            <div style="display:flex; gap:10px; justify-content:center;">
-                <button class="btn" id="custom-confirm-yes"
-                    style="background:var(--gold); color:#000; box-shadow:0 0 10px var(--gold); flex:1; padding:15px 5px;">SÍ</button>
-                <button class="btn" id="custom-confirm-no"
-                    style="background:transparent; border:2px solid #888; color:#888; box-shadow:none; flex:1; padding:15px 5px;">NO</button>
-            </div>
+    <div id="custom-alert" class="overlay-full" style="z-index:20000; background:rgba(0,0,0,0.8);">
+        <div style="background:#111; border:2px solid var(--neon); border-radius:15px; padding:20px; max-width:300px;">
+            <p id="custom-alert-msg"></p>
+            <button class="btn" onclick="document.getElementById('custom-alert').style.display='none'">OK</button>
         </div>
     </div>
 
     <script>
-        var peer, conn, myId, playerName;
-        var lastState = null;
-        var playerAvatarDataUrl = null;
-        
-        var sabotageCooldowns = { SABOTAGE_MUTE: 0, SABOTAGE_BUZZER: 0 };
-        var btnOriginalText = { 'btn-sabotage-mute': 'MUTE 15s (0)', 'btn-sabotage-buzzer': '¡ZUMBIDO! (0)' };
-
-        function handleCooldownSabotage(action, btnId) {
-            if (Date.now() < sabotageCooldowns[action]) return;
-            send(action);
-
-            var duration = 5 * 60 * 1000;
-            sabotageCooldowns[action] = Date.now() + duration;
-
-            var btn = document.getElementById(btnId);
-            if (!btn) return;
-
-            var iv = setInterval(function () {
-                var remaining = sabotageCooldowns[action] - Date.now();
-                if (remaining <= 0) {
-                    clearInterval(iv);
-                    btn.innerHTML = btnOriginalText[btnId];
-                    btn.style.background = 'var(--bg)';
-                    btn.style.color = btnId === 'btn-sabotage-mute' ? '#ff0055' : '#00ff00';
-                    btn.style.borderColor = btnId === 'btn-sabotage-mute' ? '#ff0055' : '#00ff00';
-                    btn.disabled = false;
-                    if(lastState) updateDashboard(lastState);
-                } else {
-                    var pct = 100 - (remaining / duration * 100);
-                    btn.style.background = 'linear-gradient(90deg, #444 ' + pct + '%, #111 ' + pct + '%)';
-                    btn.style.color = '#777';
-                    btn.style.borderColor = '#444';
-                    var secs = Math.ceil(remaining / 1000);
-                    var m = Math.floor(secs / 60);
-                    var s = secs % 60;
-                    btn.innerHTML = 'RECARGANDO (' + m + ':' + s.toString().padStart(2, '0') + ')';
-                }
-            }, 1000);
-            
-            var pct = 0;
-            btn.style.background = 'linear-gradient(90deg, #444 ' + pct + '%, #111 ' + pct + '%)';
-            btn.style.color = '#777';
-            btn.style.borderColor = '#444';
-            btn.innerHTML = 'RECARGANDO (5:00)';
-        }
-
-        // Cargar datos guardados al iniciar
-        window.addEventListener('load', function () {
-            var savedName = localStorage.getItem('cb_player_name');
-            if (savedName) {
-                document.getElementById('player-name').value = savedName;
-            }
-            var savedAvatar = localStorage.getItem('cb_player_avatar');
-            if (savedAvatar) {
-                playerAvatarDataUrl = savedAvatar;
-                document.getElementById('avatar-preview').src = savedAvatar;
-                document.getElementById('avatar-preview').style.display = 'block';
-                document.getElementById('avatar-placeholder').style.display = 'none';
-            }
-        });
+        var peer, conn, myId, playerName, lastState;
+        var sabotageCooldowns = { SABOTAGE_MUTE: 0, SABOTAGE_BUZZER: 0, SABOTAGE_VETO: 0 };
+        var btnOriginalText = { 'btn-sabotage-mute': 'MUTE 15s (1 🔵)', 'btn-sabotage-buzzer': '¡ZUMBIDO! (1 🔵)', 'btn-sabotage-veto': 'VETO CAMBIAR (1 🔵)' };
 
         function handleAvatarSelect(event) {
             var file = event.target.files[0];
             if (!file) return;
-
             var reader = new FileReader();
             reader.onload = function (e) {
                 var img = new Image();
                 img.onload = function () {
-                    // Comprimir la imagen usando canvas
                     var canvas = document.createElement('canvas');
                     var MAX_SIZE = 150;
-                    var width = img.width;
-                    var height = img.height;
-
-                    if (width > height) {
-                        if (width > MAX_SIZE) {
-                            height *= MAX_SIZE / width;
-                            width = MAX_SIZE;
-                        }
-                    } else {
-                        if (height > MAX_SIZE) {
-                            width *= MAX_SIZE / height;
-                            height = MAX_SIZE;
-                        }
-                    }
-
-                    canvas.width = width;
-                    canvas.height = height;
-                    var ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-
-                    // Convertir a base64 calidad 0.7
+                    var width = img.width; var height = img.height;
+                    if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } }
+                    else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } }
+                    canvas.width = width; canvas.height = height;
+                    var ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height);
                     playerAvatarDataUrl = canvas.toDataURL('image/jpeg', 0.7);
-
                     document.getElementById('avatar-preview').src = playerAvatarDataUrl;
                     document.getElementById('avatar-preview').style.display = 'block';
                     document.getElementById('avatar-placeholder').style.display = 'none';
-
-                    // Guardar en localStorage
                     localStorage.setItem('cb_player_avatar', playerAvatarDataUrl);
-
-                    // Transformar a Toon automáticamente
                     toonifyAvatar();
                 };
                 img.src = e.target.result;
@@ -1246,985 +407,203 @@
 
         async function toonifyAvatar() {
             if (!playerAvatarDataUrl) return;
-
             const overlay = document.getElementById('ai-loading-overlay');
             overlay.style.display = 'flex';
-
             try {
-                // --- FILTRO DE COLOR NEÓN DEL TEMA MIX (VERDE NEÓN) ---
-
-                const img = new Image();
-                img.src = playerAvatarDataUrl;
-                await new Promise(r => {
-                    img.onload = r;
-                    img.onerror = r;
-                });
-
-                const canvas = document.createElement('canvas');
-                const MAX_SIZE = 400;
-                let cWidth = img.width;
-                let cHeight = img.height;
-                if (cWidth > cHeight && cWidth > MAX_SIZE) {
-                    cHeight *= MAX_SIZE / cWidth;
-                    cWidth = MAX_SIZE;
-                } else if (cHeight > MAX_SIZE) {
-                    cWidth *= MAX_SIZE / cHeight;
-                    cHeight = MAX_SIZE;
-                }
-
-                canvas.width = cWidth;
-                canvas.height = cHeight;
+                const img = new Image(); img.src = playerAvatarDataUrl;
+                await new Promise(r => { img.onload = r; img.onerror = r; });
+                const canvas = document.createElement('canvas'); const MAX_SIZE = 400;
+                let cWidth = img.width; let cHeight = img.height;
+                if (cWidth > cHeight && cWidth > MAX_SIZE) { cHeight *= MAX_SIZE / cWidth; cWidth = MAX_SIZE; }
+                else if (cHeight > MAX_SIZE) { cWidth *= MAX_SIZE / cHeight; cHeight = MAX_SIZE; }
+                canvas.width = cWidth; canvas.height = cHeight;
                 const ctx = canvas.getContext('2d');
-
-                // 1. Dibujar en escala de grises y alto contraste
                 ctx.filter = 'grayscale(100%) contrast(1.4) brightness(1.2)';
-                ctx.drawImage(img, 0, 0, cWidth, cHeight);
-                ctx.filter = 'none';
-
-                // 2. Teñir con el color Verde Neón del tema Mix
-                ctx.globalCompositeOperation = 'color';
-                ctx.fillStyle = 'rgba(0, 255, 0, 0.8)';
-                ctx.fillRect(0, 0, cWidth, cHeight);
-
-                // Mezclar un poco de luz (Tono neón vibrante)
-                ctx.globalCompositeOperation = 'overlay';
-                ctx.fillStyle = 'rgba(0, 255, 0, 0.3)';
-                ctx.fillRect(0, 0, cWidth, cHeight);
-
-                // 3. Viñeta oscura
+                ctx.drawImage(img, 0, 0, cWidth, cHeight); ctx.filter = 'none';
+                ctx.globalCompositeOperation = 'color'; ctx.fillStyle = 'rgba(0, 255, 0, 0.8)'; ctx.fillRect(0, 0, cWidth, cHeight);
+                ctx.globalCompositeOperation = 'overlay'; ctx.fillStyle = 'rgba(0, 255, 0, 0.3)'; ctx.fillRect(0, 0, cWidth, cHeight);
                 ctx.globalCompositeOperation = 'multiply';
-                const grd = ctx.createRadialGradient(cWidth / 2, cHeight / 2, cWidth * 0.3, cWidth / 2, cHeight / 2, cWidth * 0.9);
-                grd.addColorStop(0, "white");
-                grd.addColorStop(1, "rgba(10, 10, 10, 0.9)");
-                ctx.fillStyle = grd;
-                ctx.fillRect(0, 0, cWidth, cHeight);
-
+                const grd = ctx.createRadialGradient(cWidth/2, cHeight/2, cWidth*0.3, cWidth/2, cHeight/2, cWidth*0.9);
+                grd.addColorStop(0,"white"); grd.addColorStop(1,"rgba(10,10,10,0.9)");
+                ctx.fillStyle = grd; ctx.fillRect(0, 0, cWidth, cHeight);
                 playerAvatarDataUrl = canvas.toDataURL('image/jpeg', 0.9);
                 document.getElementById('avatar-preview').src = playerAvatarDataUrl;
                 localStorage.setItem('cb_player_avatar', playerAvatarDataUrl);
-
-                // Notify host immediately if already connected
-                if (window.conn && window.conn.open) {
-                    window.conn.send({ type: 'AVATAR_UPDATE', name: playerName, avatar: playerAvatarDataUrl });
-                }
-
-                await new Promise(r => setTimeout(r, 400));
-
-            } catch (err) {
-                console.error('Color filter error:', err);
-                alert("Error aplicando filtro de color: " + err.message);
-            } finally {
-                overlay.style.display = 'none';
-            }
-        } function showCustomAlert(msg) {
-            document.getElementById('custom-alert-msg').innerText = msg;
-            document.getElementById('custom-alert').style.display = 'flex';
+                if (window.conn && window.conn.open) window.conn.send({ type: 'AVATAR_UPDATE', avatar: playerAvatarDataUrl });
+            } catch (err) { console.error('Toon error:', err); } finally { overlay.style.display = 'none'; }
         }
 
-        function showCustomConfirm(msg, callback) {
-            document.getElementById('custom-confirm-msg').innerText = msg;
-            var confirmDialog = document.getElementById('custom-confirm');
-            var btnYes = document.getElementById('custom-confirm-yes');
-            var btnNo = document.getElementById('custom-confirm-no');
-
-            // Remove previous event listeners
-            var newBtnYes = btnYes.cloneNode(true);
-            var newBtnNo = btnNo.cloneNode(true);
-            btnYes.parentNode.replaceChild(newBtnYes, btnYes);
-            btnNo.parentNode.replaceChild(newBtnNo, btnNo);
-
-            newBtnYes.addEventListener('click', function () {
-                confirmDialog.style.display = 'none';
-                callback(true);
-            });
-
-            newBtnNo.addEventListener('click', function () {
-                confirmDialog.style.display = 'none';
-                callback(false);
-            });
-
-            confirmDialog.style.display = 'flex';
+        function toggleRules() { var el=document.getElementById('rules-overlay'); el.style.display=(el.style.display==='none'||el.style.display==='')?'flex':'none'; }
+        function toggleRemote() { var el=document.getElementById('remote-overlay'); el.style.display=(el.style.display==='none'||el.style.display==='')?'flex':'none'; }
+        
+        function switchTab(tabId, btn) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            btn.classList.add('active');
         }
 
-        // Wake Lock
-        let wakeLock = null;
-        async function requestWakeLock() {
-            try {
-                if ('wakeLock' in navigator) {
-                    wakeLock = await navigator.wakeLock.request('screen');
-                    console.log('Wake Lock Player activo');
-                }
-            } catch (err) {
-                console.error(`${err.name}, ${err.message}`);
-            }
-        }
+        function send(action, val) { if(conn && conn.open) conn.send({type:'COMMAND', action:action, value:val}); }
 
         function conectar() {
-            requestWakeLock();
             var hostId = document.getElementById('host-id').value.toUpperCase().trim();
-            hostId = hostId.replace('CB-HOST-', '').replace('CB-ANIME-HOST-', '').replace('CB-MOVIES-HOST-', '');
             playerName = document.getElementById('player-name').value.trim();
             if (!hostId || !playerName) return showCustomAlert("Rellena los datos para continuar.");
-
-            // Si no tiene avatar, preguntarle una vez
-            if (!playerAvatarDataUrl) {
-                showCustomConfirm("¿Quieres hacerte un selfie para tu avatar antes de entrar?", function (confirmed) {
-                    if (confirmed) {
-                        document.getElementById('avatar-input').click();
-                    } else {
-                        realizarConexion(hostId);
-                    }
-                });
-            } else {
-                realizarConexion(hostId);
-            }
-        }
-
-        function realizarConexion(hostId) {
-            // Guardar nombre en localStorage
-            localStorage.setItem('cb_player_name', playerName);
-
-            var btn = document.getElementById('join-btn');
-            btn.disabled = true;
-            btn.innerText = "CONECTANDO...";
-
+            
             peer = new Peer({
                 config: {
-                                                            'iceServers': [
+                    'iceServers': [
                         { urls: 'stun:stun.l.google.com:19302' },
-                        { urls: 'stun:stun1.l.google.com:19302' },
-                        { urls: 'stun:global.stun.twilio.com:3478' },
-                        { urls: 'stun:stun.cloudflare.com:3478' },
-                        { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
-                        { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' },
-                        { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' }
+                        { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' }
                     ]
                 }
             });
-            peer.on('open', function (id) {
+            peer.on('open', id => {
                 myId = id;
-                console.log("Conectando con ID Peer:", id);
                 conn = peer.connect("CB-HOST-" + hostId);
-
-                conn.on('open', function () {
-                    console.log("¡Conectado!");
+                conn.on('open', () => {
                     conn.send({ type: 'JOIN', name: playerName, avatar: playerAvatarDataUrl });
                     document.getElementById('login-screen').style.display = 'none';
                     document.getElementById('game-screen').style.display = 'flex';
-                    initCheatSystem();
                 });
-
                 conn.on('data', handle);
-
-                conn.on('close', function () {
-                    showCustomAlert("Conexión cerrada. El Host se ha desconectado.");
-                    setTimeout(() => location.reload(), 3000);
-                });
             });
-
-            peer.on('error', function (err) {
-                console.error("Error PeerJS:", err);
-                showCustomAlert("Error de conexión: " + err.type);
-                btn.disabled = false;
-                btn.innerText = "ENTRAR";
-            });
-        }
-
-        function applyTheme(type) {
-            let color = '#00ff00'; // Mix / Default
-            if (type === 'orig') color = '#00f2ff';
-            if (type === 'anime') color = '#ff00cc';
-            if (type === 'movies') color = '#ffaa00';
-            if (type === 'videojuegos') color = '#bf00ff';
-            
-            document.documentElement.style.setProperty('--neon', color);
-            let metaTheme = document.querySelector('meta[name="theme-color"]');
-            if (metaTheme) metaTheme.setAttribute('content', color);
-            
-            // Actualizar el indicador de trucos si es necesario
-            const indicator = document.getElementById('cheat-indicator');
-            if (indicator && indicator.style.display !== 'none') {
-                indicator.style.boxShadow = '0 0 15px ' + color;
-            }
-        }
-
-        function send(action, value) {
-            if (navigator.vibrate) navigator.vibrate(40);
-            if (conn && conn.open) {
-                conn.send({ type: 'COMMAND', action: action, value: value });
-            } else {
-                showCustomAlert("Conexión perdida. Recarga la página.");
-            }
-        }
-
-        function updateMarket(state) {
-            const container = document.getElementById('market-container');
-            if (!container) return;
-
-            const isMyTurn = (state.activePlayer && state.activePlayer.id && myId && state.activePlayer.id.toLowerCase() === myId.toLowerCase());
-            const myTokens = state.myTokens || 0;
-            const myWildcards = state.myWildcards !== undefined ? state.myWildcards : 3;
-            const hasActiveShield = state.hasShield && state.hasShield[myId];
-
-            let html = "";
-
-            // COMODÍN ARTISTA (Limitado a 3 usos gratis, compartido con Canción)
-            html += `<button class="market-btn" ${(!isMyTurn || myWildcards < 1) ? 'disabled' : ''} onclick="send('MARKET_WILDCARD', 'artist')">
-                        COMODÍN ARTISTA (${myWildcards} 🃏)
-                     </button>`;
-
-            // COMODÍN CANCIÓN
-            html += `<button class="market-btn" ${(!isMyTurn || myWildcards < 1) ? 'disabled' : ''} onclick="send('MARKET_WILDCARD', 'song')">
-                        COMODÍN CANCIÓN (${myWildcards} 🃏)
-                     </button>`;
-
-
-
-            // PISTA DÉCADA (1🔘)
-            html += `<button class="market-btn" ${(!isMyTurn || myTokens < 1) ? 'disabled' : ''} onclick="send('MARKET_DECADE')">
-                        PISTA DÉCADA (1 <span class="neon-chip"></span>)
-                     </button>`;
-
-            // ESCUDO PROTECTOR (3🔘)
-            html += `<button class="market-btn" ${(myTokens < 3 || hasActiveShield) ? 'disabled' : ''} onclick="send('MARKET_SHIELD')" 
-                        style="${hasActiveShield ? 'border-color:var(--gold); color:var(--gold);' : ''}">
-                        ${hasActiveShield ? '🛡️ ESCUDO ACTIVO' : 'ESCUDO PROTECTOR (3 <span class="neon-chip"></span>)'}
-                     </button>`;
-            
-            if (hasActiveShield) {
-                html += `<p style="color:var(--gold); font-size:0.75em; text-align:center; margin-top:-5px; font-family:Bungee;">PROTECCIÓN CONTRA SABOTAJES ACTIVA</p>`;
-            }
-
-
-            container.innerHTML = html;
         }
 
         function handle(data) {
             console.log("Evento:", data.type, data);
-
-            if (data.type === 'SABOTAGE_SKIP_ALERT') {
-                showCustomAlert(data.msg);
-                return;
-            }
-
-            if (data.type === 'BET_RESULT' || data.type === 'SABOTAGE_SKIP_ALERT') {
+            if (data.type === 'SABOTAGE_SKIP_ALERT' || data.type === 'BET_RESULT') {
                 if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
-                showCustomAlert(data.msg || "¡Sabotaje recibido!");
+                showCustomAlert(data.msg || "¡Evento recibido!");
                 return;
             }
-
-            // Retroalimentación de trucos para Xavi
-            if (data.type === 'STATE_UPDATE' && lastState && playerName.toLowerCase() === 'xavi') {
-                if (data.cheatsEnabled !== lastState.cheatsEnabled) {
-                    const indicator = document.getElementById('cheat-indicator');
-                    indicator.innerText = data.cheatsEnabled ? "TRUCOS ON" : "TRUCOS OFF";
-                    indicator.style.background = data.cheatsEnabled ? "var(--neon)" : "var(--accent)";
-                    indicator.style.display = "block";
-                    setTimeout(() => { indicator.style.display = "none"; }, 2000);
-                }
-            }
-
-            // State handling moved to end
             if (data.type === 'STATE_UPDATE') {
-                try {
-                    updateMarket(data);
-                
-                var cardModeLabel = document.getElementById('card-mode-label');
-                const artistLabel = document.getElementById('c-artist');
-                const songLabel = document.getElementById('c-song');
-                
-                if (cardModeLabel) {
-                    if (data.currentType === 'videojuegos') {
-                        cardModeLabel.innerText = "VIDEOGAMES";
-                        if (artistLabel) artistLabel.innerText = "ESTUDIO";
-                        if (songLabel) songLabel.innerText = "JUEGO";
-                    } else if (data.currentType === 'anime') {
-                        cardModeLabel.innerText = "ANIME";
-                        if (artistLabel) artistLabel.innerText = "ESTUDIO";
-                        if (songLabel) songLabel.innerText = "ANIME";
-                    } else if (data.currentType === 'movies') {
-                        cardModeLabel.innerText = "MOVIES";
-                        if (artistLabel) artistLabel.innerText = "ESTUDIO";
-                        if (songLabel) songLabel.innerText = "PELÍCULA / SERIE";
-                    } else {
-                        cardModeLabel.innerText = "ORIGINAL";
-                        if (artistLabel) artistLabel.innerText = "ARTISTA";
-                        if (songLabel) songLabel.innerText = "CANCIÓN";
-                    }
-                }
-
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('game-screen').style.display = 'flex';
-
-                // Vibración al inicio de turno PROPIO o al entrar en DUELO
-                var isMyTurnNow = (data.activePlayer && data.activePlayer.id && myId && data.activePlayer.id.toLowerCase() === myId.toLowerCase());
-                var wasMyTurnBefore = (lastState && lastState.activePlayer && lastState.activePlayer.id && myId && lastState.activePlayer.id.toLowerCase() === myId.toLowerCase());
-                var phaseChangedToDuel = (data.turnPhase === 'DUEL' && (!lastState || lastState.turnPhase !== 'DUEL'));
-
-                if (navigator.vibrate) {
-                    if (isMyTurnNow && !wasMyTurnBefore) {
-                        navigator.vibrate([100, 50, 100]); // Pulsación triple suave para avisar
-                    } else if (phaseChangedToDuel) {
-                        navigator.vibrate([400]); // Vibración larga para duelo
-                    }
-                }
-                document.getElementById('cur-player').innerText = data.activePlayer && data.activePlayer.name ? data.activePlayer.name : "---";
-
-                // LOGICA DEL MANDO HOST
-                var fab = document.getElementById('fab-remote');
-                var rContainer = document.getElementById('remote-controls-container');
-                if (data.judgeId === 'ALL' || (data.judgeId && myId && data.judgeId.toLowerCase() === myId.toLowerCase())) {
-                    fab.style.display = 'flex';
-                    fab.style.filter = 'none';
-                    fab.style.opacity = '1';
-                    fab.style.pointerEvents = 'auto';
-                    fab.style.borderColor = 'var(--neon)';
-                    fab.style.boxShadow = '0 0 15px var(--neon)';
-
-                    // Render Contextual Buttons
-                    if (data.judgeId === 'ALL' && !data.gameStarted) {
-                        var currJop = data.joputismoLevel || 0;
-                        var js = "";
-                        js += "<h4 style='color:var(--neon); font-family:Bungee; font-size:1em; margin-bottom:10px; margin-top:0'>CONFIGURACIÓN LOBBY:</h4>";
-                        
-                        js += "<div style='background:rgba(0,0,0,0.3); padding:10px; border-radius:10px; margin-bottom:15px;'>";
-                        js += "<p style='font-size:0.7em; color:#888; margin-top:0;'>NIVEL JOPUTISMO:</p>";
-                        js += "<div style='display:flex; gap:5px; justify-content:center;'>";
-                        js += "<button class='btn' style='padding:10px; font-size:0.7em; flex:1; " + (currJop === 0 ? "background:var(--neon);color:#000;" : "background:#222;color:#888") + "' onclick=\"send('REMOTE_JOPUTISMO', 0)\">LOSER</button>";
-                        js += "<button class='btn' style='padding:10px; font-size:0.7em; flex:1; " + (currJop === 1 ? "background:var(--neon);color:#000;" : "background:#222;color:#888") + "' onclick=\"send('REMOTE_JOPUTISMO', 1)\">TROLL</button>";
-                        js += "<button class='btn' style='padding:10px; font-size:0.7em; flex:1; " + (currJop === 2 ? "background:var(--neon);color:#000;" : "background:#222;color:#888") + "' onclick=\"send('REMOTE_JOPUTISMO', 2)\">SUPERMAN</button>";
-                        js += "</div></div>";
-
-                        js += "<div style='background:rgba(0,0,0,0.3); padding:10px; border-radius:10px; margin-bottom:15px;'>";
-                        js += "<p style='font-size:0.7em; color:#888; margin-top:0;'>MODO DE JUEGO:</p>";
-                        js += "<div style='display:flex; gap:5px;'>";
-                        js += "<button class='btn' style='padding:10px; font-size:0.7em; flex:1; " + (data.gameMode === 'normal' ? "background:var(--neon);color:#000;" : "background:#222;color:#888") + "' onclick=\"send('REMOTE_SET_GAME_MODE', 'normal')\">CLÁSICO</button>";
-                        js += "<button class='btn' style='padding:10px; font-size:0.7em; flex:1; " + (data.gameMode === 'rey' ? "background:var(--neon);color:#000;" : "background:#222;color:#888") + "' onclick=\"send('REMOTE_SET_GAME_MODE', 'rey')\">MODO REY</button>";
-                        js += "</div></div>";
-
-                        rContainer.innerHTML = js + `<button class="btn" style="background:#ff00ff; color:white; border-color:#ff00ff; padding:20px; font-size:1.1em; width:100%;" onclick="send('REMOTE_START_GAME'); toggleRemote();">▶ INICIAR PARTIDA</button>`;
-                    } else if (data.turnPhase === 'DUEL' && !data.currentDuel) {
-                        rContainer.innerHTML = `<button class="btn" style="background:var(--neon); color:#000; padding:20px; font-size:1.2em; width:100%;" onclick="send('REMOTE_NEXT_TURN'); toggleRemote();">SIGUIENTE TURNO</button>`;
-                    } else if (data.turnPhase === 'DUEL') {
-                        if (data.duelResult) {
-                            rContainer.innerHTML = `<button class="btn" style="background:var(--neon); color:#000; padding:20px; font-size:1.2em; width:100%;" onclick="send('REMOTE_DUEL_FINISH'); toggleRemote();">ACEPTAR RESULTADO DUELO</button>`;
-                        } else {
-                            rContainer.innerHTML = `<p style="color:#888; text-align:center;">Duelo en curso...<br>Esperando resultados.</p>`;
-                        }
-                    } else if (data.turnPhase === 'KING_GUESS_RESULT' || data.turnPhase === 'NORMAL' || data.turnPhase === 'KING_SELECTION' || data.turnPhase === 'KING_GUESS') {
-                        if (!data.revealed) {
-                            rContainer.innerHTML = `<button class="btn" style="background:var(--gold); color:#000; padding:20px; font-size:1.2em; width:100%;" onclick="send('REMOTE_REVEAL'); toggleRemote();">👀 REVELAR CARTA</button>
-                            <button class="btn" style="background:#555; color:white; border-color:#555; margin-top:20px; width:100%;" onclick="send('REMOTE_SYSTEM_ERROR'); toggleRemote();">ERROR DE SISTEMA (REPETIR)</button>`;
-                        } else {
-                            rContainer.innerHTML = `
-                                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px;">
-                                    <button class="btn" style="background:#00ff00; color:#000; padding:12px; font-size:0.8em;" onclick="send('REMOTE_CORRECT'); toggleRemote();">✅ SÍ<br>(Carta)</button>
-                                    <button class="btn" style="background:#ffd700; color:#000; padding:12px; font-size:0.8em;" onclick="send('REMOTE_CORRECT_TOKEN'); toggleRemote();">🔵 SÍ<br>(+ Ficha)</button>
-                                    <button class="btn" style="background:#ff4444; color:#fff; padding:12px; font-size:0.8em;" onclick="send('REMOTE_INCORRECT'); toggleRemote();">❌ NO<br>(Nada)</button>
-                                    <button class="btn" style="background:#00f2fe; color:#000; padding:12px; font-size:0.8em;" onclick="send('REMOTE_INCORRECT_TOKEN'); toggleRemote();">🔵 NO<br>(+ Ficha)</button>
-                                </div>
-                                <button class="btn" style="background:#444; color:white; border-color:#444; padding:15px; width:100%; font-size:0.9em; margin-bottom:10px;" onclick="send('REMOTE_NEXT_TURN'); toggleRemote();">PASAR TURNO (Nadie)</button>
-                                <button class="btn" style="background:#555; color:white; border-color:#555; padding:10px; width:100%; font-size:0.8em;" onclick="send('REMOTE_SYSTEM_ERROR'); toggleRemote();">ERROR SISTEMA</button>
-                            `;
-                        }
-                    } else {
-                        rContainer.innerHTML = `<p style="color:#888; text-align:center;">Fase: ${data.turnPhase}.<br>Esperando al Host.</p>
-                        <button class="btn" style="background:#555; color:white; width:100%; margin-top:10px;" onclick="send('REMOTE_NEXT_TURN')">SALTAR FORZADO</button>`;
-                    }
-                } else {
-                    fab.style.display = 'flex';
-                    fab.style.filter = 'grayscale(100%)';
-                    fab.style.opacity = '0.3';
-                    fab.style.pointerEvents = 'none';
-                    fab.style.borderColor = '#555';
-                    fab.style.boxShadow = 'none';
-                    document.getElementById('remote-overlay').style.display = 'none';
-                }
-
-                if (data.leader) {
-                    document.getElementById('lb-leader-name').innerText = data.leader.name;
-                    document.getElementById('lb-leader-cards').innerText = data.leader.score;
-                }
-                if (data.myCards) {
-                    document.getElementById('lb-me-cards').innerText = data.myCards.length;
-                }
-                
-                
-                
-                // lastState will be updated at the end of handle()
-                // Identificar si es mi turno usando el ID de PeerJS
-                var isMyTurn = (data.activePlayer && data.activePlayer.id && myId && data.activePlayer.id.toLowerCase() === myId.toLowerCase());
-                console.log("¿Mi Turno?", isMyTurn, "ID Host:", data.activePlayer ? data.activePlayer.id : "null", "Mi ID:", myId);
-
-                var isKingMode = (data.turnPhase && data.turnPhase !== 'NORMAL');
-                var normalCardContainer = document.getElementById('normal-card-container');
-                var normalCollection = document.getElementById('normal-collection');
-                var kingModeUi = document.getElementById('king-mode-ui');
-
-                if (isKingMode) {
-                    normalCardContainer.style.display = 'none';
-                    normalCollection.style.display = 'none';
-                    kingModeUi.style.display = 'flex';
-
-                    if (data.turnPhase === 'KING_SELECTION') {
-                        if (isMyTurn) {
-                            kingModeUi.innerHTML = "<h3 style='color:var(--gold);font-family:Bungee;'>ERES EL REY</h3><p>EL RESTO DE JUGADORES ESTÁ ELIGIENDO TU CARTA...</p>";
-                        } else {
-                            var html = "<h3 style='color:var(--neon);font-family:Bungee;'>¡ELIGE LA CARTA MÁS DIFÍCIL!</h3>";
-                            if (data.kingOptions) {
-                                data.kingOptions.forEach(function (opt, idx) {
-                                    html += "<div style='background:#111; border:1px solid var(--neon); border-radius:10px; padding:10px; margin-bottom:10px; text-align:left;'>";
-                                    html += "<span style='color:#00f2fe; font-family:Bungee; font-size:1.2em; margin-right:10px;'>#" + (idx + 1) + "</span>";
-                                    html += "<span style='font-size:0.8em; color:#aaa;'>" + opt.artist + "</span><br>";
-                                    html += "<strong style='font-family:Bungee;'>" + opt.song + "</strong><br>";
-                                    html += "<span style='color:var(--accent); font-family:Bungee; font-size:1.2em;'>" + opt.year + "</span>";
-                                    html += "<button class='btn' style='margin-top:10px; padding:10px; font-size:1em;' onclick=\"send('KING_SELECT_CARD', " + idx + ")\">¡ELEGIR ESTA!</button>";
-                                    html += "</div>";
-                                });
-                            }
-                            kingModeUi.innerHTML = html;
-                        }
-                    } else if (data.turnPhase === 'KING_GUESS') {
-                        if (isMyTurn) {
-                            var html = "<h3 style='color:var(--gold);font-family:Bungee;'>¡ADIVINA EL AÑO!</h3>";
-                            html += "<p style='font-size:0.8em; color:var(--neon); margin-bottom:15px;'>(Escucha la canción. Margen de error: +/- 2 años)</p>";
-                            html += "<input type='number' id='king-guess-input' placeholder='AÑO' style='font-size:1.5em; text-align:center;'>";
-                            html += "<button class='btn' style='margin-top:10px;' onclick=\"var y = document.getElementById('king-guess-input').value; if(y) send('KING_GUESS', y);\">CONFIRMAR AÑO</button>";
-                            html += "<button class='btn btn-error-track' style='margin-top:15px; background:transparent; border:2px solid #ff0055; color:#ff0055; padding:10px; font-size:0.8em;' onclick=\"send('SYSTEM_ERROR_TRACK')\">⚠️ ERROR DE VIDEO (SALTAR)</button>";
-                            kingModeUi.innerHTML = html;
-                        } else {
-                            kingModeUi.innerHTML = "<h3 style='color:var(--neon);font-family:Bungee;'>CARTA ENVIADA</h3><p>EL REY ESTÁ ADIVINANDO EL AÑO...</p>";
-                        }
-                    } else if (data.turnPhase === 'DUEL') {
-                        var isParticipant = data.currentDuel && (data.currentDuel.challenger === myId || data.currentDuel.target === myId);
-                        if (!isParticipant) {
-                            kingModeUi.innerHTML = "<h3 style='color:var(--neon);font-family:Bungee;'>🔫 DUELO EN CURSO 🔫</h3><p>¡TIROTEO EN EL SALOON! 🔫 LOS DUELISTAS SE ESTÁN MIDIENDO...</p>";
-                        }
-                    } else if (data.turnPhase === 'KING_GUESS_RESULT') {
-                        var html = "<h3 style='color:var(--gold);font-family:Bungee;'>RESULTADO</h3>";
-                        html += "<p style='font-size:0.8em;color:#aaa;'>" + data.currentTrack.artist + "</p>";
-                        html += "<p style='font-family:Bungee;font-size:2em; color:var(--neon); margin-bottom:15px;'>" + data.currentTrack.year + "</p>";
-                        kingModeUi.innerHTML = html;
-                    }
-                } else {
-                    normalCardContainer.style.display = 'flex';
-                    normalCollection.style.display = 'block';
-                    kingModeUi.style.display = 'none';
-                    kingModeUi.innerHTML = '';
-                }
-
-                // Control de visibilidad de bloques de mando
-                var showMusic = isMyTurn;
-                if (data.turnPhase === 'KING_SELECTION') showMusic = false;
-
-                document.getElementById('m-ctrl').style.display = showMusic ? 'grid' : 'none';
-                document.getElementById('s-ctrl').style.display = showMusic ? 'grid' : 'none';
-
-                // Botones Especiales y Sabotajes
-                var specialCtrl = document.getElementById('special-ctrl');
-                var sabotageCtrl = document.getElementById('sabotage-ctrl');
-                var sabotageStatusMsg = document.getElementById('sabotage-status-msg');
-
-                if (isMyTurn && !data.revealed && (!data.turnPhase || data.turnPhase === 'NORMAL')) {
-                    specialCtrl.style.display = 'flex';
-                    sabotageCtrl.style.display = 'none';
-                    if (sabotageStatusMsg) sabotageStatusMsg.style.display = 'block';
-                    
-                    document.getElementById('btn-autowin').style.display = (!data.isPlaying) ? 'block' : 'none';
-                    var btnPlayInfo = document.querySelector('.btn-play');
-                    if (btnPlayInfo) {
-                        if (data.isPlaying) {
-                            btnPlayInfo.classList.add('playing');
-                            btnPlayInfo.innerText = "SONANDO...";
-                        } else {
-                            btnPlayInfo.classList.remove('playing');
-                            btnPlayInfo.innerText = "PLAY";
-                        }
-                    }
-                    document.getElementById('btn-error-track').style.display = (data.isPlaying) ? 'block' : 'none';
-                    document.getElementById('btn-reload').style.display = (data.isPlaying && data.canReload) ? 'block' : 'none';
-                } else {
-                    specialCtrl.style.display = 'none';
-                    var isSabotageVisible = (!isMyTurn && data.isPlaying && (!data.turnPhase || data.turnPhase === 'NORMAL') && !data.revealed);
-                    sabotageCtrl.style.display = isSabotageVisible ? 'block' : 'none';
-                    if (sabotageStatusMsg) sabotageStatusMsg.style.display = isSabotageVisible ? 'none' : 'block';
-
-                    let jLevel = data.joputismoLevel || 0;
-                    var btnMute = document.getElementById('btn-sabotage-mute');
-                    if (btnMute) { btnMute.style.display = 'flex'; btnMute.disabled = (data.myTokens < 1); }
-                    var btnBet = document.getElementById('btn-sabotage-bet');
-                    if (btnBet) {
-                        btnBet.style.display = 'flex';
-                        btnBet.disabled = (data.myTokens < 3);
-                    }
-
-                    let disp1 = jLevel >= 1 ? 'flex' : 'none';
-                    if (document.getElementById('btn-sabotage-buzzer')) { document.getElementById('btn-sabotage-buzzer').style.display = disp1; document.getElementById('btn-sabotage-buzzer').disabled = (data.myTokens < 1); }
-                    if (document.getElementById('btn-sabotage-veto')) { document.getElementById('btn-sabotage-veto').style.display = disp1; document.getElementById('btn-sabotage-veto').disabled = (data.myTokens < 1); }
-                    if (document.getElementById('btn-sabotage-panic')) { document.getElementById('btn-sabotage-panic').style.display = disp1; document.getElementById('btn-sabotage-panic').disabled = (data.myTokens < 2); }
-                    if (document.getElementById('btn-sabotage-fog')) { document.getElementById('btn-sabotage-fog').style.display = disp1; document.getElementById('btn-sabotage-fog').disabled = (data.myTokens < 2); }
-
-                    let disp2 = jLevel >= 2 ? 'flex' : 'none';
-                    if (document.getElementById('btn-sabotage-skip')) { document.getElementById('btn-sabotage-skip').style.display = disp2; document.getElementById('btn-sabotage-skip').disabled = (data.myTokens < 3); }
-                    if (document.getElementById('btn-sabotage-panic')) { document.getElementById('btn-sabotage-panic').style.display = disp2; document.getElementById('btn-sabotage-panic').disabled = (data.myTokens < 2); }
-                    if (document.getElementById('btn-sabotage-fog')) { document.getElementById('btn-sabotage-fog').style.display = disp2; document.getElementById('btn-sabotage-fog').disabled = (data.myTokens < 2); }
-                    if (document.getElementById('btn-sabotage-steal-token')) { document.getElementById('btn-sabotage-steal-token').style.display = disp2; document.getElementById('btn-sabotage-steal-token').disabled = (data.myTokens < 4); }
-                    if (document.getElementById('btn-sabotage-steal-turn')) { document.getElementById('btn-sabotage-steal-turn').style.display = disp2; document.getElementById('btn-sabotage-steal-turn').disabled = (data.myTokens < 4); }
-                    if (document.getElementById('btn-sabotage-blackhole')) { document.getElementById('btn-sabotage-blackhole').style.display = disp2; document.getElementById('btn-sabotage-blackhole').disabled = (data.myTokens < 5); }
-                    if (document.getElementById('btn-sabotage-russian-roulette')) {
-                         document.getElementById('btn-sabotage-russian-roulette').style.display = 'flex';
-                         document.getElementById('btn-sabotage-russian-roulette').disabled = (data.myTokens < 2);
-                    }
-                }
-
-                // DUEL PHASE HANDLING
-                var duelModeUi = document.getElementById('duel-mode-ui');
-                var duelAnnouncement = document.getElementById('duel-announcement');
-                var duelFeedback = document.getElementById('duel-feedback-popup');
-
-                if (data.turnPhase === 'DUEL' && data.currentDuel) {
-                    // Mostrar anuncio global si acaba de empezar (y no lo hemos visto aún para este duelo)
-                    var duelId = data.currentDuel.challenger + "_" + data.currentDuel.target;
-                    if (window.lastDuelId !== duelId) {
-                        window.lastDuelId = duelId;
-                        var p1 = data.players ? data.players.find(x => x.id === data.currentDuel.challenger) : null;
-                        var p2 = data.players ? data.players.find(x => x.id === data.currentDuel.target) : null;
-                        document.getElementById('duel-opponent-names').innerHTML = `
-                            <div class="player-name">${p1 ? p1.name : '???'}</div>
-                            <div class="vs">VS</div>
-                            <div class="player-name">${p2 ? p2.name : '???'}</div>
-                        `;
-                        duelAnnouncement.style.display = 'flex';
-                        setTimeout(() => { duelAnnouncement.style.display = 'none'; }, 4000);
-                    }
-
-                    var isParticipant = (data.currentDuel.challenger === myId || data.currentDuel.target === myId);
-                    if (isParticipant) {
-                        // AUTO-SWITCH TO GAME TAB
-                        var gameTabBtn = document.querySelector('.tab-btn[onclick*="tab-game"]');
-                        if (gameTabBtn && !gameTabBtn.classList.contains('active')) {
-                            switchTab('tab-game', gameTabBtn);
-                        }
-
-                        normalCardContainer.style.display = 'none';
-                        normalCollection.style.display = 'none';
-                        kingModeUi.style.display = 'none';
-                        duelModeUi.style.display = 'flex';
-                        
-                        // Si ya contesté, ocultar input y mostrar espera
-                        var hasAnswered = (data.currentDuel.challenger === myId && data.currentDuel.challengerYear !== null) || 
-                                         (data.currentDuel.target === myId && data.currentDuel.targetYear !== null);
-                        if (hasAnswered) {
-                            document.getElementById('duel-year-input').style.display = 'none';
-                            document.querySelector('#duel-mode-ui button').style.display = 'none';
-                            document.getElementById('duel-wait-msg').style.display = 'block';
-                        } else {
-                            document.getElementById('duel-year-input').style.display = 'block';
-                            document.querySelector('#duel-mode-ui button').style.display = 'block';
-                            document.getElementById('duel-wait-msg').style.display = 'none';
-                        }
-                    } else {
-                        if (duelModeUi) duelModeUi.style.display = 'none';
-                    }
-                } else {
-                    if (duelModeUi) duelModeUi.style.display = 'none';
-                    // Resetear lastDuelId cuando no hay duelo
-                    if (!data.currentDuel) window.lastDuelId = null;
-                }
-
-                // MOSTRAR FEEDBACK CABRÓN AL FINALIZAR
-                if (data.duelResult && !window.feedbackShown) {
-                    if (data.duelResult.winnerId === myId) {
-                        document.getElementById('duel-result-title').innerText = "¡HAS GANADO EL DUELO!";
-                        document.getElementById('duel-result-title').style.color = "var(--neon)";
-                        document.getElementById('duel-result-msg').innerText = data.duelResult.winnerMsg;
-                        duelFeedback.className = "duel-feedback";
-                        duelFeedback.style.display = "block";
-                        window.feedbackShown = true;
-                    } else if (data.duelResult.loserId === myId) {
-                        document.getElementById('duel-result-title').innerText = "¡HAS PERDIDO EL DUELO!";
-                        document.getElementById('duel-result-title').style.color = "#ff0055";
-                        document.getElementById('duel-result-msg').innerText = data.duelResult.loserMsg;
-                        duelFeedback.className = "duel-feedback lose";
-                        duelFeedback.style.display = "block";
-                        window.feedbackShown = true;
-                    }
-                }
-                if (!data.duelResult) window.feedbackShown = false;
-
-                var wm = document.getElementById('wait-msg');
-                var startBtn = document.getElementById('host-start-game-btn');
-                if (!data.gameStarted && data.judgeId === 'ALL') {
-                    wm.style.display = 'none';
-                    if(startBtn) startBtn.style.display = 'block';
-                } else {
-                    if(startBtn) startBtn.style.display = 'none';
-                    if (!isMyTurn && !isKingMode) {
-                        wm.style.display = 'block';
-                        wm.innerText = "ESPERANDO SIGUIENTE TRACK...";
-                    } else {
-                        wm.style.display = 'none';
-                    }
-                }
-
-                if (data.revealed && !isKingMode) {
-                    document.getElementById('card').classList.add('flipped');
-                    document.getElementById('c-artist').innerText = data.currentTrack.artist || "";
-                    document.getElementById('c-song').innerText = data.currentTrack.song || "";
-                    document.getElementById('c-year').innerText = data.currentTrack.year || "";
-                } else {
-                    document.getElementById('card').classList.remove('flipped');
-                }
-
-                if (!isKingMode) {
-                    if (isMyTurn) {
-                        document.getElementById('inventory-title').innerText = "MIS CARTAS (MARCA TU APUESTA)";
-                    } else {
-                        document.getElementById('inventory-title').innerText = "CRONOLOGÍA DE " + data.activePlayer.name;
-                    }
-
-                    if (isMyTurn) {
-                        if (data.myCards) {
-                            var h = "";
-                            var isSingleCard = (data.myCards.length === 1);
-                            if (isSingleCard) h += '<div style="font-size:0.8em; color:var(--neon); text-align:center; font-family:\'Bungee\'; margin-bottom:5px;">↑ ANTES ↑</div>';
-                            h += renderBetSlot(0, data.currentBets, data.activeGuess, true);
-                            data.myCards.forEach(function (year, idx) {
-                                var displayYear = (data.isFogActive) ? "????" : year;
-                                h += '<div class="card-row">' + displayYear + '</div>';
-                                h += renderBetSlot(idx + 1, data.currentBets, data.activeGuess, true);
-                            });
-                            if (isSingleCard) h += '<div style="font-size:0.8em; color:var(--neon); text-align:center; font-family:\'Bungee\'; margin-top:5px;">↓ DESPUÉS ↓</div>';
-                            document.getElementById('my-cards-list').innerHTML = h;
-                        }
-                    } else {
-                        if (data.activeTimeline) {
-                            var h = "";
-                            var isSingleCard = (data.activeTimeline.length === 1);
-                            if (isSingleCard) h += '<div style="font-size:0.8em; color:var(--neon); text-align:center; font-family:\'Bungee\'; margin-bottom:5px;">↑ ANTES ↑</div>';
-                            h += renderBetSlot(0, data.currentBets, data.activeGuess, false);
-                            data.activeTimeline.forEach(function (year, idx) {
-                                h += '<div class="card-row" style="border-color: #444; color: #888;">' + year + '</div>';
-                                h += renderBetSlot(idx + 1, data.currentBets, data.activeGuess, false);
-                            });
-                            if (isSingleCard) h += '<div style="font-size:0.8em; color:var(--neon); text-align:center; font-family:\'Bungee\'; margin-top:5px;">↓ DESPUÉS ↓</div>';
-                            document.getElementById('my-cards-list').innerHTML = h;
-                        }
-                    }
-
-                }
-
-                if (data.myTokens !== undefined) {
-                    var chipsHtml = "";
-                    for (var i = 0; i < data.myTokens; i++) chipsHtml += '<span class="neon-chip"></span>';
-                    document.getElementById('my-tokens-ui').innerHTML = "MIS FICHAS: " + chipsHtml;
-                    var isActionLocked = (data.activeGuess !== null);
-
-                    document.getElementById('btn-autowin').disabled = (data.myTokens < 3 || isActionLocked);
-                    document.getElementById('btn-reload').disabled = (data.myTokens < 1 || data.canReload === false || isActionLocked);
-                    
-                    var isMuteCooldown = typeof sabotageCooldowns !== 'undefined' && Date.now() < (sabotageCooldowns['SABOTAGE_MUTE'] || 0);
-                    var isBuzzerCooldown = typeof sabotageCooldowns !== 'undefined' && Date.now() < (sabotageCooldowns['SABOTAGE_BUZZER'] || 0);
-                    var isVetoCooldown = typeof sabotageCooldowns !== 'undefined' && Date.now() < (sabotageCooldowns['SABOTAGE_VETO'] || 0);
-
-                    document.getElementById('btn-sabotage-mute').disabled = (isActionLocked || isMuteCooldown);
-                    document.getElementById('btn-sabotage-buzzer').disabled = (isActionLocked || isBuzzerCooldown);
-                    document.getElementById('btn-sabotage-veto').disabled = (data.myTokens < 1 || isActionLocked || isVetoCooldown);
-                    
-                    var btnDuel = document.getElementById('btn-sabotage-duel');
-                    if (btnDuel) {
-                        btnDuel.disabled = (data.myTokens < 3 || isActionLocked || data.duelTriggered || data.turnPhase === 'DUEL');
-                        if (data.duelTriggered) {
-                            btnDuel.style.opacity = '0.5';
-                            btnDuel.innerText = "DUELO INICIADO";
-                        } else {
-                            btnDuel.style.opacity = '1';
-                            btnDuel.innerHTML = '🔥 DUELO 🔥 (1 <span class="neon-chip" style="width:10px;height:10px; background:var(--gold);"></span>)';
-                        }
-                    }
-
-                    var btnSkip = document.getElementById('btn-sabotage-skip');
-                    if (btnSkip) btnSkip.disabled = (data.myTokens < 1 || isActionLocked);
-
-                    document.getElementById('btn-sabotage-panic').disabled = (data.myTokens < 2 || data.panicActive || isActionLocked);
-                    document.getElementById('btn-sabotage-fog').disabled = (data.myTokens < 2 || data.isFogActive || isActionLocked);
-
-                    var btnStealToken = document.getElementById('btn-sabotage-steal-token');
-                    if (btnStealToken) btnStealToken.disabled = (data.myTokens < 4 || isActionLocked);
-
-                    var btnStealTurn = document.getElementById('btn-sabotage-steal-turn');
-                    if (btnStealTurn) btnStealTurn.disabled = (data.myTokens < 4 || isActionLocked);
-
-                    // Panic Overlay Check
-                    var isMyTurn = (data.activePlayer && data.activePlayer.id === myId);
-                    // Panic Overlay Check
-                    var panicOverlay = document.getElementById('panic-overlay');
-                    if (data.panicActive && isMyTurn) {
-                        panicOverlay.style.display = 'flex';
-                        document.getElementById('panic-timer').innerText = data.panicTimer;
-                        // V26 FIX: El overlay NO debe bloquear clics, es solo visual
-                        panicOverlay.style.pointerEvents = 'none';
-                        if (data.panicTimer > 5) {
-                            panicOverlay.style.background = 'rgba(255,0,0,0.85)';
-                        } else {
-                            panicOverlay.style.background = 'transparent';
-                        }
-                        if (data.panicTimer <= 3) document.getElementById('panic-timer').style.color = '#ff0000';
-                        else document.getElementById('panic-timer').style.color = 'white';
-                    } else {
-                        panicOverlay.style.display = 'none';
-                        panicOverlay.style.background = 'rgba(255,0,0,0.85)';
-                        document.getElementById('panic-timer').style.color = 'white';
-                    }
-
-                    // FOG OVERLAY CHECK (V79)
-                    var fogOverlay = document.getElementById('fog-overlay');
-                    if (data.isFogActive && isMyTurn) {
-                        fogOverlay.style.display = 'block';
-                    } else {
-                        fogOverlay.style.display = 'none';
-                    }
-
-                    var btnSabotageBet = document.getElementById('btn-sabotage-bet');
-                    var btnSabotageBetFor = document.getElementById('btn-sabotage-bet-for');
-                    var alreadyBetAgainst = data.bettingAgainst && data.bettingAgainst.includes(myId);
-                    var alreadyBetFor = data.bettingFor && data.bettingFor.includes(myId);
-                    var hasBetAny = alreadyBetAgainst || alreadyBetFor;
-
-                    if (btnSabotageBet) {
-                        btnSabotageBet.disabled = (data.myTokens < 1 || hasBetAny);
-                        if (hasBetAny || data.myTokens < 1) {
-                            btnSabotageBet.style.opacity = '0.5';
-                            if (alreadyBetAgainst) btnSabotageBet.innerText = "APUESTA HECHA";
-                            else if (alreadyBetFor) btnSabotageBet.innerText = "BLOQUEADO";
-                        } else {
-                            btnSabotageBet.style.opacity = '1';
-                            btnSabotageBet.innerHTML = '¡NI DE COÑA! (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)';
-                        }
-                    }
-                    if (btnSabotageBetFor) {
-                        btnSabotageBetFor.disabled = (data.myTokens < 1 || hasBetAny);
-                        if (hasBetAny || data.myTokens < 1) {
-                            btnSabotageBetFor.style.opacity = '0.5';
-                            if (alreadyBetFor) btnSabotageBetFor.innerText = "APUESTA HECHA";
-                            else if (alreadyBetAgainst) btnSabotageBetFor.innerText = "BLOQUEADO";
-                        } else {
-                            btnSabotageBetFor.style.opacity = '1';
-                            btnSabotageBetFor.innerHTML = '¡ESTOY CONTIGO! (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)';
-                        }
-                    }
-                }
-                    lastState = data;
-                } catch (err) {
-                    console.error("CRITICAL UI ERROR:", err);
-                    var errDiv = document.getElementById('debug-error-box');
-                    if (!errDiv) {
-                        errDiv = document.createElement('div');
-                        errDiv.id = 'debug-error-box';
-                        errDiv.style = 'position:fixed; top:0; left:0; width:100%; background:rgba(255,0,0,0.9); color:white; padding:15px; font-family:monospace; z-index:99999; font-size:12px; word-break:break-all; text-align:left;';
-                        document.body.appendChild(errDiv);
-                    }
-                    errDiv.innerHTML = '<b>⚠️ ERROR DE RENDERIZADO:</b><br>' + err.message + '<br><br><small>' + err.stack.substring(0, 200) + '...</small><br><br><button onclick="this.parentElement.remove()" style="background:white; color:red; border:none; padding:5px 10px; border-radius:5px;">CERRAR</button>';
-                }
+                lastState = data;
+                updateUI(data);
             }
         }
 
-        function renderBetSlot(idx, bets, activeGuess, amIActive) {
-            var occupants = [];
-            var imIn = false;
-            var isTakenByOther = false;
-            for (var pid in bets) {
-                if (bets[pid] == idx) {
-                    if (pid === myId) imIn = true;
-                    else isTakenByOther = true;
-                    occupants.push(pid === myId ? "YO" : "?");
-                }
+        function updateUI(state) {
+            if (state.leader) {
+                document.getElementById('leaderboard-info').innerHTML = `LÍDER: ${state.leader.name} (${state.leader.score}) | YO: ${state.myCards ? state.myCards.length : 0}`;
             }
+            document.getElementById('turn-status').innerText = "TURNO DE: " + (state.activePlayer ? state.activePlayer.name : "---");
+            
+            var chipsHtml = ""; for (var i = 0; i < (state.myTokens || 0); i++) chipsHtml += '<span class="neon-chip"></span>';
+            document.getElementById('my-tokens-ui').innerHTML = "FICHAS: " + chipsHtml;
 
-            var isGuess = (activeGuess == idx);
-            var cls = "bet-slot";
-
-            if (isGuess) cls += " active-guess";
-            if (occupants.length > 0) cls += " occupied";
-            if (imIn) cls += " my-bet";
-
-            // Bloqueo: si el hueco está pillado por el activo (y no soy yo) o por otro desafiante
-            var blockedForMe = false;
-            if (!amIActive && isGuess) blockedForMe = true;
-            if (isTakenByOther) blockedForMe = true;
-            // El activo no puede pisar a un desafiante
-            if (amIActive && isTakenByOther) blockedForMe = true;
-
-            if (blockedForMe) cls += " blocked";
-
-            var label = "";
-            if (isGuess) label = "X";
-            else if (imIn) label = "YO";
-            else if (isTakenByOther) label = "🔘";
-
-            return '<div class="' + cls + '" onclick="interactuarSlot(' + idx + ', ' + amIActive + ', ' + isGuess + ', ' + isTakenByOther + ')">' + label + '</div>';
-        }
-
-        function interactuarSlot(idx, amIActive, isGuess, isTakenByOther) {
-            if (isTakenByOther) {
-                showCustomAlert("¡Este hueco ya lo ha pillado otro jugador!");
-                return;
-            }
-            if (amIActive) {
-                if (lastState && lastState.activeGuess !== null) {
-                    showCustomAlert("Ya has marcado tu adivinanza de año. Espera la resolución.");
-                    return;
-                }
-                showCustomConfirm("¿Marcar este hueco como tu apuesta para el año de la canción?", function (confirmed) {
-                    if (confirmed) send('GUESS', idx);
-                });
+            var isMyTurn = (state.activePlayer && state.activePlayer.id && myId && state.activePlayer.id.toLowerCase() === myId.toLowerCase());
+            var isKingMode = (state.turnPhase && state.turnPhase !== 'NORMAL');
+            
+            if (state.revealed && state.currentTrack && !isKingMode) {
+                document.getElementById('card').classList.add('flipped');
+                document.getElementById('c-artist').innerText = state.currentTrack.artist || "";
+                document.getElementById('c-song').innerText = state.currentTrack.song || "";
+                document.getElementById('c-year').innerText = state.currentTrack.year || "";
             } else {
-                // REGLA: Solo se puede apostar si el jugador activo YA ha puesto su carta
-                if (lastState && lastState.activeGuess === null) {
-                    showCustomAlert("Espera a que el jugador activo coloque primero su apuesta.");
-                    return;
-                }
-                if (isGuess) {
-                    showCustomAlert("¡Ese hueco ya lo ha elegido el jugador activo! Elige otro sitio para tu apuesta.");
-                    return;
-                }
-                console.log("Rival intentando apostar en:", idx);
-                showCustomConfirm("¿Seguro que quieres RETAR A DUELO en este hueco (Coste: 2 Fichas)?", function (confirmed) {
-                    if (confirmed) send('BET', idx);
-                });
-            }
-        }
-
-        // CHEAT SYSTEM
-        function initCheatSystem() {
-            var auth = ['xavi', 'mimi', 'sonia'];
-            var pName = playerName.toLowerCase();
-            if (!auth.includes(pName)) return;
-
-            console.log("Cheat System Initialized for", pName);
-
-            // Mechanic 1: Peek at the card (Hold)
-            var card = document.getElementById('card');
-
-            function isMyTurn() {
-                return lastState && lastState.activePlayer && lastState.activePlayer.id === myId;
+                document.getElementById('card').classList.remove('flipped');
             }
 
-            function startPeek(e) {
-                // Peek allowed if cheats are enabled, it's not our turn (or king mode), and we have track data
-                if (lastState && lastState.cheatsEnabled !== false && (!isMyTurn() || (lastState.turnPhase && lastState.turnPhase !== 'NORMAL')) && lastState.currentTrack) {
-                    if (e && e.preventDefault) e.preventDefault(); // Prevent text selection
-                    document.getElementById('card').classList.add('flipped');
-                    document.getElementById('c-artist').innerText = lastState.currentTrack.artist || "";
-                    document.getElementById('c-song').innerText = lastState.currentTrack.song || "";
-                    document.getElementById('c-year').innerText = lastState.currentTrack.year || "";
-                }
-            }
-
-            function stopPeek(e) {
-                if (lastState && !lastState.revealed && !lastState.turnPhase?.includes('GUESS_RESULT')) {
-                    document.getElementById('card').classList.remove('flipped');
-                }
-            }
-
-            // Touch events for mobile, mouse events for desktop
-            card.addEventListener('touchstart', startPeek, { passive: false });
-            card.addEventListener('touchend', stopPeek);
-            card.addEventListener('touchcancel', stopPeek);
-            card.addEventListener('mousedown', startPeek);
-            card.addEventListener('mouseup', stopPeek);
-            card.addEventListener('mouseleave', stopPeek);
-
-            // Mechanic 2: Toggle Master Cheat (Xavi Only via Timeline tap)
-            if (pName === 'xavi') {
-                var container = document.getElementById('my-cards-list');
-                // Use event delegation for tapping the first timeline year
-                container.addEventListener('click', function (e) {
-                    var targetRow = e.target.closest('.card-row');
-                    // Si ha pulsado el texto de un año en la cronología rival
-                    if (targetRow) {
-                        var rows = container.querySelectorAll('.card-row');
-                        // Verificamos que sea la primera carta (index 0) y que no sea el turno de xavi
-                        if (rows.length > 0 && targetRow === rows[0] && !isMyTurn) {
-                            console.log("Xavi toggling master cheat via timeline tap");
-                            targetRow.style.color = (lastState && lastState.cheatsEnabled) ? 'red' : 'green';
-                            setTimeout(() => { targetRow.style.color = '#888'; }, 500);
-                            send('TOGGLE_CHEAT');
-                        }
-                    }
-                });
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', function () {
-            var msgs = {
-                'btn-sabotage-buzzer': '¡Zumbido enviado al DJ!',
-                'btn-sabotage-veto': '¡Has vetado su recarga!',
-                'btn-sabotage-panic': '¡Ataque de Pánico enviado!',
-                'btn-sabotage-fog': '¡Niebla Temporal enviada!',
-                'btn-sabotage-steal-token': '¡Has robado una ficha (al azar)!',
-                'btn-sabotage-steal-turn': '¡Has robado el turno!',
-                'btn-sabotage-blackhole': '¡Agujero Negro lanzado!'
-            };
-            for (var id in msgs) {
-                var b = document.getElementById(id);
-                if (b) {
-                    b.addEventListener('click', (function (msg) {
-                        return function () { showCustomAlert(msg); }
-                    })(msgs[id]));
-                }
-            }
-        });
-
-        function switchTab(tabId, el) {
-            document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(tabId).style.display = 'flex';
-            el.classList.add('active');
-        }
-
-        function sendDuelGuess() {
-            var year = document.getElementById('duel-year-input').value;
-            if (year && year.length >= 4) {
-                // Sonido de disparo local para feedback inmediato
-                try {
-                    new Audio('https://www.myinstants.com/media/sounds/pistol-shot.mp3').play();
-                } catch(e){}
-                
-                send('DUEL_GUESS', year);
-                document.getElementById('duel-year-input').style.display = 'none';
-                document.querySelector('#duel-mode-ui button').style.display = 'none';
-                document.getElementById('duel-wait-msg').style.display = 'block';
+            document.getElementById('tab-game').style.display = 'flex';
+            const normalContainer = document.getElementById('card').parentElement;
+            const kingUi = document.getElementById('king-mode-ui');
+            
+            if (isKingMode) {
+                normalContainer.style.display = 'none';
+                kingUi.style.display = 'flex';
+                renderKingMode(state, isMyTurn);
             } else {
-                showCustomAlert("Introduce un año válido");
+                normalContainer.style.display = 'flex';
+                kingUi.style.display = 'none';
             }
+
+            document.getElementById('btn-autowin').style.display = (isMyTurn && !state.isPlaying && !state.revealed) ? 'block' : 'none';
+            document.getElementById('btn-reload').style.display = (isMyTurn && state.isPlaying && state.canReload && !state.revealed) ? 'block' : 'none';
+            
+            document.getElementById('sabotage-ctrl').style.display = (!isMyTurn && state.isPlaying && !state.revealed && !isKingMode) ? 'block' : 'none';
+            document.getElementById('sabotage-status-msg').style.display = (isMyTurn || !state.isPlaying || state.revealed || isKingMode) ? 'block' : 'none';
+
+            if (state.judgeId === 'ALL' || (state.judgeId && myId && state.judgeId.toLowerCase() === myId.toLowerCase())) {
+                document.getElementById('fab-remote').style.display = 'flex';
+                renderRemote(state);
+            } else {
+                document.getElementById('fab-remote').style.display = 'none';
+                document.getElementById('remote-overlay').style.display = 'none';
+            }
+
+            renderTimeline(state, isMyTurn);
         }
-    </script>
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js').then(reg => {
-                    reg.addEventListener('updatefound', () => {
-                        const newWorker = reg.installing;
-                        newWorker.addEventListener('statechange', () => {
-                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                window.location.reload();
-                            }
-                        });
+
+        function renderKingMode(state, isMyTurn) {
+            const kingUi = document.getElementById('king-mode-ui');
+            if (state.turnPhase === 'KING_SELECTION') {
+                if (isMyTurn) kingUi.innerHTML = "<p>ERES EL REY. ESPERANDO CARTA...</p>";
+                else {
+                    let h = "<h3>¡ELIGE CARTA PARA EL REY!</h3>";
+                    if (state.kingOptions) state.kingOptions.forEach((o, i) => {
+                        h += `<button class='btn' style='margin-bottom:10px; font-size:0.8em; padding:10px;' onclick="send('KING_SELECT_CARD', ${i})">${o.artist} - ${o.song} (${o.year})</button>`;
                     });
-                });
-            });
-
-            let refreshing = false;
-            navigator.serviceWorker.addEventListener('controllerchange', () => {
-                if (!refreshing) {
-                    window.location.reload();
-                    refreshing = true;
+                    kingUi.innerHTML = h;
                 }
+            } else if (state.turnPhase === 'KING_GUESS') {
+                if (isMyTurn) {
+                    kingUi.innerHTML = `<h3>¿AÑO?</h3><input type='number' id='kg' placeholder='AÑO'><button class='btn' onclick="send('KING_GUESS', document.getElementById('kg').value)">ENVIAR</button>`;
+                } else kingUi.innerHTML = "<p>EL REY ESTÁ ADIVINANDO...</p>";
+            } else if (state.turnPhase === 'KING_GUESS_RESULT') {
+                kingUi.innerHTML = `<h3>RESULTADO: ${state.currentTrack.year}</h3><p>${state.currentTrack.artist} - ${state.currentTrack.song}</p>`;
+            }
+        }
+
+        function renderRemote(state) {
+            let c = document.getElementById('remote-controls-container');
+            let h = "";
+            if (!state.gameStarted) h = `<button class='btn' onclick="send('REMOTE_START_GAME')">INICIAR PARTIDA</button>`;
+            else if (state.turnPhase === 'DUEL') h = `<button class='btn' onclick="send('REMOTE_NEXT_TURN')">SALTAR DUELO</button>`;
+            else if (!state.revealed) h = `<button class='btn' onclick="send('REMOTE_REVEAL')">REVELAR</button>`;
+            else h = `<button class='btn' onclick="send('REMOTE_CORRECT')">✅ SÍ</button><button class='btn' style='background:var(--accent); margin-top:10px;' onclick="send('REMOTE_INCORRECT')">❌ NO</button><button class='btn' style='background:#555; margin-top:10px;' onclick="send('REMOTE_NEXT_TURN')">SALTAR</button>`;
+            c.innerHTML = h;
+        }
+
+        function renderTimeline(state, isMyTurn) {
+            const list = document.getElementById('my-cards-list');
+            const cards = isMyTurn ? state.myCards : state.activeTimeline;
+            if (!cards) return;
+            let h = "";
+            h += renderSlot(0, state);
+            cards.forEach((y, i) => {
+                h += `<div class='card-row'>${y}</div>`;
+                h += renderSlot(i + 1, state);
             });
+            list.innerHTML = h;
+        }
+
+        function renderSlot(idx, state) {
+            const isActive = (state.activeGuess === idx);
+            const isOccupied = state.currentBets && state.currentBets.some(b => b.position === idx);
+            return `<div class="bet-slot ${isActive ? 'active-guess' : ''} ${isOccupied ? 'occupied' : ''}" onclick="send('PLACE_BET', ${idx})">${isActive ? '✔' : (isOccupied ? '●' : '+')}</div>`;
+        }
+
+        function showCustomAlert(msg) {
+            document.getElementById('custom-alert-msg').innerText = msg;
+            document.getElementById('custom-alert').style.display = 'flex';
+        }
+
+        function handleCooldownSabotage(action, btnId) {
+            if (Date.now() < sabotageCooldowns[action]) return;
+            send(action);
+            var duration = 5 * 60 * 1000; sabotageCooldowns[action] = Date.now() + duration;
+            var btn = document.getElementById(btnId); if (!btn) return;
+            var iv = setInterval(function () {
+                var remaining = sabotageCooldowns[action] - Date.now();
+                if (remaining <= 0) {
+                    clearInterval(iv); btn.innerHTML = btnOriginalText[btnId]; btn.disabled = false;
+                } else {
+                    var secs = Math.ceil(remaining / 1000);
+                    btn.innerHTML = 'ESPERA (' + Math.floor(secs/60) + ':' + (secs%60).toString().padStart(2,'0') + ')';
+                    btn.disabled = true;
+                }
+            }, 1000);
         }
     </script>
 </body>
-
 </html>
-
