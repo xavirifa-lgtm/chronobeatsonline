@@ -877,6 +877,44 @@
                 <li style="margin-bottom:8px;"><strong style="color:#00ff00;">¡ZUMBIDO! (1🔵):</strong> Ruido molesto para despistar.</li>
                 <li style="margin-bottom:8px;"><strong style="color:#ff8800;">VETO CAMBIAR (1🔵):</strong> Bloquea su botón de recarga.</li>
                 <li style="margin-bottom:8px;"><strong style="color:#ff0000;">PÁNICO 10s (2🔵):</strong> Solo tiene 10 segundos para elegir.</li>
+</style>
+</head>
+
+<body>
+    <!-- FAB REGLAMENTO -->
+    <div id="fab-rules" onclick="toggleRules()"
+        style="display:flex; position:fixed; top:80px; left:20px; width:50px; height:50px; background:#111; border:2px solid var(--neon); border-radius:50%; z-index:9000; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 0 10px rgba(0,242,255,0.5); font-size:1.5em; transition:0.3s; color:var(--neon); font-family:'Bungee';">
+        ?
+    </div>
+
+    <!-- MANDO DEL HOST (REMOTE) -->
+    <div id="fab-remote" onclick="toggleRemote()"
+        style="display:none; position:fixed; top:20px; right:20px; width:50px; height:50px; background:#111; border:2px solid #555; border-radius:50%; z-index:9000; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 0 10px rgba(0,0,0,0.5); font-size:1.5em; filter:grayscale(100%); transition:0.3s; opacity:0.5; pointer-events:none;">
+        📺
+    </div>
+
+    <div id="rules-overlay"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:9500; align-items:center; justify-content:flex-start; flex-direction:column; padding:20px; text-align:left; overflow-y:auto;">
+        <h2
+            style="font-family:'Bungee'; color:var(--neon); margin-bottom:10px; font-size:2em; text-align:center; width:100%; margin-top:20px;">
+            📖 REGLAS</h2>
+        <div
+            style="color:#ddd; font-family:'Montserrat'; font-size:0.9em; max-width:400px; width:100%; line-height:1.5;">
+            <p><strong style="color:var(--neon);">OBJETIVO:</strong> Coloca las canciones en el orden correcto en tu cronología. Gana quien llegue a 10 cartas.</p>
+            <p><strong style="color:var(--neon);">TURNO NORMAL:</strong> Escucha la canción y colócala en tu cronología personal.</p>
+            <p><strong style="color:var(--gold);">FICHAS AZULES (🔵):</strong> Sirven para sabotear. Se ganan al acertar en un Duelo, por bonos del Host o en el Mercado.</p>
+            <p><strong style="color:var(--accent);">¡NI DE COÑA! (1🔵):</strong> Apuesta contra el jugador activo si crees que se equivoca. Si falla, ganas +3 fichas.</p>
+            <p><strong style="color:#00ff88;">¡ESTOY CONTIGO! (1🔵):</strong> Apuesta a favor del jugador activo si crees que va a acertar. Si acierta, ganas +3 fichas.</p>
+            <p><strong style="color:var(--gold);">DUELOS (1🔵):</strong> Reta a un rival a un duelo Western 🔫. Introducid el año a ciegas. Quien esté más cerca gana la carta. (Requiere 3🔵 para disparar: 1 de coste + 2 de garantía).</p>
+
+            <h3
+                style="color:var(--neon); font-family:'Bungee'; margin-top:20px; border-bottom:1px solid #333; padding-bottom:5px;">
+                SABOTAJES (MERCADO NEGRO)</h3>
+            <ul style="padding-left:15px; margin-top:10px;">
+                <li style="margin-bottom:8px;"><strong style="color:#ff0055;">MUTE 15s (1🔵):</strong> Silencia su música.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#00ff00;">¡ZUMBIDO! (1🔵):</strong> Ruido molesto para despistar.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#ff8800;">VETO CAMBIAR (1🔵):</strong> Bloquea su botón de recarga.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#ff0000;">PÁNICO 10s (2🔵):</strong> Solo tiene 10 segundos para elegir.</li>
                 <li style="margin-bottom:8px;"><strong style="color:#aaaaaa;">NIEBLA TIEMPO (2🔵):</strong> Borra los años de su pantalla.</li>
                 <li style="margin-bottom:8px;"><strong style="color:#ff0055;">RULETA RUSA (2🔵):</strong> 50% éxito (robos) o 50% fallo (pierdes ficha).</li>
                 <li style="margin-bottom:8px;"><strong style="color:#ff00ff;">FORZAR SALTO (3🔵):</strong> Salta su canción automáticamente.</li>
@@ -888,30 +926,6 @@
         
         <button class="btn" onclick="if(confirm('¿Forzar actualización de caché? Se recargará la página.')){ caches.keys().then(names => { for (let name of names) caches.delete(name); }); location.reload(true); }" style="margin-top:10px; background:#ff0055 !important; color:white !important; border-color:#ff0055 !important; width:100% !important; max-width:300px !important; padding:10px !important; font-size:0.8em !important; box-shadow: 0 0 15px rgba(255,0,85,0.4) !important;">⚠️ FORZAR ACTUALIZACIÓN (BORRAR CACHÉ)</button>
 
-        <button class="btn" onclick="toggleRules()"
-            style="margin-top:30px; margin-bottom: 40px; background:#333; color:white; border-color:#555; width:100%; max-width:300px; padding:15px;">CERRAR
-            REGLAMENTO</button>
-    </div>
-
-    <div id="remote-overlay"
-        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:9500; align-items:center; justify-content:center; flex-direction:column; padding:20px; text-align:center;">
-        <h2 style="font-family:'Bungee'; color:var(--neon); margin-bottom:10px; font-size:2em;">📺 MANDO HOST</h2>
-        <p style="color:#aaa; font-family:'Montserrat'; margin-bottom:30px; font-size:0.9em; max-width:80%;">CONTROLA LA
-            PARTIDA DESDE TU MÓVIL</p>
-
-        <div id="remote-controls-container"
-            var el = document.getElementById('remote-overlay');
-            el.style.display = (el.style.display === 'none' || el.style.display === '') ? 'flex' : 'none';
-        }
-    </script>
-
-    <div id="panic-overlay"
-        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,0,0,0.85); z-index:9999; flex-direction:column; justify-content:center; align-items:center; text-align:center;">
-        <h1 style="color:white; font-family:'Bungee'; font-size:3em; margin:0; text-shadow:0 0 20px black;">¡PÁNICO!
-        </h1>
-        <div id="panic-timer"
-            style="color:white; font-family:'Bungee'; font-size:8em; margin:0; line-height:1; text-shadow:0 0 20px black;">
-            10</div>
         <p style="color:white; font-family:'Bungee'; font-size:1.5em; text-shadow:0 0 10px black;">¡COLOCA TU CARTA
             RÁPIDO!</p>
     </div>
