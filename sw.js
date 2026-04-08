@@ -1,7 +1,12 @@
-const CACHE_NAME = 'chronobeats-luxe-v119';
+const CACHE_NAME = 'chronobeats-luxe-v120';
 const ASSETS = [
   './',
   './index.html',
+  './indexchrono.html',
+  './indexchronoanime.html',
+  './indexchronomix.html',
+  './indexchronomovies.html',
+  './indexchronovideojuegos.html',
   './player_digital.html',
   './host_digital.html',
   './player_digital_anime.html',
