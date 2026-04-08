@@ -64,12 +64,14 @@
             justify-content: center;
             color: #666;
             font-family: 'Bungee';
-            font-size: 0.65em;
+            font-size: 0.7em; /* Un poco más grande */
             cursor: pointer;
             transition: 0.3s;
             border: none;
             background: none;
-            gap: 4px;
+            gap: 2px;
+            padding: 8px 0;
+            height: 100%;
         }
 
         .tab-btn.active {
@@ -163,19 +165,19 @@
 
         .music-controls {
             display: none;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
+            grid-template-columns: 1fr; /* Una sola columna para ocupar todo el ancho */
+            gap: 12px;
             width: 100%;
-            margin-bottom: 10px;
+            margin-bottom: 20px;
         }
 
         .skip-controls {
             display: none;
             grid-template-rows: repeat(2, 1fr);
             grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
+            gap: 12px;
             width: 100%;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
 
         .ctrl-btn {
@@ -193,6 +195,21 @@
         .btn-play {
             border-color: var(--neon);
             color: var(--neon);
+        }
+
+        .btn-play.playing {
+            background: var(--neon) !important;
+            color: #000 !important;
+            font-weight: 900 !important;
+            box-shadow: 0 0 30px var(--neon), inset 0 0 10px rgba(255,255,255,0.5) !important;
+            text-shadow: none !important;
+            animation: pulse-active 1.5s infinite;
+        }
+
+        @keyframes pulse-active {
+            0% { transform: scale(1); box-shadow: 0 0 20px var(--neon); }
+            50% { transform: scale(1.03); box-shadow: 0 0 40px var(--neon); }
+            100% { transform: scale(1); box-shadow: 0 0 20px var(--neon); }
         }
 
         .neon-chip {
@@ -274,13 +291,15 @@
         }
 
         .card-container {
-            flex: 0 0 280px;
+            height: 280px; /* Altura fija para evitar desplazamientos */
             perspective: 1000px;
             display: flex;
             align-items: center;
             justify-content: center;
             width: 100%;
-            margin-top: 25px;
+            margin: 10px 0;
+            position: relative;
+            flex-shrink: 0; /* No se encoge */
         }
 
         .card {
@@ -881,20 +900,6 @@
             PARTIDA DESDE TU MÓVIL</p>
 
         <div id="remote-controls-container"
-            style="display:flex; flex-direction:column; gap:15px; width:100%; max-width:300px;">
-            <!-- INJECTED BY JS -->
-        </div>
-
-        <button class="btn" onclick="toggleRemote()"
-            style="margin-top:40px; background:#333; color:white; border-color:#555;">CERRAR MANDO</button>
-    </div>
-
-    <script>
-        function toggleRules() {
-            var el = document.getElementById('rules-overlay');
-            el.style.display = (el.style.display === 'none' || el.style.display === '') ? 'flex' : 'none';
-        }
-        function toggleRemote() {
             var el = document.getElementById('remote-overlay');
             el.style.display = (el.style.display === 'none' || el.style.display === '') ? 'flex' : 'none';
         }
@@ -1327,7 +1332,21 @@
             confirmDialog.style.display = 'flex';
         }
 
+        // Wake Lock
+        let wakeLock = null;
+        async function requestWakeLock() {
+            try {
+                if ('wakeLock' in navigator) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                    console.log('Wake Lock Player activo');
+                }
+            } catch (err) {
+                console.error(`${err.name}, ${err.message}`);
+            }
+        }
+
         function conectar() {
+            requestWakeLock();
             var hostId = document.getElementById('host-id').value.toUpperCase().trim();
             hostId = hostId.replace('CB-HOST-', '').replace('CB-ANIME-HOST-', '').replace('CB-MOVIES-HOST-', '');
             playerName = document.getElementById('player-name').value.trim();
@@ -1701,14 +1720,10 @@
                     var btnPlayInfo = document.querySelector('.btn-play');
                     if (btnPlayInfo) {
                         if (data.isPlaying) {
-                            btnPlayInfo.style.background = 'var(--neon)';
-                            btnPlayInfo.style.color = '#000';
-                            btnPlayInfo.style.boxShadow = '0 0 15px var(--neon)';
+                            btnPlayInfo.classList.add('playing');
                             btnPlayInfo.innerText = "SONANDO...";
                         } else {
-                            btnPlayInfo.style.background = 'transparent';
-                            btnPlayInfo.style.color = 'var(--neon)';
-                            btnPlayInfo.style.boxShadow = 'none';
+                            btnPlayInfo.classList.remove('playing');
                             btnPlayInfo.innerText = "PLAY";
                         }
                     }

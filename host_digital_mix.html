@@ -6,14 +6,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon-192.png">
-    <meta name="theme-color" content="#ffffff">
-    <title>HOST - CHRONOBEATS TOTAL MIX</title>
+    <meta name="theme-color" content="#00f2ff">
+    <title>HOST - CHRONOBEATS MIX</title>
     <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://www.youtube.com/iframe_api"></script>
     <style>
         :root {
-            --neon: #00ff00;
+            --neon: #00ff00; /* Verde por defecto para MIX */
             --bg: #0d0d0d;
             --accent: #ff0055;
             --gold: #ffd700;
@@ -57,6 +58,7 @@
             grid-template-columns: repeat(3, 1fr);
             gap: 6px;
             width: 100%;
+            max-width: 320px;
             margin-top: 10px;
         }
 
@@ -66,6 +68,7 @@
             grid-template-columns: repeat(3, 1fr);
             gap: 4px;
             width: 100%;
+            max-width: 320px;
             margin-top: 5px;
         }
 
@@ -390,191 +393,7 @@
         .animate-flash {
             animation: gunshot-flash 0.4s ease-out forwards;
         }
-    
-        
-        
-        
-        /* --- ELITE-PREMIUM UI V1.6: AURORA & TEXTURE --- */
-        :root {
-            --glass: rgba(15, 15, 15, 0.5);
-            --glass-border: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0.2) 100%);
-            --aurora-1: hsla(180, 100%, 15%, 0.15);
-            --aurora-2: hsla(280, 100%, 15%, 0.15);
-            --aurora-3: hsla(220, 100%, 15%, 0.15);
-        }
-
-        body {
-            background: #020202 !important;
-            background-image: 
-                radial-gradient(circle at 20% 30%, var(--aurora-1), transparent 40%),
-                radial-gradient(circle at 80% 70%, var(--aurora-2), transparent 40%),
-                radial-gradient(circle at 50% 50%, var(--aurora-3), transparent 60%) !important;
-            background-attachment: fixed !important;
-            position: relative;
-            overflow-x: hidden;
-        }
-
-        body::before {
-            content: "";
-            position: fixed;
-            top: -50%; left: -50%; width: 200%; height: 200%;
-            background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.4) 100%);
-            animation: aurora-orbit 30s linear infinite;
-            z-index: -1;
-            pointer-events: none;
-        }
-
-        @keyframes aurora-orbit {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        /* Glass Grain Texture */
-        input, .collection-summary, .card-row, .modal-content, .btn-secondary, .ctrl-btn, .spec-btn, .sk-btn, .market-btn, #sabotage-grid .spec-btn, .tab-bar, .duel-mode-ui, #custom-alert > div, #custom-confirm > div, .card-face {
-            background: var(--glass) !important;
-            backdrop-filter: blur(25px) saturate(200%) !important;
-            -webkit-backdrop-filter: blur(25px) saturate(200%) !important;
-            border: 1px solid rgba(255,255,255,0.1) !important;
-            border-image: var(--glass-border) 1 !important;
-            position: relative;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.5) !important;
-        }
-
-        /* Grainy Overlay */
-        input::before, .collection-summary::before, .modal-content::before, .tab-bar::before, .card-face::before {
-            content: "";
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-            opacity: 0.03;
-            pointer-events: none;
-            mix-blend-mode: overlay;
-            border-radius: inherit;
-        }
-
-        /* Play Button Vibrancy Fix */
-        .btn-play.playing {
-            background: var(--neon) !important;
-            color: #000 !important;
-            font-weight: 900 !important;
-            box-shadow: 0 0 30px var(--neon), inset 0 0 10px rgba(255,255,255,0.5) !important;
-            text-shadow: none !important;
-            animation: pulse-active 1.5s infinite;
-        }
-
-        @keyframes pulse-active {
-            0% { transform: scale(1); box-shadow: 0 0 20px var(--neon); }
-            50% { transform: scale(1.03); box-shadow: 0 0 40px var(--neon); }
-            100% { transform: scale(1); box-shadow: 0 0 20px var(--neon); }
-        }
-
-        /* Bokeh Particles */
-        .bokeh {
-            position: fixed;
-            width: 10px; height: 10px;
-            background: white;
-            border-radius: 50%;
-            opacity: 0.1;
-            filter: blur(5px);
-            z-index: -1;
-            animation: float-bokeh 10s infinite ease-in-out;
-        }
-
-        @keyframes float-bokeh {
-            0% { transform: translate(0, 0); opacity: 0; }
-            50% { opacity: 0.2; }
-            100% { transform: translate(100px, -100px); opacity: 0; }
-        }
-
-        /* --- ELITE-PREMIUM UI V1.6: AURORA & TEXTURE --- */
-        :root {
-            --glass: rgba(15, 15, 15, 0.5);
-            --glass-border: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0.2) 100%);
-            --aurora-1: hsla(180, 100%, 15%, 0.15);
-            --aurora-2: hsla(280, 100%, 15%, 0.15);
-            --aurora-3: hsla(220, 100%, 15%, 0.15);
-        }
-
-        body {
-            background: #020202 !important;
-            background-image: 
-                radial-gradient(circle at 20% 30%, var(--aurora-1), transparent 40%),
-                radial-gradient(circle at 80% 70%, var(--aurora-2), transparent 40%),
-                radial-gradient(circle at 50% 50%, var(--aurora-3), transparent 60%) !important;
-            background-attachment: fixed !important;
-            position: relative;
-            overflow-x: hidden;
-        }
-
-        body::before {
-            content: "";
-            position: fixed;
-            top: -50%; left: -50%; width: 200%; height: 200%;
-            background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.4) 100%);
-            animation: aurora-orbit 30s linear infinite;
-            z-index: -1;
-            pointer-events: none;
-        }
-
-        @keyframes aurora-orbit {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        /* Glass Grain Texture */
-        input, .collection-summary, .card-row, .modal-content, .btn-secondary, .ctrl-btn, .spec-btn, .sk-btn, .market-btn, #sabotage-grid .spec-btn, .tab-bar, .duel-mode-ui, #custom-alert > div, #custom-confirm > div, .card-face {
-            background: var(--glass) !important;
-            backdrop-filter: blur(25px) saturate(200%) !important;
-            -webkit-backdrop-filter: blur(25px) saturate(200%) !important;
-            border: 1px solid rgba(255,255,255,0.1) !important;
-            border-image: var(--glass-border) 1 !important;
-            position: relative;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.5) !important;
-            width: 100% !important;
-            box-sizing: border-box !important;
-        }
-
-        /* Grainy Overlay */
-        input::before, .collection-summary::before, .modal-content::before, .tab-bar::before, .card-face::before {
-            content: "";
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-            opacity: 0.03;
-            pointer-events: none;
-            mix-blend-mode: overlay;
-            border-radius: inherit;
-        }
-
-        /* Play Button Vibrancy Fix */
-        .btn-play.playing {
-            background: var(--neon) !important;
-            color: #000 !important;
-            font-weight: 900 !important;
-            box-shadow: 0 0 30px var(--neon), inset 0 0 10px rgba(255,255,255,0.5) !important;
-            text-shadow: none !important;
-            animation: pulse-active 1.5s infinite;
-        }
-
-        @keyframes pulse-active {
-            0% { transform: scale(1); box-shadow: 0 0 20px var(--neon); }
-            50% { transform: scale(1.03); box-shadow: 0 0 40px var(--neon); }
-            100% { transform: scale(1); box-shadow: 0 0 20px var(--neon); }
-        }
-
-        /* Bokeh Particles */
-        .bokeh {
-            position: fixed;
-            width: 10px; height: 10px;
-            background: white;
-            border-radius: 50%;
-            opacity: 0.1;
-            filter: blur(5px);
-            z-index: -1;
-            animation: float-bokeh 10s infinite ease-in-out;
-        }
-
-</style>
+    </style>
 </head>
 
 <body>
@@ -586,7 +405,7 @@
         <h2 id="winner-name">---</h2>
         <button class="btn-start" onclick="location.reload()" style="margin-top:30px">JUGAR OTRA VEZ</button>
     </div>
-    <div class="logo">CHRONOBEATS TOTAL MIX <span style="font-size:0.4em; opacity:0.6; vertical-align:top; color:#aaa; font-family:Montserrat;">V1.6</span></div>
+    <div class="logo">CHRONOBEATS</div>
     <div id="live-room-code"
         style="display:none; position:fixed; top:20px; right:20px; background:var(--bg); border:1px solid var(--neon); color:var(--neon); padding:8px 15px; border-radius:10px; font-family:'Bungee'; font-size:1.2em; z-index:10000; box-shadow:0 0 10px rgba(0,242,255,0.3);">
         CODE</div>
@@ -608,10 +427,10 @@
 
         <div id="joputismo-container-lobby" style="margin-bottom: 20px;">
             <label
-                style="font-family: 'Bungee'; color: var(--neon); font-size: 1.2em; display: block; margin-bottom: 10px;">NIVEL
+                style="font-family: 'Bungee'; color: #ff0055; font-size: 1.2em; display: block; margin-bottom: 10px;">NIVEL
                 DE JOPUTISMO</label>
             <select id="joputismo-select-lobby" onchange="setJoputismo(this.value)"
-                style="padding: 10px; font-family: 'Montserrat'; font-size: 1em; border-radius: 8px; background: #222; color: #fff; border: 1px solid var(--neon);">
+                style="padding: 10px; font-family: 'Montserrat'; font-size: 1em; border-radius: 8px; background: #222; color: #fff; border: 1px solid #ff0055;">
                 <option value="0">LOSER (Modo Pacífico)</option>
                 <option value="1">TROLL (Nivel Cabrón)</option>
                 <option value="2">SUPERMAN (Guerra Total)</option>
@@ -636,10 +455,10 @@
             <div
                 style="margin-bottom: 20px; text-align: center; border-top: 1px solid #333; padding-top: 10px; border-bottom: 1px solid #333; padding-bottom: 15px;">
                 <label
-                    style="font-family: 'Bungee'; color: var(--neon); font-size: 0.6em; display: block; margin-bottom: 5px;">NIVEL
+                    style="font-family: 'Bungee'; color: #ff0055; font-size: 0.6em; display: block; margin-bottom: 5px;">NIVEL
                     DE JOPUTISMO</label>
                 <select id="joputismo-select-game" onchange="setJoputismo(this.value)"
-                    style="width: 100%; padding: 5px; font-family: 'Montserrat'; font-size: 0.8em; border-radius: 5px; background: #111; color: var(--neon); border: 1px solid var(--neon);">
+                    style="width: 100%; padding: 5px; font-family: 'Montserrat'; font-size: 0.8em; border-radius: 5px; background: #111; color: #ff0055; border: 1px solid #ff0055;">
                     <option value="0">LOSER</option>
                     <option value="1">TROLL</option>
                     <option value="2">SUPERMAN</option>
@@ -652,8 +471,9 @@
             <div id="player-container">
                 <div id="youtube-player"></div>
             </div>
+            <div class="validation-area">
                 <div class="val-card" id="val-card-ui" style="display:none;">
-                    <p id="ui-category-label" style="font-size: 0.7em; color: var(--neon); margin-bottom: 5px;">CARGANDO CATEGORÍA... <span style="font-size: 0.8em; opacity: 0.8;"> - TOTAL MIX</span></p>
+                    <p style="font-size: 0.7em; color: var(--neon); margin-bottom: 5px;">CANCIÓN EN JUEGO <span id="ui-song-category" style="font-size: 0.8em; opacity: 0.8;"></span></p>
                     <p id="ui-card-artist" style="font-size: 0.9em; color: #aaa; margin: 0; font-weight: bold;">????</p>
                     <h3 id="ui-card-song" style="margin: 5px 0; font-size: 1.2em;">????</h3>
                     <div id="ui-card-year"
@@ -689,23 +509,61 @@
     </div>
 
     <script>
+        // Wake Lock
+        let wakeLock = null;
+        async function requestWakeLock() {
+            try {
+                if ('wakeLock' in navigator) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                    console.log('Wake Lock Host activo');
+                }
+            } catch (err) {
+                console.error(`${err.name}, ${err.message}`);
+            }
+        }
+
         var peer, roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+        var player; // YouTube Player Instance
         var players = [], connections = {}, songs = [], currentSongIdx = -1, activePlayerIdx = 0, isRevealed = false;
-        var hasShield = {}; // playerId -> boolean
         var currentBets = {}; // playerId -> slotIndex
         var activeGuess = null; // slotIndex del jugador activo
         var bettingAgainst = []; // IDs de los jugadores que han apostado contra el jugador activo
         var bettingFor = []; // IDs de los jugadores que han apostado a favor del jugador activo
-        var queuedDuel = null;
-        var currentDuel = null;
-        var duelResult = null; // Para mensajes de fin de duelo
-        var duelTriggered = false; // Bloqueo de un duelo por turno
+
+        const timesUpPhrases = [
+            "¿Te has dormido o qué? El tiempo vuela y tú no te enteras.",
+            "¡Zzz... despierta! Has perdido el turno por lento.",
+            "Mucho ruido y pocas nueces. ¡Siguiente!",
+            "¿Esperabas que la canción adivinara el año por ti?",
+            "Vaya empanada mental llevas. Turno perdido.",
+            "El oráculo dice: eres demasiado lento para este juego.",
+            "¡BOOM! El tiempo explotó en tu cara. ¡A pastar!",
+            "Esa parsimonia te va a costar la partida. ¡Siguiente pringao!",
+            "¿Estás analizando la frecuencia del bombo? Porque el tiempo ya se acabó.",
+            "Error 404: Reflejos no encontrados.",
+            "Si tardas más, se acaba la década antes que tu turno.",
+            "¡Tiempo agotado! Tu indecisión es música para mis oídos.",
+            "¿Te has quedado pillado? El cronómetro no espera a nadie.",
+            "Mucha pose y poca ficha. ¡Siguiente!",
+            "¡A dormir a la cama! Aquí hemos venido a jugar.",
+            "Esa mirada perdida no te va a dar puntos. ¡Fuera!",
+            "Has tardado tanto que la canción ya es un clásico de oro.",
+            "¿Estás esperando el permiso de tu abogado? ¡Pierdes turno!",
+            "¡Al carrer! Por lento y por soso.",
+            "Mi abuela con un taca-taca tiene más reflejos que tú.",
+            "Has petado el sistema de puro aburrimiento. ¡Turno fuera!",
+            "¿Te lo piensas tanto para todo? Qué cruz de jugador.",
+            "¡Game Over para tu turno! A ver si el siguiente espabila.",
+            "Siguiente... que este se ha quedado en modo pause.",
+            "¿Te has quedado admirando el diseño? Es normal, pero ¡juega!"
+        ];
 
         // Variables de estado del Modo Rey
         var gameMode = 'normal';
         var turnPhase = 'NORMAL'; // 'NORMAL', 'KING_SELECTION', 'KING_GUESS', 'KING_GUESS_RESULT'
         var kingOptions = []; // Array de opciones para los retadores
         var cheatsEnabled = true;
+        var gameStarted = false;
 
         // Seguimiento de tiempo para skips manuales
         var segundosAcumulados = 0;
@@ -719,8 +577,85 @@
         var panicInterval = null;
         var joputismoLevel = 0; // 0: LOSER, 1: HE-MAN, 2: SUPERMAN
         var isFogActive = false;
+        var hasShield = {}; // playerId -> boolean
+
+        // Duel Mode variables
+        var queuedDuel = null; // { challenger: id, target: id }
+        var currentDuel = null;
+        var duelResult = null; // Para mensajes de fin de duelo
+        var duelTriggered = false; // Bloqueo de un duelo por turno
 
         document.getElementById('join-code').innerText = roomCode;
+
+        // Eliminadas funciones de YT API
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('youtube-player', {
+                height: '1',
+                width: '1',
+                videoId: '', // Will be loaded later
+                playerVars: {
+                    'autoplay': 0,
+                    'controls': 0,
+                    'disablekb': 1,
+                    'fs': 0,
+                    'modestbranding': 1,
+                    'rel': 0,
+                    'showinfo': 0
+                },
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange,
+                    'onError': onPlayerError
+                }
+            });
+        }
+
+        function onPlayerReady(event) {
+            console.log("YouTube Player Listo");
+        }
+
+        function onPlayerStateChange(event) {
+            if (event.data === YT.PlayerState.PLAYING) {
+                isPlaying = true;
+                momentoDeInicio = Date.now();
+                document.getElementById('host-instructions').innerText = isMuted ? "REPRODUCIENDO (MUTE)" : "REPRODUCIENDO";
+                syncState();
+            }
+            if (event.data === YT.PlayerState.PAUSED) {
+                isPlaying = false;
+                syncState();
+            }
+            if (event.data === YT.PlayerState.ENDED) {
+                handleSongEnd();
+            }
+        }
+
+        function onPlayerError(event) {
+            console.warn("YouTube Error:", event.data);
+            // Si el video está bloqueado o da error, podemos disparar SYSTEM_ERROR_TRACK
+            handlePlayerCommand('SYSTEM', 'SYSTEM_ERROR_TRACK', null);
+        }
+
+        function handleSongEnd() {
+            if (!isRevealed && activeGuess === null) {
+                // TIEMPO AGOTADO - El jugador no respondió
+                isPlaying = false;
+                var phrase = timesUpPhrases[Math.floor(Math.random() * timesUpPhrases.length)];
+                document.getElementById('host-instructions').innerHTML = "<span style='color:#ff0055; font-size:1.5em; font-family:Bungee;'>¡TIEMPO AGOTADO! ⏰</span><br><span style='font-size:0.9em;'>" + phrase + "</span>";
+                
+                // Notificar al jugador activo de su desgracia (V130)
+                var activeP = players[activePlayerIdx];
+                if (activeP && connections[activeP.id]) {
+                    try { connections[activeP.id].send({ type: 'BET_RESULT', msg: "¡TIEMPO AGOTADO!\n" + phrase }); } catch(e){}
+                }
+
+                setTimeout(function() {
+                    nextTurn();
+                }, 4000);
+                
+                syncState();
+            }
+        }
 
         function updateTokens(player, delta) {
             if (!player) return;
@@ -791,72 +726,80 @@
                 }
             });
         }
+        function applyTheme(type) {
+            let color = '#00ff00'; // Mix / Default
+            let label = ' - MODO MIX';
+            if (type === 'orig') { color = '#00f2ff'; label = ' - ORIGINAL EDITION'; }
+            if (type === 'anime') { color = '#ff00cc'; label = ' - ANIME EDITION'; }
+            if (type === 'movies') { color = '#ffaa00'; label = ' - PELÍCULAS Y SERIES'; }
+            
+            document.documentElement.style.setProperty('--neon', color);
+            let catSpan = document.getElementById('ui-song-category');
+            if (catSpan) catSpan.innerText = label;
+        }
+
         initPeer();
 
-        async function loadMixSongs() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const mixParam = urlParams.get('mix') || 'orig,anime,movies,videojuegos';
-            const selectedTypes = mixParam.split(',');
-            const limitPerType = Math.floor(60 / selectedTypes.length);
+        var urlParams = new URLSearchParams(window.location.search);
+        var mixParam = urlParams.get('mix') || 'orig,anime,movies';
+        var mixTypes = mixParam.split(',');
+        var fetchPromises = [];
 
-            const listFiles = [
-                { url: 'lista_final.txt', type: 'orig' },
-                { url: 'lista_final_anime.txt', type: 'anime' },
-                { url: 'lista_final_pelis.txt', type: 'movies' },
-                { url: 'lista_videojuegos.txt', type: 'videojuegos' }
-            ].filter(f => selectedTypes.includes(f.type));
+        if (mixTypes.includes('orig')) {
+            fetchPromises.push(fetch('lista_final.txt?v=' + new Date().getTime()).then(function (r) { return r.text() }).then(function (t) { return { text: t, type: 'orig', color: '#00f2ff' } }));
+        }
+        if (mixTypes.includes('anime')) {
+            fetchPromises.push(fetch('lista_final_anime.txt?v=' + new Date().getTime()).then(function (r) { return r.text() }).then(function (t) { return { text: t, type: 'anime', color: '#ff00cc' } }));
+        }
+        if (mixTypes.includes('movies')) {
+            fetchPromises.push(fetch('lista_final_pelis.txt?v=' + new Date().getTime()).then(function (r) { return r.text() }).then(function (t) { return { text: t, type: 'movies', color: '#ffaa00' } }));
+        }
 
-            let allSongs = [];
-            let uniqueIds = new Set();
-            let playedIds = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]');
-
-            for (let f of listFiles) {
-                try {
-                    let r = await fetch(f.url + '?v=' + Date.now());
-                    let t = await r.text();
-                    let lines = t.replace(/\r/g, '').split('\n').filter(l => l.includes('|'));
-                    
-                    let typeSongs = [];
-                    lines.forEach(l => {
-                        let p = l.split('|');
-                        let m = p[3] ? p[3].match(/[?&]v=([^&#]+)|youtu\.be\/([^?&#]+)/) : null;
-                        if (m && !uniqueIds.has(m[1]||m[2]) && !playedIds.includes(m[1]||m[2])) {
-                            typeSongs.push({ artist: p[0], song: p[1], year: p[2], id: m[1] || m[2], type: f.type });
-                            uniqueIds.add(m[1]||m[2]);
+        Promise.all(fetchPromises).then(function (results) {
+            var rawSongs = [];
+            var uniqueIds = new Set();
+            var playedIds = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]');
+            results.forEach(function (res) {
+                var categorySongs = [];
+                var lines = res.text.replace(/\r/g, '').split('\n');
+                lines.forEach(function (l, index) {
+                    var p = l.split('|');
+                    var m = p[3] ? p[3].match(/[?&]v=([^&#]+)|youtu\.be\/([^?&#]+)/) : null;
+                    if (m) {
+                        var currentId = (m[1] || m[2]);
+                        if (!uniqueIds.has(currentId) && !playedIds.includes(currentId)) {
+                            uniqueIds.add(currentId);
+                            categorySongs.push({
+                                artist: p[0],
+                                song: p[1],
+                                year: p[2],
+                                id: currentId,
+                                line: index + 1,
+                                type: res.type,
+                                color: res.color
+                            });
                         }
-                    });
+                    }
+                });
 
-                    // Barajamos internamente esta categoría y cogemos solo el límite
-                    typeSongs.sort(() => Math.random() - 0.5);
-                    allSongs = allSongs.concat(typeSongs.slice(0, limitPerType));
-                    
-                } catch(e) { console.error("Error loading " + f.url, e); }
-            }
-            // Barajado final para mezclar las categorías
-            songs = allSongs.sort(() => Math.random() - 0.5);
-            
-            if (songs.length < 5 && playedIds.length > 0) {
+                // Mezclar la categoría antes de recortar
+                categorySongs.sort(function() { return Math.random() - 0.5; });
+
+                // Tomar máximo 60 para equilibrar el Mix
+                var selectedSongs = categorySongs.slice(0, 60);
+                rawSongs = rawSongs.concat(selectedSongs);
+            });
+
+            if (rawSongs.length < 10 && playedIds.length > 0) {
                 localStorage.removeItem('CB_PlayedSongs');
                 location.reload();
+                return;
             }
-        }
-        loadMixSongs();
 
-        function applyTheme(type) {
-            const root = document.documentElement;
-            const label = document.getElementById('ui-category-label');
-            const artistLabel = document.getElementById('ui-card-artist');
-            let color = "#00f2ff"; let txt = "ORIGINAL / CLÁSICA";
-            
-            if (type === 'anime') { color = "#ff00cc"; txt = "ESTUDIO / ANIME"; }
-            else if (type === 'movies') { color = "#ffcc00"; txt = "DIRECTOR / CINE"; }
-            else if (type === 'videojuegos') { color = "#bf00ff"; txt = "ESTUDIO / JUEGO"; }
-            
-            root.style.setProperty('--neon', color);
-            label.innerText = txt;
-            label.style.color = color;
-            artistLabel.innerText = "???";
-        }
+            // Mezcla final de todo el mix
+            rawSongs.sort(function() { return Math.random() - 0.5; });
+            songs = rawSongs;
+        });
 
         function updateLobby() {
             var h = "";
@@ -908,6 +851,7 @@
         }
 
         function startGame() {
+            requestWakeLock(); // Activar Wake Lock al empezar la partida
             var tc = document.getElementById('joputismo-audio-player');
             if (tc) tc.innerHTML = '';
 
@@ -922,37 +866,7 @@
 
             document.getElementById('lobby').style.display = 'none';
             document.getElementById('dashboard').style.display = 'grid';
-            nextTurn();
-        }
-
-        function refundBets() {
-            var refunded = false;
-            if (bettingAgainst.length > 0) {
-                bettingAgainst.forEach(function(pid) {
-                    var p = players.find(pl => pl.id === pid);
-                    if(p) updateTokens(p, 1);
-                });
-                refunded = true;
-            }
-            if (bettingFor.length > 0) {
-                bettingFor.forEach(function(pid) {
-                    var p = players.find(pl => pl.id === pid);
-                    if(p) updateTokens(p, 1);
-                });
-                refunded = true;
-            }
-            bettingAgainst = [];
-            bettingFor = [];
-            if (refunded) syncState();
-        }
-
-        function reportSystemError(recipient) {
-            refundBets();
-            alert("¡Error registrado! Se ha preparado un email para " + recipient + ".\nSe descarta esta canción y repites el turno.");
-            if (turnPhase === 'KING_GUESS' || turnPhase === 'KING_GUESS_RESULT' || turnPhase === 'KING_SELECTION') {
-                activePlayerIdx--;
-                if (activePlayerIdx < 0) activePlayerIdx = players.length - 1;
-            }
+            gameStarted = true;
             nextTurn();
         }
 
@@ -960,16 +874,7 @@
             turnPhase = 'NORMAL';
             currentDuel = null;
             duelResult = null;
-            
-            currentSongIdx++; 
-            if (currentSongIdx >= songs.length) {
-                currentSongIdx = 0;
-                songs = songs.sort(() => Math.random() - 0.5);
-            }
-            
-            applyTheme(songs[currentSongIdx].type);
-
-            if(songs[currentSongIdx] && songs[currentSongIdx].id) { var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]'); if(!_pl.includes(songs[currentSongIdx].id)){ _pl.push(songs[currentSongIdx].id); localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl)); } } isRevealed = false;
+            currentSongIdx++; if(songs[currentSongIdx] && songs[currentSongIdx].id) { var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]'); if(!_pl.includes(songs[currentSongIdx].id)){ _pl.push(songs[currentSongIdx].id); localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl)); } } isRevealed = false;
             segundosAcumulados = 0;
             momentoDeInicio = 0;
             isPlaying = false;
@@ -977,15 +882,13 @@
             activeGuess = null; // Limpiar adivinanza
             bettingAgainst = []; // Limpiar apuestas de "ni de coña"
             bettingFor = []; // Limpiar apuestas a favor
-            duelResult = null;
-            duelTriggered = false;
 
             isMuted = false;
             muteTimeRemaining = 0;
             if (muteIntervalTimer) { clearInterval(muteIntervalTimer); muteIntervalTimer = null; }
 
             // Parar música de duelo
-            var audioContainer = document.getElementById('audio-player-container');
+            var audioContainer = document.getElementById('joputismo-audio-player');
             if (audioContainer) audioContainer.innerHTML = '';
 
             panicActive = false;
@@ -1015,12 +918,16 @@
                 document.getElementById('ui-current-player').innerText = players[activePlayerIdx].name + " (REY)";
                 document.getElementById('host-instructions').innerText = "ESPERANDO A QUE LOS JUGADORES ELIJAN QUÉ CARTA TE TOCA...";
                 document.getElementById('player-container').innerHTML = '';
+                applyTheme('mix');
                 syncState();
                 return;
             }
             // --- FIN MODO REY CHECK ---
 
+            // Duelo ya no se activa en nextTurn sino inmediatamente
+
             var s = songs[currentSongIdx];
+            applyTheme(s ? s.type : 'mix');
             document.getElementById('ui-card-artist').innerText = "????";
             document.getElementById('ui-card-song').innerText = "????";
             document.getElementById('ui-card-year').innerText = "????";
@@ -1030,15 +937,28 @@
             document.getElementById('challenger-validation').style.display = 'none';
             document.getElementById('ui-current-player').innerText = players[activePlayerIdx].name;
             document.getElementById('host-instructions').innerText = "ESPERANDO ACCIÓN...";
-            document.getElementById('player-container').innerHTML = '<div id="youtube-player"></div>';
+            if (player && player.loadVideoById && s) {
+                player.loadVideoById({
+                    'videoId': s.id,
+                    'startSeconds': 0
+                });
+                player.stopVideo();
+            }
             syncState();
         }
 
+        function playBuzzerWebAudio() {
+            try {
+                var audio = new Audio('https://www.myinstants.com/media/sounds/wrong-answer-buzzer.mp3');
+                audio.play();
+            } catch(e) {}
+        }
+
         function playDuelMusic() {
-            var container = document.getElementById('audio-player-container');
-            if (container) {
-                // Limitamos a 45s para que no se haga eterno
-                container.innerHTML = '<iframe id="duel-iframe" width="1" height="1" src="https://www.youtube.com/embed/AFa1-kciCb4?autoplay=1&end=45" allow="autoplay" style="display:none;"></iframe>';
+            var tc = document.getElementById('joputismo-audio-player');
+            if (tc) {
+                // El bueno, el feo y el malo - Climax - Limitado a 45s
+                tc.innerHTML = '<iframe id="duel-iframe" width="1" height="1" src="https://www.youtube-nocookie.com/embed/AFa1-kciCb4?autoplay=1&end=45" allow="autoplay" style="display:none;"></iframe>';
             }
         }
 
@@ -1054,35 +974,31 @@
         function resolveDuel() {
             if (!currentDuel) return;
             var s = songs[currentSongIdx];
-            var challenger = players.find(x => x.id === currentDuel.challenger);
-            var target = players.find(x => x.id === currentDuel.target);
+            var actualYear = parseInt(s.year);
+            var ch = players.find(p => p.id === currentDuel.challenger);
+            var tg = players.find(p => p.id === currentDuel.target);
             
-            var dChallenger = Math.abs(currentDuel.challengerYear - s.year);
-            var dTarget = Math.abs(currentDuel.targetYear - s.year);
+            var chDist = currentDuel.challengerYear !== null ? Math.abs(currentDuel.challengerYear - actualYear) : 999;
+            var tgDist = currentDuel.targetYear !== null ? Math.abs(currentDuel.targetYear - actualYear) : 999;
             
             var winnerId = null;
-            var reason = "";
-            
-            if (dChallenger < dTarget) {
-                winnerId = challenger.id;
-                reason = challenger.name + " estuvo más cerca (" + currentDuel.challengerYear + " vs " + currentDuel.targetYear + ")";
-            } else if (dTarget < dChallenger) {
-                winnerId = target.id;
-                reason = target.name + " estuvo más cerca (" + currentDuel.targetYear + " vs " + currentDuel.challengerYear + ")";
+            if (chDist < tgDist) {
+                winnerId = currentDuel.challenger;
+            } else if (tgDist < chDist) {
+                winnerId = currentDuel.target;
             } else {
-                // Tie breaker: Quick Draw
+                // Empate en distancia o ambos exactos
+                // Quick Draw: el que tenga el timestamp más bajo gana
                 if (currentDuel.challengerTime < currentDuel.targetTime) {
-                    winnerId = challenger.id;
-                    reason = "¡EMPATE! Pero " + challenger.name + " fue más rápido (QUICK DRAW).";
+                    winnerId = currentDuel.challenger;
                 } else {
-                    winnerId = target.id;
-                    reason = "¡EMPATE! Pero " + target.name + " fue más rápido (QUICK DRAW).";
+                    winnerId = currentDuel.target;
                 }
             }
             
-            var winner = (winnerId === challenger.id) ? challenger : target;
-            var loser = (winnerId === challenger.id) ? target : challenger;
-
+            var winner = players.find(p => p.id === winnerId);
+            var loser = players.find(p => p.id === (winnerId === (ch ? ch.id : currentDuel.challenger) ? (tg ? tg.id : currentDuel.target) : (ch ? ch.id : currentDuel.challenger)));
+            
             // Frases cabronas
             var winnerPhrases = [
                 "¡Felicidades, lumbreras! Hasta un reloj parado acierta dos veces al día.",
@@ -1105,23 +1021,22 @@
             };
             
             if (winner && loser) {
-                // Awarding
+                // Premio: Gana la carta
                 winner.score++;
-                winner.cards.push(s.year);
+                winner.cards.push(actualYear);
                 winner.cards.sort(function(a, b){return a - b});
                 
-                // Stealing tokens
-                var stolen = Math.min(loser.tokens, 2);
-                updateTokens(loser, -stolen);
-                updateTokens(winner, stolen);
+                // Robo: 2 fichas al oponente (Capped at 5)
+                var theft = Math.min(loser.tokens, 2);
+                updateTokens(loser, -theft);
+                triggerFlash();
+                updateTokens(winner, theft);
                 
-                document.getElementById('host-instructions').innerHTML = "<div style='color:var(--gold); font-family:Bungee; font-size:1.8em;'>¡GANADOR: " + winner.name + "!</div><div style='font-size:0.9em; margin-bottom:10px;'>" + reason + "</div><div style='color:var(--neon);'>Se lleva la carta y " + stolen + " fichas del rival.</div>";
+                document.getElementById('host-instructions').innerHTML = "<span style='color:var(--gold); font-size:1.5em; font-family:Bungee;'>¡" + winner.name + " GANA EL DUELO!</span><br>Robó " + theft + " fichas y se queda la carta.";
+            } else {
+                document.getElementById('host-instructions').innerHTML = "<span style='color:#ff4444; font-size:1.5em; font-family:Bungee;'>EL DUELO QUEDÓ DESIERTO</span>";
             }
-            document.getElementById('validation-buttons').style.display = 'flex';
-            document.getElementById('validation-buttons').innerHTML = '<button class="btn-val btn-ok" onclick="finishDuel()">ACEPTAR RESULTADO</button>';
-            
-            turnPhase = 'NORMAL';
-            syncState();
+            document.getElementById('host-instructions').innerHTML += "<br><button class='btn' style='margin-top:10px; padding:10px; font-family:Bungee; background:var(--neon); color:#000;' onclick='finishDuel()'>SIGUIENTE TURNO</button>";
         }
 
         function finishDuel() {
@@ -1132,28 +1047,8 @@
             nextTurn();
         }
 
-        function playBuzzerWebAudio() {
-            try {
-                var ctx = new (window.AudioContext || window.webkitAudioContext)();
-                var osc = ctx.createOscillator();
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(150, ctx.currentTime);
-                osc.frequency.linearRampToValueAtTime(100, ctx.currentTime + 2);
-                var gain = ctx.createGain();
-                gain.gain.setValueAtTime(0, ctx.currentTime);
-                gain.gain.linearRampToValueAtTime(1, ctx.currentTime + 0.1);
-                gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 3);
-                osc.connect(gain);
-                gain.connect(ctx.destination);
-                osc.start();
-                osc.stop(ctx.currentTime + 3);
-            } catch (e) {
-                console.error("Audio API error:", e);
-            }
-        }
-
         function handlePlayerCommand(peerId, action, value) {
-            var activeP = players[activePlayerIdx] || {};
+            var activeP = players[activePlayerIdx];
             var s = songs[currentSongIdx];
             var container = document.getElementById('player-container');
 
@@ -1162,8 +1057,11 @@
                     if (peerId !== activeP.id) return;
                     if (!isPlaying) {
                         momentoDeInicio = Date.now();
+                        if (player && player.playVideo) {
+                            player.playVideo();
+                            if (isMuted) player.mute(); else player.unMute();
+                        }
                         isPlaying = true;
-                        container.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + s.id + '?autoplay=1&start=' + segundosAcumulados + (isMuted ? '&mute=1' : '') + '" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen style="width:100%; height:100%; border:none;"></iframe>';
                         document.getElementById('host-instructions').innerText = "REPRODUCIENDO" + (isMuted ? " (MUTE)" : "");
                         syncState();
                     }
@@ -1173,71 +1071,16 @@
                     if (isPlaying) {
                         var tiempoTranscurrido = Math.floor((Date.now() - momentoDeInicio) / 1000);
                         segundosAcumulados += tiempoTranscurrido;
-                        container.innerHTML = '';
+                        if (player && player.pauseVideo) player.pauseVideo();
                         isPlaying = false;
                         document.getElementById('host-instructions').innerText = "PAUSADO";
-                        syncState();
-                    }
-                    break;
-                case 'SABOTAGE_DUEL':
-                    if (turnPhase === 'DUEL' || duelTriggered) return;
-                    // Retar a duelo (3 fichas de coste)
-                    var p = players.find(function (pl) { return pl.id === peerId; });
-                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 3 && activeGuess === null && isPlaying && !isRevealed) {
-                        updateTokens(p, -3);
-                        duelTriggered = true;
-                        var target = players[activePlayerIdx];
-                        
-                        // ACTIVACIÓN INMEDIATA
-                        currentDuel = { 
-                            challenger: p.id, 
-                            target: target.id,
-                            challengerYear: null, targetYear: null,
-                            challengerTime: null, targetTime: null
-                        };
-                        duelResult = null;
-                        turnPhase = 'DUEL';
-                        
-                        // Parar musica actual
-                        if (isPlaying) {
-                            isPlaying = false;
-                            container.innerHTML = '<div id="youtube-player"></div>';
-                        }
-                        if (typeof player !== 'undefined' && player && player.stopVideo) player.stopVideo();
-                        
-                        playDuelMusic();
-
-                        document.getElementById('host-instructions').innerHTML = "<div style='color:var(--gold); font-family:Bungee; font-size:2em;'>¡DUELO A MUERTE!</div><div style='font-size:1.2em;'>" + p.name + " VS " + target.name + "</div>";
-                        document.getElementById('validation-buttons').style.display = 'none';
-
-                        syncState();
-                    }
-                    break;
-                case 'DUEL_GUESS':
-                    if (currentDuel) {
-                        playGunshot();
-                        if (peerId === currentDuel.challenger) {
-                            currentDuel.challengerYear = parseInt(value);
-                            currentDuel.challengerTime = Date.now();
-                        } else if (peerId === currentDuel.target) {
-                            currentDuel.targetYear = parseInt(value);
-                            currentDuel.targetTime = Date.now();
-                        }
-                        if (currentDuel.challengerYear !== null && currentDuel.targetYear !== null) {
-                            // Parar musica de duelo inmediatamente
-                            var audioContainer = document.getElementById('audio-player-container');
-                            if (audioContainer) audioContainer.innerHTML = '';
-                            
-                            document.getElementById('host-instructions').innerHTML = "<div style='color:var(--gold); font-family:Bungee; font-size:2em;'>¡DUELO FINALIZADO!</div><div style='font-size:1.2em;'>Calculando resultados...</div>";
-                            revealData();
-                        }
                         syncState();
                     }
                     break;
                 case 'STOP':
                     if (peerId !== activeP.id) return;
                     isPlaying = false;
-                    container.innerHTML = '';
+                    if (player && player.stopVideo) player.stopVideo();
                     document.getElementById('host-instructions').innerText = "¿ACERTÓ?";
                     revealData();
                     syncState();
@@ -1249,6 +1092,7 @@
                         playGunshot();
                         triggerFlash();
                         
+                        // Pick a random target (someone else)
                         var otherPlayers = players.filter(x => x.id !== p.id);
                         var target = otherPlayers.length > 0 ? otherPlayers[Math.floor(Math.random() * otherPlayers.length)] : null;
                         
@@ -1300,15 +1144,13 @@
                         break;
                     }
                     var p = players.find(function (pl) { return pl.id === peerId; });
-                    if (p && p.id !== players[activePlayerIdx].id && isPlaying) {
+                    if (p && p.tokens >= 1 && p.id !== players[activePlayerIdx].id && isPlaying) {
+                        updateTokens(p, -1);
                         muteTimeRemaining += 15000;
 
                         if (!isMuted) {
                             isMuted = true;
-                            var tiempoTranscurrido = Math.floor((Date.now() - momentoDeInicio) / 1000);
-                            segundosAcumulados += tiempoTranscurrido;
-                            momentoDeInicio = Date.now();
-                            container.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + s.id + '?autoplay=1&start=' + segundosAcumulados + '&mute=1" allow="autoplay"></iframe>';
+                            if (player && player.mute) player.mute();
                             document.getElementById('host-instructions').innerText = "REPRODUCIENDO (MUTE)";
 
                             muteIntervalTimer = setInterval(function () {
@@ -1319,10 +1161,7 @@
                                     muteTimeRemaining = 0;
                                     if (isMuted && isPlaying) {
                                         isMuted = false;
-                                        var t2 = Math.floor((Date.now() - momentoDeInicio) / 1000);
-                                        segundosAcumulados += t2;
-                                        momentoDeInicio = Date.now();
-                                        container.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + s.id + '?autoplay=1&start=' + segundosAcumulados + '" allow="autoplay"></iframe>';
+                                        if (player && player.unMute) player.unMute();
                                         document.getElementById('host-instructions').innerText = "REPRODUCIENDO";
                                         syncState();
                                     }
@@ -1338,17 +1177,9 @@
                     break;
                 case 'SKIP':
                     if (peerId !== activeP.id) return;
-                    if (isPlaying) {
-                        var tiempoTranscurrido = Math.floor((Date.now() - momentoDeInicio) / 1000);
-                        segundosAcumulados += tiempoTranscurrido + value;
-                    } else {
-                        segundosAcumulados += value;
-                    }
-                    if (segundosAcumulados < 0) segundosAcumulados = 0;
-                    momentoDeInicio = Date.now();
-                    if (isPlaying) {
-                        container.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + s.id + '?autoplay=1&start=' + segundosAcumulados + (isMuted ? '&mute=1' : '') + '" allow="autoplay"></iframe>';
-                        document.getElementById('host-instructions').innerText = "REPRODUCIENDO" + (isMuted ? " (MUTE)" : "");
+                    if (player && player.getCurrentTime) {
+                        var currentTime = player.getCurrentTime();
+                        player.seekTo(currentTime + value, true);
                         syncState();
                     }
                     break;
@@ -1359,8 +1190,9 @@
                         p.canReload = false; // Solo uno por turno
                         refundBets();
                         isPlaying = false;
-                        container.innerHTML = '<div id="youtube-player"></div>'; // Parar música de verdad
+                        if (player && player.stopVideo) player.stopVideo();
                         currentSongIdx++; if(songs[currentSongIdx] && songs[currentSongIdx].id) { var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]'); if(!_pl.includes(songs[currentSongIdx].id)){ _pl.push(songs[currentSongIdx].id); localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl)); } } // Descartar y pasar a la siguiente
+                        if(songs[currentSongIdx]) applyTheme(songs[currentSongIdx].type);
                         segundosAcumulados = 0;
                         momentoDeInicio = 0;
                         isRevealed = false; // Resetear revelado
@@ -1379,8 +1211,9 @@
                     if (p && isPlaying) {
                         refundBets();
                         isPlaying = false;
-                        container.innerHTML = '<div id="youtube-player"></div>';
+                        if (player && player.stopVideo) player.stopVideo();
                         currentSongIdx++; if(songs[currentSongIdx] && songs[currentSongIdx].id) { var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]'); if(!_pl.includes(songs[currentSongIdx].id)){ _pl.push(songs[currentSongIdx].id); localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl)); } }
+                        if(songs[currentSongIdx]) applyTheme(songs[currentSongIdx].type);
                         segundosAcumulados = 0;
                         momentoDeInicio = 0;
                         isRevealed = false;
@@ -1410,9 +1243,9 @@
                     var slotOccupied = (activeGuess == valNum);
                     for (var pid in currentBets) { if (currentBets[pid] == valNum) slotOccupied = true; }
 
-                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 2 && currentBets[peerId] === undefined && !slotOccupied && activeGuess !== null) {
+                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 1 && currentBets[peerId] === undefined && !slotOccupied && activeGuess !== null) {
                         console.log("[OK] Apuesta (Duelo) aceptada para", p.name);
-                        updateTokens(p, -2);
+                        updateTokens(p, -1);
                         currentBets[peerId] = valNum;
                         syncState();
                     } else {
@@ -1493,7 +1326,7 @@
 
                                 // PARAR MÚSICA Y REVELAR (V30)
                                 isPlaying = false;
-                                document.getElementById('player-container').innerHTML = '';
+                                if (player && player.stopVideo) player.stopVideo();
                                 revealData(); 
                                 syncState();
                                 // Quitamos el setTimeout para que el Host valide manualmente o pase turno
@@ -1505,35 +1338,11 @@
                     }
                     break;
                 case 'SABOTAGE_BUZZER':
-                    var p = players.find(x => x.id === peerId);
-                    if (p && p.id !== players[activePlayerIdx].id && isPlaying && !isRevealed && (!turnPhase || turnPhase === 'NORMAL')) {
+                    var p = players.find(function (pl) { return pl.id === peerId; });
+                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 1 && isPlaying && !isRevealed && (!turnPhase || turnPhase === 'NORMAL')) {
+                        updateTokens(p, -1);
                         playBuzzerWebAudio();
                         syncState();
-                    }
-                    break;
-                case 'SABOTAGE_DUEL':
-                    if (turnPhase === 'DUEL' || duelTriggered) return;
-                    var p = players.find(x => x.id === peerId);
-                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 3 && (!turnPhase || turnPhase === 'NORMAL') && !queuedDuel && !currentDuel) {
-                        updateTokens(p, -3);
-                        duelTriggered = true;
-                        var target = players[activePlayerIdx];
-                        
-                        document.getElementById('host-instructions').innerHTML = "<div style='color:var(--gold); font-family:Bungee; font-size:1.8em;'>¡TIROTEO EN EL SALOON! 🔫</div><div style='color:white;'>" + p.name + " reta a " + target.name + "</div>";
-                        playDuelMusic();
-
-                        setTimeout(function(){
-                            turnPhase = 'DUEL';
-                            currentDuel = {
-                                challenger: p.id,
-                                target: target.id,
-                                challengerYear: null,
-                                targetYear: null,
-                                challengerTime: 0,
-                                targetTime: 0
-                            };
-                            syncState();
-                        }, 4000);
                     }
                     break;
                 case 'SABOTAGE_FOG':
@@ -1546,7 +1355,7 @@
                         syncState();
                         break;
                     }
-                    var p = players.find(x => x.id === peerId);
+                    var p = players.find(function (pl) { return pl.id === peerId; });
                     if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 2 && !isFogActive && (!turnPhase || turnPhase === 'NORMAL')) {
                         updateTokens(p, -2);
                         isFogActive = true;
@@ -1579,13 +1388,14 @@
                         syncState();
                         break;
                     }
-                    var p = players.find(x => x.id === peerId);
+                    var p = players.find(function (pl) { return pl.id === peerId; });
                     if (p && p.tokens >= 3 && activeGuess === null && isPlaying && !isRevealed && (!turnPhase || turnPhase === 'NORMAL')) {
                         updateTokens(p, -3);
                         refundBets();
                         isPlaying = false;
-                        container.innerHTML = '<div id="youtube-player"></div>';
+                        if (player && player.stopVideo) player.stopVideo();
                         currentSongIdx++; if(songs[currentSongIdx] && songs[currentSongIdx].id) { var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]'); if(!_pl.includes(songs[currentSongIdx].id)){ _pl.push(songs[currentSongIdx].id); localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl)); } }
+                        if(songs[currentSongIdx]) applyTheme(songs[currentSongIdx].type);
                         segundosAcumulados = 0;
                         momentoDeInicio = 0;
                         isRevealed = false;
@@ -1614,6 +1424,69 @@
                         syncState();
                     }
                     break;
+                case 'SABOTAGE_DUEL':
+                    if (turnPhase === 'DUEL' || duelTriggered) return;
+                    var p = players.find(x => x.id === peerId);
+                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 3 && (!turnPhase || turnPhase === 'NORMAL') && !currentDuel) {
+                        updateTokens(p, -3);
+                        duelTriggered = true;
+                        var target = players[activePlayerIdx];
+                        
+                        // ACTIVACIÓN INMEDIATA
+                        currentDuel = { 
+                            challenger: p.id, 
+                            target: target.id,
+                            challengerYear: null, targetYear: null,
+                            challengerTime: null, targetTime: null
+                        };
+                        duelResult = null;
+                        turnPhase = 'DUEL';
+                        
+                        // Parar musica actual
+                        if (isPlaying) {
+                            isPlaying = false;
+                            if (player && player.stopVideo) player.stopVideo();
+                        }
+                        if (typeof player !== 'undefined' && player && player.stopVideo) player.stopVideo();
+                        
+                        playDuelMusic();
+
+                        document.getElementById('ui-card-artist').innerText = "¡DUELO A MUERTE!";
+                        document.getElementById('ui-card-song').innerText = p.name + " VS " + target.name;
+                        document.getElementById('ui-card-year').innerText = "PONED EL AÑO";
+                        document.getElementById('btn-reveal-host').style.display = 'none';
+                        document.getElementById('val-card-ui').style.display = 'block';
+                        document.getElementById('validation-buttons').style.display = 'none';
+                        document.getElementById('challenger-validation').style.display = 'none';
+                        document.getElementById('ui-current-player').innerText = "¡DUELO!";
+                        document.getElementById('host-instructions').innerText = "EL QUE MÁS SE ACERQUE (Y MÁS RÁPIDO) GANA.";
+
+                        syncState();
+                    }
+                    break;
+                case 'DUEL_GUESS':
+                    if (currentDuel) {
+                        playGunshot();
+                        if (peerId === currentDuel.challenger) {
+                            currentDuel.challengerYear = parseInt(value);
+                            currentDuel.challengerTime = Date.now();
+                        } else if (peerId === currentDuel.target) {
+                            currentDuel.targetYear = parseInt(value);
+                            currentDuel.targetTime = Date.now();
+                        }
+                        
+                        // Si ambos han contestado, podemos revelar automáticamente o esperar al host
+                        if (currentDuel.challengerYear !== null && currentDuel.targetYear !== null) {
+                            // Parar musica de duelo inmediatamente
+                            var audioContainer = document.getElementById('audio-player-container');
+                            if (audioContainer) audioContainer.innerHTML = '';
+                            
+                            document.getElementById('host-instructions').innerHTML = "<div style='color:var(--gold); font-family:Bungee; font-size:2em;'>¡DUELO FINALIZADO!</div><div style='font-size:1.2em;'>Calculando resultados...</div>";
+                            revealData();
+                        }
+                        syncState();
+                    }
+                    break;
                 case 'SABOTAGE_VETO':
                     if (hasShield[activeP.id]) {
                         var p = players.find(function (pl) { return pl.id === peerId; });
@@ -1624,7 +1497,7 @@
                         syncState();
                         break;
                     }
-                    var p = players.find(x => x.id === peerId);
+                    var p = players.find(function (pl) { return pl.id === peerId; });
                     if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 1 && players[activePlayerIdx].canReload && (!turnPhase || turnPhase === 'NORMAL')) {
                         updateTokens(p, -1);
                         players[activePlayerIdx].canReload = false;
@@ -1638,7 +1511,7 @@
                     }
                     break;
                 case 'SABOTAGE_STEAL_TURN':
-                    var p = players.find(x => x.id === peerId);
+                    var p = players.find(function (pl) { return pl.id === peerId; });
                     if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 4 && isPlaying && !isRevealed) {
                         updateTokens(p, -4);
                         var oldActive = players[activePlayerIdx];
@@ -1668,34 +1541,14 @@
                             target.score -= 1;
                             var cardIdx = Math.floor(Math.random() * target.cards.length);
                             target.cards.splice(cardIdx, 1);
-                            triggerFlash();
-                            document.getElementById('host-instructions').innerHTML = "<span style='color:var(--gold); font-size:1.5em; font-family:Bungee;'>¡" + p.name + " ACTIVÓ EL RETROCESO TEMPORAL!</span>";
+
+                            document.getElementById('host-instructions').innerHTML = "<span style='color:#9900ff; font-size:1.5em; font-family:Bungee;'>¡" + p.name + " CREÓ UN AGUJERO NEGRO Y DESTRUYÓ UNA CARTA DE " + target.name + "!</span>";
                             setTimeout(function () {
                                 if (!isRevealed && !panicActive) document.getElementById('host-instructions').innerText = (isMuted ? "REPRODUCIENDO (MUTE)" : "REPRODUCIENDO");
                             }, 4000);
                             syncState();
                         }
                     }
-                    break;
-                case 'REMOTE_SET_GAME_MODE':
-                    if (turnPhase === 'LOBBY') {
-                        gameMode = value;
-                        document.getElementById('game-mode-select').value = value;
-                        syncState();
-                    }
-                    break;
-                case 'REMOTE_KING_RESOLVE':
-                    resolveKingMode(value === 'true' || value === true);
-                    break;
-                case 'REMOTE_NEXT_TURN':
-                    if (turnPhase === 'DUEL' && !currentDuel) {
-                        nextTurn();
-                    } else if (isRevealed) {
-                        nextTurn();
-                    }
-                    break;
-                case 'REMOTE_DUEL_FINISH':
-                    finishDuel();
                     break;
                 case 'SABOTAGE_STEAL_TOKEN':
                     var p = players.find(function (pl) { return pl.id === peerId; });
@@ -1761,6 +1614,7 @@
                     if (indexElegido >= 0 && indexElegido < kingOptions.length) {
                         var cartaElegida = kingOptions[indexElegido];
                         songs[currentSongIdx] = cartaElegida;
+                        applyTheme(cartaElegida.type ? cartaElegida.type : 'mix');
 
                         turnPhase = 'KING_GUESS';
                         document.getElementById('ui-card-artist').innerText = "????";
@@ -1768,7 +1622,7 @@
                         document.getElementById('ui-card-year').innerText = "????";
                         document.getElementById('host-instructions').innerHTML = "CARTA ELEGIDA.<br>ESPERANDO A QUE EL REY INTRODUZCA EL AÑO...";
                         document.getElementById('player-container').innerHTML = '<div id="youtube-player"></div>';
-                        isPlaying = false; syncState();
+                        syncState();
                     }
                     break;
                 case 'KING_GUESS':
@@ -1826,6 +1680,55 @@
                     if (turnPhase === 'LOBBY' || players.length === 0) {
                         setJoputismo(parseInt(value));
                     }
+                    break;
+                case 'REMOTE_START_GAME':
+                    if (!gameStarted) {
+                        startGame();
+                    }
+                    break;
+                case 'REMOTE_JOPUTISMO':
+                    setJoputismo(value);
+                    syncState();
+                    break;
+                case 'REMOTE_REVEAL':
+                    if (turnPhase !== 'LOBBY' && !isRevealed) {
+                        revealData();
+                    }
+                    break;
+                case 'REMOTE_CORRECT':
+                    validateResult(true, false);
+                    break;
+                case 'REMOTE_CORRECT_TOKEN':
+                    validateResult(true, true);
+                    break;
+                case 'REMOTE_INCORRECT':
+                    validateResult(false, false);
+                    break;
+                case 'REMOTE_INCORRECT_TOKEN':
+                    validateResult(false, true);
+                    break;
+                case 'REMOTE_SYSTEM_ERROR':
+                    reportSystemError();
+                    break;
+                case 'REMOTE_SET_GAME_MODE':
+                    if (turnPhase === 'LOBBY') {
+                        gameMode = value;
+                        document.getElementById('game-mode-select').value = value;
+                        syncState();
+                    }
+                    break;
+                case 'REMOTE_KING_RESOLVE':
+                    resolveKingMode(value === 'true' || value === true);
+                    break;
+                case 'REMOTE_NEXT_TURN':
+                    if (turnPhase === 'DUEL' && !currentDuel) {
+                        nextTurn();
+                    } else if (isRevealed) {
+                        nextTurn();
+                    }
+                    break;
+                case 'REMOTE_DUEL_FINISH':
+                    finishDuel();
                     break;
                 case 'MARKET_WILDCARD':
                     var p = players.find(function (pl) { return pl.id === peerId; });
@@ -1892,24 +1795,57 @@
             }
         }
 
+        function refundBets() {
+            var refunded = false;
+            if (bettingAgainst.length > 0) {
+                bettingAgainst.forEach(function(pid) {
+                    var p = players.find(pl => pl.id === pid);
+                    if(p) updateTokens(p, 1);
+                });
+                refunded = true;
+            }
+            if (bettingFor.length > 0) {
+                bettingFor.forEach(function(pid) {
+                    var p = players.find(pl => pl.id === pid);
+                    if(p) updateTokens(p, 1);
+                });
+                refunded = true;
+            }
+            bettingAgainst = [];
+            bettingFor = [];
+            if (refunded) syncState();
+        }
+
         function reportSystemError() {
+            refundBets();
             var s = songs[currentSongIdx];
             if (!s || !s.id) return;
-            var url = 'https://www.youtube.com/watch?v=' + s.id;
-            var listType = s.type ? s.type : 'General';
-            
-            fetch('reporte_error.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ url: url, tipo: listType })
-            }).then(function(r){ return r.json()}).then(function(data){
-                alert('URL reportada como rota. Gasta un Token de Recarga si tienes para saltarla.');
-                var btn = document.getElementById('btn-report-error');
-                if(btn) btn.style.display = 'none';
-            }).catch(function(e){
-                console.error(e);
-                alert('Aviso guardado.');
-            });
+            var newYear = prompt("ERROR EN DATOS: " + s.artist + " - " + s.song + "\nIntroduce el AÑO CORRECTO para registro:");
+            if (newYear) {
+                var recipient = "xavi.rifa@gmail.com";
+                var subject = "CORRECCION CHRONOBEATS: Fila " + s.line;
+                var body = "DETECTADO ERROR EN LISTA\n\n" +
+                    "Fila: " + s.line + "\n" +
+                    "Artista: " + s.artist + "\n" +
+                    "Canción: " + s.song + "\n" +
+                    "Año en TXT: " + s.year + "\n" +
+                    "Año Correcto: " + newYear + "\n\n" +
+                    "Instrucciones: Abrir lista_final.txt en la fila " + s.line + " y corregir el año.";
+
+                var mailtoUrl = "mailto:" + recipient + "?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
+
+                console.log("!!! ERROR DE SISTEMA DETECTADO !!!");
+                console.log("Referencia: " + s.artist + " - " + s.song + " (Fila " + s.line + ")");
+                console.log("Corrección: " + s.year + " -> " + newYear);
+
+                window.location.href = mailtoUrl;
+                alert("¡Error registrado! Se ha preparado un email para " + recipient + ".\nSe descarta esta canción y repites el turno.");
+            }
+            if (turnPhase === 'KING_GUESS' || turnPhase === 'KING_GUESS_RESULT' || turnPhase === 'KING_SELECTION') {
+                activePlayerIdx--;
+                if (activePlayerIdx < 0) activePlayerIdx = players.length - 1;
+            }
+            nextTurn();
         }
 
         function revealData() {
@@ -1952,7 +1888,7 @@
         }
 
         function validateResult(isCardOk, isTokenOk) {
-            if (turnPhase === 'DUEL') return;
+            if (turnPhase === 'DUEL') return; // No se valida nada en modo duelo manualmente de esta forma
             
             if (isTokenOk) {
                 updateTokens(players[activePlayerIdx], 1);
@@ -2182,10 +2118,6 @@
         }
 
         function syncState() {
-            // Si un jugador llega a 10 cartas (Modo Rey), sus fichas pasan a 0
-            players.forEach(function (p) {
-                if (p.score >= 10) p.tokens = 0;
-            });
             var leaderName = "---";
             var leaderScore = 0;
             if (players.length > 0) {
@@ -2198,7 +2130,7 @@
 
             var currentJudgeId = 'ALL';
             if (document.getElementById('lobby').style.display === 'none' && players.length > 0) {
-                // El usuario prefiere que el mando pase al SIGUIENTE jugador para validar
+                // El usuario prefiere que el mando pase al SIGUIENTE jugador para validar (como tradicionalmente)
                 if (turnPhase === 'NORMAL' || turnPhase === 'KING_GUESS' || turnPhase === 'KING_SELECTION') {
                     var judgeIdx = (activePlayerIdx + 1) % players.length;
                     currentJudgeId = players[judgeIdx] ? players[judgeIdx].id : 'ALL';
@@ -2216,7 +2148,6 @@
                     judgeId: currentJudgeId,
                     leader: { name: leaderName, score: leaderScore },
                     currentTrack: songs[currentSongIdx],
-                    currentType: songs[currentSongIdx] ? songs[currentSongIdx].type : 'orig',
                     revealed: isRevealed,
                     isPlaying: isPlaying,
                     isMuted: isMuted,
@@ -2234,11 +2165,12 @@
                     activeTimeline: players[activePlayerIdx] ? players[activePlayerIdx].cards : [],
                     currentBets: currentBets,
                     activeGuess: activeGuess,
+                    currentDuel: currentDuel,
+                    duelResult: duelResult,
                     kingOptions: kingOptions,
                     cheatsEnabled: cheatsEnabled,
                     turnPhase: turnPhase,
-                    currentDuel: currentDuel,
-                    duelResult: duelResult,
+                    currentType: songs[currentSongIdx] ? songs[currentSongIdx].type : 'mix',
                     hasShield: hasShield,
                     duelTriggered: duelTriggered,
                     gameStarted: document.getElementById('lobby').style.display === 'none'
@@ -2287,7 +2219,7 @@
             });
             document.getElementById('leaderboard-list').innerHTML = h;
 
-            // Resto de updateUI
+            // Mostrar cartas del jugador actual en el centro
             var currentCardsHtml = "";
             players[activePlayerIdx].cards.forEach(function (year) {
                 currentCardsHtml += '<div class="mini-card">' + (isFogActive ? '????' : year) + '</div>';
@@ -2300,16 +2232,7 @@
                 timelinesHtml += '</div></div>';
             });
             document.getElementById('global-timelines').innerHTML = timelinesHtml;
-        }
-
-        function triggerFlash() {
-            let overlay = document.getElementById('flash-overlay');
-            if (overlay) {
-                overlay.classList.remove('animate-flash');
-                void overlay.offsetWidth; // Force reflow
-                overlay.classList.add('animate-flash');
-            }
-        }
+        }    
         function reportBrokenLink() {
             var s = songs[currentSongIdx];
             if (!s || !s.id) return;
@@ -2353,7 +2276,14 @@
                 }
             });
         }
+        function triggerFlash() {
+            let overlay = document.getElementById('flash-overlay');
+            if (overlay) {
+                overlay.classList.remove('animate-flash');
+                void overlay.offsetWidth; // Force reflow
+                overlay.classList.add('animate-flash');
+            }
+        }
     </script>
 </body>
 </html>
-
