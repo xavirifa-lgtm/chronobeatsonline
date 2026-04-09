@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 
 <head>
@@ -7,7 +7,7 @@
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon-192.png">
     <meta name="theme-color" content="#ffaa00">
-    <title>HOST - CHRONOBEATS PELÍCULAS</title>
+    <title>HOST - CHRONOBEATS PELÃCULAS</title>
     <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
@@ -125,7 +125,7 @@
             top: -999px;
             left: -999px;
             opacity: 0.1;
-            /* Mínima opacidad pero técnicamente visible para el navegador */
+            /* MÃ­nima opacidad pero tÃ©cnicamente visible para el navegador */
         }
 
         #player-container iframe {
@@ -581,7 +581,7 @@
     <a href="index.html" class="btn-hub" title="Volver al Hub">H</a>
     <div id="flash-overlay"></div>
     <div id="winner-screen">
-        <h1>¡TENEMOS GANADOR!</h1>
+        <h1>Â¡TENEMOS GANADOR!</h1>
         <div id="winner-avatar-img" style="margin: 20px 0;"></div>
         <h2 id="winner-name">---</h2>
         <button class="btn-start" onclick="location.reload()" style="margin-top:30px">JUGAR OTRA VEZ</button>
@@ -601,8 +601,8 @@
                 DE JUEGO</label>
             <select id="game-mode-select"
                 style="padding: 10px; font-family: 'Montserrat'; font-size: 1em; border-radius: 8px; background: #222; color: #fff; border: 1px solid var(--neon);">
-                <option value="normal">CLÁSICO (Gana a los 10)</option>
-                <option value="rey">MODO REY (Adivina Año Final)</option>
+                <option value="normal">CLÃSICO (Gana a los 10)</option>
+                <option value="rey">MODO REY (Adivina AÃ±o Final)</option>
             </select>
         </div>
 
@@ -612,8 +612,8 @@
                 DE JOPUTISMO</label>
             <select id="joputismo-select-lobby" onchange="setJoputismo(this.value)"
                 style="padding: 10px; font-family: 'Montserrat'; font-size: 1em; border-radius: 8px; background: #222; color: #fff; border: 1px solid #ff0055;">
-                <option value="0">LOSER (Modo Pacífico)</option>
-                <option value="1">TROLL (Nivel Cabrón)</option>
+                <option value="0">LOSER (Modo PacÃ­fico)</option>
+                <option value="1">TROLL (Nivel CabrÃ³n)</option>
                 <option value="2">SUPERMAN (Guerra Total)</option>
             </select>
         </div>
@@ -654,7 +654,7 @@
             </div>
             <div class="validation-area">
                 <div class="val-card" id="val-card-ui" style="display:none;">
-                    <p style="font-size: 0.7em; color: var(--neon); margin-bottom: 5px;">CANCIÓN EN JUEGO <span style="font-size: 0.8em; opacity: 0.8;"> - PELÍCULAS Y SERIES</span></p>
+                    <p style="font-size: 0.7em; color: var(--neon); margin-bottom: 5px;">CANCIÃ“N EN JUEGO <span style="font-size: 0.8em; opacity: 0.8;"> - PELÃCULAS Y SERIES</span></p>
                     <p id="ui-card-artist" style="font-size: 0.9em; color: #aaa; margin: 0; font-weight: bold;">????</p>
                     <h3 id="ui-card-song" style="margin: 5px 0; font-size: 1.2em;">????</h3>
                     <div id="ui-card-year"
@@ -664,23 +664,23 @@
                         style="display:block; margin: 15px auto;">REVELAR DATOS</button>
                     <div class="actions" id="validation-buttons"
                         style="display:none; gap: 10px; width: 100%; margin-top: 15px;">
-                        <button class="btn-val btn-ok" onclick="validateResult(true, false)">ACERTÓ</button>
+                        <button class="btn-val btn-ok" onclick="validateResult(true, false)">ACERTÃ“</button>
                         <button class="btn-val btn-ok" style="background:#ffd700;"
-                            onclick="validateResult(true, true)">ACERTÓ TODO + <span class="neon-chip"></span></button>
-                        <button class="btn-val btn-fail" onclick="validateResult(false, false)">FALLÓ</button>
+                            onclick="validateResult(true, true)">ACERTÃ“ TODO + <span class="neon-chip"></span></button>
+                        <button class="btn-val btn-fail" onclick="validateResult(false, false)">FALLÃ“</button>
                     </div>
                     <div id="challenger-validation"
                         style="display:none; margin-top: 15px; border-top: 1px solid #333; padding-top: 15px;">
-                        <p style="font-size: 0.7em; color: var(--gold); margin-bottom: 10px;">¿ALGÚN DESAFIANTE GANÓ LA
+                        <p style="font-size: 0.7em; color: var(--gold); margin-bottom: 10px;">Â¿ALGÃšN DESAFIANTE GANÃ“ LA
                             APUESTA?</p>
                         <div id="challenger-buttons"
                             style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;"></div>
                         <button class="btn-val"
                             style="background:#444; margin-top:10px; font-size: 0.6em; padding: 10px;"
-                            onclick="nextTurn()">NADIE ACERTÓ</button>
+                            onclick="nextTurn()">NADIE ACERTÃ“</button>
                     </div>
                 </div>
-                <div id="host-instructions">ESPERANDO ACCIÓN...</div>
+                <div id="host-instructions">ESPERANDO ACCIÃ“N...</div>
                 <div id="active-player-inventory" class="active-player-cards"></div>
             </div>
         </div>
@@ -730,39 +730,27 @@
         }
 
         function initPeer() {
-            peer = new Peer("CB-HOST-" + roomCode, {
-                config: {
-                                                            'iceServers': [
-                        { urls: 'stun:stun.l.google.com:19302' },
-                        { urls: 'stun:stun1.l.google.com:19302' },
-                        { urls: 'stun:global.stun.twilio.com:3478' },
-                        { urls: 'stun:stun.cloudflare.com:3478' },
-                        { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
-                        { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' },
-                        { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' }
-                    ]
-                }
-            });
+            peer = new Peer("CB-HOST-" + roomCode, { debug: 3, host: "0.peerjs.com", port: 443, secure: true, path: "/", pingInterval: 5000, config: { iceServers: [ { urls: "stun:stun.l.google.com:19302" }, { urls: "stun:stun1.l.google.com:19302" }, { urls: "stun:stun2.l.google.com:19302" }, { urls: "stun:global.stun.twilio.com:3478" }, { urls: "turn:openrelay.metered.ca:443", username: "openrelayproject", credential: "openrelayproject" } ] } });
             peer.on('open', function (id) {
                 console.log("Host Peer Abierto:", id);
                 document.getElementById('live-room-code').innerText = roomCode;
                 document.getElementById('live-room-code').style.display = 'block';
             });
             peer.on('connection', function (conn) {
-                console.log("Nueva conexión entrante:", conn.peer);
+                console.log("Nueva conexiÃ³n entrante:", conn.peer);
                 conn.on('open', function () {
-                    console.log("Conexión con el player abierta");
+                    console.log("ConexiÃ³n con el player abierta");
                 });
                 conn.on('data', function (data) {
                     console.log("Comando recibido en host:", data);
                     if (data.type === 'JOIN') {
-                        // PROTECCIÓN DUPLICADOS: Buscar si el nombre ya existe
+                        // PROTECCIÃ“N DUPLICADOS: Buscar si el nombre ya existe
                         var existing = players.find(function (p) { return p.name.toLowerCase() === data.name.toLowerCase(); });
                         if (existing) {
-                            console.log("Reconexión de jugador:", data.name);
+                            console.log("ReconexiÃ³n de jugador:", data.name);
                             delete connections[existing.id];
                             existing.id = conn.peer;
-                            existing.avatar = data.avatar || existing.avatar; // Actualizar avatar si cambió
+                            existing.avatar = data.avatar || existing.avatar; // Actualizar avatar si cambiÃ³
                             connections[conn.peer] = conn;
                             syncState(); // Force state sync to reconnecting player
                         } else {
@@ -781,7 +769,7 @@
                     }
                 });
                 conn.on('error', function (err) {
-                    console.error("Error en conexión:", err);
+                    console.error("Error en conexiÃ³n:", err);
                 });
             });
             peer.on('error', function (err) {
@@ -807,7 +795,7 @@
                     song: p[1],
                     year: p[2],
                     id: m ? (m[1] || m[2]) : null,
-                    line: index + 1 // Guardar número de fila original
+                    line: index + 1 // Guardar nÃºmero de fila original
                 };
             }).filter(function (s) {
                 if (!s.id || uniqueIds.has(s.id) || playedIds.includes(s.id)) return false;
@@ -877,7 +865,7 @@
 
             gameMode = document.getElementById('game-mode-select').value;
 
-            // MECÁNICA INICIAL: Repartir una carta a cada jugador
+            // MECÃNICA INICIAL: Repartir una carta a cada jugador
             players.forEach(function (p) {
                 currentSongIdx++; if(songs[currentSongIdx] && songs[currentSongIdx].id) { var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]'); if(!_pl.includes(songs[currentSongIdx].id)){ _pl.push(songs[currentSongIdx].id); localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl)); } }
                 var s = songs[currentSongIdx];
@@ -902,7 +890,7 @@
             isPlaying = false;
             currentBets = {}; var rb=document.getElementById('btn-report-error'); if(rb) rb.style.display='block'; // al cambiar de turno
             activeGuess = null; // Limpiar adivinanza
-            bettingAgainst = []; // Limpiar apuestas de "ni de coña"
+            bettingAgainst = []; // Limpiar apuestas de "ni de coÃ±a"
             bettingFor = []; // Limpiar apuestas a favor
 
             isMuted = false;
@@ -914,7 +902,7 @@
             duelResult = null;
             duelTriggered = false;
 
-            // Parar música de duelo
+            // Parar mÃºsica de duelo
             var audioContainer = document.getElementById('audio-player-container');
             if (audioContainer) audioContainer.innerHTML = '';
 
@@ -928,7 +916,7 @@
             if (gameMode === 'rey' && players.length >= 3 && players[activePlayerIdx] && players[activePlayerIdx].score >= 10) {
                 turnPhase = 'KING_SELECTION';
                 kingOptions = [];
-                // Calcular un número de cartas igual a (players.length - 1)
+                // Calcular un nÃºmero de cartas igual a (players.length - 1)
                 var numOptions = Math.max(1, players.length - 1);
                 for (var i = 0; i < numOptions; i++) {
                     currentSongIdx++; if(songs[currentSongIdx] && songs[currentSongIdx].id) { var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]'); if(!_pl.includes(songs[currentSongIdx].id)){ _pl.push(songs[currentSongIdx].id); localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl)); } }
@@ -943,7 +931,7 @@
                 document.getElementById('validation-buttons').style.display = 'none';
                 document.getElementById('challenger-validation').style.display = 'none';
                 document.getElementById('ui-current-player').innerText = players[activePlayerIdx].name + " (REY)";
-                document.getElementById('host-instructions').innerText = "ESPERANDO A QUE LOS JUGADORES ELIJAN QUÉ CARTA TE TOCA...";
+                document.getElementById('host-instructions').innerText = "ESPERANDO A QUE LOS JUGADORES ELIJAN QUÃ‰ CARTA TE TOCA...";
                 document.getElementById('player-container').innerHTML = '';
                 syncState();
                 return;
@@ -959,7 +947,7 @@
             document.getElementById('validation-buttons').style.display = 'none';
             document.getElementById('challenger-validation').style.display = 'none';
             document.getElementById('ui-current-player').innerText = players[activePlayerIdx].name;
-            document.getElementById('host-instructions').innerText = "ESPERANDO ACCIÓN...";
+            document.getElementById('host-instructions').innerText = "ESPERANDO ACCIÃ“N...";
             document.getElementById('player-container').innerHTML = '<div id="youtube-player"></div>';
             syncState();
         }
@@ -995,18 +983,18 @@
             
             if (dChallenger < dTarget) {
                 winnerId = challenger.id;
-                reason = challenger.name + " estuvo más cerca (" + currentDuel.challengerYear + " vs " + currentDuel.targetYear + ")";
+                reason = challenger.name + " estuvo mÃ¡s cerca (" + currentDuel.challengerYear + " vs " + currentDuel.targetYear + ")";
             } else if (dTarget < dChallenger) {
                 winnerId = target.id;
-                reason = target.name + " estuvo más cerca (" + currentDuel.targetYear + " vs " + currentDuel.challengerYear + ")";
+                reason = target.name + " estuvo mÃ¡s cerca (" + currentDuel.targetYear + " vs " + currentDuel.challengerYear + ")";
             } else {
                 // Tie breaker: Quick Draw
                 if (currentDuel.challengerTime < currentDuel.targetTime) {
                     winnerId = challenger.id;
-                    reason = "¡EMPATE! Pero " + challenger.name + " fue más rápido (QUICK DRAW).";
+                    reason = "Â¡EMPATE! Pero " + challenger.name + " fue mÃ¡s rÃ¡pido (QUICK DRAW).";
                 } else {
                     winnerId = target.id;
-                    reason = "¡EMPATE! Pero " + target.name + " fue más rápido (QUICK DRAW).";
+                    reason = "Â¡EMPATE! Pero " + target.name + " fue mÃ¡s rÃ¡pido (QUICK DRAW).";
                 }
             }
             
@@ -1015,16 +1003,16 @@
             
             // Frases cabronas
             var winnerPhrases = [
-                "¡Felicidades, lumbreras! Hasta un reloj parado acierta dos veces al día.",
-                "Qué potra tienes, chaval. A la próxima no te salva ni la caridad.",
-                "¡Victoria! Aunque con esa cara, dudo que te sirva de mucho.",
-                "Mira cómo brilla... es tu ego, no tu inteligencia."
+                "Â¡Felicidades, lumbreras! Hasta un reloj parado acierta dos veces al dÃ­a.",
+                "QuÃ© potra tienes, chaval. A la prÃ³xima no te salva ni la caridad.",
+                "Â¡Victoria! Aunque con esa cara, dudo que te sirva de mucho.",
+                "Mira cÃ³mo brilla... es tu ego, no tu inteligencia."
             ];
             var loserPhrases = [
-                "¡Qué ridículo! Mi abuela sorda lo habría hecho mejor.",
-                "A fregar, que para adivinar años no sirves.",
-                "¿En serio? ¿Ese año? Vuelve a la guardería.",
-                "Palizón gitano. A casa a llorar con tu madre."
+                "Â¡QuÃ© ridÃ­culo! Mi abuela sorda lo habrÃ­a hecho mejor.",
+                "A fregar, que para adivinar aÃ±os no sirves.",
+                "Â¿En serio? Â¿Ese aÃ±o? Vuelve a la guarderÃ­a.",
+                "PalizÃ³n gitano. A casa a llorar con tu madre."
             ];
 
             duelResult = {
@@ -1045,7 +1033,7 @@
                 updateTokens(loser, -stolen);
                 updateTokens(winner, stolen);
                 
-                document.getElementById('host-instructions').innerHTML = "<div style='color:var(--gold); font-family:Bungee; font-size:1.8em;'>¡GANADOR: " + winner.name + "!</div><div style='font-size:0.9em; margin-bottom:10px;'>" + reason + "</div><div style='color:var(--neon);'>Se lleva la carta y " + stolen + " fichas del rival.</div>";
+                document.getElementById('host-instructions').innerHTML = "<div style='color:var(--gold); font-family:Bungee; font-size:1.8em;'>Â¡GANADOR: " + winner.name + "!</div><div style='font-size:0.9em; margin-bottom:10px;'>" + reason + "</div><div style='color:var(--neon);'>Se lleva la carta y " + stolen + " fichas del rival.</div>";
             }
             document.getElementById('validation-buttons').style.display = 'flex';
             document.getElementById('validation-buttons').innerHTML = '<button class="btn-val btn-ok" onclick="finishDuel()">ACEPTAR RESULTADO</button>';
@@ -1117,7 +1105,7 @@
                         duelTriggered = true;
                         var target = players[activePlayerIdx];
                         
-                        // ACTIVACIÓN INMEDIATA
+                        // ACTIVACIÃ“N INMEDIATA
                         currentDuel = { 
                             challenger: p.id, 
                             target: target.id,
@@ -1136,7 +1124,7 @@
                         
                         playDuelMusic();
 
-                        document.getElementById('host-instructions').innerHTML = "<div style='color:var(--gold); font-family:Bungee; font-size:2em;'>¡DUELO A MUERTE!</div><div style='font-size:1.2em;'>" + p.name + " VS " + target.name + "</div>";
+                        document.getElementById('host-instructions').innerHTML = "<div style='color:var(--gold); font-family:Bungee; font-size:2em;'>Â¡DUELO A MUERTE!</div><div style='font-size:1.2em;'>" + p.name + " VS " + target.name + "</div>";
                         document.getElementById('validation-buttons').style.display = 'none';
 
                         syncState();
@@ -1157,7 +1145,7 @@
                             var audioContainer = document.getElementById('audio-player-container');
                             if (audioContainer) audioContainer.innerHTML = '';
                             
-                            document.getElementById('host-instructions').innerHTML = "<div style='color:var(--gold); font-family:Bungee; font-size:2em;'>¡DUELO FINALIZADO!</div><div style='font-size:1.2em;'>Calculando resultados...</div>";
+                            document.getElementById('host-instructions').innerHTML = "<div style='color:var(--gold); font-family:Bungee; font-size:2em;'>Â¡DUELO FINALIZADO!</div><div style='font-size:1.2em;'>Calculando resultados...</div>";
                             revealData();
                         }
                         syncState();
@@ -1167,7 +1155,7 @@
                     if (peerId !== activeP.id) return;
                     isPlaying = false;
                     container.innerHTML = '';
-                    document.getElementById('host-instructions').innerText = "¿ACERTÓ?";
+                    document.getElementById('host-instructions').innerText = "Â¿ACERTÃ“?";
                     revealData();
                     syncState();
                     break;
@@ -1189,32 +1177,32 @@
                             if (target && target.cards && target.cards.length > 0) {
                                 var card = target.cards.pop();
                                 p.cards.push(card);
-                                msgP = "¡ZAS! Le has mangado una carta a " + target.name + ". ¡Vaya suerte de forajido!";
-                                msgT = "¡MALAS NOTICIAS! " + p.name + " te ha levantado una carta en la Ruleta Rusa. ¡Es un mangante!";
+                                msgP = "Â¡ZAS! Le has mangado una carta a " + target.name + ". Â¡Vaya suerte de forajido!";
+                                msgT = "Â¡MALAS NOTICIAS! " + p.name + " te ha levantado una carta en la Ruleta Rusa. Â¡Es un mangante!";
                             } else {
-                                msgP = "Has intentado mangar una carta a " + (target ? target.name : "nadie") + " pero no tenía nada. ¡Pólvora mojada!";
+                                msgP = "Has intentado mangar una carta a " + (target ? target.name : "nadie") + " pero no tenÃ­a nada. Â¡PÃ³lvora mojada!";
                             }
                         } else if (result === 1) { // Robar 1 ficha
                             if (target && target.tokens > 0) {
                                 updateTokens(target, -1);
                                 updateTokens(p, 1);
-                                msgP = "¡Dichosa suerte! Le has birlado una ficha a " + target.name + ".";
-                                msgT = "¡AY! " + p.name + " te ha robado una ficha en la Ruleta Rusa. ¡Vigila tu bolsa!";
+                                msgP = "Â¡Dichosa suerte! Le has birlado una ficha a " + target.name + ".";
+                                msgT = "Â¡AY! " + p.name + " te ha robado una ficha en la Ruleta Rusa. Â¡Vigila tu bolsa!";
                             } else {
-                                msgP = "¡Vaya! Has ganado un hueco vacío. " + (target ? target.name : "nadie") + " no tiene ni un centavo.";
+                                msgP = "Â¡Vaya! Has ganado un hueco vacÃ­o. " + (target ? target.name : "nadie") + " no tiene ni un centavo.";
                             }
                         } else if (result === 2) { // Perder 1 ficha
                             updateTokens(p, -1);
-                            msgP = "¡BOOM! El tiro te ha rozado la oreja... Pierdes 1 ficha extra por el susto.";
+                            msgP = "Â¡BOOM! El tiro te ha rozado la oreja... Pierdes 1 ficha extra por el susto.";
                         } else if (result === 3) { // Perder 2 fichas
                             updateTokens(p, -2);
-                            msgP = "¡CRITICAL HIT! Te has pegado un tiro en el pie tú solo. Pierdes 2 fichas extras.";
+                            msgP = "Â¡CRITICAL HIT! Te has pegado un tiro en el pie tÃº solo. Pierdes 2 fichas extras.";
                         }
 
                         if (msgP) try { connections[p.id].send({ type: 'BET_RESULT', msg: msgP }); } catch (e) { }
                         if (target && msgT) try { connections[target.id].send({ type: 'BET_RESULT', msg: msgT }); } catch (e) { }
                         
-                        document.getElementById('host-instructions').innerHTML = "<span style='color:#ff0055; font-size:1.5em; font-family:Bungee;'>¡" + p.name + " JUGÓ A LA RULETA RUSA!</span>";
+                        document.getElementById('host-instructions').innerHTML = "<span style='color:#ff0055; font-size:1.5em; font-family:Bungee;'>Â¡" + p.name + " JUGÃ“ A LA RULETA RUSA!</span>";
                         syncState();
                     }
                     break;
@@ -1222,7 +1210,7 @@
                     if (hasShield[activeP.id]) {
                         var p = players.find(function (pl) { return pl.id === peerId; });
                         if (p) {
-                            try { if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "¡ZASCA! El Escudo de " + activeP.name + " ha rebotado tu sabotaje y lo has perdido todo jajaja" }); } catch (e) { }
+                            try { if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "Â¡ZASCA! El Escudo de " + activeP.name + " ha rebotado tu sabotaje y lo has perdido todo jajaja" }); } catch (e) { }
                         }
                         hasShield[activeP.id] = false;
                         syncState();
@@ -1288,7 +1276,7 @@
                         p.canReload = false; // Solo uno por turno
                         refundBets();
                         isPlaying = false;
-                        container.innerHTML = '<div id="youtube-player"></div>'; // Parar música de verdad
+                        container.innerHTML = '<div id="youtube-player"></div>'; // Parar mÃºsica de verdad
                         currentSongIdx++; if(songs[currentSongIdx] && songs[currentSongIdx].id) { var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]'); if(!_pl.includes(songs[currentSongIdx].id)){ _pl.push(songs[currentSongIdx].id); localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl)); } } // Descartar y pasar a la siguiente
                         segundosAcumulados = 0;
                         momentoDeInicio = 0;
@@ -1299,7 +1287,7 @@
                         document.getElementById('btn-reveal-host').style.display = 'block';
                         document.getElementById('val-card-ui').style.display = 'block';
                         document.getElementById('validation-buttons').style.display = 'none';
-                        document.getElementById('host-instructions').innerText = "CANCIÓN CAMBIADA (DALE A PLAY)";
+                        document.getElementById('host-instructions').innerText = "CANCIÃ“N CAMBIADA (DALE A PLAY)";
                         syncState();
                     }
                     break;
@@ -1319,7 +1307,7 @@
                         document.getElementById('btn-reveal-host').style.display = 'block';
                         document.getElementById('val-card-ui').style.display = 'block';
                         document.getElementById('validation-buttons').style.display = 'none';
-                        document.getElementById('host-instructions').innerText = "VÍDEO ROTO. CANCIÓN CAMBIADA.";
+                        document.getElementById('host-instructions').innerText = "VÃDEO ROTO. CANCIÃ“N CAMBIADA.";
                         syncState();
                     }
                     break;
@@ -1345,7 +1333,7 @@
                         currentBets[peerId] = valNum;
                         syncState();
                     } else {
-                        console.log("[FAIL] Apuesta rechazada. p:", !!p, "Tokens:", p ? p.tokens : 0, "Ya apostó?", p ? currentBets[peerId] !== undefined : false, "Slot ocupado?", slotOccupied, "Guess es", activeGuess);
+                        console.log("[FAIL] Apuesta rechazada. p:", !!p, "Tokens:", p ? p.tokens : 0, "Ya apostÃ³?", p ? currentBets[peerId] !== undefined : false, "Slot ocupado?", slotOccupied, "Guess es", activeGuess);
                     }
                     break;
                 case 'BET_AGAINST_ACTIVE':
@@ -1356,7 +1344,7 @@
 
                         // Mostrar mensaje flotante en el host
                         var oldText = document.getElementById('host-instructions').innerText;
-                        document.getElementById('host-instructions').innerHTML = "<span style='color:#ff0055; font-size:1.2em;'>¡" + p.name + " DUDA DE QUE LO SEPA!</span>";
+                        document.getElementById('host-instructions').innerHTML = "<span style='color:#ff0055; font-size:1.2em;'>Â¡" + p.name + " DUDA DE QUE LO SEPA!</span>";
                         setTimeout(function () {
                             if (!isRevealed) document.getElementById('host-instructions').innerText = (isMuted ? "REPRODUCIENDO (MUTE)" : "REPRODUCIENDO");
                         }, 3000);
@@ -1372,7 +1360,7 @@
 
                         // Mostrar mensaje flotante en el host
                         var oldText = document.getElementById('host-instructions').innerText;
-                        document.getElementById('host-instructions').innerHTML = "<span style='color:#00ff88; font-size:1.2em;'>¡" + p.name + " ESTÁ CON EL MAESTRO!</span>";
+                        document.getElementById('host-instructions').innerHTML = "<span style='color:#00ff88; font-size:1.2em;'>Â¡" + p.name + " ESTÃ CON EL MAESTRO!</span>";
                         setTimeout(function () {
                             if (!isRevealed) document.getElementById('host-instructions').innerText = (isMuted ? "REPRODUCIENDO (MUTE)" : "REPRODUCIENDO");
                         }, 3000);
@@ -1384,7 +1372,7 @@
                     if (hasShield[activeP.id]) {
                         var p = players.find(function (pl) { return pl.id === peerId; });
                         if (p) {
-                            try { if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "¡ZASCA! El Escudo de " + activeP.name + " ha rebotado tu sabotaje y lo has perdido todo jajaja" }); } catch (e) { }
+                            try { if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "Â¡ZASCA! El Escudo de " + activeP.name + " ha rebotado tu sabotaje y lo has perdido todo jajaja" }); } catch (e) { }
                         }
                         hasShield[activeP.id] = false;
                         syncState();
@@ -1397,14 +1385,14 @@
                         panicTimer = 10;
 
                         var oldText = document.getElementById('host-instructions').innerText;
-                        document.getElementById('host-instructions').innerHTML = "<span style='color:#ff0000; font-size:1.5em; font-family:Bungee;'>¡" + p.name + " HA LANZADO UN ATAQUE DE PÁNICO!</span>";
+                        document.getElementById('host-instructions').innerHTML = "<span style='color:#ff0000; font-size:1.5em; font-family:Bungee;'>Â¡" + p.name + " HA LANZADO UN ATAQUE DE PÃNICO!</span>";
                         
                         // NOTIFICAR AL JUGADOR AFECTADO (V86)
                         var targetConn = connections[activeP.id];
                         if (targetConn) {
                             targetConn.send({
                                 type: 'SABOTAGE_SKIP_ALERT',
-                                msg: "¡" + p.name + " HA SEMBRADO EL PÁNICO EN TU TURNO! 😱"
+                                msg: "Â¡" + p.name + " HA SEMBRADO EL PÃNICO EN TU TURNO! ðŸ˜±"
                             });
                         }
 
@@ -1420,7 +1408,7 @@
                                 panicTimer = 0;
                                 panicActive = false;
 
-                                // PARAR MÚSICA Y REVELAR
+                                // PARAR MÃšSICA Y REVELAR
                                 isPlaying = false;
                                 document.getElementById('player-container').innerHTML = '';
                                 revealData(); 
@@ -1443,7 +1431,7 @@
                     if (hasShield[activeP.id]) {
                         var p = players.find(function (pl) { return pl.id === peerId; });
                         if (p) {
-                            try { if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "¡ZASCA! El Escudo de " + activeP.name + " ha rebotado tu sabotaje y lo has perdido todo jajaja" }); } catch (e) { }
+                            try { if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "Â¡ZASCA! El Escudo de " + activeP.name + " ha rebotado tu sabotaje y lo has perdido todo jajaja" }); } catch (e) { }
                         }
                         hasShield[activeP.id] = false;
                         syncState();
@@ -1454,14 +1442,14 @@
                         updateTokens(p, -2);
                         isFogActive = true;
 
-                        document.getElementById('host-instructions').innerHTML = "<span style='color:#aaaaaa; font-size:1.5em; font-family:Bungee;'>¡JAJAJA! ¡" + p.name + " HA LANZADO NIEBLA TEMPORAL!</span>";
+                        document.getElementById('host-instructions').innerHTML = "<span style='color:#aaaaaa; font-size:1.5em; font-family:Bungee;'>Â¡JAJAJA! Â¡" + p.name + " HA LANZADO NIEBLA TEMPORAL!</span>";
                         
                         // NOTIFICAR AL JUGADOR AFECTADO (V86)
                         var targetConn = connections[activeP.id];
                         if (targetConn) {
                             targetConn.send({
                                 type: 'SABOTAGE_SKIP_ALERT',
-                                msg: "¡" + p.name + " HA LANZADO NIEBLA SOBRE TU TURNO! 🌫️"
+                                msg: "Â¡" + p.name + " HA LANZADO NIEBLA SOBRE TU TURNO! ðŸŒ«ï¸"
                             });
                         }
 
@@ -1476,7 +1464,7 @@
                     if (hasShield[activeP.id]) {
                         var p = players.find(function (pl) { return pl.id === peerId; });
                         if (p) {
-                            try { if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "¡ZASCA! El Escudo de " + activeP.name + " ha rebotado tu sabotaje y lo has perdido todo jajaja" }); } catch (e) { }
+                            try { if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "Â¡ZASCA! El Escudo de " + activeP.name + " ha rebotado tu sabotaje y lo has perdido todo jajaja" }); } catch (e) { }
                         }
                         hasShield[activeP.id] = false;
                         syncState();
@@ -1499,19 +1487,19 @@
                         document.getElementById('val-card-ui').style.display = 'block';
                         document.getElementById('validation-buttons').style.display = 'none';
 
-                        document.getElementById('host-instructions').innerHTML = "<span style='color:#ff00ff; font-size:1.5em; font-family:Bungee;'>¡" + p.name + " HA OBLIGADO A CAMBIAR LA CANCIÓN!</span>";
+                        document.getElementById('host-instructions').innerHTML = "<span style='color:#ff00ff; font-size:1.5em; font-family:Bungee;'>Â¡" + p.name + " HA OBLIGADO A CAMBIAR LA CANCIÃ“N!</span>";
                         
                         // NOTIFICAR AL JUGADOR SALTADO (V79)
                         var targetConn = connections[activeP.id];
                         if (targetConn) {
                             targetConn.send({
                                 type: 'SABOTAGE_SKIP_ALERT',
-                                msg: "¡" + p.name + " HA SALTADO TU CANCIÓN! ⏭️"
+                                msg: "Â¡" + p.name + " HA SALTADO TU CANCIÃ“N! â­ï¸"
                             });
                         }
 
                         setTimeout(function () {
-                            if (!isRevealed && !panicActive) document.getElementById('host-instructions').innerText = "CANCIÓN CAMBIADA (DALE A PLAY)";
+                            if (!isRevealed && !panicActive) document.getElementById('host-instructions').innerText = "CANCIÃ“N CAMBIADA (DALE A PLAY)";
                         }, 4000);
 
                         syncState();
@@ -1521,7 +1509,7 @@
                     if (hasShield[activeP.id]) {
                         var p = players.find(function (pl) { return pl.id === peerId; });
                         if (p) {
-                            try { if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "¡ZASCA! El Escudo de " + activeP.name + " ha rebotado tu sabotaje y lo has perdido todo jajaja" }); } catch (e) { }
+                            try { if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "Â¡ZASCA! El Escudo de " + activeP.name + " ha rebotado tu sabotaje y lo has perdido todo jajaja" }); } catch (e) { }
                         }
                         hasShield[activeP.id] = false;
                         syncState();
@@ -1532,7 +1520,7 @@
                         updateTokens(p, -1);
                         players[activePlayerIdx].canReload = false;
 
-                        document.getElementById('host-instructions').innerHTML = "<span style='color:#ff8800; font-size:1.5em; font-family:Bungee;'>¡" + p.name + " HA VETADO LA RECARGA!</span>";
+                        document.getElementById('host-instructions').innerHTML = "<span style='color:#ff8800; font-size:1.5em; font-family:Bungee;'>Â¡" + p.name + " HA VETADO LA RECARGA!</span>";
                         setTimeout(function () {
                             if (!isRevealed && !panicActive) document.getElementById('host-instructions').innerText = (isMuted ? "REPRODUCIENDO (MUTE)" : "REPRODUCIENDO");
                         }, 3000);
@@ -1544,7 +1532,7 @@
                     if (hasShield[activeP.id]) {
                         var p = players.find(function (pl) { return pl.id === peerId; });
                         if (p) {
-                            try { if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "¡ZASCA! El Escudo de " + activeP.name + " ha rebotado tu sabotaje y lo has perdido todo jajaja" }); } catch (e) { }
+                            try { if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "Â¡ZASCA! El Escudo de " + activeP.name + " ha rebotado tu sabotaje y lo has perdido todo jajaja" }); } catch (e) { }
                         }
                         hasShield[activeP.id] = false;
                         syncState();
@@ -1562,7 +1550,7 @@
                         bettingAgainst = [];
                         bettingFor = [];
 
-                        document.getElementById('host-instructions').innerHTML = "<span style='color:#00f2fe; font-size:1.5em; font-family:Bungee;'>¡" + p.name + " HA ROBADO EL TURNO A " + oldActive.name + "!</span>";
+                        document.getElementById('host-instructions').innerHTML = "<span style='color:#00f2fe; font-size:1.5em; font-family:Bungee;'>Â¡" + p.name + " HA ROBADO EL TURNO A " + oldActive.name + "!</span>";
                         setTimeout(function () {
                             if (!isRevealed && !panicActive) document.getElementById('host-instructions').innerText = (isMuted ? "REPRODUCIENDO (MUTE)" : "REPRODUCIENDO");
                         }, 4000);
@@ -1581,7 +1569,7 @@
                             var cardIdx = Math.floor(Math.random() * target.cards.length);
                             target.cards.splice(cardIdx, 1);
 
-                            document.getElementById('host-instructions').innerHTML = "<span style='color:#9900ff; font-size:1.5em; font-family:Bungee;'>¡" + p.name + " CREÓ UN AGUJERO NEGRO Y DESTRUYÓ UNA CARTA DE " + target.name + "!</span>";
+                            document.getElementById('host-instructions').innerHTML = "<span style='color:#9900ff; font-size:1.5em; font-family:Bungee;'>Â¡" + p.name + " CREÃ“ UN AGUJERO NEGRO Y DESTRUYÃ“ UNA CARTA DE " + target.name + "!</span>";
                             setTimeout(function () {
                                 if (!isRevealed && !panicActive) document.getElementById('host-instructions').innerText = (isMuted ? "REPRODUCIENDO (MUTE)" : "REPRODUCIENDO");
                             }, 4000);
@@ -1604,12 +1592,12 @@
                             if (tConn) {
                                 tConn.send({
                                     type: 'BET_RESULT',
-                                    msg: "¡" + p.name + " TE HA ROBADO 1 FICHA! 🥷"
+                                    msg: "Â¡" + p.name + " TE HA ROBADO 1 FICHA! ðŸ¥·"
                                 });
                             }
 
                             triggerFlash();
-                            document.getElementById('host-instructions').innerHTML = "<span style='color:#ffff00; font-size:1.2em;'>¡" + p.name + " HA ROBADO A " + target.name + "!</span>";
+                            document.getElementById('host-instructions').innerHTML = "<span style='color:#ffff00; font-size:1.2em;'>Â¡" + p.name + " HA ROBADO A " + target.name + "!</span>";
                             setTimeout(function () {
                                 if (!isRevealed && !panicActive) document.getElementById('host-instructions').innerText = (isMuted ? "REPRODUCIENDO (MUTE)" : "REPRODUCIENDO");
                             }, 3000);
@@ -1637,12 +1625,12 @@
                             panicInterval = null;
                             panicActive = false;
                             panicTimer = 0;
-                            console.log("[PANIC] Temporizador detenido por respuesta rápida.");
+                            console.log("[PANIC] Temporizador detenido por respuesta rÃ¡pida.");
                         }
 
                         syncState();
                     } else {
-                        console.log("[FAIL] Guess rechazado. ¿Ya hay marca?", activeGuess !== null);
+                        console.log("[FAIL] Guess rechazado. Â¿Ya hay marca?", activeGuess !== null);
                     }
                     break;
                 case 'KING_SELECT_CARD':
@@ -1658,7 +1646,7 @@
                         document.getElementById('ui-card-artist').innerText = "????";
                         document.getElementById('ui-card-song').innerText = "????";
                         document.getElementById('ui-card-year').innerText = "????";
-                        document.getElementById('host-instructions').innerHTML = "CARTA ELEGIDA.<br>ESPERANDO A QUE EL REY INTRODUZCA EL AÑO...";
+                        document.getElementById('host-instructions').innerHTML = "CARTA ELEGIDA.<br>ESPERANDO A QUE EL REY INTRODUZCA EL AÃ‘O...";
                         document.getElementById('player-container').innerHTML = '<div id="youtube-player"></div>';
                         isPlaying = false; syncState();
                     }
@@ -1680,14 +1668,14 @@
 
                         var resultHtml = "";
                         if (won) {
-                            resultHtml = "<span style='color:#00ff00; font-size:1.5em;'>¡EL REY ACERTÓ!</span><br>Dijo " + guessedYear + ". (El año era " + actualYear + ").";
+                            resultHtml = "<span style='color:#00ff00; font-size:1.5em;'>Â¡EL REY ACERTÃ“!</span><br>Dijo " + guessedYear + ". (El aÃ±o era " + actualYear + ").";
                         } else {
-                            resultHtml = "<span style='color:#ff4444; font-size:1.5em;'>¡FALLÓ!</span><br>Dijo " + guessedYear + ". (El año era " + actualYear + ").";
+                            resultHtml = "<span style='color:#ff4444; font-size:1.5em;'>Â¡FALLÃ“!</span><br>Dijo " + guessedYear + ". (El aÃ±o era " + actualYear + ").";
                         }
                         resultHtml += "<br><br><button class='btn' style='background:var(--neon); color:#000; padding:15px; font-size:1.2em; pointer-events:auto; position:relative; z-index:9999;' onclick='resolveKingMode(" + won + ")'>ACEPTAR RESULTADO</button>";
 
                         document.getElementById('host-instructions').innerHTML = resultHtml;
-                        document.getElementById('host-instructions').style.pointerEvents = 'auto'; // Permitir click en el div global si está bloqueado
+                        document.getElementById('host-instructions').style.pointerEvents = 'auto'; // Permitir click en el div global si estÃ¡ bloqueado
 
                         turnPhase = 'KING_GUESS_RESULT';
                         syncState();
@@ -1793,7 +1781,7 @@
                             decadeStr = Math.floor(sYear / 10) * 10 + "s";
                         }
                         try {
-                            if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "PISTA! Años " + decadeStr });
+                            if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "PISTA! AÃ±os " + decadeStr });
                         } catch (e) { }
                         syncState();
                     }
@@ -1804,13 +1792,13 @@
                         updateTokens(p, -3);
                         hasShield[p.id] = true;
                         try {
-                            if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "ESCUDO ACTIVADO! Tu proximo sabotaje enemigo será neutralizado." });
+                            if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "ESCUDO ACTIVADO! Tu proximo sabotaje enemigo serÃ¡ neutralizado." });
                         } catch (e) { }
                         syncState();
                     }
                     break;
             }
-            // Eliminamos el syncState duplicado que podría causar problemas de carrera
+            // Eliminamos el syncState duplicado que podrÃ­a causar problemas de carrera
         }
 
         function isSlotCorrect(slotIdx, songYear, timeline) {
@@ -1857,26 +1845,26 @@
         function reportSystemError() {
             refundBets();
             var s = songs[currentSongIdx];
-            var newYear = prompt("ERROR EN DATOS: " + s.artist + " - " + s.song + "\nIntroduce el AÑO CORRECTO para registro:");
+            var newYear = prompt("ERROR EN DATOS: " + s.artist + " - " + s.song + "\nIntroduce el AÃ‘O CORRECTO para registro:");
             if (newYear) {
                 var recipient = "xavi.rifa@gmail.com";
                 var subject = "CORRECCION CHRONOBEATS: Fila " + s.line;
                 var body = "DETECTADO ERROR EN LISTA\n\n" +
                     "Fila: " + s.line + "\n" +
                     "Artista: " + s.artist + "\n" +
-                    "Canción: " + s.song + "\n" +
-                    "Año en TXT: " + s.year + "\n" +
-                    "Año Correcto: " + newYear + "\n\n" +
-                    "Instrucciones: Abrir lista_final.txt en la fila " + s.line + " y corregir el año.";
+                    "CanciÃ³n: " + s.song + "\n" +
+                    "AÃ±o en TXT: " + s.year + "\n" +
+                    "AÃ±o Correcto: " + newYear + "\n\n" +
+                    "Instrucciones: Abrir lista_final.txt en la fila " + s.line + " y corregir el aÃ±o.";
 
                 var mailtoUrl = "mailto:" + recipient + "?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
 
                 console.log("!!! ERROR DE SISTEMA DETECTADO !!!");
                 console.log("Referencia: " + s.artist + " - " + s.song + " (Fila " + s.line + ")");
-                console.log("Corrección: " + s.year + " -> " + newYear);
+                console.log("CorrecciÃ³n: " + s.year + " -> " + newYear);
 
                 window.location.href = mailtoUrl;
-                alert("¡Error registrado! Se ha preparado un email para " + recipient + ".\nSe descarta esta canción y repites el turno.");
+                alert("Â¡Error registrado! Se ha preparado un email para " + recipient + ".\nSe descarta esta canciÃ³n y repites el turno.");
             }
             if (turnPhase === 'KING_GUESS' || turnPhase === 'KING_GUESS_RESULT' || turnPhase === 'KING_SELECTION') {
                 activePlayerIdx--;
@@ -1898,7 +1886,7 @@
                 return;
             }
 
-            // Validación automática
+            // ValidaciÃ³n automÃ¡tica
             var activeP = players[activePlayerIdx];
             var isCorrect = false;
             if (activeGuess !== null) {
@@ -1907,17 +1895,17 @@
 
             document.getElementById('validation-buttons').style.display = 'flex';
             if (isCorrect) {
-                document.getElementById('host-instructions').innerHTML = "<span style='color:#00ff00; font-size:1.5em;'>¡POSICIÓN CORRECTA! ✅</span><br>¿Detalles?";
+                document.getElementById('host-instructions').innerHTML = "<span style='color:#00ff00; font-size:1.5em;'>Â¡POSICIÃ“N CORRECTA! âœ…</span><br>Â¿Detalles?";
                 document.getElementById('validation-buttons').innerHTML = `
-                    <button class="btn-val btn-ok" onclick="validateResult(true, false)">SÍ</button>
-                    <button class="btn-val btn-ok" style="background:#ffd700; color:#000;" onclick="validateResult(true, true)">SÍ (+ 🔵 FICHA)</button>
+                    <button class="btn-val btn-ok" onclick="validateResult(true, false)">SÃ</button>
+                    <button class="btn-val btn-ok" style="background:#ffd700; color:#000;" onclick="validateResult(true, true)">SÃ (+ ðŸ”µ FICHA)</button>
                     <button class="btn-val btn-fail" style="background:#555;" onclick="reportSystemError()">ERROR SISTEMA</button>
                  `;
             } else {
-                document.getElementById('host-instructions').innerHTML = "<span style='color:#ff4444; font-size:1.5em;'>POSICIÓN INCORRECTA ❌</span><br>¿Pero acertó Algo?";
+                document.getElementById('host-instructions').innerHTML = "<span style='color:#ff4444; font-size:1.5em;'>POSICIÃ“N INCORRECTA âŒ</span><br>Â¿Pero acertÃ³ Algo?";
                 document.getElementById('validation-buttons').innerHTML = `
                     <button class="btn-val btn-fail" onclick="validateResult(false, false)">NO</button>
-                    <button class="btn-val btn-ok" style="background:#00f2fe; color:#000;" onclick="validateResult(false, true)">SÍ (+ 🔵 FICHA)</button>
+                    <button class="btn-val btn-ok" style="background:#00f2fe; color:#000;" onclick="validateResult(false, true)">SÃ (+ ðŸ”µ FICHA)</button>
                     <button class="btn-val btn-fail" style="background:#00f2fe; color:#000; font-size: 0.6em;" onclick="reportSystemError()">ERROR SISTEMA (REPETIR)</button>
                  `;
             }
@@ -1931,53 +1919,53 @@
                 updateTokens(players[activePlayerIdx], 1);
             }
 
-            // RESOLVER APUESTAS "NI DE COÑA" y "ESTOY CONTIGO"
+            // RESOLVER APUESTAS "NI DE COÃ‘A" y "ESTOY CONTIGO"
             if ((bettingAgainst && bettingAgainst.length > 0) || (bettingFor && bettingFor.length > 0)) {
                 if (isCardOk) {
                     // El jugador activo ACIERTA: los que apostaron en contra pierden. los que apostaron a favor ganan.
                     var losesPhrases = [
                         "Has dudado de un puto experto... y has perdido.",
-                        "¿Ni de coña? Ni de coña vas a recuperar esa ficha, pringao.",
-                        "Para la próxima te callas. El maestro sabe lo que hace.",
-                        "A llorar a la llorería. Esa ficha es historia.",
+                        "Â¿Ni de coÃ±a? Ni de coÃ±a vas a recuperar esa ficha, pringao.",
+                        "Para la prÃ³xima te callas. El maestro sabe lo que hace.",
+                        "A llorar a la llorerÃ­a. Esa ficha es historia.",
                         "Has apostado contra Dios y te has quemado.",
-                        "¿Te creías muy listo, eh? Pues toma zasca en toda la boca.",
+                        "Â¿Te creÃ­as muy listo, eh? Pues toma zasca en toda la boca.",
                         "Poca fe para tanta ignorancia. Ficha perdida.",
                         "Silencio en la sala. Ha hablado el puto amo del tiempo.",
                         "Tu envidia alimenta su victoria. Menos 1 ficha para ti.",
-                        "¿En serio pensabas que iba a fallar? Qué pardillo.",
+                        "Â¿En serio pensabas que iba a fallar? QuÃ© pardillo.",
                         "Nunca apuestes contra el jefe, novato.",
-                        "Te has comido el amago entero. Despídete de la ficha.",
+                        "Te has comido el amago entero. DespÃ­dete de la ficha.",
                         "Mucha boquita pero poca ficha te queda.",
-                        "Con esa intuición de mierda normal que pierdas fichas.",
+                        "Con esa intuiciÃ³n de mierda normal que pierdas fichas.",
                         "Vaya patinazo. Esa masterclass te ha costado una ficha.",
                         "Has ido a por lana y has salido trasquilado.",
                         "Te ha retratado. Sigue mirando y aprende.",
-                        "Ni de coña tienes tú tanto nivel. Ficha al pozo.",
+                        "Ni de coÃ±a tienes tÃº tanto nivel. Ficha al pozo.",
                         "Acaso pensabas que dudar del amo del juego te iba a salir gratis?",
-                        "Te pones chulito y te quedas sin blanca. Clásico.",
+                        "Te pones chulito y te quedas sin blanca. ClÃ¡sico.",
                         "Esa ficha era tuya, ahora es solo un mal recuerdo.",
-                        "¿Querías sangre? Toma dos tazas de humillación.",
-                        "Le has tirado un órdago y te ha sacado la chorra.",
-                        "El rey no se mancha las manos con plebeyos como tú.",
-                        "Has tropezado con la piedra de su sabiduría.",
+                        "Â¿QuerÃ­as sangre? Toma dos tazas de humillaciÃ³n.",
+                        "Le has tirado un Ã³rdago y te ha sacado la chorra.",
+                        "El rey no se mancha las manos con plebeyos como tÃº.",
+                        "Has tropezado con la piedra de su sabidurÃ­a.",
                         "Ficha denegada por listillo. A tu cueva.",
                         "Te la ha clavado por la escuadra. A pastar.",
-                        "Tu intento de sabotaje da más pena que otra cosa.",
-                        "Otra fichita pal bote. Gracias por la donación, pringao.",
+                        "Tu intento de sabotaje da mÃ¡s pena que otra cosa.",
+                        "Otra fichita pal bote. Gracias por la donaciÃ³n, pringao.",
                         "Te iba a devolver la ficha por pena, pero mejor me la quedo.",
-                        "Cárgate de paciencia, porque de fichas vas justito.",
-                        "El oráculo musical ataca de nuevo. Tú agacha la cabeza.",
-                        "Ni con un DeLorean aciertas tú tantas veces. Asúmelo.",
+                        "CÃ¡rgate de paciencia, porque de fichas vas justito.",
+                        "El orÃ¡culo musical ataca de nuevo. TÃº agacha la cabeza.",
+                        "Ni con un DeLorean aciertas tÃº tantas veces. AsÃºmelo.",
                         "Ojo al dato: acabas de perder una ficha contra el mejor.",
-                        "Sigue apostando en contra, a ver si así te arruinas antes.",
+                        "Sigue apostando en contra, a ver si asÃ­ te arruinas antes.",
                         "Dudar de un dios solo trae castigos divinos en forma de fichas.",
-                        "¿Te sobra el dinero? Porque las fichas azules parece que las regalas.",
-                        "Has intentado hacerle el lío al máster y has cobrado tú.",
+                        "Â¿Te sobra el dinero? Porque las fichas azules parece que las regalas.",
+                        "Has intentado hacerle el lÃ­o al mÃ¡ster y has cobrado tÃº.",
                         "Por favor, un aplauso para el que acaba de perder otra ficha absurda.",
-                        "El rey manda, tú pagas la entrada al espectáculo.",
-                        "La próxima vez guarda la ficha, que igual te hace falta para no dar pena.",
-                        "Que ponga la música y tú pones las fichas perdidas. Trato justo."
+                        "El rey manda, tÃº pagas la entrada al espectÃ¡culo.",
+                        "La prÃ³xima vez guarda la ficha, que igual te hace falta para no dar pena.",
+                        "Que ponga la mÃºsica y tÃº pones las fichas perdidas. Trato justo."
                     ];
                     if (bettingAgainst) {
                         bettingAgainst.forEach(function (pid) {
@@ -1993,7 +1981,7 @@
                             if (p) {
                                 updateTokens(p, 2);
                                 if (connections[pid]) {
-                                    connections[pid].send({ type: 'BET_RESULT', msg: "¡SABÍAS QUE IBA A ACERTAR Y HAS GANADO!\n\nRecompensa: +2 FICHAS AZULES." });
+                                    connections[pid].send({ type: 'BET_RESULT', msg: "Â¡SABÃAS QUE IBA A ACERTAR Y HAS GANADO!\n\nRecompensa: +2 FICHAS AZULES." });
                                 }
                             }
                         });
@@ -2006,18 +1994,18 @@
                             if (p) {
                                 updateTokens(p, 2);
                                 if (connections[pid]) {
-                                    connections[pid].send({ type: 'BET_RESULT', msg: "¡SABÍAS QUE IBA A FALLAR Y HAS GANADO!\n\nRecompensa: +2 FICHAS AZULES." });
+                                    connections[pid].send({ type: 'BET_RESULT', msg: "Â¡SABÃAS QUE IBA A FALLAR Y HAS GANADO!\n\nRecompensa: +2 FICHAS AZULES." });
                                 }
                             }
                         });
                     }
                     if (bettingFor) {
                         var losesPhrasesFor = [
-                            "Confiaste en un inútil y has pagado el pato.",
+                            "Confiaste en un inÃºtil y has pagado el pato.",
                             "Tanta fe para nada. Menudo patinazo.",
                             "Ni estando contigo logra acertar. Ficha perdida.",
                             "Has apostado al caballo perdedor.",
-                            "Qué mala vista tienes para elegir aliados."
+                            "QuÃ© mala vista tienes para elegir aliados."
                         ];
                         bettingFor.forEach(function (pid) {
                             if (connections[pid]) {
@@ -2059,9 +2047,9 @@
                         var slotCorrect = isSlotCorrect(currentBets[pid], s.year, players[activePlayerIdx].cards);
 
                         if (p && slotCorrect) {
-                            h += '<button class="btn-val" style="background:var(--gold); color:#000; border: 2px solid #00ff00;" onclick="awardToChallenger(\'' + pid + '\')">' + p.name + ' GANÓ LA APUESTA (✅)</button>';
+                            h += '<button class="btn-val" style="background:var(--gold); color:#000; border: 2px solid #00ff00;" onclick="awardToChallenger(\'' + pid + '\')">' + p.name + ' GANÃ“ LA APUESTA (âœ…)</button>';
                         } else if (p) {
-                            h += '<button class="btn-val" style="background:#555; color:#888; cursor:not-allowed;" disabled>' + p.name + ' FALLÓ (❌)</button>';
+                            h += '<button class="btn-val" style="background:#555; color:#888; cursor:not-allowed;" disabled>' + p.name + ' FALLÃ“ (âŒ)</button>';
                         }
                     }
                     document.getElementById('challenger-buttons').innerHTML = h;
@@ -2109,7 +2097,7 @@
             // Limpiar confeti previo si existe
             if (window.victoryInterval) clearInterval(window.victoryInterval);
 
-            // V26.3: Integración de IDs Verificados por el Usuario
+            // V26.3: IntegraciÃ³n de IDs Verificados por el Usuario
             var isXavi = name.toLowerCase().includes('xavi');
             var songId = "";
             var songTitle = "";
@@ -2121,12 +2109,12 @@
                 // El "Pool de la Frikada" (V26.3 - IDs proporcionados por el usuario)
                 var frikiPool = [
                     { id: 'wfeCIvOxXBo', t: "Rodolfo Chikilicuatre - Chiki Chiki" },
-                    { id: '5mKKc2F0GbQ', t: "El Koala - Opá" },
+                    { id: '5mKKc2F0GbQ', t: "El Koala - OpÃ¡" },
                     { id: '62Z8vUIk9s8', t: "Zapato Veloz - Tractor Amarillo" },
                     { id: 'lTxGto9ADx0', t: "Georgie Dann - La Barbacoa" },
-                    { id: 'arZZw8NyPq8', t: "Las Ketchup - Aserejé" },
-                    { id: 'd21lBEXv6RE', t: "Leonardo Dantés - Pañuelo" },
-                    { id: 'WCQuf90qf9U', t: "King África - La Bomba" },
+                    { id: 'arZZw8NyPq8', t: "Las Ketchup - AserejÃ©" },
+                    { id: 'd21lBEXv6RE', t: "Leonardo DantÃ©s - PaÃ±uelo" },
+                    { id: 'WCQuf90qf9U', t: "King Ãfrica - La Bomba" },
                     { id: 'tUHtrE533X4', t: "Mandangastyle" },
                     { id: 'YMlDlM7lvO0', t: "Paco Pil - Viva la Fiesta" }
                 ];
@@ -2245,7 +2233,7 @@
                 // Mostrar cartel de SE BUSCA al que va ganando
                 if (p.score === maxScore && maxScore > 0) {
                     var wantedAvatar = p.avatar ? '<img src="' + p.avatar + '">' : '<div class="initial">' + p.name.charAt(0).toUpperCase() + '</div>';
-                    wantedHtml = '<div class="wanted-poster"><div class="txt1">WANTED</div><div class="txt2">LÍDER</div><div class="wanted-img-placeholder">' + wantedAvatar + '</div></div>';
+                    wantedHtml = '<div class="wanted-poster"><div class="txt1">WANTED</div><div class="txt2">LÃDER</div><div class="wanted-img-placeholder">' + wantedAvatar + '</div></div>';
                 }
 
                 avatarHtml = '<div style="position:relative; display:inline-block; margin-right:12px; vertical-align:middle;">' + 
@@ -2308,4 +2296,6 @@
     </script>
 </body>
 </html>
+
+
 

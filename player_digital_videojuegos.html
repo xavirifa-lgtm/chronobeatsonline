@@ -10,7 +10,7 @@
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon-192.png">
     <meta name="theme-color" content="#9d00ff">
-    <title>CHRONOBEATS - GAMER EDITION</title>
+    <title>CHRONOBEATS GAMER EDITION</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Bungee&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
@@ -74,7 +74,7 @@
             justify-content: center;
             color: #666;
             font-family: 'Press Start 2P', cursive;
-            font-size: 0.45em;
+            font-size: 0.65em;
             cursor: pointer;
             transition: 0.3s;
             background: none;
@@ -102,7 +102,7 @@
         /* STANDARDIZED BUTTONS */
         .btn {
             background: var(--neon);
-            color: #fff;
+            color: #000;
             border: none;
             padding: 18px;
             border-radius: 50px;
@@ -110,8 +110,8 @@
             width: 100%;
             max-width: 280px;
             cursor: pointer;
-            font-size: 0.7em;
-            box-shadow: 0 0 20px rgba(157, 0, 255, 0.3);
+            font-size: 1.1em;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
             transition: 0.3s;
             text-transform: uppercase;
         }
@@ -127,14 +127,14 @@
             margin-bottom: 12px;
             font-family: 'Press Start 2P', cursive;
             text-align: center;
-            font-size: 0.8em;
+            font-size: 1.1em;
         }
 
         .ctrl-btn {
             padding: 15px 5px;
             border-radius: 10px;
             font-family: 'Press Start 2P', cursive;
-            font-size: 0.55em;
+            font-size: 0.85em;
             cursor: pointer;
             color: #fff;
         }
@@ -143,7 +143,7 @@
             padding: 12px 2px;
             border-radius: 8px;
             font-family: 'Press Start 2P', cursive;
-            font-size: 0.5em;
+            font-size: 0.75em;
             cursor: pointer;
             color: #fff;
         }
@@ -152,7 +152,7 @@
             padding: 12px 5px;
             border-radius: 8px;
             font-family: 'Press Start 2P', cursive;
-            font-size: 0.5em;
+            font-size: 0.8em;
             cursor: pointer;
             color: var(--gold);
             border-color: var(--gold) !important;
@@ -196,14 +196,14 @@
 
         .card-back { transform: rotateY(180deg); border-color: var(--accent) !important; }
 
-        #c-artist { font-size: 0.55em; color: #aaa; text-transform: uppercase; margin-bottom: 5px; font-family: 'Press Start 2P'; }
-        #c-song { font-family: 'Press Start 2P'; font-size: 0.8em; margin-bottom: 10px; line-height: 1.2; }
-        #c-year { font-family: 'Press Start 2P'; font-size: 2.5em; color: var(--accent); line-height: 0.9; }
+        #c-artist { font-size: 0.75em; color: #aaa; text-transform: uppercase; margin-bottom: 5px; }
+        #c-song { font-family: 'Press Start 2P', cursive; font-size: 1.1em; margin-bottom: 10px; line-height: 1.2; }
+        #c-year { font-family: 'Press Start 2P', cursive; font-size: 4em; color: var(--accent); line-height: 0.9; }
 
         /* STATUS UI */
-        #turn-status { font-family: 'Press Start 2P'; color: var(--neon); font-size: 0.6em; margin: 10px 0; }
-        .chip-display { font-family: 'Press Start 2P'; color: var(--gold); font-size: 0.6em; margin-bottom: 5px; display: flex; align-items: center; gap: 5px; }
-        .neon-chip { width: 12px; height: 12px; background: var(--neon); border-radius: 50%; box-shadow: 0 0 10px var(--neon); }
+        #turn-status { font-family: 'Press Start 2P', cursive; color: var(--neon); font-size: 0.8em; margin: 10px 0; }
+        .chip-display { font-family: 'Press Start 2P', cursive; color: var(--gold); font-size: 0.9em; margin-bottom: 5px; display: flex; align-items: center; gap: 5px; }
+        .neon-chip { width: 12px; height: 12px; background: #00ff00; border-radius: 50%; box-shadow: 0 0 10px #00ff00; }
 
         /* GRID SABOTAJES */
         #sabotage-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; margin-top: 10px; }
@@ -215,7 +215,7 @@
             position: fixed; top: calc(20px + env(safe-area-inset-top, 0px)); left: 20px; z-index: 10000;
             width: 50px; height: 50px; background: #000; border: 2px solid var(--neon); border-radius: 50%;
             display: flex !important; align-items: center; justify-content: center; color: var(--neon);
-            text-decoration: none; font-family: 'Press Start 2P'; font-size: 1.2em; box-shadow: 0 0 15px var(--neon);
+            text-decoration: none; font-family: 'Press Start 2P', cursive; font-size: 1.5em; box-shadow: 0 0 15px var(--neon);
         }
 
         @keyframes pulse-active {
@@ -223,7 +223,7 @@
             50% { transform: scale(1.03); box-shadow: 0 0 40px var(--neon); }
             100% { transform: scale(1); box-shadow: 0 0 20px var(--neon); }
         }
-        .playing-active { animation: pulse-active 1.5s infinite; background: var(--neon) !important; color: #fff !important; }
+        .playing-active { animation: pulse-active 1.5s infinite; background: var(--neon) !important; color: #000 !important; }
 
         /* OVERLAYS */
         .overlay-full {
@@ -233,11 +233,11 @@
         }
 
         .bet-slot {
-            width: 30px; height: 30px; background: rgba(157, 0, 255, 0.1); border: 2px dashed var(--neon);
-            border-radius: 4px; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; margin: 4px auto; font-size: 0.5em; color: var(--neon); font-family: 'Press Start 2P';
+            width: 30px; height: 30px; background: rgba(0, 255, 0, 0.1); border: 2px dashed var(--neon);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; margin: 4px auto; font-size: 0.6em; color: var(--neon); font-family: 'Press Start 2P', cursive;
         }
-        .bet-slot.occupied { background: var(--neon); color: #fff; border-style: solid; }
+        .bet-slot.occupied { background: var(--neon); color: #000; border-style: solid; }
         .bet-slot.my-bet { background: var(--gold); border-color: var(--gold); color: #000; }
         .bet-slot.active-guess { background: #fff; border-color: #fff; color: #000; }
     </style>
@@ -248,13 +248,13 @@
 
     <!-- FAB REGLAMENTO -->
     <div id="fab-rules" onclick="toggleRules()"
-        style="display:flex; position:fixed; top:80px; left:20px; width:50px; height:50px; background:#111; border:2px solid var(--neon); border-radius:50%; z-index:9000; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 0 10px rgba(157,0,255,0.5); font-size:1.2em; color:var(--neon); font-family:'Press Start 2P';">
+        style="display:flex; position:fixed; top:80px; left:20px; width:50px; height:50px; background:#111; border:2px solid var(--neon); border-radius:50%; z-index:9000; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 0 10px rgba(0,255,0,0.5); font-size:1.5em; color:var(--neon); font-family:'Bungee';">
         ?
     </div>
 
     <!-- PANTALLA LOGIN -->
     <div id="login-screen" style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px;">
-        <div class="logo" style="font-family:'Press Start 2P'; color:var(--neon); text-shadow: 0 0 10px var(--neon); font-size:1.2em; text-align:center; margin-bottom:20px;">
+        <div class="logo" style="font-family:'Press Start 2P'; color:var(--neon); text-shadow: 0 0 10px var(--neon); font-size:1em; text-align:center; margin-bottom:20px;">
             CHRONOBEATS <span style="font-size:0.4em; opacity:0.6; vertical-align:top; color:var(--gold);">GAMER EDITION</span></div>
 
         <div id="avatar-container" onclick="document.getElementById('avatar-input').click()"
@@ -264,11 +264,11 @@
             <div id="avatar-placeholder" style="width:100px; height:100px; border-radius:12px; border: 3px dashed var(--neon); display:flex; align-items:center; justify-content:center; color:var(--neon); font-size:2.5em; font-family:'Press Start 2P';">
                 +
             </div>
-            <div style="font-size: 0.5em; color: var(--neon); font-family: 'Press Start 2P'; margin-top: 10px;">¡INSERT COIN!</div>
+            <div style="font-size: 0.5em; color: var(--neon); font-family: 'Press Start 2P', cursive; margin-top: 10px;">¡INSERT COIN!</div>
         </div>
         <input type="file" id="avatar-input" accept="image/*" capture="user" style="display:none;" onchange="handleAvatarSelect(event)">
 
-        <input type="text" id="host-id" placeholder="LOBBY CODE" maxlength="6">
+        <input type="text" id="host-id" placeholder="CÓDIGO SALA" maxlength="6">
         <input type="text" id="player-name" placeholder="NICKNAME">
         <button class="btn" id="join-btn" onclick="conectar()">START</button>
     </div>
@@ -278,11 +278,11 @@
         <div id="tab-game" class="tab-content active">
             <div id="leaderboard-info" style="font-family:'Press Start 2P'; font-size:0.5em; color:#888; text-align:center; width:100%;">
                 <div style="color:var(--gold);">BOSS: <span id="lb-leader-name">---</span> (<span id="lb-leader-cards">0</span>)</div>
-                <div>LEVEL: <span id="lb-me-cards">0</span> CARDS</div>
+                <div>LEVEL: <span id="lb-me-cards">0</span> CARTAS</div>
             </div>
             
-            <div id="turn-status">PLAYER: <span id="cur-player">---</span></div>
-            <div class="chip-display" id="my-tokens-ui">CRYSTALS: </div>
+            <div id="turn-status">TURNO DE: <span id="cur-player">---</span></div>
+            <div class="chip-display" id="my-tokens-ui">MIS FICHAS: </div>
 
             <!-- CONTROLES MÚSICA -->
             <div class="music-controls" id="m-ctrl">
@@ -303,8 +303,8 @@
             <div class="card-container" id="normal-card-container">
                 <div id="card" class="card">
                     <div class="card-face card-front">
-                        <div style="font-family:'Press Start 2P';color:var(--neon);opacity:0.2;font-size:1.2em;line-height:1;">CHRONO<br>BEATS</div>
-                        <div id="card-mode-label" style="font-family:'Press Start 2P';color:var(--neon);opacity:0.5;font-size:0.4em;margin-top:15px;">VIDEOJUEGOS</div>
+                        <div style="font-family:'Press Start 2P';color:var(--neon);opacity:0.2;font-size:1.8em;line-height:0.95;">CHRONO<br>BEATS</div>
+                        <div id="card-mode-label" style="font-family:'Press Start 2P';color:var(--neon);opacity:0.5;font-size:0.6em;margin-top:15px;">GAMER</div>
                     </div>
                     <div class="card-face card-back">
                         <div id="c-artist">ARTISTA</div>
@@ -312,51 +312,51 @@
                         <div id="c-year">1999</div>
                     </div>
                 </div>
-                <div id="wait-msg" style="font-family:'Press Start 2P';opacity:0.4;font-size:0.5em;margin-top:15px;">LOADING TRACK...</div>
+                <div id="wait-msg" style="font-family:'Press Start 2P';opacity:0.4;font-size:0.8em;margin-top:15px;">ESPERANDO TRACK...</div>
             </div>
 
             <!-- MI CRONOLOGÍA -->
             <div class="collection-summary" id="normal-collection" style="width:100%; max-width:340px; margin-top:20px; padding:15px; border-radius:12px;">
-                <h4 id="inventory-title" style="font-family:'Press Start 2P'; font-size:0.5em; color:var(--neon); margin:0 0 10px 0; text-align:center;">MY INVENTORY</h4>
+                <h4 id="inventory-title" style="font-family:'Press Start 2P'; font-size:0.7em; color:var(--neon); margin:0 0 10px 0; text-align:center;">MI CRONOLOGÍA</h4>
                 <div id="my-cards-list" style="display:flex; flex-direction:column; gap:4px;"></div>
             </div>
 
             <!-- ACCIONES ESPECIALES -->
             <div class="special-actions" id="special-ctrl" style="display:none; flex-direction:column; gap:10px; width:100%; max-width:340px; margin-top:15px;">
-                <button class="spec-btn" id="btn-autowin" onclick="send('AUTO_WIN')">BUY CARD (3 🔵)</button>
-                <button class="spec-btn" id="btn-reload" onclick="send('RELOAD_SONG')">RE-ROLL (1 🔵)</button>
+                <button class="spec-btn" id="btn-autowin" onclick="send('AUTO_WIN')">COMPRAR CARTA (3 🔵)</button>
+                <button class="spec-btn" id="btn-reload" onclick="send('RELOAD_SONG')">CAMBIAR CANCIÓN (1 🔵)</button>
             </div>
 
             <!-- DUELO UI -->
             <div id="duel-mode-ui" style="display: none; width: 100%; max-width: 340px; margin-top: 20px; text-align: center; flex-direction: column; gap: 15px; background: rgba(255, 215, 0, 0.1); padding: 20px; border: 2px solid var(--gold); border-radius: 15px;">
-                <div style="font-family: 'Press Start 2P'; color: var(--gold); font-size: 1.2em;">🔫 DUEL! 🤠</div>
-                <input type="number" id="duel-year-input" placeholder="YEAR" style="width: 100%; font-size: 1.2em; border-color: var(--gold);">
-                <button class="btn" style="background: var(--gold); color: #000;" onclick="sendDuelGuess()">SHOOT!</button>
-                <div id="duel-wait-msg" style="display:none; font-family:'Press Start 2P'; color:var(--gold); font-size:0.5em;">WAITING...</div>
+                <div style="font-family: 'Press Start 2P', cursive; color: var(--gold); font-size: 1.4em;">🔫 ¡DUELO! 🤠</div>
+                <input type="number" id="duel-year-input" placeholder="AÑO" style="width: 100%; font-size: 1.5em; border-color: var(--gold);">
+                <button class="btn" style="background: var(--gold); color: #000;" onclick="sendDuelGuess()">¡DISPARAR!</button>
+                <div id="duel-wait-msg" style="display:none; font-family:'Bungee'; color:var(--gold);">ESPERANDO RIVAL...</div>
             </div>
         </div>
 
         <!-- PESTAÑA SABOTAJE -->
         <div id="tab-sabotage" class="tab-content">
-            <h2 style="font-family:'Press Start 2P'; color:var(--neon); margin-top:20px; font-size:1em;">PVP ACTIONS</h2>
-            <p id="sabotage-status-msg" style="color:#666; font-size:0.5em; text-align:center;">AVAILABLE DURING OPPONENT TURNS</p>
+            <h2 style="font-family:'Press Start 2P'; color:var(--neon); margin-top:20px;">SABOTAJE</h2>
+            <p id="sabotage-status-msg" style="color:#666; font-size:0.8em; text-align:center;">DISPONIBLE SOLO CUANDO OTROS JUEGAN</p>
             <div id="sabotage-ctrl" style="display:none; width:100%; max-width:340px;">
                 <div id="sabotage-grid">
                     <button class="spec-btn" id="btn-sabotage-mute" style="color:#ff0055; border-color:#ff0055 !important;" onclick="handleCooldownSabotage('SABOTAGE_MUTE', 'btn-sabotage-mute')">MUTE 15s</button>
-                    <button class="spec-btn" style="color:#00f2fe; border-color:#00f2fe !important;" onclick="send('BET_AGAINST_ACTIVE')">FAKE! (1 🔵)</button>
-                    <button class="spec-btn" style="color:#00ff88; border-color:#00ff88 !important;" onclick="send('BET_FOR_ACTIVE')">ALLIED! (1 🔵)</button>
-                    <button class="spec-btn" style="color:#00ff00; border-color:#00ff00 !important;" onclick="handleCooldownSabotage('SABOTAGE_BUZZER', 'btn-sabotage-buzzer')">BUZZER</button>
-                    <button class="spec-btn" style="color:var(--gold); border:2px dashed var(--gold) !important;" onclick="send('SABOTAGE_DUEL')">🔫 DUEL 🔫 (3 🔵)</button>
-                    <button class="spec-btn" style="color:#ff8800; border-color:#ff8800 !important;" onclick="send('SABOTAGE_VETO')">VETO (1 🔵)</button>
-                    <button class="spec-btn" style="color:#ff0000; border-color:#ff0000 !important;" onclick="send('SABOTAGE_PANIC')">PANIC (2 🔵)</button>
-                    <button class="spec-btn" style="color:#ff00ff; border-color:#ff00ff !important;" onclick="send('SABOTAGE_FORCE_SKIP')">FORCE SKIP (3 🔵)</button>
+                    <button class="spec-btn" style="color:#00f2fe; border-color:#00f2fe !important;" onclick="send('BET_AGAINST_ACTIVE')">¡NI DE COÑA! (1 🔵)</button>
+                    <button class="spec-btn" style="color:#00ff88; border-color:#00ff88 !important;" onclick="send('BET_FOR_ACTIVE')">¡CONMIGO! (1 🔵)</button>
+                    <button class="spec-btn" style="color:#00ff00; border-color:#00ff00 !important;" onclick="handleCooldownSabotage('SABOTAGE_BUZZER', 'btn-sabotage-buzzer')">ZUMBIDO</button>
+                    <button class="spec-btn" style="color:var(--gold); border:2px dashed var(--gold) !important;" onclick="send('SABOTAGE_DUEL')">🔫 DUELO 🔫 (3 🔵)</button>
+                    <button class="spec-btn" style="color:#ff8800; border-color:#ff8800 !important;" onclick="send('SABOTAGE_VETO')">VETO RECARGA (1 🔵)</button>
+                    <button class="spec-btn" style="color:#ff0000; border-color:#ff0000 !important;" onclick="send('SABOTAGE_PANIC')">PÁNICO (2 🔵)</button>
+                    <button class="spec-btn" style="color:#ff00ff; border-color:#ff00ff !important;" onclick="send('SABOTAGE_FORCE_SKIP')">SALTO FORZADO (3 🔵)</button>
                 </div>
             </div>
         </div>
 
         <!-- PESTAÑA MERCADO -->
         <div id="tab-market" class="tab-content">
-            <h2 style="font-family:'Press Start 2P'; color:var(--gold); margin-top:20px; font-size:1em;">SHOP</h2>
+            <h2 style="font-family:'Press Start 2P'; color:var(--gold); margin-top:20px;">MERCADO</h2>
             <div id="market-container" style="display:flex; flex-direction:column; gap:15px; width:100%; max-width:340px; margin-top:20px;">
                 <!-- Injected via JS -->
             </div>
@@ -364,27 +364,27 @@
 
         <!-- BARRA PESTAÑAS -->
         <div class="tab-bar">
-            <div class="tab-btn active" onclick="switchTab('tab-game', this)"><span>🎸</span><span>LEVEL</span></div>
-            <div class="tab-btn" onclick="switchTab('tab-sabotage', this)"><span>💀</span><span>PVP</span></div>
-            <div class="tab-btn" onclick="switchTab('tab-market', this)"><span>💰</span><span>SHOP</span></div>
+            <div class="tab-btn active" onclick="switchTab('tab-game', this)"><span>🎸</span><span>JUEGO</span></div>
+            <div class="tab-btn" onclick="switchTab('tab-sabotage', this)"><span>💀</span><span>SABOTAJE</span></div>
+            <div class="tab-btn" onclick="switchTab('tab-market', this)"><span>💰</span><span>MERCADO</span></div>
         </div>
     </div>
 
     <!-- OVERLAYS COMUNES -->
     <div id="rules-overlay" class="overlay-full">
-        <h2 style="font-family:'Press Start 2P'; color:var(--neon); font-size:1.2em;">📖 MANUAL</h2>
-        <div style="color:#ddd; font-size:0.6em; max-width:400px; line-height:1.5; padding:20px; font-family:'Press Start 2P';">
-            <p><strong>MISSION:</strong> Place tracks in chronological order. First to 10 wins.</p>
-            <p><strong>TURN:</strong> Listen and place the track in your timeline.</p>
-            <p><strong>CRYSTALS:</strong> Use them for sabotage or shop items.</p>
+        <h2 style="font-family:'Bungee'; color:var(--neon); font-size:2em;">📖 REGLAS</h2>
+        <div style="color:#ddd; font-size:0.9em; max-width:400px; line-height:1.5; padding:20px;">
+            <p><strong>OBJETIVO:</strong> Coloca las canciones en orden cronológico. Gana quien llegue a 10 cartas.</p>
+            <p><strong>TURNO:</strong> Escucha y define dónde va la canción en tu fila.</p>
+            <p><strong>FICHAS:</strong> Úsalas para sabotear a rivales o comprar pistas en el mercado.</p>
         </div>
-        <button class="btn" onclick="toggleRules()" style="background:#333; color:#fff;">BACK</button>
+        <button class="btn" onclick="toggleRules()" style="background:#333; color:#fff;">CERRAR</button>
     </div>
 
     <div id="custom-alert" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:20000; align-items:center; justify-content:center;">
         <div style="background:#111; border:2px solid var(--neon); border-radius:15px; padding:20px; width:80%; max-width:350px; text-align:center;">
-            <h3 style="font-family:'Press Start 2P'; color:var(--neon); font-size:1em;">SYSTEM</h3>
-            <p id="custom-alert-msg" style="font-family:'Press Start 2P'; font-size:0.5em;"></p>
+            <h3 style="font-family:'Bungee'; color:var(--neon);">AVISO</h3>
+            <p id="custom-alert-msg"></p>
             <button class="btn" onclick="document.getElementById('custom-alert').style.display='none'">OK</button>
         </div>
     </div>
@@ -405,11 +405,11 @@
             }
         });
 
-        function handleAvatarSelect(event) {
-            const file = event.target.files[0];
+        function handleAvatarSelect(e) {
+            const file = e.target.files[0];
             if (!file) return;
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = function(event) {
                 const img = new Image();
                 img.onload = function() {
                     const canvas = document.createElement('canvas');
@@ -421,9 +421,9 @@
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, w, h);
                     
-                    // TOONIFY FILTER (PURPLE)
+                    // TOONIFY FILTER (GREEN)
                     ctx.globalCompositeOperation = 'color';
-                    ctx.fillStyle = 'rgba(157, 0, 255, 0.5)';
+                    ctx.fillStyle = 'rgba(0, 255, 0, 0.5)';
                     ctx.fillRect(0,0,w,h);
                     
                     playerAvatarDataUrl = canvas.toDataURL('image/jpeg', 0.7);
@@ -432,18 +432,19 @@
                     document.getElementById('avatar-placeholder').style.display = 'none';
                     localStorage.setItem('cb_player_avatar', playerAvatarDataUrl);
                 };
-                img.src = e.target.result;
+                img.src = event.target.result;
             };
             reader.readAsDataURL(file);
         }
 
-        let connectTimeout;
+        
 
+                let connectTimeout;
         function log(msg) {
             const l = document.getElementById('debug-log');
             if (l) {
                 const time = new Date().toLocaleTimeString();
-                l.innerHTML = `[${time}] ${msg}<br>` + l.innerHTML;
+                l.innerHTML = \[\] \<br>\ + l.innerHTML;
             }
             console.log("PeerLog:", msg);
         }
@@ -457,12 +458,12 @@
         function conectar() {
             var hostId = document.getElementById('host-id').value.toUpperCase().trim();
             playerName = document.getElementById('player-name').value.trim();
-            if(!hostId || !playerName) return alert("MISSING DATA");
+            if(!hostId || !playerName) return alert("FALTAN DATOS");
 
             localStorage.setItem('cb_player_name', playerName);
             const btn = document.getElementById('join-btn');
             btn.disabled = true;
-            status("1/3: Peer...");
+            status("1/3: PEER...");
 
             if (connectTimeout) clearTimeout(connectTimeout);
 
@@ -491,13 +492,13 @@
             peer.on('open', (id) => {
                 myId = id;
                 log("Peer abierto con ID: " + id);
-                status("2/3: Finding Host...");
+                status("2/3: BUSCANDO...");
                 
                 connectTimeout = setTimeout(() => {
                     log("TIMEOUT: La conexión no se abrió tras 20s");
-                    alert("¡TIEMPO AGOTADO! La red móvil es muy lenta o bloquea la conexión. Consulta los logs abajo.");
+                    alert("¡TIEMPO AGOTADO! La red móvil es muy lenta o bloquea la conexión.");
                     btn.disabled = false;
-                    status("RETRY");
+                    status("REINTENTAR");
                     if (peer) peer.destroy();
                 }, 20000);
 
@@ -506,8 +507,8 @@
                 
                 conn.on('open', () => {
                     if (connectTimeout) clearTimeout(connectTimeout);
-                    log("Conexión abierta con el Host");
-                    status("3/3: Joining...");
+                    log("Conexión abierta");
+                    status("3/3: ENTRANDO...");
                     conn.send({ type: 'JOIN', name: playerName, avatar: playerAvatarDataUrl });
                     document.getElementById('login-screen').style.display = 'none';
                     document.getElementById('game-screen').style.display = 'flex';
@@ -526,22 +527,59 @@
                 conn.on('error', (err) => {
                     if (connectTimeout) clearTimeout(connectTimeout);
                     log("ERROR Conn: " + err);
-                    alert("Connection Error: " + err);
+                    alert("Error de Conexión: " + err);
                     btn.disabled = false;
-                    status("RETRY");
+                    status("REINTENTAR");
                 });
             });
 
             peer.on('disconnected', () => {
-                log("Peer desconectado del servidor de señales");
+                log("Peer desconectado");
             });
 
             peer.on('error', (err) => {
                 if (connectTimeout) clearTimeout(connectTimeout);
                 log("ERROR Peer: " + err.type);
-                alert("Network Error: " + err.type);
+                alert("Error de Red: " + err.type);
                 btn.disabled = false;
-                status("RETRY");
+                status("REINTENTAR");
+            });
+        },
+                        { urls: 'stun:stun1.l.google.com:19302' },
+                        { urls: 'stun:global.stun.twilio.com:3478' },
+                        { urls: 'stun:stun.cloudflare.com:3478' },
+                        { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
+                        { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' },
+                        { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' }
+                    ]
+                }
+            });
+
+            peer.on('open', (id) => {
+                myId = id;
+                status("2/3: Buscando Host...");
+                conn = peer.connect("CB-HOST-" + hostId, { reliable: true });
+                
+                conn.on('open', () => {
+                    status("3/3: Entrando...");
+                    conn.send({ type: 'JOIN', name: playerName, avatar: playerAvatarDataUrl });
+                    document.getElementById('login-screen').style.display = 'none';
+                    document.getElementById('game-screen').style.display = 'flex';
+                });
+
+                conn.on('data', handle);
+                
+                conn.on('error', (err) => {
+                    alert("Error de Conexión: " + err);
+                    btn.disabled = false;
+                    status("REINTENTAR");
+                });
+            });
+
+            peer.on('error', (err) => {
+                alert("Error de Red: " + err.type);
+                btn.disabled = false;
+                status("REINTENTAR");
             });
         }
 
@@ -562,7 +600,7 @@
 
             // Fichas
             let chips = ""; for(let i=0; i<state.myTokens; i++) chips += '<span class="neon-chip"></span>';
-            document.getElementById('my-tokens-ui').innerHTML = "CRYSTALS: " + chips;
+            document.getElementById('my-tokens-ui').innerHTML = "MIS FICHAS: " + chips;
 
             // Turno
             const isMe = state.activePlayer.id === myId;
@@ -585,7 +623,7 @@
             const timeline = isMe ? state.myCards : state.activeTimeline;
             h += renderSlot(0, state);
             timeline.forEach((year, idx) => {
-                h += `<div class="card-row" style="padding:10px; text-align:center; font-family:'Press Start 2P'; font-size:0.6em; background:rgba(255,255,255,0.05); border-radius:5px;">${year}</div>`;
+                h += `<div class="card-row" style="padding:10px; text-align:center; font-family:'Bungee'; background:rgba(255,255,255,0.05); border-radius:5px;">${year}</div>`;
                 h += renderSlot(idx + 1, state);
             });
             document.getElementById('my-cards-list').innerHTML = h;
@@ -611,7 +649,7 @@
             
             for (let pid in state.currentBets) {
                 if (state.currentBets[pid] === idx) {
-                    if (pid === myId) { cls += " my-bet"; label = "ME"; }
+                    if (pid === myId) { cls += " my-bet"; label = "YO"; }
                     else { cls += " occupied"; label = "🔘"; }
                 }
             }
@@ -623,7 +661,7 @@
                 if (lastState.activeGuess !== null) return;
                 send('GUESS', idx);
             } else {
-                if (lastState.activeGuess === null) return alert("WAIT FOR PLAYER");
+                if (lastState.activeGuess === null) return alert("Espera al jugador activo");
                 send('BET', idx);
             }
         }
@@ -632,8 +670,8 @@
             const container = document.getElementById('market-container');
             const isMe = state.activePlayer.id === myId;
             let h = "";
-            h += `<button class="btn" style="font-size:0.5em; padding:12px;" ${(!isMe || state.myWildcards < 1) ? 'disabled' : ''} onclick="send('MARKET_WILDCARD', 'artist')">ARTIST HINT (${state.myWildcards} 🃏)</button>`;
-            h += `<button class="btn" style="font-size:0.5em; padding:12px;" ${(state.myTokens < 3) ? 'disabled' : ''} onclick="send('MARKET_SHIELD')">SHIELD (3 🔵)</button>`;
+            h += `<button class="btn" style="font-size:0.7em; padding:12px;" ${(!isMe || state.myWildcards < 1) ? 'disabled' : ''} onclick="send('MARKET_WILDCARD', 'artist')">PISTA ARTISTA (${state.myWildcards} 🃏)</button>`;
+            h += `<button class="btn" style="font-size:0.7em; padding:12px;" ${(state.myTokens < 3) ? 'disabled' : ''} onclick="send('MARKET_SHIELD')">ESCUDO (3 🔵)</button>`;
             container.innerHTML = h;
         }
 
@@ -659,6 +697,7 @@
         function showCustomAlert(msg) { document.getElementById('custom-alert-msg').innerText = msg; document.getElementById('custom-alert').style.display = 'flex'; }
     </script>
     <div id="debug-log" style="position:fixed; bottom:25px; left:5px; right:5px; height:100px; overflow-y:auto; background:rgba(0,0,0,0.8); color:#0f0; font-family:monospace; font-size:9px; padding:5px; z-index:9999; border:1px solid #333; pointer-events:none; display:none;"></div>
-    <div style="position:fixed; bottom:5px; right:5px; font-size:10px; opacity:0.3; color:white; z-index:10000; font-family: 'Montserrat', sans-serif;" onclick="document.getElementById('debug-log').style.display='block'">v146</div>
+    <div style="position:fixed; bottom:5px; right:5px; font-size:10px; opacity:0.3; color:white; z-index:10000; font-family: 'Montserrat', sans-serif;" onclick="document.getElementById('debug-log').style.display='block'">v148</div>
 </body>
 </html>
+

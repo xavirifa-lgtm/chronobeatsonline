@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 
 <head>
@@ -56,7 +56,7 @@
             position: relative;
         }
 
-        /* PESTAÑAS UI */
+        /* PESTAÃ‘AS UI */
         .tab-bar {
             display: flex;
             height: 65px;
@@ -264,11 +264,11 @@
             <div id="avatar-placeholder" style="width:100px; height:100px; border-radius:50%; border: 3px dashed var(--neon); display:flex; align-items:center; justify-content:center; color:var(--neon); font-size:2.5em; font-family:'Bungee';">
                 +
             </div>
-            <div style="font-size: 0.7em; color: var(--neon); font-family: 'Bungee'; margin-top: 10px;">¡AUTO-SELFIE!</div>
+            <div style="font-size: 0.7em; color: var(--neon); font-family: 'Bungee'; margin-top: 10px;">Â¡AUTO-SELFIE!</div>
         </div>
         <input type="file" id="avatar-input" accept="image/*" capture="user" style="display:none;" onchange="handleAvatarSelect(event)">
 
-        <input type="text" id="host-id" placeholder="CÓDIGO SALA" maxlength="6">
+        <input type="text" id="host-id" placeholder="CÃ“DIGO SALA" maxlength="6">
         <input type="text" id="player-name" placeholder="TU NOMBRE">
         <button class="btn" id="join-btn" onclick="conectar()">ENTRAR</button>
     </div>
@@ -277,14 +277,14 @@
     <div id="game-screen" style="display:none; flex:1; flex-direction:column;">
         <div id="tab-game" class="tab-content active">
             <div id="leaderboard-info" style="font-family:'Bungee'; font-size:0.7em; color:#888; text-align:center; width:100%;">
-                <div style="color:var(--gold);">LÍDER: <span id="lb-leader-name">---</span> (<span id="lb-leader-cards">0</span>)</div>
+                <div style="color:var(--gold);">LÃDER: <span id="lb-leader-name">---</span> (<span id="lb-leader-cards">0</span>)</div>
                 <div>YO: <span id="lb-me-cards">0</span> CARTAS</div>
             </div>
             
             <div id="turn-status">TURNO DE: <span id="cur-player">---</span></div>
             <div class="chip-display" id="my-tokens-ui">MIS FICHAS: </div>
 
-            <!-- CONTROLES MÚSICA -->
+            <!-- CONTROLES MÃšSICA -->
             <div class="music-controls" id="m-ctrl">
                 <button class="ctrl-btn btn-play" onclick="send('PLAY')">PLAY</button>
                 <button class="ctrl-btn" onclick="send('PAUSE')">PAUSE</button>
@@ -304,57 +304,57 @@
                 <div id="card" class="card">
                     <div class="card-face card-front">
                         <div style="font-family:'Limelight';color:var(--neon);opacity:0.2;font-size:1.8em;line-height:0.95;">CHRONO<br>BEATS</div>
-                        <div id="card-mode-label" style="font-family:'Bungee';color:var(--neon);opacity:0.5;font-size:0.6em;margin-top:15px;">PELÍCULAS</div>
+                        <div id="card-mode-label" style="font-family:'Bungee';color:var(--neon);opacity:0.5;font-size:0.6em;margin-top:15px;">PELÃCULAS</div>
                     </div>
                     <div class="card-face card-back">
                         <div id="c-artist">ARTISTA</div>
-                        <div id="c-song">TÍTULO</div>
+                        <div id="c-song">TÃTULO</div>
                         <div id="c-year">1999</div>
                     </div>
                 </div>
                 <div id="wait-msg" style="font-family:'Bungee';opacity:0.4;font-size:0.8em;margin-top:15px;">ESPERANDO TRACK...</div>
             </div>
 
-            <!-- MI CRONOLOGÍA -->
+            <!-- MI CRONOLOGÃA -->
             <div class="collection-summary" id="normal-collection" style="width:100%; max-width:340px; margin-top:20px; padding:15px; border-radius:12px;">
-                <h4 id="inventory-title" style="font-family:'Bungee'; font-size:0.7em; color:var(--neon); margin:0 0 10px 0; text-align:center;">MI CRONOLOGÍA</h4>
+                <h4 id="inventory-title" style="font-family:'Bungee'; font-size:0.7em; color:var(--neon); margin:0 0 10px 0; text-align:center;">MI CRONOLOGÃA</h4>
                 <div id="my-cards-list" style="display:flex; flex-direction:column; gap:4px;"></div>
             </div>
 
             <!-- ACCIONES ESPECIALES -->
             <div class="special-actions" id="special-ctrl" style="display:none; flex-direction:column; gap:10px; width:100%; max-width:340px; margin-top:15px;">
-                <button class="spec-btn" id="btn-autowin" onclick="send('AUTO_WIN')">COMPRAR CARTA (3 🔵)</button>
-                <button class="spec-btn" id="btn-reload" onclick="send('RELOAD_SONG')">CAMBIAR CANCIÓN (1 🔵)</button>
+                <button class="spec-btn" id="btn-autowin" onclick="send('AUTO_WIN')">COMPRAR CARTA (3 ðŸ”µ)</button>
+                <button class="spec-btn" id="btn-reload" onclick="send('RELOAD_SONG')">CAMBIAR CANCIÃ“N (1 ðŸ”µ)</button>
             </div>
 
             <!-- DUELO UI -->
             <div id="duel-mode-ui" style="display: none; width: 100%; max-width: 340px; margin-top: 20px; text-align: center; flex-direction: column; gap: 15px; background: rgba(255, 215, 0, 0.1); padding: 20px; border: 2px solid var(--gold); border-radius: 15px;">
-                <div style="font-family: 'Bungee'; color: var(--gold); font-size: 1.4em;">🔫 ¡DUELO! 🤠</div>
-                <input type="number" id="duel-year-input" placeholder="AÑO" style="width: 100%; font-size: 1.5em; border-color: var(--gold);">
-                <button class="btn" style="background: var(--gold); color: #000;" onclick="sendDuelGuess()">¡DISPARAR!</button>
+                <div style="font-family: 'Bungee'; color: var(--gold); font-size: 1.4em;">ðŸ”« Â¡DUELO! ðŸ¤ </div>
+                <input type="number" id="duel-year-input" placeholder="AÃ‘O" style="width: 100%; font-size: 1.5em; border-color: var(--gold);">
+                <button class="btn" style="background: var(--gold); color: #000;" onclick="sendDuelGuess()">Â¡DISPARAR!</button>
                 <div id="duel-wait-msg" style="display:none; font-family:'Bungee'; color:var(--gold);">ESPERANDO RIVAL...</div>
             </div>
         </div>
 
-        <!-- PESTAÑA SABOTAJE -->
+        <!-- PESTAÃ‘A SABOTAJE -->
         <div id="tab-sabotage" class="tab-content">
             <h2 style="font-family:'Limelight'; color:var(--neon); margin-top:20px;">SABOTAJE</h2>
             <p id="sabotage-status-msg" style="color:#666; font-size:0.8em; text-align:center;">DISPONIBLE SOLO CUANDO OTROS JUEGAN</p>
             <div id="sabotage-ctrl" style="display:none; width:100%; max-width:340px;">
                 <div id="sabotage-grid">
                     <button class="spec-btn" id="btn-sabotage-mute" style="color:#ff0055; border-color:#ff0055 !important;" onclick="handleCooldownSabotage('SABOTAGE_MUTE', 'btn-sabotage-mute')">MUTE 15s</button>
-                    <button class="spec-btn" style="color:#00f2fe; border-color:#00f2fe !important;" onclick="send('BET_AGAINST_ACTIVE')">¡NI DE COÑA! (1 🔵)</button>
-                    <button class="spec-btn" style="color:#00ff88; border-color:#00ff88 !important;" onclick="send('BET_FOR_ACTIVE')">¡CONMIGO! (1 🔵)</button>
+                    <button class="spec-btn" style="color:#00f2fe; border-color:#00f2fe !important;" onclick="send('BET_AGAINST_ACTIVE')">Â¡NI DE COÃ‘A! (1 ðŸ”µ)</button>
+                    <button class="spec-btn" style="color:#00ff88; border-color:#00ff88 !important;" onclick="send('BET_FOR_ACTIVE')">Â¡CONMIGO! (1 ðŸ”µ)</button>
                     <button class="spec-btn" style="color:#00ff00; border-color:#00ff00 !important;" onclick="handleCooldownSabotage('SABOTAGE_BUZZER', 'btn-sabotage-buzzer')">ZUMBIDO</button>
-                    <button class="spec-btn" style="color:var(--gold); border:2px dashed var(--gold) !important;" onclick="send('SABOTAGE_DUEL')">🔫 DUELO 🔫 (3 🔵)</button>
-                    <button class="spec-btn" style="color:#ff8800; border-color:#ff8800 !important;" onclick="send('SABOTAGE_VETO')">VETO RECARGA (1 🔵)</button>
-                    <button class="spec-btn" style="color:#ff0000; border-color:#ff0000 !important;" onclick="send('SABOTAGE_PANIC')">PÁNICO (2 🔵)</button>
-                    <button class="spec-btn" style="color:#ff00ff; border-color:#ff00ff !important;" onclick="send('SABOTAGE_FORCE_SKIP')">SALTO FORZADO (3 🔵)</button>
+                    <button class="spec-btn" style="color:var(--gold); border:2px dashed var(--gold) !important;" onclick="send('SABOTAGE_DUEL')">ðŸ”« DUELO ðŸ”« (3 ðŸ”µ)</button>
+                    <button class="spec-btn" style="color:#ff8800; border-color:#ff8800 !important;" onclick="send('SABOTAGE_VETO')">VETO RECARGA (1 ðŸ”µ)</button>
+                    <button class="spec-btn" style="color:#ff0000; border-color:#ff0000 !important;" onclick="send('SABOTAGE_PANIC')">PÃNICO (2 ðŸ”µ)</button>
+                    <button class="spec-btn" style="color:#ff00ff; border-color:#ff00ff !important;" onclick="send('SABOTAGE_FORCE_SKIP')">SALTO FORZADO (3 ðŸ”µ)</button>
                 </div>
             </div>
         </div>
 
-        <!-- PESTAÑA MERCADO -->
+        <!-- PESTAÃ‘A MERCADO -->
         <div id="tab-market" class="tab-content">
             <h2 style="font-family:'Limelight'; color:var(--gold); margin-top:20px;">MERCADO</h2>
             <div id="market-container" style="display:flex; flex-direction:column; gap:15px; width:100%; max-width:340px; margin-top:20px;">
@@ -362,21 +362,21 @@
             </div>
         </div>
 
-        <!-- BARRA PESTAÑAS -->
+        <!-- BARRA PESTAÃ‘AS -->
         <div class="tab-bar">
-            <div class="tab-btn active" onclick="switchTab('tab-game', this)"><span>🎸</span><span>JUEGO</span></div>
-            <div class="tab-btn" onclick="switchTab('tab-sabotage', this)"><span>💀</span><span>SABOTAJE</span></div>
-            <div class="tab-btn" onclick="switchTab('tab-market', this)"><span>💰</span><span>MERCADO</span></div>
+            <div class="tab-btn active" onclick="switchTab('tab-game', this)"><span>ðŸŽ¸</span><span>JUEGO</span></div>
+            <div class="tab-btn" onclick="switchTab('tab-sabotage', this)"><span>ðŸ’€</span><span>SABOTAJE</span></div>
+            <div class="tab-btn" onclick="switchTab('tab-market', this)"><span>ðŸ’°</span><span>MERCADO</span></div>
         </div>
     </div>
 
     <!-- OVERLAYS COMUNES -->
     <div id="rules-overlay" class="overlay-full">
-        <h2 style="font-family:'Limelight'; color:var(--neon); font-size:2em;">📖 REGLAS</h2>
+        <h2 style="font-family:'Limelight'; color:var(--neon); font-size:2em;">ðŸ“– REGLAS</h2>
         <div style="color:#ddd; font-size:0.9em; max-width:400px; line-height:1.5; padding:20px;">
-            <p><strong>OBJETIVO:</strong> Coloca las canciones en orden cronológico. Gana quien llegue a 10 cartas.</p>
-            <p><strong>TURNO:</strong> Escucha y define dónde va la canción en tu fila.</p>
-            <p><strong>FICHAS:</strong> Úsalas para sabotear a rivales o comprar pistas en el mercado.</p>
+            <p><strong>OBJETIVO:</strong> Coloca las canciones en orden cronolÃ³gico. Gana quien llegue a 10 cartas.</p>
+            <p><strong>TURNO:</strong> Escucha y define dÃ³nde va la canciÃ³n en tu fila.</p>
+            <p><strong>FICHAS:</strong> Ãšsalas para sabotear a rivales o comprar pistas en el mercado.</p>
         </div>
         <button class="btn" onclick="toggleRules()" style="background:#333; color:#fff;">CERRAR</button>
     </div>
@@ -453,19 +453,7 @@
             btn.disabled = true;
             status("1/3: Peer...");
 
-            peer = new Peer({
-                config: {
-                    'iceServers': [
-                        { urls: 'stun:stun.l.google.com:19302' },
-                        { urls: 'stun:stun1.l.google.com:19302' },
-                        { urls: 'stun:global.stun.twilio.com:3478' },
-                        { urls: 'stun:stun.cloudflare.com:3478' },
-                        { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
-                        { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' },
-                        { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' }
-                    ]
-                }
-            });
+            peer = new Peer({ debug: 3, host: "0.peerjs.com", port: 443, secure: true, path: "/", pingInterval: 5000, config: { iceServers: [ { urls: "stun:stun.l.google.com:19302" }, { urls: "stun:stun1.l.google.com:19302" }, { urls: "stun:stun2.l.google.com:19302" }, { urls: "stun:global.stun.twilio.com:3478" }, { urls: "turn:openrelay.metered.ca:443", username: "openrelayproject", credential: "openrelayproject" } ] } });
 
             peer.on('open', (id) => {
                 myId = id;
@@ -483,7 +471,7 @@
                 conn.on('close', () => { location.reload(); });
                 
                 conn.on('error', (err) => {
-                    alert("Error de Conexión: " + err);
+                    alert("Error de ConexiÃ³n: " + err);
                     btn.disabled = false;
                     status("REINTENTAR");
                 });
@@ -531,7 +519,7 @@
                 document.getElementById('card').classList.remove('flipped');
             }
 
-            // Cronología
+            // CronologÃ­a
             let h = "";
             const timeline = isMe ? state.myCards : state.activeTimeline;
             h += renderSlot(0, state);
@@ -563,7 +551,7 @@
             for (let pid in state.currentBets) {
                 if (state.currentBets[pid] === idx) {
                     if (pid === myId) { cls += " my-bet"; label = "YO"; }
-                    else { cls += " occupied"; label = "🔘"; }
+                    else { cls += " occupied"; label = "ðŸ”˜"; }
                 }
             }
             return `<div class="${cls}" onclick="interactSlot(${idx}, ${isActive})">${label}</div>`;
@@ -583,8 +571,8 @@
             const container = document.getElementById('market-container');
             const isMe = state.activePlayer.id === myId;
             let h = "";
-            h += `<button class="btn" style="font-size:0.7em; padding:12px;" ${(!isMe || state.myWildcards < 1) ? 'disabled' : ''} onclick="send('MARKET_WILDCARD', 'artist')">PISTA ARTISTA (${state.myWildcards} 🃏)</button>`;
-            h += `<button class="btn" style="font-size:0.7em; padding:12px;" ${(state.myTokens < 3) ? 'disabled' : ''} onclick="send('MARKET_SHIELD')">ESCUDO (3 🔵)</button>`;
+            h += `<button class="btn" style="font-size:0.7em; padding:12px;" ${(!isMe || state.myWildcards < 1) ? 'disabled' : ''} onclick="send('MARKET_WILDCARD', 'artist')">PISTA ARTISTA (${state.myWildcards} ðŸƒ)</button>`;
+            h += `<button class="btn" style="font-size:0.7em; padding:12px;" ${(state.myTokens < 3) ? 'disabled' : ''} onclick="send('MARKET_SHIELD')">ESCUDO (3 ðŸ”µ)</button>`;
             container.innerHTML = h;
         }
 
@@ -611,3 +599,4 @@
     </script>
 </body>
 </html>
+
