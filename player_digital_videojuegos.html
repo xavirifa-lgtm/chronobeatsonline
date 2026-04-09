@@ -439,10 +439,19 @@
 
         let connectTimeout;
 
+        function log(msg) {
+            const l = document.getElementById('debug-log');
+            if (l) {
+                const time = new Date().toLocaleTimeString();
+                l.innerHTML = `[${time}] ${msg}<br>` + l.innerHTML;
+            }
+            console.log("PeerLog:", msg);
+        }
+
         function status(msg) {
             const btn = document.getElementById('join-btn');
             if (btn) btn.innerText = msg;
-            console.log("PeerStatus:", msg);
+            log("Status: " + msg);
         }
 
         function conectar() {
@@ -457,55 +466,74 @@
 
             if (connectTimeout) clearTimeout(connectTimeout);
 
+            log("Iniciando Peer...");
+            const iceServers = [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun1.l.google.com:19302' },
+                { urls: 'stun:stun2.l.google.com:19302' },
+                { urls: 'stun:global.stun.twilio.com:3478' },
+                { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
+                { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' },
+                { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' }
+            ];
+
             peer = new Peer({
-                config: {
-                    'iceServers': [
-                        { urls: 'stun:stun.l.google.com:19302' },
-                        { urls: 'stun:stun1.l.google.com:19302' },
-                        { urls: 'stun:global.stun.twilio.com:3478' },
-                        { urls: 'stun:stun.cloudflare.com:3478' },
-                        { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
-                        { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' },
-                        { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' }
-                    ]
-                }
+                debug: 3,
+                config: { 'iceServers': iceServers },
+                iceServers: iceServers // Doble definición por compatibilidad
             });
 
             peer.on('open', (id) => {
                 myId = id;
+                log("Peer abierto con ID: " + id);
                 status("2/3: Finding Host...");
                 
-                // Timeout de 15 segundos para la conexión
                 connectTimeout = setTimeout(() => {
-                    alert("¡TIEMPO AGOTADO! La red móvil es muy lenta o bloquea la conexión. Reintentando...");
+                    log("TIMEOUT: La conexión no se abrió tras 15s");
+                    alert("¡TIEMPO AGOTADO! La red móvil es muy lenta o bloquea la conexión. Consulta los logs abajo.");
                     btn.disabled = false;
                     status("RETRY");
                     if (peer) peer.destroy();
                 }, 15000);
 
+                log("Conectando a: CB-HOST-" + hostId);
                 conn = peer.connect("CB-HOST-" + hostId);
                 
                 conn.on('open', () => {
                     if (connectTimeout) clearTimeout(connectTimeout);
+                    log("Conexión abierta con el Host");
                     status("3/3: Joining...");
                     conn.send({ type: 'JOIN', name: playerName, avatar: playerAvatarDataUrl });
                     document.getElementById('login-screen').style.display = 'none';
                     document.getElementById('game-screen').style.display = 'flex';
                 });
 
-                conn.on('data', handle);
-                conn.on('close', () => { location.reload(); });
+                conn.on('data', (data) => {
+                    log("Datos recibidos: " + (data.type || 'unknown'));
+                    handle(data);
+                });
+
+                conn.on('close', () => { 
+                    log("Conexión cerrada");
+                    location.reload(); 
+                });
                 
                 conn.on('error', (err) => {
                     if (connectTimeout) clearTimeout(connectTimeout);
+                    log("ERROR Conn: " + err);
                     alert("Connection Error: " + err);
                     btn.disabled = false;
                     status("RETRY");
                 });
             });
 
+            peer.on('disconnected', () => {
+                log("Peer desconectado del servidor de señales");
+            });
+
             peer.on('error', (err) => {
                 if (connectTimeout) clearTimeout(connectTimeout);
+                log("ERROR Peer: " + err.type);
                 alert("Network Error: " + err.type);
                 btn.disabled = false;
                 status("RETRY");
@@ -625,6 +653,7 @@
         function handleCooldownSabotage(action, id) { send(action); }
         function showCustomAlert(msg) { document.getElementById('custom-alert-msg').innerText = msg; document.getElementById('custom-alert').style.display = 'flex'; }
     </script>
-    <div style="position:fixed; bottom:5px; right:5px; font-size:10px; opacity:0.3; color:white; z-index:10000; font-family: 'Montserrat', sans-serif;">v142</div>
+    <div id="debug-log" style="position:fixed; bottom:25px; left:5px; right:5px; height:100px; overflow-y:auto; background:rgba(0,0,0,0.8); color:#0f0; font-family:monospace; font-size:9px; padding:5px; z-index:9999; border:1px solid #333; pointer-events:none; display:none;"></div>
+    <div style="position:fixed; bottom:5px; right:5px; font-size:10px; opacity:0.3; color:white; z-index:10000; font-family: 'Montserrat', sans-serif;" onclick="document.getElementById('debug-log').style.display='block'">v144</div>
 </body>
 </html>
