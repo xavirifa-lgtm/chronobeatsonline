@@ -437,6 +437,8 @@
             reader.readAsDataURL(file);
         }
 
+        let connectTimeout;
+
         function status(msg) {
             const btn = document.getElementById('join-btn');
             if (btn) btn.innerText = msg;
@@ -452,6 +454,8 @@
             const btn = document.getElementById('join-btn');
             btn.disabled = true;
             status("1/3: Peer...");
+
+            if (connectTimeout) clearTimeout(connectTimeout);
 
             peer = new Peer({
                 config: {
@@ -470,9 +474,19 @@
             peer.on('open', (id) => {
                 myId = id;
                 status("2/3: Finding Host...");
-                conn = peer.connect("CB-HOST-" + hostId, { reliable: true });
+                
+                // Timeout de 15 segundos para la conexión
+                connectTimeout = setTimeout(() => {
+                    alert("¡TIEMPO AGOTADO! La red móvil es muy lenta o bloquea la conexión. Reintentando...");
+                    btn.disabled = false;
+                    status("RETRY");
+                    if (peer) peer.destroy();
+                }, 15000);
+
+                conn = peer.connect("CB-HOST-" + hostId);
                 
                 conn.on('open', () => {
+                    if (connectTimeout) clearTimeout(connectTimeout);
                     status("3/3: Joining...");
                     conn.send({ type: 'JOIN', name: playerName, avatar: playerAvatarDataUrl });
                     document.getElementById('login-screen').style.display = 'none';
@@ -483,6 +497,7 @@
                 conn.on('close', () => { location.reload(); });
                 
                 conn.on('error', (err) => {
+                    if (connectTimeout) clearTimeout(connectTimeout);
                     alert("Connection Error: " + err);
                     btn.disabled = false;
                     status("RETRY");
@@ -490,6 +505,7 @@
             });
 
             peer.on('error', (err) => {
+                if (connectTimeout) clearTimeout(connectTimeout);
                 alert("Network Error: " + err.type);
                 btn.disabled = false;
                 status("RETRY");
@@ -609,5 +625,6 @@
         function handleCooldownSabotage(action, id) { send(action); }
         function showCustomAlert(msg) { document.getElementById('custom-alert-msg').innerText = msg; document.getElementById('custom-alert').style.display = 'flex'; }
     </script>
+    <div style="position:fixed; bottom:5px; right:5px; font-size:10px; opacity:0.3; color:white; z-index:10000; font-family: 'Montserrat', sans-serif;">v142</div>
 </body>
 </html>
