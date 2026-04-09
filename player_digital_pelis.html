@@ -9,30 +9,29 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon-192.png">
-    <meta name="theme-color" content="#ff0055">
-    <title>CHRONOBEATS ANIME EDITION</title>
-    <link href="https://fonts.googleapis.com/css2?family=Shojumaru&family=Bungee&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <meta name="theme-color" content="#ffaa00">
+    <title>CHRONOBEATS MOVIES EDITION</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
         :root {
-            --neon: #ff0055;
+            --neon: #ffaa00;
             --bg: #0d0d0d;
-            --accent: #00f2fe;
+            --accent: #ff0055;
             --gold: #ffd700;
         }
 
-        /* --- UI COMPACT & STANDARD: AURORA ELITE V1.6 --- */
+        /* --- UI COMPACT & STANDARD: CINEMA ELITE --- */
         * {
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            background: #020202 !important;
+            background: #050505 !important;
             background-image: 
-                radial-gradient(circle at 20% 30%, hsla(330, 100%, 15%, 0.15), transparent 40%),
-                radial-gradient(circle at 80% 70%, hsla(350, 100%, 15%, 0.15), transparent 40%),
-                radial-gradient(circle at 50% 50%, hsla(340, 100%, 15%, 0.15), transparent 60%) !important;
+                radial-gradient(circle at 20% 30%, hsla(40, 100%, 15%, 0.15), transparent 40%),
+                radial-gradient(circle at 80% 70%, hsla(45, 100%, 15%, 0.15), transparent 40%) !important;
             background-attachment: fixed !important;
             color: #fff;
             font-family: 'Montserrat', sans-serif;
@@ -48,11 +47,11 @@
 
         /* Standardized Glass Style */
         input, .collection-summary, .card-row, .modal-content, .btn-secondary, .ctrl-btn, .spec-btn, .sk-btn, .market-btn, #sabotage-grid .spec-btn, .tab-bar, .duel-mode-ui, #custom-alert > div, #custom-confirm > div, .card-face {
-            background: rgba(15, 15, 15, 0.5) !important;
+            background: rgba(20, 20, 20, 0.6) !important;
             backdrop-filter: blur(25px) saturate(200%) !important;
             -webkit-backdrop-filter: blur(25px) saturate(200%) !important;
-            border: 1px solid rgba(255,255,255,0.1) !important;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.5) !important;
+            border: 1px solid rgba(255,170,0,0.2) !important;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6) !important;
             position: relative;
         }
 
@@ -102,16 +101,16 @@
         /* STANDARDIZED BUTTONS */
         .btn {
             background: var(--neon);
-            color: #fff;
+            color: #000;
             border: none;
             padding: 18px;
             border-radius: 50px;
-            font-family: 'Shojumaru';
+            font-family: 'Bungee';
             width: 100%;
             max-width: 280px;
             cursor: pointer;
             font-size: 1.1em;
-            box-shadow: 0 0 20px rgba(255, 0, 85, 0.3);
+            box-shadow: 0 0 20px rgba(255, 170, 0, 0.3);
             transition: 0.3s;
             text-transform: uppercase;
         }
@@ -125,40 +124,16 @@
             width: 100%;
             max-width: 280px;
             margin-bottom: 12px;
-            font-family: 'Shojumaru';
+            font-family: 'Bungee';
             text-align: center;
             font-size: 0.9em;
         }
 
         #host-id { text-transform: uppercase; }
 
-        .ctrl-btn {
-            padding: 15px 5px;
-            border-radius: 10px;
-            font-family: 'Bungee';
-            font-size: 0.85em;
-            cursor: pointer;
-            color: #fff;
-        }
-
-        .sk-btn {
-            padding: 12px 2px;
-            border-radius: 8px;
-            font-family: 'Bungee';
-            font-size: 0.75em;
-            cursor: pointer;
-            color: #fff;
-        }
-
-        .spec-btn {
-            padding: 12px 5px;
-            border-radius: 8px;
-            font-family: 'Bungee';
-            font-size: 0.8em;
-            cursor: pointer;
-            color: var(--gold);
-            border-color: var(--gold) !important;
-        }
+        .ctrl-btn { padding: 15px 5px; border-radius: 10px; font-family: 'Bungee'; font-size: 0.85em; cursor: pointer; color: #fff; }
+        .sk-btn { padding: 12px 2px; border-radius: 8px; font-family: 'Bungee'; font-size: 0.75em; cursor: pointer; color: #fff; }
+        .spec-btn { padding: 12px 5px; border-radius: 8px; font-family: 'Bungee'; font-size: 0.8em; cursor: pointer; color: var(--gold); border-color: var(--gold) !important; }
 
         /* CARD UI */
         .card-container {
@@ -171,14 +146,7 @@
             margin-top: 25px;
         }
 
-        .card {
-            height: 100%;
-            aspect-ratio: 2/3;
-            position: relative;
-            transform-style: preserve-3d;
-            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
+        .card { height: 100%; aspect-ratio: 2/3; position: relative; transform-style: preserve-3d; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
         .card.flipped { transform: rotateY(180deg); }
 
         .card-face {
@@ -203,8 +171,8 @@
         #c-year { font-family: 'Bungee'; font-size: 4em; color: var(--accent); line-height: 0.9; }
 
         /* STATUS UI */
-        #turn-status { font-family: 'Shojumaru'; color: var(--neon); font-size: 0.8em; margin: 10px 0; }
-        .chip-display { font-family: 'Shojumaru'; color: var(--gold); font-size: 0.7em; margin-bottom: 5px; display: flex; align-items: center; gap: 5px; }
+        #turn-status { font-family: 'Bungee'; color: var(--neon); font-size: 0.8em; margin: 10px 0; }
+        .chip-display { font-family: 'Bungee'; color: var(--gold); font-size: 0.7em; margin-bottom: 5px; display: flex; align-items: center; gap: 5px; }
         .neon-chip { width: 12px; height: 12px; background: var(--neon); border-radius: 50%; box-shadow: 0 0 10px var(--neon); }
 
         /* HUB & FAB */
@@ -223,11 +191,11 @@
         }
 
         .bet-slot {
-            width: 30px; height: 30px; background: rgba(255, 0, 85, 0.1); border: 2px dashed var(--neon);
+            width: 30px; height: 30px; background: rgba(255, 170, 0, 0.1); border: 2px dashed var(--neon);
             border-radius: 50%; display: flex; align-items: center; justify-content: center;
             cursor: pointer; margin: 4px auto; font-size: 0.6em; color: var(--neon); font-family: 'Bungee';
         }
-        .bet-slot.occupied { background: var(--neon); color: #fff; border-style: solid; }
+        .bet-slot.occupied { background: var(--neon); color: #000; border-style: solid; }
         .bet-slot.my-bet { background: var(--gold); border-color: var(--gold); color: #000; }
         .bet-slot.active-guess { background: #fff; border-color: #fff; color: #000; }
     </style>
@@ -238,14 +206,14 @@
 
     <!-- FAB REGLAMENTO -->
     <div id="fab-rules" onclick="toggleRules()"
-        style="display:flex; position:fixed; top:80px; left:20px; width:50px; height:50px; background:#111; border:2px solid var(--neon); border-radius:50%; z-index:9000; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 0 10px rgba(255,0,85,0.5); font-size:1.5em; color:var(--neon); font-family:'Bungee';">
+        style="display:flex; position:fixed; top:80px; left:20px; width:50px; height:50px; background:#111; border:2px solid var(--neon); border-radius:50%; z-index:9000; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 0 10px rgba(255,170,0,0.5); font-size:1.5em; color:var(--neon); font-family:'Bungee';">
         ?
     </div>
 
     <!-- PANTALLA LOGIN -->
     <div id="login-screen" style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px;">
-        <div class="logo" style="font-family:'Shojumaru'; color:var(--neon); text-shadow: 0 0 10px var(--neon); font-size:1.5em; text-align:center; margin-bottom:20px; line-height:1.2;">
-            CHRONOBEATS<br><span style="font-size:0.6em; opacity:0.6; vertical-align:top; color:var(--gold);">ANIME EDITION</span></div>
+        <div class="logo" style="font-family:'Bungee'; color:var(--neon); text-shadow: 0 0 10px var(--neon); font-size:1.5em; text-align:center; margin-bottom:20px; line-height:1.2;">
+            CHRONOBEATS<br><span style="font-size:0.6em; opacity:0.6; vertical-align:top; color:var(--gold);">MOVIES EDITION</span></div>
 
         <div id="avatar-container" onclick="document.getElementById('avatar-input').click()"
             style="display:flex; flex-direction:column; align-items:center; margin-bottom:15px; cursor:pointer;">
@@ -254,20 +222,20 @@
             <div id="avatar-placeholder" style="width:100px; height:100px; border-radius:50%; border: 3px dashed var(--neon); display:flex; align-items:center; justify-content:center; color:var(--neon); font-size:2.5em; font-family:'Bungee';">
                 +
             </div>
-            <div style="font-size: 0.6em; color: var(--neon); font-family: 'Shojumaru'; margin-top: 10px;">¡AUTO-SELFIE!</div>
+            <div style="font-size: 0.6em; color: var(--neon); font-family: 'Bungee'; margin-top: 10px;">¡AUTO-SELFIE!</div>
         </div>
         <input type="file" id="avatar-input" accept="image/*" capture="user" style="display:none;" onchange="handleAvatarSelect(event)">
 
         <input type="text" id="host-id" placeholder="CÓDIGO SALA" maxlength="6">
-        <input type="text" id="player-name" placeholder="SHINOBI NAME">
-        <button class="btn" id="join-btn" onclick="conectar()">ENTRAR</button>
+        <input type="text" id="player-name" placeholder="DIRECCIÓN">
+        <button class="btn" id="join-btn" onclick="conectar()">ACCION!</button>
     </div>
 
     <!-- PANTALLA JUEGO -->
     <div id="game-screen" style="display:none; flex:1; flex-direction:column;">
         <div id="tab-game" class="tab-content active">
-            <div id="leaderboard-info" style="font-family:'Shojumaru'; font-size:0.45em; color:#888; text-align:center; width:100%;">
-                <div style="color:var(--gold);">HOKAGE: <span id="lb-leader-name">---</span> (<span id="lb-leader-cards">0</span>)</div>
+            <div id="leaderboard-info" style="font-family:'Bungee'; font-size:0.45em; color:#888; text-align:center; width:100%;">
+                <div style="color:var(--gold);">DIRECTOR: <span id="lb-leader-name">---</span> (<span id="lb-leader-cards">0</span>)</div>
                 <div>YO: <span id="lb-me-cards">0</span> CARTAS</div>
             </div>
             
@@ -293,98 +261,76 @@
             <div class="card-container" id="normal-card-container">
                 <div id="card" class="card">
                     <div class="card-face card-front">
-                        <div style="font-family:'Shojumaru';color:var(--neon);opacity:0.2;font-size:1.5em;line-height:1.1;">CHRONO<br>BEATS</div>
-                        <div id="card-mode-label" style="font-family:'Shojumaru';color:var(--neon);opacity:0.5;font-size:0.5em;margin-top:15px;">ANIME</div>
+                        <div style="font-family:'Bungee';color:var(--neon);opacity:0.2;font-size:1.5em;line-height:1.1;">CHRONO<br>BEATS</div>
+                        <div id="card-mode-label" style="font-family:'Bungee';color:var(--neon);opacity:0.5;font-size:0.5em;margin-top:15px;">MOVIES</div>
                     </div>
                     <div class="card-face card-back">
-                        <div id="c-artist">AUTOR/ANIME</div>
+                        <div id="c-artist">COMPOSITOR/SAGA</div>
                         <div id="c-song">TÍTULO</div>
                         <div id="c-year">20XX</div>
                     </div>
                 </div>
-                <div id="wait-msg" style="font-family:'Shojumaru';opacity:0.4;font-size:0.6em;margin-top:15px;">CARGANDO OPENING...</div>
+                <div id="wait-msg" style="font-family:'Bungee';opacity:0.4;font-size:0.6em;margin-top:15px;">CARGANDO BANDA SONORA...</div>
             </div>
 
             <!-- MI CRONOLOGÍA -->
             <div class="collection-summary" id="normal-collection" style="width:100%; max-width:340px; margin-top:20px; padding:15px; border-radius:12px;">
-                <h4 id="inventory-title" style="font-family:'Shojumaru'; font-size:0.6em; color:var(--neon); margin:0 0 10px 0; text-align:center;">MI PERGAMINO</h4>
+                <h4 id="inventory-title" style="font-family:'Bungee'; font-size:0.6em; color:var(--neon); margin:0 0 10px 0; text-align:center;">MI FILMOGRAFÍA</h4>
                 <div id="my-cards-list" style="display:flex; flex-direction:column; gap:4px;"></div>
             </div>
 
             <!-- ACCIONES ESPECIALES -->
             <div class="special-actions" id="special-ctrl" style="display:none; flex-direction:column; gap:10px; width:100%; max-width:340px; margin-top:15px;">
-                <button class="spec-btn" id="btn-autowin" onclick="send('AUTO_WIN')">COMPRAR CARTA (3 🔵)</button>
-                <button class="spec-btn" id="btn-reload" onclick="send('RELOAD_SONG')">CAMBIAR EPISODIO (1 🔵)</button>
+                <button class="spec-btn" id="btn-autowin" onclick="send('AUTO_WIN')">PREMIO OSCAR (3 🔵)</button>
+                <button class="spec-btn" id="btn-reload" onclick="send('RELOAD_SONG')">NUEVA TOMA (1 🔵)</button>
             </div>
 
             <!-- DUELO UI -->
             <div id="duel-mode-ui" style="display: none; width: 100%; max-width: 340px; margin-top: 20px; text-align: center; flex-direction: column; gap: 15px; background: rgba(255, 215, 0, 0.1); padding: 20px; border: 2px solid var(--gold); border-radius: 15px;">
-                <div style="font-family: 'Shojumaru'; color: var(--gold); font-size: 1.1em;">🔫 ¡COMBATE! 🤠</div>
+                <div style="font-family: 'Bungee'; color: var(--gold); font-size: 1.1em;">🔫 ¡DUELO FINAL! 🤠</div>
                 <input type="number" id="duel-year-input" placeholder="AÑO" style="width: 100%; font-size: 1.2em; border-color: var(--gold);">
-                <button class="btn" style="background: var(--gold); color: #000;" onclick="sendDuelGuess()">¡ATACAR!</button>
-                <div id="duel-wait-msg" style="display:none; font-family:'Shojumaru'; color:var(--gold); font-size:0.5em; margin-top:5px;">ESPERANDO RIVAL...</div>
+                <button class="btn" style="background: var(--gold); color: #000;" onclick="sendDuelGuess()">¡FUEGO!</button>
+                <div id="duel-wait-msg" style="display:none; font-family:'Bungee'; color:var(--gold); font-size:0.5em; margin-top:5px;">ESPERANDO RIVAL...</div>
             </div>
         </div>
 
         <!-- PESTAÑA SABOTAJE -->
         <div id="tab-sabotage" class="tab-content">
-            <h2 style="font-family:'Shojumaru'; color:var(--neon); margin-top:20px; font-size:1em;">JUTSUS</h2>
-            <p id="sabotage-status-msg" style="color:#666; font-size:0.6em; text-align:center; font-family:'Shojumaru';">ESPERA TU MOMENTO</p>
+            <h2 style="font-family:'Bungee'; color:var(--neon); margin-top:20px; font-size:1em;">SABOTAJE</h2>
+            <p id="sabotage-status-msg" style="color:#666; font-size:0.6em; text-align:center; font-family:'Bungee';">ESPERA TU MOMENTO</p>
             <div id="sabotage-ctrl" style="display:none; width:100%; max-width:340px;">
-                <div id="sabotage-grid">
-                    <button class="spec-btn" id="btn-sabotage-mute" style="color:#ff0055; border-color:#ff0055 !important;" onclick="handleCooldownSabotage('SABOTAGE_MUTE', 'btn-sabotage-mute')">MUTE 15s</button>
-                    <button class="spec-btn" style="color:#00f2fe; border-color:#00f2fe !important;" onclick="send('BET_AGAINST_ACTIVE')">¡NI DE COÑA! (1 🔵)</button>
-                    <button class="spec-btn" style="color:#00ff88; border-color:#00ff88 !important;" onclick="send('BET_FOR_ACTIVE')">¡CONMIGO! (1 🔵)</button>
-                    <button class="spec-btn" style="color:#00ff00; border-color:#00ff00 !important;" onclick="handleCooldownSabotage('SABOTAGE_BUZZER', 'btn-sabotage-buzzer')">ZUMBIDO</button>
+                <div id="sabotage-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                    <button class="spec-btn" id="btn-sabotage-mute" style="color:#ff0055; border-color:#ff0055 !important;" onclick="send('SABOTAGE_MUTE')">SILENCIO 15s</button>
+                    <button class="spec-btn" style="color:#00f2fe; border-color:#00f2fe !important;" onclick="send('BET_AGAINST_ACTIVE')">¡NO ME LO CREO! (1 🔵)</button>
+                    <button class="spec-btn" style="color:#00ff88; border-color:#00ff88 !important;" onclick="send('BET_FOR_ACTIVE')">¡CRITICA OK! (1 🔵)</button>
+                    <button class="spec-btn" style="color:#00ff00; border-color:#00ff00 !important;" onclick="send('SABOTAGE_BUZZER')">BOCINA</button>
                     <button class="spec-btn" style="color:var(--gold); border:2px dashed var(--gold) !important;" onclick="send('SABOTAGE_DUEL')">🔫 DUELO 🔫 (3 🔵)</button>
-                    <button class="spec-btn" style="color:#ff8800; border-color:#ff8800 !important;" onclick="send('SABOTAGE_VETO')">VETO (1 🔵)</button>
                     <button class="spec-btn" style="color:#ff0000; border-color:#ff0000 !important;" onclick="send('SABOTAGE_PANIC')">PÁNICO (2 🔵)</button>
-                    <button class="spec-btn" style="color:#ff00ff; border-color:#ff00ff !important;" onclick="send('SABOTAGE_FORCE_SKIP')">SALTO (3 🔵)</button>
                 </div>
             </div>
         </div>
 
         <!-- PESTAÑA MERCADO -->
         <div id="tab-market" class="tab-content">
-            <h2 style="font-family:'Shojumaru'; color:var(--gold); margin-top:20px; font-size:1em;">TIENDA</h2>
+            <h2 style="font-family:'Bungee'; color:var(--gold); margin-top:20px; font-size:1em;">FESTIVAL</h2>
             <div id="market-container" style="display:flex; flex-direction:column; gap:15px; width:100%; max-width:340px; margin-top:20px;">
-                <!-- Injected via JS -->
+                <button class="btn" style="font-size:0.6em; padding:12px;" onclick="send('MARKET_WILDCARD', 'artist')">PISTA DIRECTOR (🃏)</button>
+                <button class="btn" style="font-size:0.6em; padding:12px;" onclick="send('MARKET_SHIELD')">ESCUDO (3 🔵)</button>
             </div>
         </div>
 
         <!-- BARRA PESTAÑAS -->
         <div class="tab-bar">
-            <div class="tab-btn active" onclick="switchTab('tab-game', this)"><span>🎸</span><span>JUEGO</span></div>
-            <div class="tab-btn" onclick="switchTab('tab-sabotage', this)"><span>💀</span><span>JUTSUS</span></div>
-            <div class="tab-btn" onclick="switchTab('tab-market', this)"><span>💰</span><span>ALDEA</span></div>
-        </div>
-    </div>
-
-    <!-- OVERLAYS COMUNES -->
-    <div id="rules-overlay" class="overlay-full">
-        <h2 style="font-family:'Shojumaru'; color:var(--neon); font-size:1.5em;">📖 REGLAS</h2>
-        <div style="color:#ddd; font-size:0.85em; max-width:400px; line-height:1.5; padding:20px; font-family:'Montserrat';">
-            <p><strong>OBJETIVO:</strong> Coloca las canciones en orden cronológico. Llega a 10 para ganar.</p>
-            <p><strong>TURNOS:</strong> Escucha y sitúa el opening en tu línea.</p>
-            <p><strong>JUTSUS:</strong> Usa tus fICHAS para sabotear a otros shinobis.</p>
-        </div>
-        <button class="btn" onclick="toggleRules()" style="background:#333; color:#fff;">CERRAR</button>
-    </div>
-
-    <div id="custom-alert" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:20000; align-items:center; justify-content:center;">
-        <div style="background:#111; border:2px solid var(--neon); border-radius:15px; padding:20px; width:80%; max-width:350px; text-align:center;">
-            <h3 style="font-family:'Shojumaru'; color:var(--neon); font-size:1em;">AVISO</h3>
-            <p id="custom-alert-msg" style="font-size:0.9em; margin:15px 0;"></p>
-            <button class="btn" onclick="document.getElementById('custom-alert').style.display='none'">OK</button>
+            <div class="tab-btn active" onclick="switchTab('tab-game', this)"><span>🎬</span><span>CINE</span></div>
+            <div class="tab-btn" onclick="switchTab('tab-sabotage', this)"><span>🍿</span><span>PLOT TWIST</span></div>
+            <div class="tab-btn" onclick="switchTab('tab-market', this)"><span>🌟</span><span>GALA</span></div>
         </div>
     </div>
 
     <script>
         var peer, conn, myId, playerName, lastState;
         var playerAvatarDataUrl = null;
-        var sabotageCooldowns = {};
 
-        // INICIO
         window.addEventListener('load', () => {
             document.getElementById('player-name').value = localStorage.getItem('cb_player_name') || '';
             playerAvatarDataUrl = localStorage.getItem('cb_player_avatar');
@@ -396,26 +342,16 @@
         });
 
         function handleAvatarSelect(e) {
-            const file = e.target.files[0];
-            if (!file) return;
+            const file = e.target.files[0]; if (!file) return;
             const reader = new FileReader();
-            reader.onload = function(event) {
+            reader.onload = (event) => {
                 const img = new Image();
-                img.onload = function() {
-                    const canvas = document.createElement('canvas');
-                    const MAX = 150;
-                    let w = img.width, h = img.height;
-                    if (w > h) { if (w > MAX) { h *= MAX/w; w = MAX; } }
-                    else { if (h > MAX) { w *= MAX/h; h = MAX; } }
+                img.onload = () => {
+                    const canvas = document.createElement('canvas'); const MAX = 150; let w = img.width, h = img.height;
+                    if (w > h) { if (w > MAX) { h *= MAX/w; w = MAX; } } else { if (h > MAX) { w *= MAX/h; h = MAX; } }
                     canvas.width = w; canvas.height = h;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, w, h);
-                    
-                    // TOONIFY FILTER (PINK)
-                    ctx.globalCompositeOperation = 'color';
-                    ctx.fillStyle = 'rgba(255, 0, 85, 0.5)';
-                    ctx.fillRect(0,0,w,h);
-                    
+                    const ctx = canvas.getContext('2d'); ctx.drawImage(img,0,0,w,h);
+                    ctx.globalCompositeOperation = 'color'; ctx.fillStyle = 'rgba(255, 170, 0, 0.5)'; ctx.fillRect(0,0,w,h);
                     playerAvatarDataUrl = canvas.toDataURL('image/jpeg', 0.7);
                     document.getElementById('avatar-preview').src = playerAvatarDataUrl;
                     document.getElementById('avatar-preview').style.display = 'block';
@@ -427,74 +363,28 @@
             reader.readAsDataURL(file);
         }
 
-        function status(msg) {
-            const btn = document.getElementById('join-btn');
-            if (btn) btn.innerText = msg;
-        }
-
         function conectar() {
             var hostId = document.getElementById('host-id').value.toUpperCase().trim();
             playerName = document.getElementById('player-name').value.trim();
             if(!hostId || !playerName) return alert("FALTAN DATOS");
-
             localStorage.setItem('cb_player_name', playerName);
-            const btn = document.getElementById('join-btn');
-            btn.disabled = true;
-            status("1/3: Peer...");
-
-            peer = new Peer({
-                debug: 3, host: '0.peerjs.com', port: 443, secure: true, path: '/', pingInterval: 5000,
-                config: {
-                    'iceServers': [
-                        { urls: 'stun:stun.l.google.com:19302' },
-                        { urls: 'stun:global.stun.twilio.com:3478' },
-                        { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' }
-                    ]
-                }
-            });
-
+            document.getElementById('join-btn').disabled = true;
+            document.getElementById('join-btn').innerText = "...";
+            peer = new Peer({ debug: 3, host: '0.peerjs.com', port: 443, secure: true, path: '/', pingInterval: 5000, config: { 'iceServers': [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' }] } });
             peer.on('open', (id) => {
-                myId = id;
-                status("2/3: Buscando...");
-                
-                const connectTimeout = setTimeout(() => {
-                    if (peer) peer.destroy();
-                    alert("TIEMPO AGOTADO!");
-                    location.reload();
-                }, 20000);
-
-                conn = peer.connect("CB-HOST-" + hostId);
-                
+                myId = id; conn = peer.connect("CB-HOST-" + hostId);
                 conn.on('open', () => {
-                    if (connectTimeout) clearTimeout(connectTimeout);
-                    status("3/3: Entrando...");
                     conn.send({ type: 'JOIN', name: playerName, avatar: playerAvatarDataUrl });
                     document.getElementById('login-screen').style.display = 'none';
                     document.getElementById('game-screen').style.display = 'flex';
                 });
-
                 conn.on('data', handle);
-                conn.on('error', (err) => {
-                    alert("Error: " + err);
-                    btn.disabled = false;
-                    status("REINTENTAR");
-                });
-            });
-
-            peer.on('error', (err) => {
-                alert("Red: " + err.type);
-                btn.disabled = false;
-                status("REINTENTAR");
             });
         }
 
         function handle(data) {
-            if (data.type === 'STATE_UPDATE') {
-                lastState = data;
-                updateUI(data);
-            } else if (data.type === 'BET_RESULT') {
-                showCustomAlert(data.msg);
-            }
+            if (data.type === 'STATE_UPDATE') { lastState = data; updateUI(data); }
+            else if (data.type === 'BET_RESULT') { showCustomAlert(data.msg); }
         }
 
         function updateUI(state) {
@@ -502,103 +392,39 @@
             document.getElementById('lb-leader-cards').innerText = state.leader.score;
             document.getElementById('lb-me-cards').innerText = state.myCards.length;
             document.getElementById('cur-player').innerText = state.activePlayer.name || "---";
-
-            // Fichas
             let chips = ""; for(let i=0; i<state.myTokens; i++) chips += '<span class="neon-chip"></span>';
             document.getElementById('my-tokens-ui').innerHTML = "FICHAS: " + chips;
-
-            // Turno
             const isMe = state.activePlayer.id === myId;
             document.getElementById('m-ctrl').style.display = isMe ? 'grid' : 'none';
             document.getElementById('s-ctrl').style.display = isMe ? 'grid' : 'none';
             document.getElementById('special-ctrl').style.display = (isMe && !state.revealed) ? 'flex' : 'none';
-
-            // Carta
-            if (state.revealed) {
-                document.getElementById('card').classList.add('flipped');
-                document.getElementById('c-artist').innerText = state.currentTrack.artist;
-                document.getElementById('c-song').innerText = state.currentTrack.song;
-                document.getElementById('c-year').innerText = state.currentTrack.year;
-            } else {
-                document.getElementById('card').classList.remove('flipped');
-            }
-
-            // Cronología
-            let h = "";
-            const timeline = isMe ? state.myCards : state.activeTimeline;
+            if (state.revealed) { document.getElementById('card').classList.add('flipped'); document.getElementById('c-artist').innerText = state.currentTrack.artist; document.getElementById('c-song').innerText = state.currentTrack.song; document.getElementById('c-year').innerText = state.currentTrack.year; }
+            else { document.getElementById('card').classList.remove('flipped'); }
+            let h = ""; const timeline = isMe ? state.myCards : state.activeTimeline;
             h += renderSlot(0, state);
-            timeline.forEach((year, idx) => {
-                h += `<div class="card-row" style="padding:10px; text-align:center; font-family:'Bungee'; background:rgba(255,255,255,0.05); border-radius:5px;">${year}</div>`;
-                h += renderSlot(idx + 1, state);
-            });
+            timeline.forEach((year, idx) => { h += `<div class="card-row" style="padding:10px;text-align:center;font-family:'Bungee';background:rgba(255,255,255,0.05);border-radius:5px;">${year}</div>`; h += renderSlot(idx+1, state); });
             document.getElementById('my-cards-list').innerHTML = h;
-
-            // Sabotajes
             const canSabotage = !isMe && state.isPlaying && !state.revealed;
             document.getElementById('sabotage-ctrl').style.display = canSabotage ? 'block' : 'none';
             document.getElementById('sabotage-status-msg').style.display = canSabotage ? 'none' : 'block';
-
-            // Duelo
             const isDuel = state.turnPhase === 'DUEL' && state.currentDuel;
             document.getElementById('duel-mode-ui').style.display = (isDuel && (state.currentDuel.challenger === myId || state.currentDuel.target === myId)) ? 'flex' : 'none';
-            
-            updateMarket(state);
         }
 
         function renderSlot(idx, state) {
-            const isActive = state.activePlayer.id === myId;
-            let cls = "bet-slot";
-            let label = "";
-            if (state.activeGuess === idx) { cls += " active-guess"; label = "X"; }
-            for (let pid in state.currentBets) {
-                if (state.currentBets[pid] === idx) {
-                    if (pid === myId) { cls += " my-bet"; label = "YO"; }
-                    else { cls += " occupied"; label = "🔘"; }
-                }
-            }
+            const isActive = state.activePlayer.id === myId; let cls = "bet-slot"; let label = "";
+            if (state.activeGuess === idx) { cls += " active-guess"; label = "🎬"; }
+            for (let pid in state.currentBets) { if (state.currentBets[pid] === idx) { if (pid === myId) { cls += " my-bet"; label = "YO"; } else { cls += " occupied"; label = "🔘"; } } }
             return `<div class="${cls}" onclick="interactSlot(${idx}, ${isActive})">${label}</div>`;
         }
 
-        function interactSlot(idx, isMe) {
-            if (isMe) {
-                if (lastState.activeGuess !== null) return;
-                send('GUESS', idx);
-            } else {
-                if (lastState.activeGuess === null) return;
-                send('BET', idx);
-            }
-        }
-
-        function updateMarket(state) {
-            const container = document.getElementById('market-container');
-            const isMe = state.activePlayer.id === myId;
-            let h = "";
-            h += `<button class="btn" style="font-size:0.6em; padding:12px;" ${(!isMe || state.myWildcards < 1) ? 'disabled' : ''} onclick="send('MARKET_WILDCARD', 'artist')">PISTA AUTOR (${state.myWildcards} 🃏)</button>`;
-            h += `<button class="btn" style="font-size:0.6em; padding:12px;" ${(state.myTokens < 3) ? 'disabled' : ''} onclick="send('MARKET_SHIELD')">ESCUDO (3 🔵)</button>`;
-            container.innerHTML = h;
-        }
-
-        function send(type, value) {
-            if (conn && conn.open) conn.send({ type: 'COMMAND', action: type, value: value });
-        }
-
-        function sendDuelGuess() {
-            const y = document.getElementById('duel-year-input').value;
-            if (y) {
-                send('DUEL_GUESS', y);
-                document.getElementById('duel-wait-msg').style.display = 'block';
-            }
-        }
-
+        function interactSlot(idx, isMe) { if (isMe) { if (lastState.activeGuess !== null) return; send('GUESS', idx); } else { if (lastState.activeGuess === null) return; send('BET', idx); } }
+        function send(type, value) { if (conn && conn.open) conn.send({ type: 'COMMAND', action: type, value: value }); }
+        function sendDuelGuess() { const y = document.getElementById('duel-year-input').value; if (y) { send('DUEL_GUESS', y); document.getElementById('duel-wait-msg').style.display = 'block'; } }
         function toggleRules() { const el = document.getElementById('rules-overlay'); el.style.display = (el.style.display === 'flex') ? 'none' : 'flex'; }
-        function switchTab(id, el) {
-            document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(id).style.display = 'flex'; el.classList.add('active');
-        }
-        function handleCooldownSabotage(action, id) { send(action); }
+        function switchTab(id, el) { document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none'); document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); document.getElementById(id).style.display = 'flex'; el.classList.add('active'); }
         function showCustomAlert(msg) { document.getElementById('custom-alert-msg').innerText = msg; document.getElementById('custom-alert').style.display = 'flex'; }
     </script>
-    <div style="position:fixed; bottom:5px; right:5px; font-size:8px; opacity:0.3; color:white; z-index:10000; font-family: 'Shojumaru';">v150</div>
+    <div style="position:fixed; bottom:5px; right:5px; font-size:8px; opacity:0.3; color:white; z-index:10000; font-family: 'Bungee';">v150</div>
 </body>
 </html>

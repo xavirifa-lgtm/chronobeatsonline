@@ -6,17 +6,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon-192.png">
-    <meta name="theme-color" content="#ff0055">
-    <title>HOST - CHRONOBEATS ANIME EDITION</title>
-    <link href="https://fonts.googleapis.com/css2?family=Shojumaru&family=Bungee&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <meta name="theme-color" content="#ffaa00">
+    <title>HOST - CHRONOBEATS MOVIES EDITION</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script src="https://www.youtube.com/iframe_api"></script>
     <style>
         :root {
-            --neon: #ff0055;
+            --neon: #ffaa00;
             --bg: #0d0d0d;
-            --accent: #00f2fe;
+            --accent: #ff0055;
             --gold: #ffd700;
         }
 
@@ -30,8 +30,8 @@
         }
 
         .logo {
-            font-family: 'Shojumaru';
-            font-size: 1.5em;
+            font-family: 'Bungee';
+            font-size: 2em;
             color: var(--neon);
             text-shadow: 0 0 20px var(--neon);
             text-align: center;
@@ -66,8 +66,8 @@
             padding: 10px;
             border-radius: 10px;
             border: 1px solid #444;
-            font-family: 'Shojumaru';
-            font-size: 0.6em;
+            font-family: 'Bungee';
+            font-size: 0.8em;
             text-transform: uppercase;
         }
 
@@ -87,8 +87,8 @@
         }
 
         .active-player-name {
-            font-family: 'Shojumaru';
-            font-size: 0.9em;
+            font-family: 'Bungee';
+            font-size: 1.5em;
             color: var(--neon);
             margin-top: 5px;
         }
@@ -171,16 +171,16 @@
             display: flex; align-items: center; justify-content: center;
             font-size: 9px; color: #666;
         }
-        .slot.filled { background: var(--neon); color: #fff; font-weight: bold; border: 1px solid #fff; }
+        .slot.filled { background: var(--neon); color: #000; font-weight: bold; border: 1px solid #fff; }
 
         .btn-start {
             background: var(--neon);
-            color: #fff;
+            color: #000;
             border: none;
             padding: 20px 60px;
             border-radius: 50px;
-            font-family: 'Shojumaru';
-            font-size: 1.2em;
+            font-family: 'Bungee';
+            font-size: 1.4em;
             cursor: pointer;
             box-shadow: 0 0 20px var(--neon);
         }
@@ -218,13 +218,13 @@
 <body>
     <a href="index.html" class="btn-hub" title="Volver al Hub">H</a>
     <div id="winner-screen">
-        <h1 style="font-family:'Shojumaru'; color:var(--gold);">LEVEL CLEAR!</h1>
+        <h1 style="font-family:'Bungee'; color:var(--gold);">THE OSCAR GOES TO...</h1>
         <div id="winner-avatar-img" style="margin: 20px 0;"></div>
-        <h2 id="winner-name" style="font-family:'Shojumaru'; color:var(--neon);">---</h2>
-        <button class="btn-start" onclick="location.reload()" style="margin-top:30px">REPLAY</button>
+        <h2 id="winner-name" style="font-family:'Bungee'; color:var(--neon);">---</h2>
+        <button class="btn-start" onclick="location.reload()" style="margin-top:30px">NEW MOVIE</button>
     </div>
     
-    <div class="logo">CHRONOBEATS<br><span style="font-size:0.5em; opacity:0.6;">ANIME EDITION</span></div>
+    <div class="logo">CHRONOBEATS<br><span style="font-size:0.5em; opacity:0.6;">MOVIES EDITION</span></div>
     
     <div id="live-room-code" style="display:none; position:fixed; top:20px; right:20px; background:var(--bg); border:1px solid var(--neon); color:var(--neon); padding:8px 15px; border-radius:10px; font-family:'Bungee'; font-size:1.2em; z-index:10000;">CODE</div>
     
@@ -233,7 +233,7 @@
         <div class="player-list" id="lobby-players"></div>
 
         <div id="mode-selector" style="margin-top: 30px; margin-bottom: 20px;">
-            <label style="font-family:'Shojumaru'; color:var(--neon); font-size:0.8em; display:block; margin-bottom:10px;">GAME MODE</label>
+            <label style="font-family:'Bungee'; color:var(--neon); font-size:1em; display:block; margin-bottom:10px;">GAME MODE</label>
             <select id="game-mode-select" style="padding:10px; font-family:'Montserrat'; border-radius:8px; background:#222; color:#fff; border:1px solid var(--neon);">
                 <option value="normal">CLASSIC (To 10 cards)</option>
                 <option value="rey">KING MODE (Final Guess)</option>
@@ -241,7 +241,7 @@
         </div>
 
         <div id="joputismo-container-lobby" style="margin-bottom: 20px;">
-            <label style="font-family:'Shojumaru'; color:#ff0055; font-size:0.8em; display:block; margin-bottom:10px;">JUTSUS LEVEL</label>
+            <label style="font-family:'Bungee'; color:#ff0055; font-size:1em; display:block; margin-bottom:10px;">SABOTAGE LEVEL</label>
             <select id="joputismo-select-lobby" onchange="setJoputismo(this.value)" style="padding:10px; font-family:'Montserrat'; border-radius:8px; background:#222; color:#fff; border:1px solid #ff0055;">
                 <option value="0">LOSER (Peaceful)</option>
                 <option value="1">TROLL (Hard)</option>
@@ -255,12 +255,12 @@
     <div id="dashboard">
         <div class="sidebar">
             <div style="text-align:center; margin-bottom:10px;">
-                <p style="font-size: 0.7em; color:#888; font-family:'Shojumaru';">TURN:</p>
+                <p style="font-size: 0.7em; color:#888; font-family:'Bungee';">TURN:</p>
                 <div class="active-player-name" id="ui-current-player">---</div>
             </div>
             
             <div style="margin-bottom: 20px; text-align: center; border-top: 1px solid #333; padding-top: 10px; border-bottom: 1px solid #333; padding-bottom: 15px;">
-                <label style="font-family:'Shojumaru'; color:#ff0055; font-size:0.6em; display:block; margin-bottom:5px;">JUTSUS</label>
+                <label style="font-family:'Bungee'; color:#ff0055; font-size:0.6em; display:block; margin-bottom:5px;">SABOTAGE</label>
                 <select id="joputismo-select-game" onchange="setJoputismo(this.value)" style="width:100%; padding:5px; font-family:'Montserrat'; font-size:0.8em; border-radius:5px; background:#111; color:#ff0055; border:1px solid #ff0055;">
                     <option value="0">LOSER</option>
                     <option value="1">TROLL</option>
@@ -274,19 +274,19 @@
             <div id="player-container"><div id="youtube-player"></div></div>
             <div class="validation-area">
                 <div class="val-card" id="val-card-ui" style="display:none;">
-                    <p style="font-family:'Shojumaru'; font-size:0.75em; color:var(--neon); margin-bottom:10px;">ACTIVE STAGE</p>
+                    <p style="font-family:'Bungee'; font-size:1em; color:var(--neon); margin-bottom:10px;">NOW SHOWING</p>
                     <p id="ui-card-artist" style="font-size:0.9em; color:#aaa; margin:0; font-weight:bold;">????</p>
                     <h3 id="ui-card-song" style="margin:5px 0;">????</h3>
                     <div id="ui-card-year" style="font-family:'Bungee'; font-size:4em; color:var(--accent); line-height:1;">????</div>
                     <button class="reveal-btn" id="btn-reveal-host" onclick="revealData()" style="display:block; margin:20px auto;">REVEAL DATA</button>
                     
                     <div class="actions" id="validation-buttons" style="display:none;">
-                        <button class="btn-val btn-ok" onclick="validateResult(true, false)">CORRECT</button>
+                        <button class="btn-val btn-ok" onclick="validateResult(true, false)">OK</button>
                         <button class="btn-val btn-ok" style="background:#ffd700;" onclick="validateResult(true, true)">PERFECT + <span class="neon-chip"></span></button>
-                        <button class="btn-val btn-fail" onclick="validateResult(false, false)">MISS</button>
+                        <button class="btn-val btn-fail" onclick="validateResult(false, false)">FAIL</button>
                     </div>
                 </div>
-                <div id="host-instructions" style="font-family:'Shojumaru'; font-size:0.8em; text-align:center;">WAITING...</div>
+                <div id="host-instructions" style="font-family:'Bungee'; font-size:1.2em; text-align:center;">WAITING...</div>
                 <div id="active-player-inventory" class="active-player-cards"></div>
             </div>
         </div>
@@ -551,11 +551,11 @@
 
         function setJoputismo(l) { joputismoLevel = parseInt(l); syncState(); }
 
-        fetch('lista_final_anime.txt?v=' + Date.now()).then(r => r.text()).then(t => {
+        fetch('lista_final_pelis.txt?v=' + Date.now()).then(r => r.text()).then(t => {
             let lines = t.split('\n');
             lines.forEach((l, i) => {
                 let p = l.split('|');
-                if (p.length > 3) songs.push({ artist: p[0], song: p[1], year: p[2], id: p[3].split('v=')[1] || p[3].split('/').pop(), line: i + 1, type: 'anime' });
+                if (p.length > 3) songs.push({ artist: p[0], song: p[1], year: p[2], id: p[3].split('v=')[1] || p[3].split('/').pop(), line: i + 1, type: 'movies' });
             });
             songs.sort(() => Math.random() - 0.5);
             initPeer();
