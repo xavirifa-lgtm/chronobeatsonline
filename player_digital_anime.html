@@ -135,7 +135,7 @@
             max-width: 280px;
             cursor: pointer;
             font-size: 1.1em;
-            box-shadow: 0 0 20px rgba(0, 242, 255, 0.3);
+            box-shadow: 0 0 20px rgba(255, 0, 204, 0.3);
             transition: 0.3s;
             text-transform: uppercase;
         }
@@ -732,12 +732,11 @@
         }
 
         /* Glass Grain Texture */
-        input, .collection-summary, .card-row, .modal-content, .btn-secondary, .ctrl-btn, .spec-btn, .sk-btn, .market-btn, #sabotage-grid .spec-btn, .tab-bar, .duel-mode-ui, #custom-alert > div, #custom-confirm > div, .card-face {
+        input, .collection-summary, .card-row, .modal-content, .btn-secondary, .market-btn, .tab-bar, .duel-mode-ui, #custom-alert > div, #custom-confirm > div, .card-face {
             background: var(--glass) !important;
             backdrop-filter: blur(25px) saturate(200%) !important;
             -webkit-backdrop-filter: blur(25px) saturate(200%) !important;
             border: 1px solid rgba(255,255,255,0.1) !important;
-            border-image: var(--glass-border) 1 !important;
             position: relative;
             box-shadow: 0 15px 35px rgba(0,0,0,0.5) !important;
         }
@@ -894,19 +893,6 @@
     </div>
 
     <div id="ai-loading-overlay">
-        <div class="spinner"></div>
-        <div style="font-size: 1.2em;">TRANSFORMANDO<br>SELFIE... 🪄✨</div>
-        <div style="font-size: 0.6em; margin-top: 15px; color: #888; font-family: 'Montserrat';">Esto puede tardar unos
-            segundos</div>
-    </div>
-    <a href="index.html" class="btn-hub" title="Volver al Hub">H</a>
-    <div id="login-screen">
-        <div class="logo" style="font-family:'Bungee'; color:var(--neon); text-shadow: 0 0 10px var(--neon);">
-            CHRONOBEATS <span style="font-size:0.4em; opacity:0.6; vertical-align:top; color:#aaa; font-family:Montserrat;">V1.6</span></div>
-
-        <div id="avatar-container" onclick="document.getElementById('avatar-input').click()"
-            style="display:flex; flex-direction:column; align-items:center; margin-bottom:15px; cursor:pointer;">
-            <img id="avatar-preview" src="" alt="Avatar"
                 style="display:none; width:100px; height:100px; border-radius:50%; object-fit:cover; border: 3px solid var(--neon); box-shadow: 0 0 15px var(--neon);">
             <div id="avatar-placeholder" class="pulse"
                 style="width:100px; height:100px; border-radius:50%; border: 3px dashed var(--neon); display:flex; align-items:center; justify-content:center; color:var(--neon); font-size:2.5em; font-family:'Bungee'; background:rgba(0,242,255,0.05); transition: 0.3s;">
