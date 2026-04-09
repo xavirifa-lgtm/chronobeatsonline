@@ -111,7 +111,7 @@
             max-width: 280px;
             cursor: pointer;
             font-size: 1.1em;
-            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+            box-shadow: 0 0 20px rgba(157, 0, 255, 0.3);
             transition: 0.3s;
             text-transform: uppercase;
         }
@@ -248,7 +248,7 @@
 
     <!-- FAB REGLAMENTO -->
     <div id="fab-rules" onclick="toggleRules()"
-        style="display:flex; position:fixed; top:80px; left:20px; width:50px; height:50px; background:#111; border:2px solid var(--neon); border-radius:50%; z-index:9000; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 0 10px rgba(0,255,0,0.5); font-size:1.5em; color:var(--neon); font-family:'Bungee';">
+        style="display:flex; position:fixed; top:80px; left:20px; width:50px; height:50px; background:#111; border:2px solid var(--neon); border-radius:50%; z-index:9000; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 0 10px rgba(157,0,255,0.5); font-size:1.5em; color:var(--neon); font-family:'Bungee';">
         ?
     </div>
 
@@ -393,6 +393,7 @@
         var peer, conn, myId, playerName, lastState;
         var playerAvatarDataUrl = null;
         var sabotageCooldowns = {};
+        let connectTimeout;
 
         // INICIO
         window.addEventListener('load', () => {
@@ -420,12 +421,6 @@
                     canvas.width = w; canvas.height = h;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, w, h);
-                    
-                    // TOONIFY FILTER (GREEN)
-                    ctx.globalCompositeOperation = 'color';
-                    ctx.fillStyle = 'rgba(0, 255, 0, 0.5)';
-                    ctx.fillRect(0,0,w,h);
-                    
                     playerAvatarDataUrl = canvas.toDataURL('image/jpeg', 0.7);
                     document.getElementById('avatar-preview').src = playerAvatarDataUrl;
                     document.getElementById('avatar-preview').style.display = 'block';
@@ -437,22 +432,9 @@
             reader.readAsDataURL(file);
         }
 
-        
-
-                let connectTimeout;
-        function log(msg) {
-            const l = document.getElementById('debug-log');
-            if (l) {
-                const time = new Date().toLocaleTimeString();
-                l.innerHTML = \[\] \<br>\ + l.innerHTML;
-            }
-            console.log("PeerLog:", msg);
-        }
-
         function status(msg) {
             const btn = document.getElementById('join-btn');
             if (btn) btn.innerText = msg;
-            log("Status: " + msg);
         }
 
         function conectar() {
@@ -467,7 +449,6 @@
 
             if (connectTimeout) clearTimeout(connectTimeout);
 
-            log("Iniciando Peer...");
             const iceServers = [
                 { urls: 'stun:stun.l.google.com:19302' },
                 { urls: 'stun:stun1.l.google.com:19302' },
@@ -485,98 +466,46 @@
                 secure: true,
                 path: '/',
                 pingInterval: 5000,
-                config: { 'iceServers': iceServers },
-                iceServers: iceServers
+                config: { 'iceServers': iceServers }
             });
 
             peer.on('open', (id) => {
                 myId = id;
-                log("Peer abierto con ID: " + id);
                 status("2/3: BUSCANDO...");
                 
                 connectTimeout = setTimeout(() => {
-                    log("TIMEOUT: La conexión no se abrió tras 20s");
                     alert("¡TIEMPO AGOTADO! La red móvil es muy lenta o bloquea la conexión.");
                     btn.disabled = false;
                     status("REINTENTAR");
                     if (peer) peer.destroy();
                 }, 20000);
 
-                log("Conectando a: CB-HOST-" + hostId);
                 conn = peer.connect("CB-HOST-" + hostId);
                 
                 conn.on('open', () => {
                     if (connectTimeout) clearTimeout(connectTimeout);
-                    log("Conexión abierta");
                     status("3/3: ENTRANDO...");
                     conn.send({ type: 'JOIN', name: playerName, avatar: playerAvatarDataUrl });
                     document.getElementById('login-screen').style.display = 'none';
                     document.getElementById('game-screen').style.display = 'flex';
                 });
 
-                conn.on('data', (data) => {
-                    log("Datos recibidos: " + (data.type || 'unknown'));
-                    handle(data);
-                });
+                conn.on('data', handle);
 
                 conn.on('close', () => { 
-                    log("Conexión cerrada");
                     location.reload(); 
                 });
                 
                 conn.on('error', (err) => {
                     if (connectTimeout) clearTimeout(connectTimeout);
-                    log("ERROR Conn: " + err);
                     alert("Error de Conexión: " + err);
                     btn.disabled = false;
                     status("REINTENTAR");
                 });
-            });
-
-            peer.on('disconnected', () => {
-                log("Peer desconectado");
             });
 
             peer.on('error', (err) => {
                 if (connectTimeout) clearTimeout(connectTimeout);
-                log("ERROR Peer: " + err.type);
-                alert("Error de Red: " + err.type);
-                btn.disabled = false;
-                status("REINTENTAR");
-            });
-        },
-                        { urls: 'stun:stun1.l.google.com:19302' },
-                        { urls: 'stun:global.stun.twilio.com:3478' },
-                        { urls: 'stun:stun.cloudflare.com:3478' },
-                        { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
-                        { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' },
-                        { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' }
-                    ]
-                }
-            });
-
-            peer.on('open', (id) => {
-                myId = id;
-                status("2/3: Buscando Host...");
-                conn = peer.connect("CB-HOST-" + hostId, { reliable: true });
-                
-                conn.on('open', () => {
-                    status("3/3: Entrando...");
-                    conn.send({ type: 'JOIN', name: playerName, avatar: playerAvatarDataUrl });
-                    document.getElementById('login-screen').style.display = 'none';
-                    document.getElementById('game-screen').style.display = 'flex';
-                });
-
-                conn.on('data', handle);
-                
-                conn.on('error', (err) => {
-                    alert("Error de Conexión: " + err);
-                    btn.disabled = false;
-                    status("REINTENTAR");
-                });
-            });
-
-            peer.on('error', (err) => {
                 alert("Error de Red: " + err.type);
                 btn.disabled = false;
                 status("REINTENTAR");
@@ -598,17 +527,14 @@
             document.getElementById('lb-me-cards').innerText = state.myCards.length;
             document.getElementById('cur-player').innerText = state.activePlayer.name || "---";
 
-            // Fichas
             let chips = ""; for(let i=0; i<state.myTokens; i++) chips += '<span class="neon-chip"></span>';
             document.getElementById('my-tokens-ui').innerHTML = "MIS FICHAS: " + chips;
 
-            // Turno
             const isMe = state.activePlayer.id === myId;
             document.getElementById('m-ctrl').style.display = isMe ? 'grid' : 'none';
             document.getElementById('s-ctrl').style.display = isMe ? 'grid' : 'none';
             document.getElementById('special-ctrl').style.display = (isMe && !state.revealed) ? 'flex' : 'none';
 
-            // Carta
             if (state.revealed) {
                 document.getElementById('card').classList.add('flipped');
                 document.getElementById('c-artist').innerText = state.currentTrack.artist;
@@ -618,7 +544,6 @@
                 document.getElementById('card').classList.remove('flipped');
             }
 
-            // Cronología
             let h = "";
             const timeline = isMe ? state.myCards : state.activeTimeline;
             h += renderSlot(0, state);
@@ -628,12 +553,10 @@
             });
             document.getElementById('my-cards-list').innerHTML = h;
 
-            // Sabotajes
             const canSabotage = !isMe && state.isPlaying && !state.revealed;
             document.getElementById('sabotage-ctrl').style.display = canSabotage ? 'block' : 'none';
             document.getElementById('sabotage-status-msg').style.display = canSabotage ? 'none' : 'block';
 
-            // Duelo
             const isDuel = state.turnPhase === 'DUEL' && state.currentDuel;
             document.getElementById('duel-mode-ui').style.display = (isDuel && (state.currentDuel.challenger === myId || state.currentDuel.target === myId)) ? 'flex' : 'none';
             
@@ -696,8 +619,6 @@
         function handleCooldownSabotage(action, id) { send(action); }
         function showCustomAlert(msg) { document.getElementById('custom-alert-msg').innerText = msg; document.getElementById('custom-alert').style.display = 'flex'; }
     </script>
-    <div id="debug-log" style="position:fixed; bottom:25px; left:5px; right:5px; height:100px; overflow-y:auto; background:rgba(0,0,0,0.8); color:#0f0; font-family:monospace; font-size:9px; padding:5px; z-index:9999; border:1px solid #333; pointer-events:none; display:none;"></div>
-    <div style="position:fixed; bottom:5px; right:5px; font-size:10px; opacity:0.3; color:white; z-index:10000; font-family: 'Montserrat', sans-serif;" onclick="document.getElementById('debug-log').style.display='block'">v148</div>
+    <div style="position:fixed; bottom:5px; right:5px; font-size:10px; opacity:0.3; color:white; z-index:10000; font-family: 'Montserrat', sans-serif;">v149</div>
 </body>
 </html>
-
