@@ -1,26 +1,22 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CHRONOBEATS MIX - SELECCIÓN</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+    <title>CHRONOBEATS MIX MODE</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Bungee&family=Montserrat:wght@400;700&family=Orbitron:wght@400;700&display=swap"
+        rel="stylesheet">
     <style>
         :root {
             --neon: #00ff00;
-            --bg: #020202;
-            --gold: #fff;
-            --glass: rgba(15, 15, 15, 0.6);
-            --aurora-1: hsla(120, 100%, 20%, 0.35);
-            --aurora-2: hsla(180, 100%, 20%, 0.35);
+            --bg: #0d0d0d;
+            --gold: #ffd700;
         }
 
         body {
             background: var(--bg);
-            background-image: 
-                radial-gradient(circle at 20% 30%, var(--aurora-1), transparent 40%),
-                radial-gradient(circle at 80% 70%, var(--aurora-2), transparent 40%);
-            background-attachment: fixed;
             color: #fff;
             font-family: 'Montserrat', sans-serif;
             display: flex;
@@ -29,175 +25,186 @@
             justify-content: center;
             min-height: 100vh;
             margin: 0;
-            padding: 20px;
-            box-sizing: border-box;
+            overflow: hidden;
         }
 
         .logo {
-            font-family: 'Montserrat';
-            font-weight: 900;
-            font-size: 2.5em;
+            font-family: 'Bungee';
+            font-size: 2em;
             color: var(--neon);
             text-shadow: 0 0 20px var(--neon);
             text-align: center;
-            margin-bottom: 30px;
-            line-height: 1.1;
-            letter-spacing: -1px;
-        }
-
-        .logo span {
-            font-size: 0.35em;
-            color: var(--neon); /* Verde Mix restaurado */
-            display: block;
-            margin-top: 10px;
-            letter-spacing: 5px;
-            font-weight: 700;
-        }
-
-        .mix-selector {
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            padding: 25px;
-            border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.1);
-            width: 100%;
-            max-width: 360px;
-            margin-bottom: 30px;
-            box-sizing: border-box;
-        }
-
-        .mix-title {
-            font-size: 0.7em;
-            font-weight: 900;
-            color: #888;
-            margin-bottom: 20px;
-            text-align: center;
-            letter-spacing: 2px;
-        }
-
-        .mix-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
-        .mix-chip {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid #333;
-            color: #555;
-            padding: 12px;
-            border-radius: 12px;
-            font-size: 0.7em;
-            font-weight: 700;
-            cursor: pointer;
-            transition: 0.3s;
-            text-align: center;
-        }
-
-        .mix-chip.active {
-            background: rgba(0, 255, 0, 0.1);
-            border-color: var(--neon);
-            color: var(--neon);
-            box-shadow: 0 0 15px rgba(0, 255, 0, 0.2);
+            margin-bottom: 40px;
         }
 
         .btn-container {
             display: flex;
             flex-direction: column;
-            gap: 15px;
-            width: 100%;
-            max-width: 360px;
+            gap: 20px;
         }
 
         .btn {
             display: block;
-            width: 100%;
-            padding: 20px;
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255,255,255,0.1);
+            width: 320px;
+            padding: 22px;
+            border: 2px solid #333;
             text-align: center;
-            color: #ccc;
+            color: #888;
             text-decoration: none;
-            font-weight: 700;
+            font-family: 'Bungee';
             font-size: 0.9em;
             border-radius: 50px;
             transition: 0.4s;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            cursor: pointer;
+            background: transparent;
+            box-sizing: border-box;
         }
 
         .btn:hover {
-            transform: translateY(-3px);
             border-color: var(--neon);
             color: var(--neon);
-            box-shadow: 0 10px 30px rgba(0, 255, 0, 0.2);
+            background: rgba(0, 255, 0, 0.05);
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.2);
+            transform: translateY(-3px);
         }
 
-        .btn-back {
-            margin-top: 20px;
-            font-size: 0.7em;
-            opacity: 0.6;
-            border-color: transparent;
-            background: transparent;
-        }
-
-        .btn-back:hover {
-            opacity: 1;
+        .btn-gold {
             border-color: #444;
-            color: #fff;
+            color: #aaa;
         }
-    </style>
-</head>
-<body>
-    <div class="logo">CHRONOBEATS<span>MIX MODE</span></div>
-    
-    <div class="mix-selector">
-        <div class="mix-title">CONFIGURAR MEZCLA</div>
-        <div class="mix-grid">
-            <div class="mix-chip active" data-type="orig" onclick="toggleMix(this)">ORIGINAL</div>
-            <div class="mix-chip active" data-type="movies" onclick="toggleMix(this)">PELIS</div>
-            <div class="mix-chip active" data-type="anime" onclick="toggleMix(this)">ANIME</div>
-            <div class="mix-chip active" data-type="videojuegos" onclick="toggleMix(this)">GAMER</div>
-        </div>
-    </div>
 
-    <style>
-        .mix-chip[data-type="orig"].active { border-color: #00f2ff; color: #00f2ff; background: rgba(0, 242, 255, 0.1); box-shadow: 0 0 15px rgba(0, 242, 255, 0.2); }
-        .mix-chip[data-type="movies"].active { border-color: #ffaa00; color: #ffaa00; background: rgba(255, 170, 0, 0.1); box-shadow: 0 0 15px rgba(255, 170, 0, 0.2); }
-        .mix-chip[data-type="anime"].active { border-color: #ff00cc; color: #ff00cc; background: rgba(255, 0, 204, 0.1); box-shadow: 0 0 15px rgba(255, 0, 204, 0.2); }
-        .mix-chip[data-type="videojuegos"].active { border-color: #bf00ff; color: #bf00ff; background: rgba(191, 0, 255, 0.1); box-shadow: 0 0 15px rgba(191, 0, 255, 0.2); }
-        
-        /* Asegurar simetría en botones */
-        .btn {
-            display: flex;
+        .btn-gold:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+            background: rgba(255, 215, 0, 0.05);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.2);
+        }
+
+        /* Modal Selector de Mix */
+        #mix-selector-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 100;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 80px;
-            padding: 0; 
-            line-height: 1.2;
+        }
+
+        .mix-modal-content {
+            background: #111;
+            padding: 40px;
+            border-radius: 20px;
+            border: 2px solid var(--neon);
+            text-align: center;
+            box-shadow: 0 0 40px rgba(0, 255, 0, 0.2);
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .mix-modal-content h2 {
+            font-family: 'Bungee';
+            color: var(--neon);
+            margin-bottom: 25px;
+            font-size: 1.2em;
+        }
+
+        .mix-option {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #333;
+            text-align: center;
+            color: #ddd;
+            text-decoration: none;
+            font-family: 'Orbitron', 'Montserrat', sans-serif;
+            font-weight: 700;
+            font-size: 1.1em;
+            letter-spacing: 1.5px;
+            border-radius: 10px;
+            transition: 0.3s;
+            margin-bottom: 15px;
+            cursor: pointer;
+            background: #1a1a1a;
+        }
+
+        .mix-option:hover {
+            border-color: var(--neon);
+            background: rgba(0, 255, 0, 0.1);
+        }
+
+        .mix-close {
+            margin-top: 20px;
+            color: #888;
+            cursor: pointer;
+            font-size: 0.9em;
+            text-decoration: underline;
         }
     </style>
+</head>
 
+<body>
+    <div class="logo">CHRONOBEATS<br><span style="font-size:0.5em; color:#fff;">MIX MODE</span></div>
     <div class="btn-container">
-        <button onclick="goToHost()" class="btn" style="cursor:pointer; font-family:inherit;">CENTRO DE CONTROL<br><span style="font-size:0.7em; opacity:0.7; font-weight:400;">(Tablet / PC)</span></button>
-        <a href="player_digital_mix.html" class="btn">MANDO JUGADOR<br><span style="font-size:0.7em; opacity:0.7; font-weight:400;">(Móvil)</span></a>
-        <a href="index.html" class="btn btn-back" style="height:auto; padding: 15px;">VOLVER AL MENÚ</a>
+        <button onclick="openMixSelector()" class="btn btn-gold">CENTRO DE CONTROL <span
+                style="font-size: 0.7em;">(Tablet)</span></button>
+        <a href="player_digital_mix.html" class="btn">MANDO JUGADOR <span style="font-size: 0.7em;">(Móvil)</span></a>
+        <a href="index.html" class="btn" style="border-color:#333; color:#555; margin-top:20px;">VOLVER AL MENÚ</a>
+    </div>
+
+    <!-- Modal Seleccionador de Host Mix -->
+    <div id="mix-selector-modal">
+        <div class="mix-modal-content">
+            <h2>ELIJA LAS LISTAS A MEZCLAR</h2>
+            <button class="mix-option" onclick="startHost('orig,anime,movies')">MIX TOTAL</button>
+            <button class="mix-option" onclick="startHost('orig,anime')">CLÁSICO + ANIME</button>
+            <button class="mix-option" onclick="startHost('orig,movies')">CLÁSICO + PELIS</button>
+            <button class="mix-option" onclick="startHost('anime,movies')">ANIME + PELIS</button>
+            <div class="mix-close" onclick="closeMixSelector()">Cancelar</div>
+        </div>
     </div>
 
     <script>
-        function toggleMix(el) {
-            el.classList.toggle('active');
+        function openMixSelector() {
+            document.getElementById('mix-selector-modal').style.display = 'flex';
         }
 
-        function goToHost() {
-            const active = Array.from(document.querySelectorAll('.mix-chip.active')).map(c => c.dataset.type);
-            if (active.length === 0) {
-                alert("Selecciona al menos una categoría para mezclar.");
-                return;
-            }
-            window.location.href = `host_digital_mix.html?mix=${active.join(',')}`;
+        function closeMixSelector() {
+            document.getElementById('mix-selector-modal').style.display = 'none';
+        }
+
+        function startHost(mixConfig) {
+            window.location.href = "host_digital_mix.html?mix=" + mixConfig;
+        }
+    </script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').then(reg => {
+                    reg.addEventListener('updatefound', () => {
+                        const newWorker = reg.installing;
+                        newWorker.addEventListener('statechange', () => {
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                window.location.reload();
+                            }
+                        });
+                    });
+                });
+            });
+
+            let refreshing = false;
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (!refreshing) {
+                    window.location.reload();
+                    refreshing = true;
+                }
+            });
         }
     </script>
 </body>
+
 </html>
