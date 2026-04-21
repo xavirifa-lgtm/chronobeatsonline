@@ -6,14 +6,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon-192.png">
-    <meta name="theme-color" content="#00f2ff">
-    <title>HOST - CHRONOBEATS DIGITAL</title>
+    <meta name="theme-color" content="#00f2fe">
+    <title>HOST - CHRONOBEATS ORIGINAL EDITION</title>
     <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://www.youtube.com/iframe_api"></script>
     <style>
         :root {
-            --neon: #00f2ff;
+            --neon: #00f2fe;
             --bg: #0d0d0d;
             --accent: #ff0055;
             --gold: #ffd700;
@@ -26,6 +27,8 @@
             margin: 0;
             padding: 20px;
             min-height: 100vh;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
         }
 
         .logo {
@@ -50,25 +53,7 @@
             color: var(--gold);
             letter-spacing: 10px;
             margin: 20px 0;
-        }
-
-        .music-controls {
-            display: none;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 6px;
-            width: 100%;
-            max-width: 320px;
-            margin-top: 10px;
-        }
-
-        .skip-controls {
-            display: none;
-            grid-template-rows: repeat(2, 1fr);
-            grid-template-columns: repeat(3, 1fr);
-            gap: 4px;
-            width: 100%;
-            max-width: 320px;
-            margin-top: 5px;
+            text-transform: uppercase;
         }
 
         .player-list {
@@ -85,6 +70,7 @@
             border: 1px solid #444;
             font-family: 'Bungee';
             font-size: 0.8em;
+            text-transform: uppercase;
         }
 
         #dashboard {
@@ -93,6 +79,7 @@
             gap: 20px;
             max-width: 1200px;
             margin: auto;
+            min-height: 0;
         }
 
         .sidebar {
@@ -106,6 +93,7 @@
             font-family: 'Bungee';
             font-size: 1.5em;
             color: var(--neon);
+            margin-top: 5px;
         }
 
         .leader-item {
@@ -121,20 +109,14 @@
             border-left: 4px solid var(--neon);
         }
 
-        /* Reproductor Fuera de pantalla pero sin visibility:hidden (que bloquea autoplay) */
         #player-container {
             position: absolute;
             top: -999px;
             left: -999px;
             opacity: 0.1;
-            /* Mínima opacidad pero técnicamente visible para el navegador */
         }
 
-        #player-container iframe {
-            width: 1px;
-            height: 1px;
-            border: none;
-        }
+        #player-container iframe { width: 1px; height: 1px; border: none; }
 
         .validation-area {
             background: #111;
@@ -171,12 +153,6 @@
             cursor: pointer;
         }
 
-        .actions {
-            display: flex;
-            gap: 10px;
-            width: 100%;
-        }
-
         .btn-val {
             flex: 1;
             padding: 20px;
@@ -187,51 +163,18 @@
             cursor: pointer;
         }
 
-        .btn-ok {
-            background: #00ff88;
-        }
+        .btn-ok { background: #00ff88; color: #000; }
+        .btn-fail { background: var(--accent); color: #fff; }
 
-        .btn-fail {
-            background: var(--accent);
-            color: #fff;
-        }
-
-        .timeline-grid {
-            display: grid;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        .player-row {
-            background: #161616;
-            padding: 10px;
-            border-radius: 10px;
-        }
-
-        .slots {
-            display: flex;
-            gap: 5px;
-            overflow-x: auto;
-        }
-
+        .timeline-grid { display: grid; gap: 10px; margin-top: 20px; }
+        .player-row { background: #161616; padding: 10px; border-radius: 10px; }
+        .slots { display: flex; gap: 5px; overflow-x: auto; }
         .slot {
-            min-width: 45px;
-            height: 25px;
-            background: #222;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 9px;
-            color: #666;
+            min-width: 45px; height: 25px; background: #222; border-radius: 4px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 9px; color: #666;
         }
-
-        .slot.filled {
-            background: var(--neon);
-            color: #000;
-            font-weight: bold;
-            border: 1px solid #fff;
-        }
+        .slot.filled { background: var(--neon); color: #000; font-weight: bold; border: 1px solid #fff; }
 
         .btn-start {
             background: var(--neon);
@@ -242,319 +185,172 @@
             font-family: 'Bungee';
             font-size: 1.4em;
             cursor: pointer;
+            box-shadow: 0 0 20px var(--neon);
         }
 
-        /* Pantalla Ganador */
         #winner-screen {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            z-index: 1000;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-        }
-
-        #winner-screen h1 {
-            font-family: 'Bungee';
-            font-size: 4em;
-            color: var(--gold);
-            margin: 0;
-        }
-
-        #winner-screen h2 {
-            font-family: 'Bungee';
-            font-size: 2em;
-            color: var(--neon);
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.9); z-index: 1000; flex-direction: column;
+            align-items: center; justify-content: center; text-align: center;
         }
 
         .active-player-cards {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            justify-content: center;
-            margin-top: 15px;
-            padding: 10px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
+            display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+            margin-top: 15px; padding: 10px; background: rgba(255, 255, 255, 0.05); border-radius: 10px;
         }
 
         .mini-card {
-            background: #222;
-            border: 1px solid var(--neon);
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-family: 'Bungee';
-            font-size: 0.9em;
-            color: #fff;
+            background: #222; border: 1px solid var(--neon); padding: 5px 10px;
+            border-radius: 5px; font-family: 'Bungee'; font-size: 0.9em; color: #fff;
         }
 
         .neon-chip {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
-            background: #00f2fe;
-            border-radius: 50%;
-            box-shadow: 0 0 8px #00f2fe, 0 0 15px #00f2fe;
-            margin: 0 3px;
-            vertical-align: middle;
+            display: inline-block; width: 10px; height: 10px; background: var(--neon);
+            border-radius: 50%; box-shadow: 0 0 8px var(--neon); margin: 0 3px; vertical-align: middle;
         }
 
-        /* Hub Button */
         .btn-hub {
-            position: fixed;
-            top: calc(20px + env(safe-area-inset-top, 0px));
-            left: 20px;
-            z-index: 10000;
-            width: 55px;
-            height: 55px;
-            background: #000;
-            border: 2px solid var(--neon, #00f2ff);
-            border-radius: 50%;
-            display: flex !important;
-            align-items: center;
-            justify-content: center;
-            color: var(--neon, #00f2ff);
-            text-decoration: none;
-            font-family: 'Bungee';
-            font-size: 1.5em;
-            box-shadow: 0 0 20px rgba(0, 242, 255, 0.5);
-            transition: 0.3s;
-            cursor: pointer;
-        }
-
-        .btn-hub:hover {
-            background: var(--neon, #00f2ff);
-            color: #000;
-            box-shadow: 0 0 40px var(--neon, #00f2ff);
-            transform: scale(1.1);
-        }
-        .wanted-poster {
-            position: absolute;
-            width: 70px;
-            height: 90px;
-            background: #e0c9a6;
-            border: 2px solid #5d4037;
-            border-radius: 5px;
-            top: -75px;
-            left: 50%;
-            transform: translateX(-50%) rotate(-5deg);
-            z-index: 10;
-            font-family: 'Bungee', cursive;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding-top: 5px;
-            box-shadow: 3px 3px 10px rgba(0,0,0,0.6);
-            background-image: repeating-linear-gradient(45deg, rgba(0,0,0,0.02) 0, rgba(0,0,0,0.02) 1px, transparent 1px, transparent 10px);
-        }
-        .wanted-poster::after {
-            content: '';
-            position: absolute;
-            top: 2px; left: 2px; right: 2px; bottom: 2px;
-            border: 1px solid rgba(93, 64, 55, 0.3);
-            pointer-events: none;
-        }
-        .wanted-poster .txt1 { font-size: 8px; color: #5d4037; margin-bottom: 2px; letter-spacing: 1px; }
-        .wanted-poster .txt2 { font-size: 11px; color: #b71c1c; font-weight: bold; margin-bottom: 5px; }
-        .wanted-img-placeholder {
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            background: rgba(0,0,0,0.1);
-            border: 1px solid #5d4037;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
-        .wanted-img-placeholder img { width: 100%; height: 100%; object-fit: cover; }
-        .wanted-img-placeholder .initial { font-size: 1.5em; color: #5d4037; }
-
-        #flash-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: white;
-            z-index: 99999;
-            pointer-events: none;
-            opacity: 0;
-        }
-        @keyframes gunshot-flash {
-            0% { opacity: 0; }
-            10% { opacity: 0.9; }
-            100% { opacity: 0; }
-        }
-        .animate-flash {
-            animation: gunshot-flash 0.4s ease-out forwards;
+            position: fixed; top: 20px; left: 20px; z-index: 10000;
+            width: 55px; height: 55px; background: #000; border: 2px solid var(--neon);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            color: var(--neon); text-decoration: none; font-family: 'Bungee'; font-size: 1.5em;
         }
     </style>
 </head>
 
 <body>
     <a href="index.html" class="btn-hub" title="Volver al Hub">H</a>
-    <div id="flash-overlay"></div>
     <div id="winner-screen">
-        <h1>¡TENEMOS GANADOR!</h1>
+        <h1 style="font-family:'Bungee'; color:var(--gold);">VICTORIA MAGISTRAL!</h1>
         <div id="winner-avatar-img" style="margin: 20px 0;"></div>
-        <h2 id="winner-name">---</h2>
-        <button class="btn-start" onclick="location.reload()" style="margin-top:30px">JUGAR OTRA VEZ</button>
+        <h2 id="winner-name" style="font-family:'Bungee'; color:var(--neon);">---</h2>
+        <button class="btn-start" onclick="location.reload()" style="margin-top:30px">OTRA RONDA</button>
     </div>
-    <div class="logo">CHRONOBEATS</div>
-    <div id="live-room-code"
-        style="display:none; position:fixed; top:20px; right:20px; background:var(--bg); border:1px solid var(--neon); color:var(--neon); padding:8px 15px; border-radius:10px; font-family:'Bungee'; font-size:1.2em; z-index:10000; box-shadow:0 0 10px rgba(0,242,255,0.3);">
-        CODE</div>
+    
+    <div class="logo">CHRONOBEATS<br><span style="font-size:0.5em; opacity:0.6;">ORIGINAL EDITION</span></div>
+    
+    <div id="live-room-code" style="display:none; position:fixed; top:20px; right:20px; background:var(--bg); border:1px solid var(--neon); color:var(--neon); padding:8px 15px; border-radius:10px; font-family:'Bungee'; font-size:1.2em; z-index:10000;">CODE</div>
+    
     <div id="lobby">
         <div class="room-code" id="join-code">------</div>
-        <div class="player-list" id="lobby-players" style="margin-bottom: 20px;"></div>
+        <div class="player-list" id="lobby-players"></div>
 
-        <!-- NEW MODE SELECTOR -->
-        <div id="mode-selector" style="margin-bottom: 20px;">
-            <label
-                style="font-family: 'Bungee'; color: var(--neon); font-size: 1.2em; display: block; margin-bottom: 10px;">MODO
-                DE JUEGO</label>
-            <select id="game-mode-select"
-                style="padding: 10px; font-family: 'Montserrat'; font-size: 1em; border-radius: 8px; background: #222; color: #fff; border: 1px solid var(--neon);">
-                <option value="normal">CLÁSICO (Gana a los 10)</option>
+        <div id="mode-selector" style="margin-top: 30px; margin-bottom: 20px;">
+            <label style="font-family:'Bungee'; color:var(--neon); font-size:1em; display:block; margin-bottom:10px;">MODO DE JUEGO</label>
+            <select id="game-mode-select" style="padding:10px; font-family:'Montserrat'; border-radius:8px; background:#222; color:#fff; border:1px solid var(--neon);">
+                <option value="normal">CLÁSICO (Gana a las 10)</option>
                 <option value="rey">MODO REY (Adivina Año Final)</option>
             </select>
         </div>
 
         <div id="joputismo-container-lobby" style="margin-bottom: 20px;">
-            <label
-                style="font-family: 'Bungee'; color: #ff0055; font-size: 1.2em; display: block; margin-bottom: 10px;">NIVEL
-                DE JOPUTISMO</label>
-            <select id="joputismo-select-lobby" onchange="setJoputismo(this.value)"
-                style="padding: 10px; font-family: 'Montserrat'; font-size: 1em; border-radius: 8px; background: #222; color: #fff; border: 1px solid #ff0055;">
-                <option value="0">LOSER (Modo Pacífico)</option>
+            <label style="font-family:'Bungee'; color:#ff0055; font-size:1em; display:block; margin-bottom:10px;">NIVEL DE JOPUTISMO</label>
+            <select id="joputismo-select-lobby" onchange="setJoputismo(this.value)" style="padding:10px; font-family:'Montserrat'; border-radius:8px; background:#222; color:#fff; border:1px solid #ff0055;">
+                <option value="0">LOSER (Pacífico)</option>
                 <option value="1">TROLL (Nivel Cabrón)</option>
                 <option value="2">SUPERMAN (Guerra Total)</option>
             </select>
         </div>
 
-        <button class="btn-start" onclick="startGame()" style="display:none; margin-top: 20px;" id="start-btn">EMPEZAR
-            PARTIDA</button>
+        <button class="btn-start" onclick="startGame()" style="display:none; margin-top:20px;" id="start-btn">EMPEZAR PARTIDA</button>
     </div>
-
-    <!-- AUDIO JOPUTISMO YOUTUBE -->
-    <div id="joputismo-audio-player" style="display:none;"></div>
-    <div id="audio-player-container" style="display:none;"></div>
 
     <div id="dashboard">
         <div class="sidebar">
             <div style="text-align:center; margin-bottom:10px;">
-                <p style="font-size: 0.7em; color: #888;">TURNO DE:</p>
+                <p style="font-size: 0.7em; color:#888; font-family:'Bungee';">TURNO:</p>
                 <div class="active-player-name" id="ui-current-player">---</div>
             </div>
-
-            <div
-                style="margin-bottom: 20px; text-align: center; border-top: 1px solid #333; padding-top: 10px; border-bottom: 1px solid #333; padding-bottom: 15px;">
-                <label
-                    style="font-family: 'Bungee'; color: #ff0055; font-size: 0.6em; display: block; margin-bottom: 5px;">NIVEL
-                    DE JOPUTISMO</label>
-                <select id="joputismo-select-game" onchange="setJoputismo(this.value)"
-                    style="width: 100%; padding: 5px; font-family: 'Montserrat'; font-size: 0.8em; border-radius: 5px; background: #111; color: #ff0055; border: 1px solid #ff0055;">
+            
+            <div style="margin-bottom: 20px; text-align: center; border-top: 1px solid #333; padding-top: 10px; border-bottom: 1px solid #333; padding-bottom: 15px;">
+                <label style="font-family:'Bungee'; color:#ff0055; font-size:0.6em; display:block; margin-bottom:5px;">JOPUTISMO</label>
+                <select id="joputismo-select-game" onchange="setJoputismo(this.value)" style="width:100%; padding:5px; font-family:'Montserrat'; font-size:0.8em; border-radius:5px; background:#111; color:#ff0055; border:1px solid #ff0055;">
                     <option value="0">LOSER</option>
                     <option value="1">TROLL</option>
                     <option value="2">SUPERMAN</option>
                 </select>
             </div>
             <div id="leaderboard-list"></div>
-
         </div>
+        
         <div class="main-content">
-            <div id="player-container">
-                <div id="youtube-player"></div>
-            </div>
+            <div id="player-container"><div id="youtube-player"></div></div>
             <div class="validation-area">
                 <div class="val-card" id="val-card-ui" style="display:none;">
-                    <p style="font-size: 0.7em; color: var(--neon); margin-bottom: 5px;">CANCIÓN EN JUEGO <span style="font-size: 0.8em; opacity: 0.8;"> - ORIGINAL EDITION</span></p>
-                    <p id="ui-card-artist" style="font-size: 0.9em; color: #aaa; margin: 0; font-weight: bold;">????</p>
-                    <h3 id="ui-card-song" style="margin: 5px 0; font-size: 1.2em;">????</h3>
-                    <div id="ui-card-year"
-                        style="font-family: 'Bungee'; font-size: 3.5em; color: var(--accent); margin-top: 5px; line-height: 1;">
-                        ????</div>
-                    <button class="reveal-btn" id="btn-reveal-host" onclick="revealData()"
-                        style="display:block; margin: 15px auto;">REVELAR DATOS</button>
-                    <div class="actions" id="validation-buttons"
-                        style="display:none; gap: 10px; width: 100%; margin-top: 15px;">
+                    <p style="font-family:'Bungee'; font-size:1em; color:var(--neon); margin-bottom:10px;">SONANDO AHORA</p>
+                    <p id="ui-card-artist" style="font-size:0.9em; color:#aaa; margin:0; font-weight:bold;">????</p>
+                    <h3 id="ui-card-song" style="margin:5px 0;">????</h3>
+                    <div id="ui-card-year" style="font-family:'Bungee'; font-size:4em; color:var(--accent); line-height:1;">????</div>
+                    <button class="reveal-btn" id="btn-reveal-host" onclick="revealData()" style="display:block; margin:20px auto;">REVELAR DATOS</button>
+                    
+                    <div class="actions" id="validation-buttons" style="display:none;">
                         <button class="btn-val btn-ok" onclick="validateResult(true, false)">ACERTÓ</button>
-                        <button class="btn-val btn-ok" style="background:#ffd700;"
-                            onclick="validateResult(true, true)">ACERTÓ TODO + <span class="neon-chip"></span></button>
+                        <button class="btn-val btn-ok" style="background:#ffd700;" onclick="validateResult(true, true)">PERFECTO + <span class="neon-chip"></span></button>
                         <button class="btn-val btn-fail" onclick="validateResult(false, false)">FALLÓ</button>
                     </div>
-                    <div id="challenger-validation"
-                        style="display:none; margin-top: 15px; border-top: 1px solid #333; padding-top: 15px;">
-                        <p style="font-size: 0.7em; color: var(--gold); margin-bottom: 10px;">¿ALGÚN DESAFIANTE GANÓ LA
-                            APUESTA?</p>
-                        <div id="challenger-buttons"
-                            style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;"></div>
-                        <button class="btn-val"
-                            style="background:#444; margin-top:10px; font-size: 0.6em; padding: 10px;"
-                            onclick="nextTurn()">NADIE ACERTÓ</button>
-                    </div>
                 </div>
-                <div id="host-instructions">ESPERANDO ACCIÓN...</div>
+                <div id="host-instructions" style="font-family:'Bungee'; font-size:1.2em; text-align:center;">ESPERANDO...</div>
                 <div id="active-player-inventory" class="active-player-cards"></div>
             </div>
         </div>
     </div>
+    
     <div class="timeline-grid" id="global-timelines"></div>
-    </div>
-    </div>
 
     <script>
         var peer, roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-        var players = [], connections = {}, songs = [], currentSongIdx = -1, activePlayerIdx = 0, isRevealed = false; 
-        var hasShield = {}; // playerId -> boolean
-        var currentBets = {}; // playerId -> slotIndex
-        var activeGuess = null; // slotIndex del jugador activo
-        var bettingAgainst = []; // IDs de los jugadores que han apostado contra el jugador activo
-        var bettingFor = []; // IDs de los jugadores que han apostado a favor del jugador activo
-        var queuedDuel = null;
-        var currentDuel = null;
-        var duelResult = null; // Para mensajes de fin de duelo
-        var duelTriggered = false; // Bloqueo de un duelo por turno
-
-        // Variables de estado del Modo Rey
-        var gameMode = 'normal';
-        var turnPhase = 'NORMAL'; // 'NORMAL', 'KING_SELECTION', 'KING_GUESS', 'KING_GUESS_RESULT'
-        var kingOptions = []; // Array de opciones para los retadores
-        var cheatsEnabled = true;
-        var gameStarted = false;
-
-        // Seguimiento de tiempo para skips manuales
-        var segundosAcumulados = 0;
-        var momentoDeInicio = 0;
-        var isPlaying = false;
-        var isMuted = false;
-        var muteTimeRemaining = 0;
-        var muteIntervalTimer = null;
-        var panicTimer = 0;
-        var panicActive = false;
-        var panicInterval = null;
-        var joputismoLevel = 0; // 0: LOSER, 1: HE-MAN, 2: SUPERMAN
-        var isFogActive = false;
+        var ytPlayer, players = [], connections = {}, songs = [], currentSongIdx = -1, activePlayerIdx = 0;
+        var isRevealed = false, isPlaying = false, isMuted = false;
+        var currentBets = {}, activeGuess = null, bettingAgainst = [], bettingFor = [];
+        var gameMode = 'normal', turnPhase = 'NORMAL', kingOptions = [], gameStarted = false;
+        var muteTimeRemaining = 0, muteIntervalTimer = null, panicTimer = 0, panicActive = false, panicInterval = null;
+        var joputismoLevel = 0, isFogActive = false, hasShield = {}, duelTriggered = false, currentDuel = null;
 
         document.getElementById('join-code').innerText = roomCode;
 
-        // Eliminadas funciones de YT API
+        function onYouTubeIframeAPIReady() {
+            ytPlayer = new YT.Player('youtube-player', {
+                height: '1', width: '1', videoId: '',
+                playerVars: { 'autoplay': 0, 'controls': 0, 'disablekb': 1, 'modestbranding': 1, 'rel': 0 },
+                events: { 'onStateChange': onPlayerStateChange, 'onError': () => handlePlayerCommand('SYSTEM', 'SYSTEM_ERROR_TRACK', null) }
+            });
+        }
 
-        function updateTokens(player, delta) {
-            if (!player) return;
-            player.tokens = Math.max(0, Math.min(5, (player.tokens || 0) + delta));
+        function onPlayerStateChange(event) {
+            if (event.data === YT.PlayerState.PLAYING) {
+                isPlaying = true;
+                document.getElementById('host-instructions').innerText = isMuted ? "PLAYING (MUTE)" : "PLAYING";
+                syncState();
+            } else if (event.data === YT.PlayerState.PAUSED) {
+                isPlaying = false;
+                syncState();
+            } else if (event.data === YT.PlayerState.ENDED) {
+                handleSongEnd();
+            }
+        }
+
+        function handleSongEnd() {
+            if (!isRevealed && activeGuess === null) {
+                isPlaying = false;
+                document.getElementById('host-instructions').innerHTML = "<span style='color:#ff0055; font-family:Bungee;'>TIEMPO AGOTADO! ⏰</span>";
+                setTimeout(nextTurn, 4000);
+                syncState();
+            }
         }
 
         function initPeer() {
             peer = new Peer("CB-HOST-" + roomCode, {
+                debug: 3,
+                host: '0.peerjs.com',
+                port: 443,
+                secure: true,
+                path: '/',
+                pingInterval: 5000,
                 config: {
-                                                            'iceServers': [
+                    'iceServers': [
                         { urls: 'stun:stun.l.google.com:19302' },
                         { urls: 'stun:stun1.l.google.com:19302' },
+                        { urls: 'stun:stun2.l.google.com:19302' },
                         { urls: 'stun:global.stun.twilio.com:3478' },
                         { urls: 'stun:stun.cloudflare.com:3478' },
                         { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
@@ -563,147 +359,47 @@
                     ]
                 }
             });
-            peer.on('open', function (id) {
-                console.log("Host Peer Abierto:", id);
+            peer.on('open', id => {
                 document.getElementById('live-room-code').innerText = roomCode;
                 document.getElementById('live-room-code').style.display = 'block';
             });
-            peer.on('connection', function (conn) {
-                console.log("Nueva conexión entrante:", conn.peer);
-                conn.on('open', function () {
-                    console.log("Conexión con el player abierta");
-                });
-                conn.on('data', function (data) {
-                    console.log("Comando recibido en host:", data);
+            peer.on('connection', conn => {
+                conn.on('data', data => {
                     if (data.type === 'JOIN') {
-                        // PROTECCIÓN DUPLICADOS: Buscar si el nombre ya existe
-                        var existing = players.find(function (p) { return p.name.toLowerCase() === data.name.toLowerCase(); });
+                        let existing = players.find(p => p.name.toLowerCase() === data.name.toLowerCase());
                         if (existing) {
-                            console.log("Reconexión de jugador:", data.name);
-                            delete connections[existing.id];
                             existing.id = conn.peer;
-                            existing.avatar = data.avatar || existing.avatar; // Actualizar avatar si cambió
+                            existing.avatar = data.avatar || existing.avatar;
                             connections[conn.peer] = conn;
-                            syncState(); // Force state sync to reconnecting player
                         } else {
                             players.push({ id: conn.peer, name: data.name, avatar: data.avatar || null, score: 1, cards: [], tokens: 2, canReload: true, wildcards: 3 });
                             connections[conn.peer] = conn;
                         }
                         updateLobby();
-                    } else if (data.type === 'AVATAR_UPDATE') {
-                        var existing = players.find(function (p) { return p.name.toLowerCase() === data.name.toLowerCase(); });
-                        if (existing) {
-                            existing.avatar = data.avatar;
-                            updateLobby();
-                        }
+                        syncState();
                     } else if (data.type === 'COMMAND') {
                         handlePlayerCommand(conn.peer, data.action, data.value);
                     }
                 });
-                conn.on('error', function (err) {
-                    console.error("Error en conexión:", err);
-                });
-            });
-            peer.on('error', function (err) {
-                if (err.type === 'unavailable-id') {
-                    alert("El ID de sala ya existe o hay un error. Probando uno nuevo...");
-                    window.location.reload();
-                } else {
-                    alert("Error PeerJS Host: " + err.type);
-                }
             });
         }
-        initPeer();
-
-        fetch('lista_final.txt?v=' + new Date().getTime()).then(function (r) { return r.text() }).then(function (t) {
-            var lines = t.replace(/\r/g, '').split('\n');
-            var uniqueIds = new Set();
-            var playedIds = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]');
-            songs = lines.map(function (l, index) {
-                var p = l.split('|');
-                var m = p[3] ? p[3].match(/[?&]v=([^&#]+)|youtu\.be\/([^?&#]+)/) : null;
-                return {
-                    artist: p[0],
-                    song: p[1],
-                    year: p[2],
-                    id: m ? (m[1] || m[2]) : null,
-                    line: index + 1 // Guardar número de fila original
-                };
-            }).filter(function (s) {
-                if (!s.id || uniqueIds.has(s.id) || playedIds.includes(s.id)) return false;
-                uniqueIds.add(s.id);
-                return true;
-            }).sort(function () { return Math.random() - 0.5; });
-
-            // V79: Si quedan pocas canciones disponibles, reseteamos el historial (Safety Net)
-            if (songs.length < 5 && playedIds.length > 0) {
-                localStorage.removeItem('CB_PlayedSongs');
-                location.reload();
-            }
-        });
 
         function updateLobby() {
-            var h = "";
-            for (var i = 0; i < players.length; i++) {
-                var avatarHtml = '';
-                if (players[i].avatar) {
-                    avatarHtml = '<img src="' + players[i].avatar + '" style="width:30px; height:30px; border-radius:50%; vertical-align:middle; margin-right:8px; border:2px solid var(--neon);">';
-                } else {
-                    var initial = players[i].name.charAt(0).toUpperCase();
-                    avatarHtml = '<div style="width:30px; height:30px; border-radius:50%; background:#222; border:2px solid var(--neon); color:var(--neon); display:inline-flex; align-items:center; justify-content:center; font-family:\'Bungee\'; vertical-align:middle; margin-right:8px;">' + initial + '</div>';
-                }
-                h += '<div class="player-tag" style="display:flex; align-items:center;">' + avatarHtml + players[i].name + '</div>';
-            }
+            let h = "";
+            players.forEach(p => {
+                let av = p.avatar ? `<img src="${p.avatar}" style="width:30px;height:30px;border-radius:50%;margin-right:8px;border:2px solid var(--neon);">` : `<div style="width:30px;height:30px;border-radius:50%;background:#222;border:2px solid var(--neon);display:inline-flex;align-items:center;justify-content:center;margin-right:8px;font-family:'Bungee';">${p.name[0]}</div>`;
+                h += `<div class="player-tag">${av}${p.name}</div>`;
+            });
             document.getElementById('lobby-players').innerHTML = h;
             if (players.length >= 1) document.getElementById('start-btn').style.display = 'inline-block';
         }
 
-        var joputismoAudioTimeout = null;
-
-        function setJoputismo(level) {
-            joputismoLevel = parseInt(level);
-            var selectLobby = document.getElementById('joputismo-select-lobby');
-            if (selectLobby) selectLobby.value = joputismoLevel;
-            var selectGame = document.getElementById('joputismo-select-game');
-            if (selectGame) selectGame.value = joputismoLevel;
-
-            var themeContainer = document.getElementById('joputismo-audio-player');
-            if (themeContainer) {
-                if (joputismoAudioTimeout) {
-                    clearTimeout(joputismoAudioTimeout);
-                    joputismoAudioTimeout = null;
-                }
-
-                if (document.getElementById('lobby').style.display !== 'none') {
-                    if (joputismoLevel === 1) {
-                        // Trololo meme
-                        themeContainer.innerHTML = '<iframe width="1" height="1" src="https://www.youtube-nocookie.com/embed/oavMtUWDBTM?autoplay=1&start=16" allow="autoplay" style="display:none;"></iframe>';
-                    } else if (joputismoLevel === 2) {
-                        // Superman theme - desde el principio
-                        themeContainer.innerHTML = '<iframe width="1" height="1" src="https://www.youtube-nocookie.com/embed/e9vrfEoc8_g?autoplay=1" allow="autoplay" style="display:none;"></iframe>';
-                    } else {
-                        themeContainer.innerHTML = '';
-                    }
-                } else {
-                    themeContainer.innerHTML = '';
-                }
-            }
-            syncState();
-        }
-
         function startGame() {
-            var tc = document.getElementById('joputismo-audio-player');
-            if (tc) tc.innerHTML = '';
-
             gameMode = document.getElementById('game-mode-select').value;
-
-            // MECÁNICA INICIAL: Repartir una carta a cada jugador
-            players.forEach(function (p) {
-                currentSongIdx++; if(songs[currentSongIdx] && songs[currentSongIdx].id) { var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]'); if(!_pl.includes(songs[currentSongIdx].id)){ _pl.push(songs[currentSongIdx].id); localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl)); } }
-                var s = songs[currentSongIdx];
-                if (s) p.cards.push(s.year);
+            players.forEach(p => {
+                currentSongIdx++;
+                if (songs[currentSongIdx]) p.cards.push(songs[currentSongIdx].year);
             });
-
             document.getElementById('lobby').style.display = 'none';
             document.getElementById('dashboard').style.display = 'grid';
             gameStarted = true;
@@ -711,1426 +407,162 @@
         }
 
         function nextTurn() {
-            turnPhase = 'NORMAL';
-            currentDuel = null;
-            duelResult = null;
-            // Duelo ya no se activa en nextTurn sino inmediatamente
-
-            currentSongIdx++; if(songs[currentSongIdx] && songs[currentSongIdx].id) { var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]'); if(!_pl.includes(songs[currentSongIdx].id)){ _pl.push(songs[currentSongIdx].id); localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl)); } } isRevealed = false;
-            segundosAcumulados = 0;
-            momentoDeInicio = 0;
-            isPlaying = false;
-            currentBets = {}; var rb=document.getElementById('btn-report-error'); if(rb) rb.style.display='block'; // al cambiar de turno
-            activeGuess = null; // Limpiar adivinanza
-            bettingAgainst = []; // Limpiar apuestas de "ni de coña"
-            bettingFor = []; // Limpiar apuestas de "estoy contigo"
-            duelTriggered = false; // Reset duel flag
-
-            isMuted = false;
-            muteTimeRemaining = 0;
-            if (muteIntervalTimer) { clearInterval(muteIntervalTimer); muteIntervalTimer = null; }
-
-            // Parar música de duelo
-            var audioContainer = document.getElementById('audio-player-container');
-            if (audioContainer) audioContainer.innerHTML = '';
-
-            panicActive = false;
-            panicTimer = 0;
-            if (panicInterval) { clearInterval(panicInterval); panicInterval = null; }
-
-            isFogActive = false;
-
-            // --- INICIO MODO REY CHECK ---
+            turnPhase = 'NORMAL'; currentDuel = null; isRevealed = false; isPlaying = false;
+            currentSongIdx++;
+            currentBets = {}; activeGuess = null; bettingAgainst = []; bettingFor = [];
+            isMuted = false; muteTimeRemaining = 0; if (muteIntervalTimer) clearInterval(muteIntervalTimer);
+            panicActive = false; panicTimer = 0; if (panicInterval) clearInterval(panicInterval);
+            
             if (gameMode === 'rey' && players.length >= 3 && players[activePlayerIdx] && players[activePlayerIdx].score >= 10) {
                 turnPhase = 'KING_SELECTION';
                 kingOptions = [];
-                // Calcular un número de cartas igual a (players.length - 1)
-                var numOptions = Math.max(1, players.length - 1);
-                for (var i = 0; i < numOptions; i++) {
-                    currentSongIdx++; if(songs[currentSongIdx] && songs[currentSongIdx].id) { var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]'); if(!_pl.includes(songs[currentSongIdx].id)){ _pl.push(songs[currentSongIdx].id); localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl)); } }
-                    kingOptions.push(songs[currentSongIdx]);
+                for(let i=0; i<Math.max(1, players.length - 1); i++){
+                    currentSongIdx++; if(songs[currentSongIdx]) kingOptions.push(songs[currentSongIdx]);
                 }
-
-                document.getElementById('ui-card-artist').innerText = "ELIGIENDO CARTA...";
-                document.getElementById('ui-card-song').innerText = "ESPERANDO RIVALES";
-                document.getElementById('ui-card-year').innerText = "----";
-                document.getElementById('btn-reveal-host').style.display = 'none';
-                document.getElementById('val-card-ui').style.display = 'block';
-                document.getElementById('validation-buttons').style.display = 'none';
-                document.getElementById('challenger-validation').style.display = 'none';
-                document.getElementById('ui-current-player').innerText = players[activePlayerIdx].name + " (REY)";
-                document.getElementById('host-instructions').innerText = "ESPERANDO A QUE LOS JUGADORES ELIJAN QUÉ CARTA TE TOCA...";
-                document.getElementById('player-container').innerHTML = '';
-                syncState();
-                return;
+                document.getElementById('ui-card-artist').innerText = "ELIGIENDO...";
+                document.getElementById('ui-current-player').innerText = players[activePlayerIdx].name + " (KING)";
+                syncState(); return;
             }
-            // --- FIN MODO REY CHECK ---
 
-            var s = songs[currentSongIdx];
+            let s = songs[currentSongIdx];
             document.getElementById('ui-card-artist').innerText = "????";
             document.getElementById('ui-card-song').innerText = "????";
             document.getElementById('ui-card-year').innerText = "????";
             document.getElementById('btn-reveal-host').style.display = 'block';
             document.getElementById('val-card-ui').style.display = 'block';
             document.getElementById('validation-buttons').style.display = 'none';
-            document.getElementById('challenger-validation').style.display = 'none';
             document.getElementById('ui-current-player').innerText = players[activePlayerIdx].name;
-            document.getElementById('host-instructions').innerText = "ESPERANDO ACCIÓN...";
-            document.getElementById('player-container').innerHTML = '<div id="youtube-player"></div>';
+            if (ytPlayer && ytPlayer.loadVideoById && s) { ytPlayer.loadVideoById({ videoId: s.id, startSeconds: 0 }); ytPlayer.stopVideo(); }
             syncState();
-        }
-
-        function playDuelMusic() {
-            var container = document.getElementById('audio-player-container');
-            if (container) {
-                // Limitamos a 45s para que no se haga eterno
-                container.innerHTML = '<iframe id="duel-iframe" width="1" height="1" src="https://www.youtube.com/embed/AFa1-kciCb4?autoplay=1&end=45" allow="autoplay" style="display:none;"></iframe>';
-            }
-        }
-
-        function playGunshot() {
-            try {
-                var audio = new Audio('https://www.myinstants.com/media/sounds/pistol-shot.mp3');
-                audio.play();
-            } catch (e) {
-                console.warn("Error reproducinedo disparo:", e);
-            }
-        }
-
-        function resolveDuel() {
-            if (!currentDuel) return;
-            var s = songs[currentSongIdx];
-            var challenger = players.find(x => x.id === currentDuel.challenger);
-            var target = players.find(x => x.id === currentDuel.target);
-            
-            var dChallenger = Math.abs(currentDuel.challengerYear - s.year);
-            var dTarget = Math.abs(currentDuel.targetYear - s.year);
-            
-            var winnerId = null;
-            var reason = "";
-            
-            if (dChallenger < dTarget) {
-                winnerId = challenger.id;
-                reason = challenger.name + " estuvo más cerca (" + currentDuel.challengerYear + " vs " + currentDuel.targetYear + ")";
-            } else if (dTarget < dChallenger) {
-                winnerId = target.id;
-                reason = target.name + " estuvo más cerca (" + currentDuel.targetYear + " vs " + currentDuel.challengerYear + ")";
-            } else {
-                // Tie breaker: Quick Draw
-                if (currentDuel.challengerTime < currentDuel.targetTime) {
-                    winnerId = challenger.id;
-                    reason = "¡EMPATE! Pero " + challenger.name + " fue más rápido (QUICK DRAW).";
-                } else {
-                    winnerId = target.id;
-                    reason = "¡EMPATE! Pero " + target.name + " fue más rápido (QUICK DRAW).";
-                }
-            }
-            
-            var winner = (winnerId === challenger.id) ? challenger : target;
-            var loser = (winnerId === challenger.id) ? target : challenger;
-            
-            // Frases cabronas
-            var winnerPhrases = [
-                "¡Felicidades, lumbreras! Hasta un reloj parado acierta dos veces al día.",
-                "Qué potra tienes, chaval. A la próxima no te salva ni la caridad.",
-                "¡Victoria! Aunque con esa cara, dudo que te sirva de mucho.",
-                "Mira cómo brilla... es tu ego, no tu inteligencia."
-            ];
-            var loserPhrases = [
-                "¡Qué ridículo! Mi abuela sorda lo habría hecho mejor.",
-                "A fregar, que para adivinar años no sirves.",
-                "¿En serio? ¿Ese año? Vuelve a la guardería.",
-                "Palizón gitano. A casa a llorar con tu madre."
-            ];
-
-            duelResult = {
-                winnerId: winner.id,
-                loserId: loser.id,
-                winnerMsg: winnerPhrases[Math.floor(Math.random() * winnerPhrases.length)],
-                loserMsg: loserPhrases[Math.floor(Math.random() * loserPhrases.length)]
-            };
-
-            if (winner && loser) {
-                // Awarding
-                winner.score++;
-                winner.cards.push(s.year);
-                winner.cards.sort(function(a, b){return a - b});
-                
-                // Stealing tokens
-                var stolen = Math.min(loser.tokens, 2);
-                updateTokens(loser, -stolen);
-                updateTokens(winner, stolen);
-                
-                document.getElementById('host-instructions').innerHTML = "<div style='color:var(--gold); font-family:Bungee; font-size:1.8em;'>¡GANADOR: " + winner.name + "!</div><div style='font-size:0.9em; margin-bottom:10px;'>" + reason + "</div><div style='color:var(--neon);'>Se lleva la carta y " + stolen + " fichas del rival.</div>";
-            }
-            document.getElementById('validation-buttons').style.display = 'flex';
-            document.getElementById('validation-buttons').innerHTML = '<button class="btn-val btn-ok" onclick="finishDuel()">ACEPTAR RESULTADO</button>';
-            
-            turnPhase = 'NORMAL';
-            syncState();
-        }
-
-        function finishDuel() {
-            triggerFlash();
-            turnPhase = 'NORMAL';
-            currentDuel = null;
-            duelTriggered = false;
-            nextTurn();
-        }
-
-        function playBuzzerWebAudio() {
-            try {
-                var ctx = new (window.AudioContext || window.webkitAudioContext)();
-                var osc = ctx.createOscillator();
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(150, ctx.currentTime);
-                osc.frequency.linearRampToValueAtTime(100, ctx.currentTime + 2);
-                var gain = ctx.createGain();
-                gain.gain.setValueAtTime(0, ctx.currentTime);
-                gain.gain.linearRampToValueAtTime(1, ctx.currentTime + 0.1);
-                gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 3);
-                osc.connect(gain);
-                gain.connect(ctx.destination);
-                osc.start();
-                osc.stop(ctx.currentTime + 3);
-            } catch (e) {
-                console.error("Audio API error:", e);
-            }
         }
 
         function handlePlayerCommand(peerId, action, value) {
-            var activeP = players[activePlayerIdx];
-            var s = songs[currentSongIdx];
-            var container = document.getElementById('player-container');
-
+            let activeP = players[activePlayerIdx];
             switch (action) {
-                case 'PLAY':
-                    if (peerId !== activeP.id) return;
-                    if (!isPlaying) {
-                        momentoDeInicio = Date.now();
-                        isPlaying = true;
-                        container.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + s.id + '?autoplay=1&start=' + segundosAcumulados + (isMuted ? '&mute=1' : '') + '" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen style="width:100%; height:100%; border:none;"></iframe>';
-                        document.getElementById('host-instructions').innerText = "REPRODUCIENDO" + (isMuted ? " (MUTE)" : "");
-                        syncState();
+                case 'PLAY': if(peerId === activeP.id && ytPlayer) ytPlayer.playVideo(); break;
+                case 'PAUSE': if(peerId === activeP.id && ytPlayer) ytPlayer.pauseVideo(); break;
+                case 'STOP': if(peerId === activeP.id && ytPlayer) ytPlayer.stopVideo(); break;
+                case 'SKIP': if(peerId === activeP.id && ytPlayer) ytPlayer.seekTo(ytPlayer.getCurrentTime() + value, true); break;
+                case 'GUESS': if(peerId === activeP.id && activeGuess === null) { activeGuess = parseInt(value); syncState(); } break;
+                case 'BET': 
+                    let pBet = players.find(x => x.id === peerId);
+                    if (pBet && pBet.id !== activeP.id && pBet.tokens >= 1 && currentBets[peerId] === undefined && activeGuess !== null) {
+                        pBet.tokens--; currentBets[peerId] = parseInt(value); syncState();
                     }
-                    break;
-                case 'PAUSE':
-                    if (peerId !== activeP.id) return;
-                    if (isPlaying) {
-                        var tiempoTranscurrido = Math.floor((Date.now() - momentoDeInicio) / 1000);
-                        segundosAcumulados += tiempoTranscurrido;
-                        container.innerHTML = '';
-                        isPlaying = false;
-                        document.getElementById('host-instructions').innerText = "PAUSADO";
-                        syncState();
-                    }
-                    break;
-                case 'STOP':
-                    if (peerId !== activeP.id) return;
-                    isPlaying = false;
-                    container.innerHTML = '';
-                    document.getElementById('host-instructions').innerText = "¿ACERTÓ?";
-                    revealData();
-                    syncState();
                     break;
                 case 'SABOTAGE_MUTE':
-                    if (hasShield[activeP.id]) {
-                        var p = players.find(function (pl) { return pl.id === peerId; });
-                        if (p) {
-                            try { if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "¡ZASCA! El Escudo de " + activeP.name + " ha rebotado tu sabotaje y lo has perdido todo jajaja" }); } catch (e) { }
-                        }
-                        hasShield[activeP.id] = false;
-                        syncState();
-                        break;
-                    }
-                    var p = players.find(function (pl) { return pl.id === peerId; });
-                    if (p && p.tokens >= 1 && p.id !== players[activePlayerIdx].id && isPlaying) {
-                        updateTokens(p, -1);
-                        muteTimeRemaining += 15000;
-
+                    let pMute = players.find(x => x.id === peerId);
+                    if (pMute && pMute.tokens >= 1 && pMute.id !== activeP.id && isPlaying) {
+                        pMute.tokens--; muteTimeRemaining += 15000;
                         if (!isMuted) {
-                            isMuted = true;
-                            var tiempoTranscurrido = Math.floor((Date.now() - momentoDeInicio) / 1000);
-                            segundosAcumulados += tiempoTranscurrido;
-                            momentoDeInicio = Date.now();
-                            container.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + s.id + '?autoplay=1&start=' + segundosAcumulados + '&mute=1" allow="autoplay"></iframe>';
-                            document.getElementById('host-instructions').innerText = "REPRODUCIENDO (MUTE)";
-
-                            muteIntervalTimer = setInterval(function () {
-                                if (isPlaying) muteTimeRemaining -= 1000;
-                                if (muteTimeRemaining <= 0) {
-                                    clearInterval(muteIntervalTimer);
-                                    muteIntervalTimer = null;
-                                    muteTimeRemaining = 0;
-                                    if (isMuted && isPlaying) {
-                                        isMuted = false;
-                                        var t2 = Math.floor((Date.now() - momentoDeInicio) / 1000);
-                                        segundosAcumulados += t2;
-                                        momentoDeInicio = Date.now();
-                                        container.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + s.id + '?autoplay=1&start=' + segundosAcumulados + '" allow="autoplay"></iframe>';
-                                        document.getElementById('host-instructions').innerText = "REPRODUCIENDO";
-                                        syncState();
-                                    }
-                                }
+                            isMuted = true; if(ytPlayer) ytPlayer.mute();
+                            muteIntervalTimer = setInterval(() => {
+                                muteTimeRemaining -= 1000;
+                                if(muteTimeRemaining <= 0){ clearInterval(muteIntervalTimer); isMuted = false; if(ytPlayer) ytPlayer.unMute(); syncState(); }
                             }, 1000);
                         }
                         syncState();
                     }
                     break;
-                case 'TOGGLE_CHEAT':
-                    cheatsEnabled = !cheatsEnabled;
-                    syncState();
-                    break;
-                case 'SKIP':
-                    if (peerId !== activeP.id) return;
-                    if (isPlaying) {
-                        var tiempoTranscurrido = Math.floor((Date.now() - momentoDeInicio) / 1000);
-                        segundosAcumulados += tiempoTranscurrido + value;
-                    } else {
-                        segundosAcumulados += value;
-                    }
-                    if (segundosAcumulados < 0) segundosAcumulados = 0;
-                    momentoDeInicio = Date.now();
-                    if (isPlaying) {
-                        container.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + s.id + '?autoplay=1&start=' + segundosAcumulados + (isMuted ? '&mute=1' : '') + '" allow="autoplay"></iframe>';
-                        document.getElementById('host-instructions').innerText = "REPRODUCIENDO" + (isMuted ? " (MUTE)" : "");
-                        syncState();
-                    }
-                    break;
                 case 'RELOAD_SONG':
-                    var p = players.find(function (pl) { return pl.id === peerId; });
-                    if (p && p.tokens >= 1 && p.canReload) {
-                        updateTokens(p, -1);
-                        p.canReload = false; // Solo uno por turno
-                        refundBets();
-                        isPlaying = false;
-                        container.innerHTML = '<div id="youtube-player"></div>'; // Parar música de verdad
-                        currentSongIdx++; if(songs[currentSongIdx] && songs[currentSongIdx].id) { var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]'); if(!_pl.includes(songs[currentSongIdx].id)){ _pl.push(songs[currentSongIdx].id); localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl)); } } // Descartar y pasar a la siguiente
-                        segundosAcumulados = 0;
-                        momentoDeInicio = 0;
-                        isRevealed = false; // Resetear revelado
-                        document.getElementById('ui-card-artist').innerText = "????";
-                        document.getElementById('ui-card-song').innerText = "????";
-                        document.getElementById('ui-card-year').innerText = "????";
-                        document.getElementById('btn-reveal-host').style.display = 'block';
-                        document.getElementById('val-card-ui').style.display = 'block';
-                        document.getElementById('validation-buttons').style.display = 'none';
-                        document.getElementById('host-instructions').innerText = "CANCIÓN CAMBIADA (DALE A PLAY)";
-                        syncState();
-                    }
-                    break;
-                case 'SYSTEM_ERROR_TRACK':
-                    var p = players.find(function (pl) { return pl.id === peerId; });
-                    if (p && isPlaying) {
-                        refundBets();
-                        isPlaying = false;
-                        container.innerHTML = '<div id="youtube-player"></div>';
-                        currentSongIdx++; if(songs[currentSongIdx] && songs[currentSongIdx].id) { var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]'); if(!_pl.includes(songs[currentSongIdx].id)){ _pl.push(songs[currentSongIdx].id); localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl)); } }
-                        segundosAcumulados = 0;
-                        momentoDeInicio = 0;
-                        isRevealed = false;
-                        document.getElementById('ui-card-artist').innerText = "????";
-                        document.getElementById('ui-card-song').innerText = "????";
-                        document.getElementById('ui-card-year').innerText = "????";
-                        document.getElementById('btn-reveal-host').style.display = 'block';
-                        document.getElementById('val-card-ui').style.display = 'block';
-                        document.getElementById('validation-buttons').style.display = 'none';
-                        document.getElementById('host-instructions').innerText = "VÍDEO ROTO. CANCIÓN CAMBIADA.";
-                        syncState();
-                    }
+                    let pReload = players.find(x => x.id === peerId);
+                    if(pReload && pReload.tokens >= 1 && pReload.canReload){ pReload.tokens--; pReload.canReload = false; nextTurn(); }
                     break;
                 case 'AUTO_WIN':
-                    var p = players.find(function (pl) { return pl.id === peerId; });
-                    if (p && p.tokens >= 3) {
-                        updateTokens(p, -3);
-                        validateResult(true, false);
-                    }
-                    break;
-                case 'BET':
-                    console.log("[BET] de", peerId, "en slot", value);
-                    var p = players.find(function (pl) { return pl.id === peerId; });
-                    var valNum = parseInt(value);
-                    if (isNaN(valNum)) break;
-
-                    var slotOccupied = (activeGuess == valNum);
-                    for (var pid in currentBets) { if (currentBets[pid] == valNum) slotOccupied = true; }
-
-                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 1 && currentBets[peerId] === undefined && !slotOccupied && activeGuess !== null) {
-                        console.log("[OK] Apuesta (Duelo) aceptada para", p.name);
-                        updateTokens(p, -1);
-                        currentBets[peerId] = valNum;
-                        syncState();
-                    } else {
-                        console.log("[FAIL] Apuesta rechazada. p:", !!p, "Tokens:", p ? p.tokens : 0, "Ya apostó?", p ? currentBets[peerId] !== undefined : false, "Slot ocupado?", slotOccupied, "Guess es", activeGuess);
-                    }
-                    break;
-                case 'BET_AGAINST_ACTIVE':
-                    var p = players.find(function (pl) { return pl.id === peerId; });
-                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 1 && !bettingAgainst.includes(peerId) && !bettingFor.includes(peerId) && isPlaying && !isRevealed && (!turnPhase || turnPhase === 'NORMAL')) {
-                        updateTokens(p, -1);
-                        bettingAgainst.push(peerId);
-
-                        // Mostrar mensaje flotante en el host
-                        var oldText = document.getElementById('host-instructions').innerText;
-                        document.getElementById('host-instructions').innerHTML = "<span style='color:#ff0055; font-size:1.2em;'>¡" + p.name + " DUDA DE QUE LO SEPA!</span>";
-                        setTimeout(function () {
-                            if (!isRevealed) document.getElementById('host-instructions').innerText = (isMuted ? "REPRODUCIENDO (MUTE)" : "REPRODUCIENDO");
-                        }, 3000);
-
-                        syncState();
-                    }
-                    break;
-                case 'BET_FOR_ACTIVE':
-                    var p = players.find(function (pl) { return pl.id === peerId; });
-                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 1 && !bettingFor.includes(peerId) && !bettingAgainst.includes(peerId) && isPlaying && !isRevealed && (!turnPhase || turnPhase === 'NORMAL')) {
-                        updateTokens(p, -1);
-                        bettingFor.push(peerId);
-
-                        // Mostrar mensaje flotante en el host
-                        var oldText = document.getElementById('host-instructions').innerText;
-                        document.getElementById('host-instructions').innerHTML = "<span style='color:#00ff88; font-size:1.2em;'>¡" + p.name + " ESTÁ CON EL MAESTRO!</span>";
-                        setTimeout(function () {
-                            if (!isRevealed) document.getElementById('host-instructions').innerText = (isMuted ? "REPRODUCIENDO (MUTE)" : "REPRODUCIENDO");
-                        }, 3000);
-
-                        syncState();
-                    }
-                    break;
-                case 'SABOTAGE_PANIC':
-                    if (hasShield[activeP.id]) {
-                        var p = players.find(function (pl) { return pl.id === peerId; });
-                        if (p) {
-                            try { if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "¡ZASCA! El Escudo de " + activeP.name + " ha rebotado tu sabotaje y lo has perdido todo jajaja" }); } catch (e) { }
-                        }
-                        hasShield[activeP.id] = false;
-                        syncState();
-                        break;
-                    }
-                    var p = players.find(function (pl) { return pl.id === peerId; });
-                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 2 && !panicActive && isPlaying && !isRevealed && (!turnPhase || turnPhase === 'NORMAL')) {
-                        updateTokens(p, -2);
-                        panicActive = true;
-                        panicTimer = 10;
-
-                        var oldText = document.getElementById('host-instructions').innerText;
-                        document.getElementById('host-instructions').innerHTML = "<span style='color:#ff0000; font-size:1.5em; font-family:Bungee;'>¡" + p.name + " HA LANZADO UN ATAQUE DE PÁNICO!</span>";
-                        
-                        // NOTIFICAR AL JUGADOR AFECTADO (V86)
-                        var targetConn = connections[activeP.id];
-                        if (targetConn) {
-                            targetConn.send({
-                                type: 'SABOTAGE_SKIP_ALERT',
-                                msg: "¡" + p.name + " HA SEMBRADO EL PÁNICO EN TU TURNO! 😱"
-                            });
-                        }
-
-                        setTimeout(function () {
-                            if (!isRevealed && panicActive) document.getElementById('host-instructions').innerText = (isMuted ? "REPRODUCIENDO (MUTE)" : "REPRODUCIENDO");
-                        }, 3000);
-
-                        panicInterval = setInterval(function () {
-                            panicTimer--;
-                            if (panicTimer <= 0) {
-                                clearInterval(panicInterval);
-                                panicInterval = null;
-                                panicTimer = 0;
-                                panicActive = false;
-
-                                // PARAR MÚSICA Y REVELAR (V30)
-                                isPlaying = false;
-                                document.getElementById('player-container').innerHTML = '';
-                                revealData(); 
-                                syncState();
-                                // Quitamos el setTimeout para que el Host valide manualmente o pase turno
-                            } else {
-                                syncState();
-                            }
-                        }, 1000);
-                        syncState();
-                    }
-                    break;
-                case 'SABOTAGE_BUZZER':
-                    var p = players.find(function (pl) { return pl.id === peerId; });
-                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 1 && isPlaying && !isRevealed && (!turnPhase || turnPhase === 'NORMAL')) {
-                        updateTokens(p, -1);
-                        playBuzzerWebAudio();
-                        syncState();
-                    }
-                    break;
-                case 'SABOTAGE_FOG':
-                    if (hasShield[activeP.id]) {
-                        var p = players.find(function (pl) { return pl.id === peerId; });
-                        if (p) {
-                            try { if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "¡ZASCA! El Escudo de " + activeP.name + " ha rebotado tu sabotaje y lo has perdido todo jajaja" }); } catch (e) { }
-                        }
-                        hasShield[activeP.id] = false;
-                        syncState();
-                        break;
-                    }
-                    var p = players.find(function (pl) { return pl.id === peerId; });
-                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 2 && !isFogActive && (!turnPhase || turnPhase === 'NORMAL')) {
-                        updateTokens(p, -2);
-                        isFogActive = true;
-
-                        document.getElementById('host-instructions').innerHTML = "<span style='color:#aaaaaa; font-size:1.5em; font-family:Bungee;'>¡JAJAJA! ¡" + p.name + " HA LANZADO NIEBLA TEMPORAL!</span>";
-                        
-                        // NOTIFICAR AL JUGADOR AFECTADO (V86)
-                        var targetConn = connections[activeP.id];
-                        if (targetConn) {
-                            targetConn.send({
-                                type: 'SABOTAGE_SKIP_ALERT',
-                                msg: "¡" + p.name + " HA LANZADO NIEBLA SOBRE TU TURNO! 🌫️"
-                            });
-                        }
-
-                        setTimeout(function () {
-                            if (!isRevealed && !panicActive) document.getElementById('host-instructions').innerText = (isMuted ? "REPRODUCIENDO (MUTE)" : "REPRODUCIENDO");
-                        }, 3000);
-
-                        syncState();
-                    }
-                    break;
-                case 'SABOTAGE_FORCE_SKIP':
-                    if (hasShield[activeP.id]) {
-                        var p = players.find(function (pl) { return pl.id === peerId; });
-                        if (p) {
-                            try { if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "¡ZASCA! El Escudo de " + activeP.name + " ha rebotado tu sabotaje y lo has perdido todo jajaja" }); } catch (e) { }
-                        }
-                        hasShield[activeP.id] = false;
-                        syncState();
-                        break;
-                    }
-                    var p = players.find(function (pl) { return pl.id === peerId; });
-                    if (p && p.tokens >= 3 && activeGuess === null && isPlaying && !isRevealed && (!turnPhase || turnPhase === 'NORMAL')) {
-                        updateTokens(p, -3);
-                        refundBets();
-                        isPlaying = false;
-                        container.innerHTML = '<div id="youtube-player"></div>';
-                        currentSongIdx++; if(songs[currentSongIdx] && songs[currentSongIdx].id) { var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]'); if(!_pl.includes(songs[currentSongIdx].id)){ _pl.push(songs[currentSongIdx].id); localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl)); } }
-                        segundosAcumulados = 0;
-                        momentoDeInicio = 0;
-                        isRevealed = false;
-                        document.getElementById('ui-card-artist').innerText = "????";
-                        document.getElementById('ui-card-song').innerText = "????";
-                        document.getElementById('ui-card-year').innerText = "????";
-                        document.getElementById('btn-reveal-host').style.display = 'block';
-                        document.getElementById('val-card-ui').style.display = 'block';
-                        document.getElementById('validation-buttons').style.display = 'none';
-
-                        document.getElementById('host-instructions').innerHTML = "<span style='color:#ff00ff; font-size:1.5em; font-family:Bungee;'>¡" + p.name + " HA OBLIGADO A CAMBIAR LA CANCIÓN!</span>";
-                        
-                        // NOTIFICAR AL JUGADOR SALTADO (V79)
-                        var targetConn = connections[activeP.id];
-                        if (targetConn) {
-                            targetConn.send({
-                                type: 'SABOTAGE_SKIP_ALERT',
-                                msg: "¡" + p.name + " HA SALTADO TU CANCIÓN! ⏭️"
-                            });
-                        }
-
-                        setTimeout(function () {
-                            if (!isRevealed && !panicActive) document.getElementById('host-instructions').innerText = "CANCIÓN CAMBIADA (DALE A PLAY)";
-                        }, 4000);
-
-                        syncState();
-                    }
-                    break;
-                case 'SABOTAGE_VETO':
-                    if (hasShield[activeP.id]) {
-                        var p = players.find(function (pl) { return pl.id === peerId; });
-                        if (p) {
-                            try { if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "¡ZASCA! El Escudo de " + activeP.name + " ha rebotado tu sabotaje y lo has perdido todo jajaja" }); } catch (e) { }
-                        }
-                        hasShield[activeP.id] = false;
-                        syncState();
-                        break;
-                    }
-                    var p = players.find(function (pl) { return pl.id === peerId; });
-                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 1 && players[activePlayerIdx].canReload && (!turnPhase || turnPhase === 'NORMAL')) {
-                        updateTokens(p, -1);
-                        players[activePlayerIdx].canReload = false;
-
-                        document.getElementById('host-instructions').innerHTML = "<span style='color:#ff8800; font-size:1.5em; font-family:Bungee;'>¡" + p.name + " HA VETADO LA RECARGA!</span>";
-                        setTimeout(function () {
-                            if (!isRevealed && !panicActive) document.getElementById('host-instructions').innerText = (isMuted ? "REPRODUCIENDO (MUTE)" : "REPRODUCIENDO");
-                        }, 3000);
-
-                        syncState();
-                    }
-                    break;
-                case 'SABOTAGE_DUEL':
-                    if (turnPhase === 'DUEL' || duelTriggered) return;
-                    var p = players.find(x => x.id === peerId);
-                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 3 && (!turnPhase || turnPhase === 'NORMAL') && !queuedDuel && !currentDuel) {
-                        updateTokens(p, -3);
-                        duelTriggered = true;
-                        var target = players[activePlayerIdx];
-                        // ACTIVACIÓN INMEDIATA
-                        currentDuel = { 
-                            challenger: p.id, 
-                            target: target.id,
-                            challengerYear: null, targetYear: null,
-                            challengerTime: null, targetTime: null
-                        };
-                        duelResult = null;
-                        turnPhase = 'DUEL';
-                        
-                        // Parar musica actual
-                        if (isPlaying) {
-                            isPlaying = false;
-                            container.innerHTML = '<div id="youtube-player"></div>';
-                        }
-                        if (typeof player !== 'undefined' && player && player.stopVideo) player.stopVideo();
-                        
-                        playDuelMusic();
-
-                        document.getElementById('host-instructions').innerHTML = "<div style='color:var(--gold); font-family:Bungee; font-size:2em;'>¡DUELO A MUERTE!</div><div style='font-size:1.2em;'>" + p.name + " VS " + target.name + "</div>";
-                        document.getElementById('validation-buttons').style.display = 'none';
-                        syncState();
-                    }
-                    break;
-                case 'DUEL_GUESS':
-                    if (currentDuel) {
-                        playGunshot();
-                        if (peerId === currentDuel.challenger) {
-                            currentDuel.challengerYear = parseInt(value);
-                            currentDuel.challengerTime = Date.now();
-                        } else if (peerId === currentDuel.target) {
-                            currentDuel.targetYear = parseInt(value);
-                            currentDuel.targetTime = Date.now();
-                        }
-                        if (currentDuel.challengerYear !== null && currentDuel.targetYear !== null) {
-                            // Parar musica de duelo inmediatamente
-                            var audioContainer = document.getElementById('audio-player-container');
-                            if (audioContainer) audioContainer.innerHTML = '';
-                            
-                            document.getElementById('host-instructions').innerHTML = "<div style='color:var(--gold); font-family:Bungee; font-size:2em;'>¡DUELO FINALIZADO!</div><div style='font-size:1.2em;'>Calculando resultados...</div>";
-                            revealData();
-                        }
-                        syncState();
-                    }
-                    break;
-                case 'SABOTAGE_STEAL_TURN':
-                    var p = players.find(function (pl) { return pl.id === peerId; });
-                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 4 && isPlaying && !isRevealed) {
-                        updateTokens(p, -4);
-                        var oldActive = players[activePlayerIdx];
-                        activePlayerIdx = players.indexOf(p);
-
-                        // Clear bets and guesses because turn changes
-                        currentBets = {};
-                        activeGuess = null;
-                        bettingAgainst = [];
-                        bettingFor = [];
-
-                        document.getElementById('host-instructions').innerHTML = "<span style='color:#00f2fe; font-size:1.5em; font-family:Bungee;'>¡" + p.name + " HA ROBADO EL TURNO A " + oldActive.name + "!</span>";
-                        setTimeout(function () {
-                            if (!isRevealed && !panicActive) document.getElementById('host-instructions').innerText = (isMuted ? "REPRODUCIENDO (MUTE)" : "REPRODUCIENDO");
-                        }, 4000);
-
-                        syncState();
-                    }
-                    break;
-                case 'SABOTAGE_BLACKHOLE':
-                    var p = players.find(function (pl) { return pl.id === peerId; });
-                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 5 && (!turnPhase || turnPhase === 'NORMAL')) {
-                        var validTargets = players.filter(function (t) { return t.id !== p.id && t.score > 1; });
-                        if (validTargets.length > 0) {
-                            updateTokens(p, -5);
-                            var target = validTargets[Math.floor(Math.random() * validTargets.length)];
-                            target.score -= 1;
-                            var cardIdx = Math.floor(Math.random() * target.cards.length);
-                            target.cards.splice(cardIdx, 1);
-
-                            triggerFlash();
-                            document.getElementById('host-instructions').innerHTML = "<span style='color:var(--gold); font-size:1.5em; font-family:Bungee;'>¡" + p.name + " ACTIVÓ EL RETROCESO TEMPORAL!</span>";
-                            setTimeout(function () {
-                                if (!isRevealed && !panicActive) document.getElementById('host-instructions').innerText = (isMuted ? "REPRODUCIENDO (MUTE)" : "REPRODUCIENDO");
-                            }, 4000);
-                            syncState();
-                        }
-                    }
-                    break;
-                case 'REMOTE_START_GAME':
-                    if (!gameStarted) {
-                        startGame();
-                    }
-                    break;
-                case 'REMOTE_JOPUTISMO':
-                    setJoputismo(value);
-                    syncState();
-                    break;
-                case 'REMOTE_REVEAL':
-                    if (turnPhase !== 'LOBBY' && !isRevealed) {
-                        revealData();
-                    }
-                    break;
-                case 'REMOTE_CORRECT':
-                    validateResult(true, false);
-                    break;
-                case 'REMOTE_CORRECT_TOKEN':
-                    validateResult(true, true);
-                    break;
-                case 'REMOTE_INCORRECT':
-                    validateResult(false, false);
-                    break;
-                case 'REMOTE_INCORRECT_TOKEN':
-                    validateResult(false, true);
-                    break;
-                case 'REMOTE_SYSTEM_ERROR':
-                    reportSystemError();
-                    break;
-                case 'REMOTE_SET_GAME_MODE':
-                    if (turnPhase === 'LOBBY') {
-                        gameMode = value;
-                        document.getElementById('game-mode-select').value = value;
-                        syncState();
-                    }
-                    break;
-                case 'REMOTE_KING_RESOLVE':
-                    resolveKingMode(value === 'true' || value === true);
-                    break;
-                case 'REMOTE_NEXT_TURN':
-                    if (turnPhase === 'DUEL' && !currentDuel) {
-                        nextTurn();
-                    } else if (isRevealed) {
-                        nextTurn();
-                    }
-                    break;
-                case 'REMOTE_DUEL_FINISH':
-                    finishDuel();
-                    break;
-                case 'SABOTAGE_STEAL_TOKEN':
-                    var p = players.find(function (pl) { return pl.id === peerId; });
-                    if (p && p.tokens >= 4) {
-                        var possibleTargets = players.filter(function (pt) { return pt.id !== peerId && pt.tokens > 0; });
-                        if (possibleTargets.length > 0) {
-                            updateTokens(p, -4); // Pay the cost
-                            var target = possibleTargets[Math.floor(Math.random() * possibleTargets.length)];
-                            updateTokens(target, -1);
-                            updateTokens(p, 1);
-
-                            // Send target an alert
-                            var tConn = connections[target.id];
-                            if (tConn) {
-                                tConn.send({
-                                    type: 'BET_RESULT',
-                                    msg: "¡" + p.name + " TE HA ROBADO 1 FICHA! 🥷"
-                                });
-                            }
-
-                            triggerFlash();
-                            document.getElementById('host-instructions').innerHTML = "<span style='color:#ffff00; font-size:1.2em;'>¡" + p.name + " HA ROBADO A " + target.name + "!</span>";
-                            setTimeout(function () {
-                                if (!isRevealed && !panicActive) document.getElementById('host-instructions').innerText = (isMuted ? "REPRODUCIENDO (MUTE)" : "REPRODUCIENDO");
-                            }, 3000);
-
-                            syncState();
-                        }
-                    }
-                    break;
-                case 'GUESS':
-                    console.log("[GUESS] de", peerId, "en slot", value);
-                    var p = players.find(function (pl) { return pl.id === peerId; });
-                    var valNum = parseInt(value);
-                    if (isNaN(valNum)) break;
-
-                    var slotOccupiedByBet = false;
-                    for (var pid in currentBets) { if (currentBets[pid] == valNum) slotOccupiedByBet = true; }
-
-                    if (p && p.id === players[activePlayerIdx].id && !slotOccupiedByBet && activeGuess === null) {
-                        console.log("[OK] Marca del activo fijada en", valNum);
-                        activeGuess = valNum;
-
-                        // STOP PANIC TIMER IF ACTIVE
-                        if (panicActive) {
-                            clearInterval(panicInterval);
-                            panicInterval = null;
-                            panicActive = false;
-                            panicTimer = 0;
-                            console.log("[PANIC] Temporizador detenido por respuesta rápida.");
-                        }
-
-                        syncState();
-                    } else {
-                        console.log("[FAIL] Guess rechazado. ¿Ya hay marca?", activeGuess !== null);
-                    }
-                    break;
-                case 'KING_SELECT_CARD':
-                    if (turnPhase !== 'KING_SELECTION') return;
-                    if (peerId === players[activePlayerIdx].id) return; // Rey no puede elegir
-
-                    var indexElegido = parseInt(value);
-                    if (indexElegido >= 0 && indexElegido < kingOptions.length) {
-                        var cartaElegida = kingOptions[indexElegido];
-                        songs[currentSongIdx] = cartaElegida;
-
-                        turnPhase = 'KING_GUESS';
-                        document.getElementById('ui-card-artist').innerText = "????";
-                        document.getElementById('ui-card-song').innerText = "????";
-                        document.getElementById('ui-card-year').innerText = "????";
-                        document.getElementById('host-instructions').innerHTML = "CARTA ELEGIDA.<br>ESPERANDO A QUE EL REY INTRODUZCA EL AÑO...";
-                        document.getElementById('player-container').innerHTML = '<div id="youtube-player"></div>';
-                        syncState();
-                    }
-                    break;
-                case 'KING_GUESS':
-                    if (turnPhase !== 'KING_GUESS') return;
-                    if (peerId !== players[activePlayerIdx].id) return; // Solo Rey
-
-                    var guessedYear = parseInt(value);
-                    if (!isNaN(guessedYear)) {
-                        var s = songs[currentSongIdx];
-                        var actualYear = parseInt(s.year);
-
-                        document.getElementById('ui-card-artist').innerText = s.artist;
-                        document.getElementById('ui-card-song').innerText = s.song;
-                        document.getElementById('ui-card-year').innerText = actualYear;
-
-                        var won = Math.abs(guessedYear - actualYear) <= 2;
-
-                        var resultHtml = "";
-                        if (won) {
-                            resultHtml = "<span style='color:#00ff00; font-size:1.5em;'>¡EL REY ACERTÓ!</span><br>Dijo " + guessedYear + ". (El año era " + actualYear + ").";
-                        } else {
-                            resultHtml = "<span style='color:#ff4444; font-size:1.5em;'>¡FALLÓ!</span><br>Dijo " + guessedYear + ". (El año era " + actualYear + ").";
-                        }
-                        resultHtml += "<br><br><button class='btn' style='background:var(--neon); color:#000; padding:15px; font-size:1.2em; pointer-events:auto; position:relative; z-index:9999;' onclick='resolveKingMode(" + won + ")'>ACEPTAR RESULTADO</button>";
-
-                        document.getElementById('host-instructions').innerHTML = resultHtml;
-                        document.getElementById('host-instructions').style.pointerEvents = 'auto'; // Permitir click en el div global si está bloqueado
-
-                        turnPhase = 'KING_GUESS_RESULT';
-                        syncState();
-                    }
-                    break;
-                case 'REMOTE_START_GAME':
-                    startGame();
-                    break;
-                case 'REMOTE_REVEAL':
-                    revealData();
-                    break;
-                case 'REMOTE_CORRECT':
-                    validateResult(true, false);
-                    break;
-                case 'REMOTE_CORRECT_TOKEN':
-                    validateResult(true, true);
-                    break;
-                case 'REMOTE_INCORRECT':
-                    validateResult(false, false);
-                    break;
-                case 'REMOTE_INCORRECT_TOKEN':
-                    validateResult(false, true);
-                    break;
-                case 'REMOTE_SYSTEM_ERROR':
-                    reportSystemError();
-                    break;
-                case 'REMOTE_JOPUTISMO':
-                    if (turnPhase === 'LOBBY' || players.length === 0) {
-                        setJoputismo(parseInt(value));
-                    }
-                    break;
-                case 'MARKET_WILDCARD':
-                    var p = players.find(function (pl) { return pl.id === peerId; });
-                    if (p && p.id === activeP.id && (p.wildcards === undefined || p.wildcards > 0)) {
-                        if (p.wildcards === undefined) p.wildcards = 3;
-                        p.wildcards--;
-                        if (value === 'artist') {
-                            document.getElementById('ui-card-artist').innerText = s.artist;
-                            document.getElementById('ui-card-artist').style.color = "var(--gold)";
-                        } else {
-                            document.getElementById('ui-card-song').innerText = s.song;
-                            document.getElementById('ui-card-song').style.color = "var(--gold)";
-                        }
-                        syncState();
-                    }
-                    break;
-                case 'MARKET_DECADE':
-                    var p = players.find(function (pl) { return pl.id === peerId; });
-                    if (p && p.id === activeP.id && p.tokens >= 1) {
-                        updateTokens(p, -1);
-                        var sYear = parseInt(s.year);
-                        var decadeStr = "Desconocida";
-                        if (!isNaN(sYear)) {
-                            decadeStr = Math.floor(sYear / 10) * 10 + "s";
-                        }
-                        try {
-                            if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "PISTA! Años " + decadeStr });
-                        } catch (e) { }
-                        syncState();
-                    }
-                    break;
-                case 'MARKET_SHIELD':
-                    var p = players.find(function (pl) { return pl.id === peerId; });
-                    if (p && p.tokens >= 3 && !hasShield[p.id]) {
-                        updateTokens(p, -3);
-                        hasShield[p.id] = true;
-                        try {
-                            if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "ESCUDO ACTIVADO! Tu proximo sabotaje enemigo será neutralizado." });
-                        } catch (e) { }
-                        syncState();
-                    }
-                    break;
-                case 'SABOTAGE_RUSSIAN_ROULETTE':
-                    var p = players.find(x => x.id === peerId);
-                    if (p && p.tokens >= 2 && (!turnPhase || turnPhase === 'NORMAL')) {
-                        updateTokens(p, -2);
-                        playGunshot();
-                        triggerFlash();
-                        
-                        var otherPlayers = players.filter(x => x.id !== p.id);
-                        var target = otherPlayers.length > 0 ? otherPlayers[Math.floor(Math.random() * otherPlayers.length)] : null;
-                        
-                        var result = Math.floor(Math.random() * 4); // 0, 1, 2, 3
-                        var msgP = "";
-                        var msgT = "";
-                        
-                        if (result === 0) { // Robar 1 carta
-                            if (target && target.cards && target.cards.length > 0) {
-                                var card = target.cards.pop();
-                                p.cards.push(card);
-                                msgP = "¡ZAS! Le has mangado una carta a " + target.name + ". ¡Vaya suerte de forajido!";
-                                msgT = "¡MALAS NOTICIAS! " + p.name + " te ha levantado una carta en la Ruleta Rusa. ¡Es un mangante!";
-                            } else {
-                                msgP = "Has intentado mangar una carta a " + (target ? target.name : "nadie") + " pero no tenía nada. ¡Pólvora mojada!";
-                            }
-                        } else if (result === 1) { // Robar 1 ficha
-                            if (target && target.tokens > 0) {
-                                updateTokens(target, -1);
-                                updateTokens(p, 1);
-                                msgP = "¡Dichosa suerte! Le has birlado una ficha a " + target.name + ".";
-                                msgT = "¡AY! " + p.name + " te ha robado una ficha en la Ruleta Rusa. ¡Vigila tu bolsa!";
-                            } else {
-                                msgP = "¡Vaya! Has ganado un hueco vacío. " + (target ? target.name : "nadie") + " no tiene ni un centavo.";
-                            }
-                        } else if (result === 2) { // Perder 1 ficha
-                            updateTokens(p, -1);
-                            msgP = "¡BOOM! El tiro te ha rozado la oreja... Pierdes 1 ficha extra por el susto.";
-                        } else if (result === 3) { // Perder 2 fichas
-                            updateTokens(p, -2);
-                            msgP = "¡CRITICAL HIT! Te has pegado un tiro en el pie tú solo. Pierdes 2 fichas extras.";
-                        }
-
-                        if (msgP) try { connections[p.id].send({ type: 'BET_RESULT', msg: msgP }); } catch (e) { }
-                        if (target && msgT) try { connections[target.id].send({ type: 'BET_RESULT', msg: msgT }); } catch (e) { }
-                        
-                        document.getElementById('host-instructions').innerHTML = "<span style='color:#ff0055; font-size:1.5em; font-family:Bungee;'>¡" + p.name + " JUGÓ A LA RULETA RUSA!</span>";
-                        syncState();
-                    }
+                    let pWin = players.find(x => x.id === peerId);
+                    if(pWin && pWin.tokens >= 3) { pWin.tokens -= 3; validateResult(true, false); }
                     break;
             }
-            // Eliminamos el syncState duplicado que podría causar problemas de carrera
-        }
-
-        function isSlotCorrect(slotIdx, songYear, timeline) {
-            if (timeline.length === 0) return true;
-            if (slotIdx === 0) return songYear <= timeline[0];
-            if (slotIdx === timeline.length) return songYear >= timeline[timeline.length - 1];
-            // En medio
-            return (songYear >= timeline[slotIdx - 1] && songYear <= timeline[slotIdx]);
-        }
-
-        function resolveKingMode(won) {
-            triggerFlash();
-            document.getElementById('host-instructions').innerHTML = "CARGANDO SIGUIENTE FASE...";
-            if (won && activePlayerIdx < players.length) {
-                showWinner(players[activePlayerIdx].name);
-            } else {
-                activePlayerIdx = (activePlayerIdx + 1) % players.length;
-                players[activePlayerIdx].canReload = true;
-                nextTurn();
-            }
-        }
-
-        function refundBets() {
-            var refunded = false;
-            if (bettingAgainst.length > 0) {
-                bettingAgainst.forEach(function(pid) {
-                    var p = players.find(pl => pl.id === pid);
-                    if(p) updateTokens(p, 1);
-                });
-                refunded = true;
-            }
-            if (bettingFor.length > 0) {
-                bettingFor.forEach(function(pid) {
-                    var p = players.find(pl => pl.id === pid);
-                    if(p) updateTokens(p, 1);
-                });
-                refunded = true;
-            }
-            bettingAgainst = [];
-            bettingFor = [];
-            if (refunded) syncState();
-        }
-
-        function reportSystemError() {
-            refundBets();
-            var s = songs[currentSongIdx];
-            var newYear = prompt("ERROR EN DATOS: " + s.artist + " - " + s.song + "\nIntroduce el AÑO CORRECTO para registro:");
-            if (newYear) {
-                var recipient = "xavi.rifa@gmail.com";
-                var subject = "CORRECCION CHRONOBEATS: Fila " + s.line;
-                var body = "DETECTADO ERROR EN LISTA\n\n" +
-                    "Fila: " + s.line + "\n" +
-                    "Artista: " + s.artist + "\n" +
-                    "Canción: " + s.song + "\n" +
-                    "Año en TXT: " + s.year + "\n" +
-                    "Año Correcto: " + newYear + "\n\n" +
-                    "Instrucciones: Abrir lista_final.txt en la fila " + s.line + " y corregir el año.";
-
-                var mailtoUrl = "mailto:" + recipient + "?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
-
-                console.log("!!! ERROR DE SISTEMA DETECTADO !!!");
-                console.log("Referencia: " + s.artist + " - " + s.song + " (Fila " + s.line + ")");
-                console.log("Corrección: " + s.year + " -> " + newYear);
-
-                window.location.href = mailtoUrl;
-                alert("¡Error registrado! Se ha preparado un email para " + recipient + ".\nSe descarta esta canción y repites el turno.");
-            }
-            if (turnPhase === 'KING_GUESS' || turnPhase === 'KING_GUESS_RESULT' || turnPhase === 'KING_SELECTION') {
-                activePlayerIdx--;
-                if (activePlayerIdx < 0) activePlayerIdx = players.length - 1;
-            }
-            nextTurn();
         }
 
         function revealData() {
             isRevealed = true;
-            var s = songs[currentSongIdx];
+            let s = songs[currentSongIdx];
             document.getElementById('ui-card-artist').innerText = s.artist;
             document.getElementById('ui-card-song').innerText = s.song;
             document.getElementById('ui-card-year').innerText = s.year;
             document.getElementById('btn-reveal-host').style.display = 'none';
 
-            if (turnPhase === 'DUEL') {
-                resolveDuel();
-                return;
-            }
-
-            // Validación automática
-            var activeP = players[activePlayerIdx];
-            var isCorrect = false;
-            if (activeGuess !== null) {
-                isCorrect = isSlotCorrect(activeGuess, s.year, activeP.cards);
-            }
-
+            let isCorrect = activeGuess !== null && isSlotCorrect(activeGuess, parseInt(s.year), players[activePlayerIdx].cards);
             document.getElementById('validation-buttons').style.display = 'flex';
-            if (isCorrect) {
-                document.getElementById('host-instructions').innerHTML = "<span style='color:#00ff00; font-size:1.5em;'>¡POSICIÓN CORRECTA! ✅</span><br>¿Detalles?";
-                document.getElementById('validation-buttons').innerHTML = `
-                    <button class="btn-val btn-ok" onclick="validateResult(true, false)">SÍ</button>
-                    <button class="btn-val btn-ok" style="background:#ffd700; color:#000;" onclick="validateResult(true, true)">SÍ (+ 🔵 FICHA)</button>
-                    <button class="btn-val btn-fail" style="background:#555;" onclick="reportSystemError()">ERROR SISTEMA</button>
-                 `;
-            } else {
-                document.getElementById('host-instructions').innerHTML = "<span style='color:#ff4444; font-size:1.5em;'>POSICIÓN INCORRECTA ❌</span><br>¿Pero acertó Algo?";
-                document.getElementById('validation-buttons').innerHTML = `
-                    <button class="btn-val btn-fail" onclick="validateResult(false, false)">NO</button>
-                    <button class="btn-val btn-ok" style="background:#00f2fe; color:#000;" onclick="validateResult(false, true)">SÍ (+ 🔵 FICHA)</button>
-                    <button class="btn-val btn-fail" style="background:#00f2fe; color:#000; font-size: 0.6em;" onclick="reportSystemError()">ERROR SISTEMA (REPETIR)</button>
-                 `;
-            }
+            document.getElementById('host-instructions').innerText = isCorrect ? "CORRECTO!" : "FALLO!";
             syncState();
         }
 
-        function validateResult(isCardOk, isTokenOk) {
-            if (turnPhase === 'DUEL') return;
-            
-            if (isTokenOk) {
-                updateTokens(players[activePlayerIdx], 1);
-            }
-
-            // RESOLVER APUESTAS "NI DE COÑA" y "ESTOY CONTIGO"
-            if ((bettingAgainst && bettingAgainst.length > 0) || (bettingFor && bettingFor.length > 0)) {
-                if (isCardOk) {
-                    // El jugador activo ACIERTA: los que apostaron en contra pierden. los que apostaron a favor ganan.
-                    var losesPhrases = [
-                        "Has dudado de un puto experto... y has perdido.",
-                        "¿Ni de coña? Ni de coña vas a recuperar esa ficha, pringao.",
-                        "Para la próxima te callas. El maestro sabe lo que hace.",
-                        "A llorar a la llorería. Esa ficha es historia.",
-                        "Has apostado contra Dios y te has quemado.",
-                        "¿Te creías muy listo, eh? Pues toma zasca en toda la boca.",
-                        "Poca fe para tanta ignorancia. Ficha perdida.",
-                        "Silencio en la sala. Ha hablado el puto amo del tiempo.",
-                        "Tu envidia alimenta su victoria. Menos 1 ficha para ti.",
-                        "¿En serio pensabas que iba a fallar? Qué pardillo.",
-                        "Nunca apuestes contra el jefe, novato.",
-                        "Te has comido el amago entero. Despídete de la ficha.",
-                        "Mucha boquita pero poca ficha te queda.",
-                        "Con esa intuición de mierda normal que pierdas fichas.",
-                        "Vaya patinazo. Esa masterclass te ha costado una ficha.",
-                        "Has ido a por lana y has salido trasquilado.",
-                        "Te ha retratado. Sigue mirando y aprende.",
-                        "Ni de coña tienes tú tanto nivel. Ficha al pozo.",
-                        "Acaso pensabas que dudar del amo del juego te iba a salir gratis?",
-                        "Te pones chulito y te quedas sin blanca. Clásico.",
-                        "Esa ficha era tuya, ahora es solo un mal recuerdo.",
-                        "¿Querías sangre? Toma dos tazas de humillación.",
-                        "Le has tirado un órdago y te ha sacado la chorra.",
-                        "El rey no se mancha las manos con plebeyos como tú.",
-                        "Has tropezado con la piedra de su sabiduría.",
-                        "Ficha denegada por listillo. A tu cueva.",
-                        "Te la ha clavado por la escuadra. A pastar.",
-                        "Tu intento de sabotaje da más pena que otra cosa.",
-                        "Otra fichita pal bote. Gracias por la donación, pringao.",
-                        "Te iba a devolver la ficha por pena, pero mejor me la quedo.",
-                        "Cárgate de paciencia, porque de fichas vas justito.",
-                        "El oráculo musical ataca de nuevo. Tú agacha la cabeza.",
-                        "Ni con un DeLorean aciertas tú tantas veces. Asúmelo.",
-                        "Ojo al dato: acabas de perder una ficha contra el mejor.",
-                        "Sigue apostando en contra, a ver si así te arruinas antes.",
-                        "Dudar de un dios solo trae castigos divinos en forma de fichas.",
-                        "¿Te sobra el dinero? Porque las fichas azules parece que las regalas.",
-                        "Has intentado hacerle el lío al máster y has cobrado tú.",
-                        "Por favor, un aplauso para el que acaba de perder otra ficha absurda.",
-                        "El rey manda, tú pagas la entrada al espectáculo.",
-                        "La próxima vez guarda la ficha, que igual te hace falta para no dar pena.",
-                        "Que ponga la música y tú pones las fichas perdidas. Trato justo."
-                    ];
-                    if (bettingAgainst) {
-                        bettingAgainst.forEach(function (pid) {
-                            if (connections[pid]) {
-                                var msg = losesPhrases[Math.floor(Math.random() * losesPhrases.length)];
-                                connections[pid].send({ type: 'BET_RESULT', msg: "JAJAJAJA...\n\n" + msg });
-                            }
-                        });
-                    }
-                    if (bettingFor) {
-                        bettingFor.forEach(function (pid) {
-                            var p = players.find(x => x.id === pid);
-                            if (p) {
-                                updateTokens(p, 2);
-                                if (connections[pid]) {
-                                    connections[pid].send({ type: 'BET_RESULT', msg: "¡SABÍAS QUE IBA A ACERTAR Y HAS GANADO!\n\nRecompensa: +2 FICHAS AZULES." });
-                                }
-                            }
-                        });
-                    }
-                } else {
-                    // El jugador activo FALLA: los que apostaron en contra ganan. los que apostaron a favor pierden.
-                    if (bettingAgainst) {
-                        bettingAgainst.forEach(function (pid) {
-                            var p = players.find(x => x.id === pid);
-                            if (p) {
-                                updateTokens(p, 2);
-                                if (connections[pid]) {
-                                    connections[pid].send({ type: 'BET_RESULT', msg: "¡SABÍAS QUE IBA A FALLAR Y HAS GANADO!\n\nRecompensa: +2 FICHAS AZULES." });
-                                }
-                            }
-                        });
-                    }
-                    if (bettingFor) {
-                        var losesPhrasesFor = [
-                            "Confiaste en un inútil y has pagado el pato.",
-                            "Tanta fe para nada. Menudo patinazo.",
-                            "Ni estando contigo logra acertar. Ficha perdida.",
-                            "Has apostado al caballo perdedor.",
-                            "Qué mala vista tienes para elegir aliados."
-                        ];
-                        bettingFor.forEach(function (pid) {
-                            if (connections[pid]) {
-                                var msg = losesPhrasesFor[Math.floor(Math.random() * losesPhrasesFor.length)];
-                                connections[pid].send({ type: 'BET_RESULT', msg: "JAJAJAJA...\n\n" + msg });
-                            }
-                        });
-                    }
-                }
-            }
-
-            if (isCardOk) {
-                players[activePlayerIdx].score++;
-                players[activePlayerIdx].cards.push(songs[currentSongIdx].year);
-                players[activePlayerIdx].cards.sort();
-                if (players[activePlayerIdx].score >= 10 && gameMode === 'normal') {
-                    showWinner(players[activePlayerIdx].name);
-                    return;
-                }
-                activePlayerIdx = (activePlayerIdx + 1) % players.length;
-                players[activePlayerIdx].canReload = true;
-                nextTurn();
-            } else {
-                // Si no hay carta para el activo, ver si hay robos
-                var challengersExist = Object.keys(currentBets).length > 0;
-                var anyChallengerCorrect = false;
-                for (var pid in currentBets) {
-                    if (isSlotCorrect(currentBets[pid], songs[currentSongIdx].year, players[activePlayerIdx].cards)) anyChallengerCorrect = true;
-                }
-
-                if (challengersExist && anyChallengerCorrect) {
-                    document.getElementById('host-instructions').innerText = "VAMOS A LAS APUESTAS...";
-                    document.getElementById('validation-buttons').style.display = 'none';
-                    document.getElementById('challenger-validation').style.display = 'block';
-                    var h = "";
-                    for (var pid in currentBets) {
-                        var p = players.find(x => x.id === pid);
-                        var s = songs[currentSongIdx];
-                        var slotCorrect = isSlotCorrect(currentBets[pid], s.year, players[activePlayerIdx].cards);
-
-                        if (p && slotCorrect) {
-                            h += '<button class="btn-val" style="background:var(--gold); color:#000; border: 2px solid #00ff00;" onclick="awardToChallenger(\'' + pid + '\')">' + p.name + ' GANÓ LA APUESTA (✅)</button>';
-                        } else if (p) {
-                            h += '<button class="btn-val" style="background:#555; color:#888; cursor:not-allowed;" disabled>' + p.name + ' FALLÓ (❌)</button>';
-                        }
-                    }
-                    document.getElementById('challenger-buttons').innerHTML = h;
-                } else {
-                    activePlayerIdx = (activePlayerIdx + 1) % players.length;
-                    players[activePlayerIdx].canReload = true; // Resetear permiso de recarga
-                    nextTurn();
-                }
-            }
+        function isSlotCorrect(idx, year, cards) {
+            if (cards.length === 0) return true;
+            if (idx === 0) return year <= cards[0];
+            if (idx === cards.length) return year >= cards[cards.length - 1];
+            return year >= cards[idx - 1] && year <= cards[idx];
         }
 
-        function awardToChallenger(pid) {
-            var p = players.find(x => x.id === pid);
-            if (p) {
-                p.score++;
-                p.cards.push(songs[currentSongIdx].year);
-                p.cards.sort();
-                if (p.score >= 10 && gameMode === 'normal') {
-                    showWinner(p.name);
-                    return;
+        function validateResult(isCardOk, isTokenOk) {
+            let p = players[activePlayerIdx];
+            if (isTokenOk) p.tokens = Math.min(5, p.tokens + 1);
+            if (isCardOk) {
+                p.score++; p.cards.push(parseInt(songs[currentSongIdx].year)); p.cards.sort();
+                if (p.score >= 10 && gameMode === 'normal') { showWinner(p.name); return; }
+                activePlayerIdx = (activePlayerIdx + 1) % players.length;
+                p.canReload = true; nextTurn();
+            } else {
+                let challengers = Object.keys(currentBets);
+                let winners = challengers.filter(id => isSlotCorrect(currentBets[id], parseInt(songs[currentSongIdx].year), p.cards));
+                if (winners.length > 0) {
+                    activePlayerIdx = (activePlayerIdx + 1) % players.length; nextTurn();
+                } else {
+                    activePlayerIdx = (activePlayerIdx + 1) % players.length;
+                    players[activePlayerIdx].canReload = true; nextTurn();
                 }
             }
-            activePlayerIdx = (activePlayerIdx + 1) % players.length;
-            players[activePlayerIdx].canReload = true;
-            nextTurn();
         }
 
         function showWinner(name) {
-            console.log("Celebrando victoria de:", name);
             document.getElementById('winner-name').innerText = name;
-
-            // Mostrar avatar del ganador
-            var winner = players.find(p => p.name === name);
-            var avatarHtml = '';
-            if (winner && winner.avatar) {
-                avatarHtml = '<img src="' + winner.avatar + '" style="width:200px; height:200px; border-radius:50%; border: 5px solid var(--neon); box-shadow: 0 0 30px var(--neon); object-fit: cover;">';
-            } else {
-                var initial = name.charAt(0).toUpperCase();
-                avatarHtml = '<div style="width:150px; height:150px; border-radius:50%; background:#222; border:5px solid var(--neon); color:var(--neon); display:inline-flex; align-items:center; justify-content:center; font-family:\'Bungee\'; font-size:4em; box-shadow: 0 0 30px var(--neon);">' + initial + '</div>';
-            }
-            document.getElementById('winner-avatar-img').innerHTML = avatarHtml;
-
+            let p = players.find(x => x.name === name);
+            document.getElementById('winner-avatar-img').innerHTML = p.avatar ? `<img src="${p.avatar}" style="width:150px;height:150px;border-radius:50%;border:4px solid var(--neon);">` : p.name[0];
             document.getElementById('winner-screen').style.display = 'flex';
-
-            // Limpiar confeti previo si existe
-            if (window.victoryInterval) clearInterval(window.victoryInterval);
-
-            // V26.3: Integración de IDs Verificados por el Usuario
-            var isXavi = name.toLowerCase().includes('xavi');
-            var songId = "";
-            var songTitle = "";
-
-            if (isXavi) {
-                songId = '04854XqcfCY'; // Queen - We Are The Champions
-                songTitle = "Queen - We Are The Champions";
-            } else {
-                // El "Pool de la Frikada" (V26.3 - IDs proporcionados por el usuario)
-                var frikiPool = [
-                    { id: 'wfeCIvOxXBo', t: "Rodolfo Chikilicuatre - Chiki Chiki" },
-                    { id: '5mKKc2F0GbQ', t: "El Koala - Opá" },
-                    { id: '62Z8vUIk9s8', t: "Zapato Veloz - Tractor Amarillo" },
-                    { id: 'lTxGto9ADx0', t: "Georgie Dann - La Barbacoa" },
-                    { id: 'arZZw8NyPq8', t: "Las Ketchup - Aserejé" },
-                    { id: 'd21lBEXv6RE', t: "Leonardo Dantés - Pañuelo" },
-                    { id: 'WCQuf90qf9U', t: "King África - La Bomba" },
-                    { id: 'tUHtrE533X4', t: "Mandangastyle" },
-                    { id: 'YMlDlM7lvO0', t: "Paco Pil - Viva la Fiesta" }
-                ];
-                var picked = frikiPool[Math.floor(Math.random() * frikiPool.length)];
-                songId = picked.id;
-                songTitle = picked.t;
-            }
-
-            console.log("Ganador:", name, "| Sonando:", songTitle);
-
-            // Usar el contenedor de video para sonar (oculto)
-            var container = document.getElementById('player-container');
-            container.innerHTML = '<iframe src="https://www.youtube.com/embed/' + songId + '?autoplay=1&mute=0&enablejsapi=1&playsinline=1" allow="autoplay; encrypted-media" style="width:300px;height:200px;border:none;"></iframe>';
-
-            // Confeti (Efectos V26)
-            if (isXavi) {
-                // V26: Confeti INFINITO para Xavi
-                var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 2000 };
-                function randomInRange(min, max) { return Math.random() * (max - min) + min; }
-
-                window.victoryInterval = setInterval(function () {
-                    confetti(Object.assign({}, defaults, { particleCount: 40, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
-                    confetti(Object.assign({}, defaults, { particleCount: 40, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
-                }, 300);
-            }
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
         }
 
         function syncState() {
-            var leaderName = "---";
-            var leaderScore = 0;
-            if (players.length > 0) {
-                var leader = players.reduce(function (prev, current) {
-                    return (prev.score > current.score) ? prev : current;
-                });
-                leaderName = leader.name;
-                leaderScore = leader.score;
-            }
-
-            var currentJudgeId = 'ALL';
-            if (document.getElementById('lobby').style.display === 'none' && players.length > 0) {
-                // El usuario prefiere que el mando pase al SIGUIENTE jugador para validar
-                if (turnPhase === 'NORMAL' || turnPhase === 'KING_GUESS' || turnPhase === 'KING_SELECTION') {
-                    var judgeIdx = (activePlayerIdx + 1) % players.length;
-                    currentJudgeId = players[judgeIdx] ? players[judgeIdx].id : 'ALL';
-                } else {
-                    currentJudgeId = 'ALL';
+            let leader = players.reduce((a, b) => (a.score > b.score ? a : b), { name: "---", score: 0 });
+            players.forEach(p => {
+                if (connections[p.id] && connections[p.id].open) {
+                    connections[p.id].send({
+                        type: 'STATE_UPDATE', players, activePlayer: players[activePlayerIdx],
+                        leader, currentTrack: songs[currentSongIdx], revealed: isRevealed,
+                        isPlaying, isMuted, panicActive, panicTimer, joputismoLevel,
+                        myCards: p.cards, myTokens: p.tokens, myWildcards: p.wildcards,
+                        activeTimeline: players[activePlayerIdx].cards, currentBets, activeGuess,
+                        turnPhase, hasShield
+                    });
                 }
-            }
-
-            for (var id in connections) {
-                var p = players.find(px => px.id.toLowerCase() === id.toLowerCase());
-                var state = {
-                    type: 'STATE_UPDATE',
-                    players: players,
-                    activePlayer: { id: players[activePlayerIdx] ? players[activePlayerIdx].id : null, name: players[activePlayerIdx] ? players[activePlayerIdx].name : null },
-                    judgeId: currentJudgeId,
-                    leader: { name: leaderName, score: leaderScore },
-                    currentTrack: songs[currentSongIdx],
-                    revealed: isRevealed,
-                    isPlaying: isPlaying,
-                    isMuted: isMuted,
-                    muteTimeRemaining: muteTimeRemaining,
-                    panicActive: panicActive,
-                    panicTimer: panicTimer,
-                    isFogActive: isFogActive,
-                    joputismoLevel: joputismoLevel,
-                    bettingAgainst: bettingAgainst,
-                    bettingFor: bettingFor,
-                    myCards: p ? p.cards : [],
-                    myTokens: p ? p.tokens : 0,
-                    myWildcards: p && p.wildcards !== undefined ? p.wildcards : 3,
-                    canReload: p ? p.canReload : false,
-                    activeTimeline: players[activePlayerIdx] ? players[activePlayerIdx].cards : [],
-                    currentBets: currentBets,
-                    currentBets: currentBets,
-                    activeGuess: activeGuess,
-                    kingOptions: kingOptions,
-                    cheatsEnabled: cheatsEnabled,
-                    turnPhase: turnPhase,
-                    currentDuel: currentDuel,
-                    duelResult: duelResult,
-                    hasShield: hasShield,
-                    duelTriggered: duelTriggered,
-                    gameStarted: document.getElementById('lobby').style.display === 'none'
-                };
-                try {
-                    if (connections[id] && connections[id].open) {
-                        connections[id].send(state);
-                    }
-                } catch (e) {
-                    console.warn("No se pudo enviar estado a", id, e);
-                }
-            }
+            });
             updateUI();
         }
 
         function updateUI() {
-            var sortedPlayers = players.slice().sort(function (a, b) { return b.score - a.score });
-            var maxScore = sortedPlayers.length > 0 ? sortedPlayers[0].score : 0;
-            var h = ""; 
-            
-            sortedPlayers.forEach(function (p) {
-                var chipsHtml = ""; for (var i = 0; i < p.tokens; i++) chipsHtml += '<span class="neon-chip"></span>';
-
-                var avatarHtml = '';
-                var wantedHtml = '';
-                var avatarCore = '';
-                if (p.avatar) {
-                    avatarCore = '<img src="' + p.avatar + '" style="width:35px; height:35px; border-radius:50%; border:2px solid ' + (players[activePlayerIdx] && p.id === players[activePlayerIdx].id ? 'var(--neon)' : '#555') + '; object-fit:cover;">';
-                } else {
-                    avatarCore = '<div style="width:35px; height:35px; border-radius:50%; background:#222; border:2px solid ' + (players[activePlayerIdx] && p.id === players[activePlayerIdx].id ? 'var(--neon)' : '#555') + '; color:#fff; display:flex; align-items:center; justify-content:center; font-family:\'Bungee\'; font-size:1.2em; box-shadow:0 0 5px rgba(0,0,0,0.5);">?</div>';
-                }
-
-                // Mostrar cartel de SE BUSCA al que va ganando
-                if (p.score === maxScore && maxScore > 0) {
-                    var wantedAvatar = p.avatar ? '<img src="' + p.avatar + '">' : '<div class="initial">' + p.name.charAt(0).toUpperCase() + '</div>';
-                    wantedHtml = '<div class="wanted-poster"><div class="txt1">WANTED</div><div class="txt2">LÍDER</div><div class="wanted-img-placeholder">' + wantedAvatar + '</div></div>';
-                }
-
-                avatarHtml = '<div style="position:relative; display:inline-block; margin-right:12px; vertical-align:middle;">' + 
-                             wantedHtml + avatarCore + '</div>';
-
-                h += '<div class="leader-item ' + (p.id === players[activePlayerIdx].id ? 'active' : '') + '" style="display:flex; align-items:center; margin-bottom:10px; position:relative;">' + 
-                     avatarHtml + 
-                     '<span style="flex:1; font-family:\'Bungee\'; font-size:0.8em;">' + p.name + '<br><span style="opacity:0.6; font-size:0.7em;">' + chipsHtml + '</span></span>' + 
-                     '<span class="score" style="font-family:\'Bungee\'; color:var(--gold);">' + p.score + ' p</span></div>';
+            let h = "";
+            players.sort((a, b) => b.score - a.score).forEach(p => {
+                let activeCls = p.id === players[activePlayerIdx].id ? 'active' : '';
+                h += `<div class="leader-item ${activeCls}"><span>${p.name}</span><span>${p.score} pts</span></div>`;
             });
             document.getElementById('leaderboard-list').innerHTML = h;
-
-            // Resto de updateUI
-            var currentCardsHtml = "";
-            players[activePlayerIdx].cards.forEach(function (year) {
-                currentCardsHtml += '<div class="mini-card">' + (isFogActive ? '????' : year) + '</div>';
-            });
-            document.getElementById('active-player-inventory').innerHTML = currentCardsHtml;
-
-            var timelinesHtml = ""; players.forEach(function (p) {
-                timelinesHtml += '<div class="player-row"><div style="font-size:0.6em;color:#888;">' + p.name + '</div><div class="slots">';
-                for (var k = 0; k < 10; k++) timelinesHtml += '<div class="slot ' + (p.cards[k] ? 'filled' : '') + '">' + (p.cards[k] ? (isFogActive ? '????' : p.cards[k]) : '') + '</div>';
-                timelinesHtml += '</div></div>';
-            });
-            document.getElementById('global-timelines').innerHTML = timelinesHtml;
+            let invH = ""; players[activePlayerIdx].cards.forEach(y => invH += `<div class="mini-card">${y}</div>`);
+            document.getElementById('active-player-inventory').innerHTML = invH;
         }
 
-        function triggerFlash() {
-            let overlay = document.getElementById('flash-overlay');
-            if (overlay) {
-                overlay.classList.remove('animate-flash');
-                void overlay.offsetWidth; // Force reflow
-                overlay.classList.add('animate-flash');
-            }
-        }
-        function reportBrokenLink() {
-            var s = songs[currentSongIdx];
-            if (!s || !s.id) return;
-            var url = 'https://www.youtube.com/watch?v=' + s.id;
-            var listType = s.type ? s.type : 'General';
-            
-            fetch('reporte_error.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ url: url, tipo: listType })
-            }).then(function(r){ return r.json()}).then(function(data){
-                alert('URL reportada como rota. Gasta un Token de Recarga si tienes para saltarla.');
-                var btn = document.getElementById('btn-report-error');
-                if(btn) btn.style.display = 'none';
-            }).catch(function(e){
-                console.error(e);
-                alert('Aviso guardado.');
-            });
-        }
-    </script>
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js').then(reg => {
-                    reg.addEventListener('updatefound', () => {
-                        const newWorker = reg.installing;
-                        newWorker.addEventListener('statechange', () => {
-                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                window.location.reload();
-                            }
-                        });
-                    });
-                });
-            });
+        function setJoputismo(l) { joputismoLevel = parseInt(l); syncState(); }
 
-            let refreshing = false;
-            navigator.serviceWorker.addEventListener('controllerchange', () => {
-                if (!refreshing) {
-                    window.location.reload();
-                    refreshing = true;
-                }
+        fetch('lista_final.txt?v=' + Date.now()).then(r => r.text()).then(t => {
+            let lines = t.split('\n');
+            lines.forEach((l, i) => {
+                let p = l.split('|');
+                if (p.length > 3) songs.push({ artist: p[0], song: p[1], year: p[2], id: p[3].split('v=')[1] || p[3].split('/').pop(), line: i + 1, type: 'original' });
             });
-        }
+            songs.sort(() => Math.random() - 0.5);
+            initPeer();
+        });
     </script>
 </body>
 </html>
