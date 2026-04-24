@@ -184,6 +184,14 @@
         }
         .playing-active { animation: pulse-active 1.5s infinite; background: var(--neon) !important; color: #000 !important; }
 
+        .btn-error-track {
+            border-color: #ff3333 !important;
+            color: #ff3333 !important;
+            box-shadow: 0 0 10px rgba(255, 51, 51, 0.2) !important;
+            display: none;
+            margin-top: 10px;
+        }
+
         /* HUB & FAB */
         .btn-hub {
             position: fixed; top: calc(20px + env(safe-area-inset-top, 0px)); left: 20px; z-index: 10000;
@@ -292,6 +300,13 @@
             <div class="special-actions" id="special-ctrl" style="display:none; flex-direction:column; gap:10px; width:100%; max-width:340px; margin-top:15px;">
                 <button class="spec-btn" id="btn-autowin" onclick="send('AUTO_WIN')">COMPRAR GRAMMY (3 🔵)</button>
                 <button class="spec-btn" id="btn-reload" onclick="send('RELOAD_SONG')">REINTENTAR (1 🔵)</button>
+                <button class="spec-btn btn-error-track" id="btn-error-track" onclick="send('SYSTEM_ERROR_TRACK')">⚠️ VIDEO ROTO</button>
+            </div>
+
+            <!-- APUESTAS RÁPIDAS (Visible siempre para rivales) -->
+            <div id="quick-bets-ctrl" style="display:none; gap:10px; width:100%; max-width:340px; margin-top:15px; justify-content:center;">
+                <button class="spec-btn" style="color:#00f2fe; border-color:#00f2fe !important; flex:1;" onclick="send('BET_AGAINST_ACTIVE')">¡NI DE COÑA! (1 🔵)</button>
+                <button class="spec-btn" style="color:#00ff88; border-color:#00ff88 !important; flex:1;" onclick="send('BET_FOR_ACTIVE')">¡CONMIGO! (1 🔵)</button>
             </div>
 
             <!-- DUELO UI -->
@@ -307,14 +322,19 @@
         <div id="tab-sabotage" class="tab-content">
             <h2 style="font-family:'Bungee'; color:var(--neon); margin-top:20px; font-size:1em;">JOPUTISMO</h2>
             <p id="sabotage-status-msg" style="color:#666; font-size:0.6em; text-align:center; font-family:'Bungee';">ESPERA TU MOMENTO</p>
-            <div id="sabotage-ctrl" style="display:none; width:100%; max-width:340px;">
+            <div id="sabotage-ctrl" style="display:none; width:100%; max-width:340px; margin-top:10px;">
                 <div id="sabotage-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-                    <button class="spec-btn" id="btn-sabotage-mute" style="color:#ff0055; border-color:#ff0055 !important;" onclick="send('SABOTAGE_MUTE')">SILENCIO 15s</button>
-                    <button class="spec-btn" style="color:#00f2fe; border-color:#00f2fe !important;" onclick="send('BET_AGAINST_ACTIVE')">¡NI DE COÑA! (1 🔵)</button>
-                    <button class="spec-btn" style="color:#00ff88; border-color:#00ff88 !important;" onclick="send('BET_FOR_ACTIVE')">¡CONMIGO! (1 🔵)</button>
-                    <button class="spec-btn" style="color:#00ff00; border-color:#00ff00 !important;" onclick="send('SABOTAGE_BUZZER')">ZUMBIDO</button>
-                    <button class="spec-btn" style="color:var(--gold); border:2px dashed var(--gold) !important;" onclick="send('SABOTAGE_DUEL')">🔫 DUELO 🔫 (3 🔵)</button>
+                    <button class="spec-btn" style="color:#ff0055; border-color:#ff0055 !important;" onclick="send('SABOTAGE_MUTE')">MUTE 15s (1 🔵)</button>
+                    <button class="spec-btn" style="color:#00ff00; border-color:#00ff00 !important;" onclick="send('SABOTAGE_BUZZER')">ZUMBIDO (1 🔵)</button>
+                    <button class="spec-btn" style="color:#ff8800; border-color:#ff8800 !important;" onclick="send('SABOTAGE_VETO')">VETO (1 🔵)</button>
                     <button class="spec-btn" style="color:#ff0000; border-color:#ff0000 !important;" onclick="send('SABOTAGE_PANIC')">PÁNICO (2 🔵)</button>
+                    <button class="spec-btn" style="color:#aaaaaa; border-color:#aaaaaa !important;" onclick="send('SABOTAGE_FOG')">NIEBLA (2 🔵)</button>
+                    <button class="spec-btn" style="color:#ff3333; border-color:#ff3333 !important;" onclick="send('SABOTAGE_RUSSIAN_ROULETTE')">RULETA (2 🔵)</button>
+                    <button class="spec-btn" style="color:#ff00ff; border-color:#ff00ff !important;" onclick="send('SABOTAGE_FORCE_SKIP')">SALTO (3 🔵)</button>
+                    <button class="spec-btn" style="color:var(--gold); border:2px dashed var(--gold) !important;" onclick="send('SABOTAGE_DUEL')">🔫 DUELO (3 🔵)</button>
+                    <button class="spec-btn" style="color:#ffff00; border-color:#ffff00 !important;" onclick="send('SABOTAGE_STEAL_TOKEN')">ROBAR 🔵 (4 🔵)</button>
+                    <button class="spec-btn" style="color:#ff00ff; border-color:#ff00ff !important; grid-column: span 2;" onclick="send('SABOTAGE_STEAL_TURN')">ROBAR TURNO (4 🔵)</button>
+                    <button class="spec-btn" style="color:#9900ff; border-color:#9900ff !important; grid-column: span 2;" onclick="send('SABOTAGE_BLACKHOLE')">AGUJERO NEGRO (5 🔵)</button>
                 </div>
             </div>
         </div>
@@ -407,6 +427,9 @@
             document.getElementById('m-ctrl').style.display = isMe ? 'grid' : 'none';
             document.getElementById('s-ctrl').style.display = isMe ? 'grid' : 'none';
             document.getElementById('special-ctrl').style.display = (isMe && !state.revealed) ? 'flex' : 'none';
+            if (document.getElementById('btn-error-track')) {
+                document.getElementById('btn-error-track').style.display = (isMe && state.isPlaying) ? 'block' : 'none';
+            }
             if (state.revealed) { document.getElementById('card').classList.add('flipped'); document.getElementById('c-artist').innerText = state.currentTrack.artist; document.getElementById('c-song').innerText = state.currentTrack.song; document.getElementById('c-year').innerText = state.currentTrack.year; }
             else { document.getElementById('card').classList.remove('flipped'); }
             let h = ""; const timeline = isMe ? state.myCards : state.activeTimeline;
@@ -416,6 +439,10 @@
             const canSabotage = !isMe && state.isPlaying && !state.revealed;
             document.getElementById('sabotage-ctrl').style.display = canSabotage ? 'block' : 'none';
             document.getElementById('sabotage-status-msg').style.display = canSabotage ? 'none' : 'block';
+            
+            if (document.getElementById('quick-bets-ctrl')) {
+                document.getElementById('quick-bets-ctrl').style.display = canSabotage ? 'flex' : 'none';
+            }
             document.getElementById('duel-mode-ui').style.display = (isDuel && (state.currentDuel.challenger === myId || state.currentDuel.target === myId)) ? 'flex' : 'none';
 
             // FEEDBACK PLAY BOTÓN
@@ -433,7 +460,7 @@
             return `<div class="${cls}" onclick="interactSlot(${idx}, ${isActive})">${label}</div>`;
         }
 
-        function interactSlot(idx, isMe) { if (isMe) { if (lastState.activeGuess !== null) return; send('GUESS', idx); } else { if (lastState.activeGuess === null) return; send('BET', idx); } }
+        function interactSlot(idx, isMe) { if (isMe) { if (lastState.activeGuess !== null) return; send('GUESS', idx); } else { send('BET', idx); } }
         function send(type, value) { if (conn && conn.open) conn.send({ type: 'COMMAND', action: type, value: value }); }
         function sendDuelGuess() { const y = document.getElementById('duel-year-input').value; if (y) { send('DUEL_GUESS', y); document.getElementById('duel-wait-msg').style.display = 'block'; } }
         function toggleRules() { const el = document.getElementById('rules-overlay'); el.style.display = (el.style.display === 'flex') ? 'none' : 'flex'; }
