@@ -1,156 +1,217 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icon-192.png">
-    <meta name="theme-color" content="#00f2ff">
-    <title>CHRONOBEATS - HUB</title>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Bungee&family=Shojumaru&family=Limelight&family=Montserrat:wght@400;700&display=swap"
-        rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>CHRONOBEATS - Game Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Montserrat:wght@400;700&family=Limelight&family=Press+Start+2P&family=Shojumaru&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg: #050505;
+            --neon: #00f2fe;
+            --gold: #ffaa00;
+            --accent: #ff0055;
+        }
+
         body {
-            background: #000;
+            background: var(--bg);
             color: #fff;
             font-family: 'Montserrat', sans-serif;
+            margin: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
-            height: 100dvh;
-            margin: 0;
-            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-            box-sizing: border-box;
-            overflow: hidden;
+            min-height: 100vh;
+            overflow-x: hidden;
+            overflow-y: auto;
         }
 
         .hub-title {
+            padding-top: 20px;
             font-family: 'Bungee';
-            font-size: 2em;
+            font-size: 3em;
             color: #fff;
-            letter-spacing: 5px;
-            margin-bottom: 50px;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
             text-align: center;
+            margin-bottom: 30px;
+            letter-spacing: 2px;
+            text-shadow: 0 0 20px rgba(255,255,255,0.3);
+            width: 100%;
         }
 
         .cards-container {
             display: flex;
+            gap: 15px;
             flex-wrap: wrap;
-            gap: 30px;
             justify-content: center;
-            max-width: 1300px;
+            width: 100%;
+            padding: 20px;
+            box-sizing: border-box;
         }
 
         .game-card {
-            width: 270px;
-            height: 400px;
-            background: #090909;
+            flex: 0 0 230px;
+            height: 360px;
+            background: #111;
+            border: 2px solid #333;
             border-radius: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             text-decoration: none;
-            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             overflow: hidden;
-            border: 2px solid transparent;
+            text-align: center;
         }
 
+        @keyframes shine {
+            from { transform: translateX(-100%); }
+            to { transform: translateX(100%); }
+        }
+
+        /* --- ELITE-PREMIUM UI V1.6: AURORA & TEXTURE --- */
+        :root {
+            --glass: rgba(15, 15, 15, 0.5);
+            --glass-border: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0.2) 100%);
+            --aurora-1: hsla(180, 100%, 20%, 0.35);
+            --aurora-2: hsla(280, 100%, 20%, 0.35);
+            --aurora-3: hsla(220, 100%, 20%, 0.35);
+        }
+
+        body {
+            background: #020202 !important;
+            background-image: 
+                radial-gradient(circle at 20% 30%, var(--aurora-1), transparent 40%),
+                radial-gradient(circle at 80% 70%, var(--aurora-2), transparent 40%),
+                radial-gradient(circle at 50% 50%, var(--aurora-3), transparent 60%) !important;
+            background-attachment: fixed !important;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.4) 100%);
+            animation: aurora-orbit 30s linear infinite;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        @keyframes aurora-orbit {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Glass Grain Texture */
+        .game-card, .btn, #custom-alert > div, #custom-confirm > div {
+            background: var(--glass);
+            backdrop-filter: blur(25px) saturate(200%);
+            -webkit-backdrop-filter: blur(25px) saturate(200%);
+            border-image: var(--glass-border) 1;
+            position: relative;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            box-sizing: border-box;
+        }
+
+        /* Grainy Overlay */
         .game-card::before {
-            content: '';
+            content: "";
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            opacity: 0.05;
-            background: radial-gradient(circle at center, currentColor 0%, transparent 70%);
-            transition: 0.4s;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            opacity: 0.03;
+            pointer-events: none;
+            mix-blend-mode: overlay;
+            border-radius: inherit;
         }
 
-        .game-card:hover {
-            transform: translateY(-15px) scale(1.05);
-            z-index: 10;
+        /* Bokeh Particles */
+        .bokeh {
+            position: fixed;
+            width: 10px; height: 10px;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.1;
+            filter: blur(5px);
+            z-index: -1;
+            animation: float-bokeh 10s infinite ease-in-out;
         }
 
-        .game-card:hover::before {
-            opacity: 0.15;
+        @keyframes float-bokeh {
+            0% { transform: translate(0, 0); opacity: 0; }
+            50% { opacity: 0.2; }
+            100% { transform: translate(100px, -100px); opacity: 0; }
         }
 
         .card-logo {
-            font-size: 2.8em;
-            text-align: center;
-            line-height: 1.1;
-            padding: 20px;
-            position: relative;
+            font-family: 'Bungee';
+            font-size: 2.5em;
+            line-height: 0.9;
+            margin-bottom: 20px;
             z-index: 2;
         }
 
         .card-sub {
-            font-family: 'Montserrat';
-            font-size: 0.3em;
-            color: #fff;
             display: block;
-            margin-top: 15px;
+            font-size: 0.35em;
+            font-family: 'Montserrat';
+            font-weight: 700;
+            margin-top: 10px;
             letter-spacing: 2px;
-            opacity: 0.8;
-            text-shadow: none;
         }
 
         /* Original */
         .card-original {
-            border-color: #00f2ff;
-            color: #00f2ff;
-            box-shadow: 0 0 20px rgba(0, 242, 255, 0.1);
+            border: 2px solid var(--neon);
+            color: var(--neon);
+            box-shadow: 0 0 20px rgba(0, 242, 254, 0.1);
         }
 
         .card-original:hover {
-            box-shadow: 0 10px 40px rgba(0, 242, 255, 0.4), inset 0 0 20px rgba(0, 242, 255, 0.2);
-            background: #0a1516;
+            box-shadow: 0 10px 40px rgba(0, 242, 254, 0.4), inset 0 0 20px rgba(0, 242, 254, 0.2);
+            background: rgba(0, 242, 254, 0.05);
         }
 
         .card-original .card-logo {
-            font-family: 'Bungee';
-            text-shadow: 0 0 15px #00f2ff;
+            text-shadow: 0 0 15px var(--neon);
         }
 
         /* Anime */
         .card-anime {
-            border-color: #ff00cc;
-            color: #ff00cc;
-            box-shadow: 0 0 20px rgba(255, 0, 204, 0.1);
+            border: 2px solid #ff00ff;
+            color: #ff00ff;
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.1);
         }
 
         .card-anime:hover {
-            box-shadow: 0 10px 40px rgba(255, 0, 204, 0.4), inset 0 0 20px rgba(255, 0, 204, 0.2);
-            background: #160a12;
+            box-shadow: 0 10px 40px rgba(255, 0, 255, 0.4), inset 0 0 20px rgba(255, 0, 255, 0.2);
+            background: rgba(255, 0, 255, 0.05);
         }
 
         .card-anime .card-logo {
             font-family: 'Shojumaru';
-            text-shadow: 0 0 15px #ff00cc;
-            font-size: 2.5em;
+            text-shadow: 0 0 15px #ff00ff;
+            font-size: 2.2em; /* Aumentado un punto según petición */
+        }
+
+        .card-anime .card-sub {
+            font-family: 'Shojumaru';
         }
 
         /* Movies */
         .card-movies {
-            border-color: #ffaa00;
+            border: 2px solid #ffaa00;
             color: #ffaa00;
             box-shadow: 0 0 20px rgba(255, 170, 0, 0.1);
         }
 
         .card-movies:hover {
             box-shadow: 0 10px 40px rgba(255, 170, 0, 0.4), inset 0 0 20px rgba(255, 170, 0, 0.2);
-            background: #16120a;
+            background: rgba(255, 170, 0, 0.05);
         }
 
         .card-movies .card-logo {
@@ -160,14 +221,14 @@
 
         /* Mix */
         .card-mix {
-            border-color: #00ff00;
+            border: 2px solid #00ff00;
             color: #00ff00;
             box-shadow: 0 0 20px rgba(0, 255, 0, 0.1);
         }
 
         .card-mix:hover {
             box-shadow: 0 10px 40px rgba(0, 255, 0, 0.4), inset 0 0 20px rgba(0, 255, 0, 0.2);
-            background: #0a160a;
+            background: rgba(0, 255, 0, 0.05);
         }
 
         .card-mix .card-logo {
@@ -176,11 +237,32 @@
             text-shadow: 0 0 15px #00ff00;
         }
 
+        /* Videojuegos */
+        .card-games {
+            border: 2px solid #bf00ff;
+            color: #bf00ff;
+            box-shadow: 0 0 20px rgba(191, 0, 255, 0.1);
+        }
+        .card-games:hover {
+            box-shadow: 0 10px 40px rgba(191, 0, 255, 0.4), inset 0 0 20px rgba(191, 0, 255, 0.2);
+            background: rgba(191, 0, 255, 0.05);
+            border-color: #bf00ff;
+        }
+        .card-games .card-logo {
+            font-family: 'Press Start 2P';
+            font-size: 2.0em; /* Reducido un punto según petición */
+            text-shadow: 0 0 15px #bf00ff;
+        }
+        .card-games .card-sub {
+            font-size: 0.42em; /* Reducido proporcionalmente */
+        }
+
         @media (max-width: 768px) {
             body {
+                overflow-x: hidden;
                 overflow-y: auto;
                 justify-content: flex-start;
-                padding-top: 40px;
+                padding: 40px 0;
             }
 
             .hub-title {
@@ -188,16 +270,26 @@
                 margin-bottom: 30px;
             }
 
+            .cards-container {
+                flex-direction: column;
+                align-items: center;
+                gap: 25px;
+                padding: 20px 0;
+                overflow-x: hidden;
+            }
+
             .game-card {
-                width: 90%;
+                flex: 0 0 auto;
+                width: 85%;
                 height: 200px;
             }
 
             .card-logo {
-                font-size: 2em;
+                font-size: 2.2em;
             }
         }
-    </style>
+    
+</style>
 </head>
 
 <body>
@@ -222,6 +314,13 @@
             <div class="card-logo">
                 CHRONO<br>BEATS
                 <span class="card-sub">MOVIES & TV SHOWS</span>
+            </div>
+        </a>
+
+        <a href="indexchronovideojuegos.html" class="game-card card-games">
+            <div class="card-logo">
+                CHRONO<br>BEATS
+                <span class="card-sub">GAMER EDITION</span>
             </div>
         </a>
 
@@ -258,5 +357,4 @@
         }
     </script>
 </body>
-
 </html>
