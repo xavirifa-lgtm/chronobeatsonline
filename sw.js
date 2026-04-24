@@ -1,16 +1,19 @@
-/* Chronobeats Luxe Service Worker v157 */
-const CACHE_NAME = 'chronobeats-luxe-v157';
+/* Chronobeats Luxe Service Worker v160 */
+const CACHE_NAME = 'chronobeats-luxe-v160';
 const ASSETS = [
   './',
   './index.html',
   './host_digital.html',
   './host_digital_mix.html',
+  './host_digital_anime.html',
+  './host_digital_pelis.html',
+  './host_digital_videojuegos.html',
   './player_digital.html',
   './player_digital_mix.html',
   './player_digital_anime.html',
   './player_digital_pelis.html',
   './player_digital_videojuegos.html',
-  './style.css',
+  './player_digital_peliculas.html',
   './manifest.json',
   './icon-192.png',
   './icon-512.png'
