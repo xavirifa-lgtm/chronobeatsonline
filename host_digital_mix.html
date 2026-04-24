@@ -740,6 +740,7 @@
             if (type === 'orig') { color = '#00f2ff'; label = ' - ORIGINAL EDITION'; }
             if (type === 'anime') { color = '#ff00cc'; label = ' - ANIME EDITION'; }
             if (type === 'movies') { color = '#ffaa00'; label = ' - PELÍCULAS Y SERIES'; }
+            if (type === 'videojuegos') { color = '#bf00ff'; label = ' - GAMER EDITION'; }
             
             document.documentElement.style.setProperty('--neon', color);
             let catSpan = document.getElementById('ui-song-category');
@@ -749,7 +750,7 @@
         initPeer();
 
         var urlParams = new URLSearchParams(window.location.search);
-        var mixParam = urlParams.get('mix') || 'orig,anime,movies';
+        var mixParam = urlParams.get('mix') || 'orig,anime,movies,videojuegos';
         var mixTypes = mixParam.split(',');
         var fetchPromises = [];
 
@@ -761,6 +762,9 @@
         }
         if (mixTypes.includes('movies')) {
             fetchPromises.push(fetch('lista_final_pelis.txt?v=' + new Date().getTime()).then(function (r) { return r.text() }).then(function (t) { return { text: t, type: 'movies', color: '#ffaa00' } }));
+        }
+        if (mixTypes.includes('videojuegos')) {
+            fetchPromises.push(fetch('lista_videojuegos.txt?v=' + new Date().getTime()).then(function (r) { return r.text() }).then(function (t) { return { text: t, type: 'videojuegos', color: '#bf00ff' } }));
         }
 
         Promise.all(fetchPromises).then(function (results) {
