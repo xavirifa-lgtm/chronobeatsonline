@@ -207,7 +207,14 @@
         /* STATUS UI */
         #turn-status { font-family: 'Shojumaru'; color: var(--neon); font-size: 0.8em; margin: 10px 0; }
         .chip-display { font-family: 'Shojumaru'; color: var(--gold); font-size: 0.7em; margin-bottom: 5px; display: flex; align-items: center; gap: 5px; }
-        .neon-chip { width: 12px; height: 12px; background: var(--neon); border-radius: 50%; box-shadow: 0 0 10px var(--neon); }
+        .neon-chip { width: 12px; height: 12px; background: #ff0055; border-radius: 50%; box-shadow: 0 0 10px #ff0055; }
+
+        @keyframes pulse-active {
+            0% { transform: scale(1); box-shadow: 0 0 20px var(--neon); }
+            50% { transform: scale(1.03); box-shadow: 0 0 40px var(--neon); }
+            100% { transform: scale(1); box-shadow: 0 0 20px var(--neon); }
+        }
+        .playing-active { animation: pulse-active 1.5s infinite; background: var(--neon) !important; color: #000 !important; }
 
         /* HUB & FAB */
         .btn-hub {
@@ -240,7 +247,7 @@
 
     <!-- FAB REGLAMENTO -->
     <div id="fab-rules" onclick="toggleRules()"
-        style="display:flex; position:fixed; top:80px; left:20px; width:50px; height:50px; background:#111; border:2px solid var(--neon); border-radius:50%; z-index:9000; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 0 10px rgba(255,0,85,0.5); font-size:1.5em; color:var(--neon); font-family:'Bungee';">
+        style="display:flex; position:fixed; top:20px; right:20px; width:50px; height:50px; background:#111; border:2px solid var(--neon); border-radius:50%; z-index:9000; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 0 10px rgba(255,0,204,0.5); font-size:1.5em; color:var(--neon); font-family:'Bungee';">
         ?
     </div>
 
@@ -543,6 +550,13 @@
             // Duelo
             const isDuel = state.turnPhase === 'DUEL' && state.currentDuel;
             document.getElementById('duel-mode-ui').style.display = (isDuel && (state.currentDuel.challenger === myId || state.currentDuel.target === myId)) ? 'flex' : 'none';
+
+            // FEEDBACK PLAY BOTÓN
+            const playBtn = document.querySelector('.btn-play');
+            if (playBtn) {
+                if (state.isPlaying) playBtn.classList.add('playing-active');
+                else playBtn.classList.remove('playing-active');
+            }
             
             updateMarket(state);
         }

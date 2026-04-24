@@ -252,7 +252,7 @@
 
     <!-- FAB REGLAMENTO -->
     <div id="fab-rules" onclick="toggleRules()"
-        style="display:flex; position:fixed; top:80px; left:20px; width:50px; height:50px; background:#111; border:2px solid var(--neon); border-radius:50%; z-index:9000; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 0 10px rgba(0,255,0,0.5); font-size:1.5em; color:var(--neon); font-family:'Bungee';">
+        style="display:flex; position:fixed; top:20px; right:20px; width:50px; height:50px; background:#111; border:2px solid var(--neon); border-radius:50%; z-index:9000; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 0 10px var(--neon); font-size:1.5em; color:var(--neon); font-family:'Bungee';">
         ?
     </div>
 
@@ -569,6 +569,31 @@
             document.getElementById('duel-mode-ui').style.display = (isDuel && (state.currentDuel.challenger === myId || state.currentDuel.target === myId)) ? 'flex' : 'none';
             
             updateMarket(state);
+
+            // TEMA DINÁMICO SEGÚN TRACK (COLOR Y ETIQUETAS)
+            if (state.currentTrack && state.currentTrack.type) {
+                let color = '#00ff00';
+                let label = 'MIX';
+                let subTitle = 'MIX EDITION';
+                
+                if (state.currentTrack.type === 'orig') { color = '#00f2ff'; label = 'ORIGINAL'; subTitle = 'ORIGINAL EDITION'; }
+                else if (state.currentTrack.type === 'anime') { color = '#ff00cc'; label = 'ANIME'; subTitle = 'ANIME EDITION'; }
+                else if (state.currentTrack.type === 'movies') { color = '#ffaa00'; label = 'MOVIES'; subTitle = 'MOVIES EDITION'; }
+                else if (state.currentTrack.type === 'videojuegos') { color = '#bf00ff'; label = 'GAMER'; subTitle = 'GAMER EDITION'; }
+                
+                document.documentElement.style.setProperty('--neon', color);
+                const modeLabel = document.getElementById('card-mode-label');
+                if (modeLabel) modeLabel.innerText = label;
+                const subTitleSpan = document.querySelector('.logo span');
+                if (subTitleSpan) subTitleSpan.innerText = subTitle;
+            }
+
+            // FEEDBACK PLAY BOTÓN
+            const playBtn = document.querySelector('.btn-play');
+            if (playBtn) {
+                if (state.isPlaying) playBtn.classList.add('playing-active');
+                else playBtn.classList.remove('playing-active');
+            }
         }
 
         function renderSlot(idx, state) {
@@ -627,5 +652,6 @@
         function handleCooldownSabotage(action, id) { send(action); }
         function showCustomAlert(msg) { document.getElementById('custom-alert-msg').innerText = msg; document.getElementById('custom-alert').style.display = 'flex'; }
     </script>
+    <div style="position:fixed; bottom:5px; right:5px; font-size:8px; opacity:0.3; color:white; z-index:10000; font-family: 'Bungee';">v155</div>
 </body>
 </html>

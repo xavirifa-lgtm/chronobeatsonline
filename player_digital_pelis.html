@@ -177,6 +177,13 @@
         .chip-display { font-family: 'Bungee'; color: var(--gold); font-size: 0.7em; margin-bottom: 5px; display: flex; align-items: center; gap: 5px; }
         .neon-chip { width: 12px; height: 12px; background: var(--neon); border-radius: 50%; box-shadow: 0 0 10px var(--neon); }
 
+        @keyframes pulse-active {
+            0% { transform: scale(1); box-shadow: 0 0 20px var(--neon); }
+            50% { transform: scale(1.03); box-shadow: 0 0 40px var(--neon); }
+            100% { transform: scale(1); box-shadow: 0 0 20px var(--neon); }
+        }
+        .playing-active { animation: pulse-active 1.5s infinite; background: var(--neon) !important; color: #000 !important; }
+
         /* HUB & FAB */
         .btn-hub {
             position: fixed; top: calc(20px + env(safe-area-inset-top, 0px)); left: 20px; z-index: 10000;
@@ -208,7 +215,7 @@
 
     <!-- FAB REGLAMENTO -->
     <div id="fab-rules" onclick="toggleRules()"
-        style="display:flex; position:fixed; top:80px; left:20px; width:50px; height:50px; background:#111; border:2px solid var(--neon); border-radius:50%; z-index:9000; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 0 10px rgba(255,170,0,0.5); font-size:1.5em; color:var(--neon); font-family:'Bungee';">
+        style="display:flex; position:fixed; top:20px; right:20px; width:50px; height:50px; background:#111; border:2px solid var(--neon); border-radius:50%; z-index:9000; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 0 10px rgba(255,170,0,0.5); font-size:1.5em; color:var(--neon); font-family:'Bungee';">
         ?
     </div>
 
@@ -409,8 +416,14 @@
             const canSabotage = !isMe && state.isPlaying && !state.revealed;
             document.getElementById('sabotage-ctrl').style.display = canSabotage ? 'block' : 'none';
             document.getElementById('sabotage-status-msg').style.display = canSabotage ? 'none' : 'block';
-            const isDuel = state.turnPhase === 'DUEL' && state.currentDuel;
             document.getElementById('duel-mode-ui').style.display = (isDuel && (state.currentDuel.challenger === myId || state.currentDuel.target === myId)) ? 'flex' : 'none';
+
+            // FEEDBACK PLAY BOTÓN
+            const playBtn = document.querySelector('.btn-play');
+            if (playBtn) {
+                if (state.isPlaying) playBtn.classList.add('playing-active');
+                else playBtn.classList.remove('playing-active');
+            }
         }
 
         function renderSlot(idx, state) {
