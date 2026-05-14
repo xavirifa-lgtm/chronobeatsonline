@@ -299,18 +299,60 @@
             <div class="special-actions" id="special-ctrl" style="display:none; flex-direction:column; gap:10px; width:100%; max-width:340px; margin-top:15px;">
                 <button class="spec-btn" onclick="send('AUTO_WIN')">COMPRAR CARTA (3 🔵)</button>
                 <button class="spec-btn" onclick="send('RELOAD_SONG')">CAMBIAR CANCIÓN (1 🔵)</button>
+                <button class="spec-btn btn-error-track" id="btn-error-track" onclick="send('SYSTEM_ERROR_TRACK')" style="display:none; color:#ff8800; border-color:#ff8800;">⚠️ VIDEO ROTO</button>
             </div>
+
+            <!-- DUELO UI -->
+            <div id="duel-mode-ui" style="display:none; width:100%; max-width:340px; margin-top:20px; text-align:center; flex-direction:column; gap:15px; background:rgba(255,215,0,0.1); padding:20px; border:2px solid var(--gold); border-radius:15px;">
+                <div style="font-family:'Bungee'; color:var(--gold); font-size:1.1em;">🔫 ¡DUELO! 🤠</div>
+                <input type="number" id="duel-year-input" placeholder="AÑO" style="width:100%; font-size:1.5em; border-color:var(--gold);">
+                <button class="btn" style="background:var(--gold); color:#000;" onclick="sendDuelGuess()">¡DISPARAR!</button>
+                <div id="duel-wait-msg" style="display:none; font-family:'Bungee'; color:var(--gold);">ESPERANDO RIVAL...</div>
+            </div>
+        </div>
+
+        <!-- PESTAÑA SABOTAJE -->
+        <div id="tab-sabotage" class="tab-content" style="display:none; flex-direction:column; align-items:center; padding:15px; padding-bottom:90px; overflow-y:auto; width:100%;">
+            <h2 style="font-family:'Bungee'; color:var(--neon); margin-top:20px; font-size:0.9em;">SABOTAJE</h2>
+            <p id="sabotage-status-msg" style="color:#666; font-size:0.8em; text-align:center;">DISPONIBLE SOLO CUANDO OTROS JUEGAN</p>
+            <div id="sabotage-ctrl" style="display:none; width:100%; max-width:340px; margin-top:10px;">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                    <!-- APUESTAS RÁPIDAS -->
+                    <button class="spec-btn" style="color:#ff4400; border-color:#ff4400 !important; grid-column:span 2;" onclick="send('BET_AGAINST_ACTIVE')">¡NI DE COÑA! (1 🔵)</button>
+                    <button class="spec-btn" style="color:#00ff88; border-color:#00ff88 !important; grid-column:span 2;" onclick="send('BET_FOR_ACTIVE')">¡CONMIGO! (1 🔵)</button>
+                    <button class="spec-btn" style="color:#ff0055; border-color:#ff0055 !important;" onclick="send('SABOTAGE_MUTE')">MUTE 15s (1 🔵)</button>
+                    <button class="spec-btn" style="color:#00ff00; border-color:#00ff00 !important;" onclick="send('SABOTAGE_BUZZER')">ZUMBIDO (1 🔵)</button>
+                    <button class="spec-btn" style="color:#ff8800; border-color:#ff8800 !important;" onclick="send('SABOTAGE_VETO')">VETO (1 🔵)</button>
+                    <button class="spec-btn" style="color:#ff0000; border-color:#ff0000 !important;" onclick="send('SABOTAGE_PANIC')">PÁNICO (2 🔵)</button>
+                    <button class="spec-btn" style="color:#aaaaaa; border-color:#aaaaaa !important;" onclick="send('SABOTAGE_FOG')">NIEBLA (2 🔵)</button>
+                    <button class="spec-btn" style="color:#ff3333; border-color:#ff3333 !important;" onclick="send('SABOTAGE_RUSSIAN_ROULETTE')">RULETA (2 🔵)</button>
+                    <button class="spec-btn" style="color:#ff00ff; border-color:#ff00ff !important;" onclick="send('SABOTAGE_FORCE_SKIP')">SALTO (3 🔵)</button>
+                    <button class="spec-btn" style="color:var(--gold); border:2px dashed var(--gold) !important;" onclick="send('SABOTAGE_DUEL')">🔫 DUELO (3 🔵)</button>
+                    <button class="spec-btn" style="color:#ffff00; border-color:#ffff00 !important;" onclick="send('SABOTAGE_STEAL_TOKEN')">ROBAR 🔵 (4 🔵)</button>
+                    <button class="spec-btn" style="color:#ff00ff; border-color:#ff00ff !important; grid-column:span 2;" onclick="send('SABOTAGE_STEAL_TURN')">ROBAR TURNO (4 🔵)</button>
+                    <button class="spec-btn" style="color:#9900ff; border-color:#9900ff !important; grid-column:span 2;" onclick="send('SABOTAGE_BLACKHOLE')">AGUJERO NEGRO (5 🔵)</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PESTAÑA MERCADO -->
+        <div id="tab-market" class="tab-content" style="display:none; flex-direction:column; align-items:center; padding:15px; padding-bottom:90px; overflow-y:auto; width:100%;">
+            <h2 style="font-family:'Bungee'; color:var(--gold); margin-top:20px; font-size:0.9em;">MERCADO</h2>
+            <div id="market-container" style="display:flex; flex-direction:column; gap:15px; width:100%; max-width:340px; margin-top:20px;"></div>
         </div>
 
         <!-- BARRA PESTAÑAS -->
         <div class="tab-bar">
-            <div class="tab-btn active" onclick="switchTab('tab-game', this)"><span>🎸</span><span>JUEGO</span></div>
+            <div class="tab-btn active" onclick="switchTab('tab-game', this)"><span>🎬</span><span>JUEGO</span></div>
+            <div class="tab-btn" onclick="switchTab('tab-sabotage', this)"><span>💀</span><span>SABOTAJE</span></div>
+            <div class="tab-btn" onclick="switchTab('tab-market', this)"><span>💰</span><span>MERCADO</span></div>
         </div>
     </div>
 
     <script>
         var peer, conn, myId, playerName, lastState;
         var playerAvatarDataUrl = null;
+        var sabotageCooldowns = {};
         let connectTimeout;
 
         function status(msg) {
@@ -335,6 +377,7 @@
                 { urls: 'stun:stun1.l.google.com:19302' },
                 { urls: 'stun:stun2.l.google.com:19302' },
                 { urls: 'stun:global.stun.twilio.com:3478' },
+                { urls: 'stun:stun.cloudflare.com:3478' },
                 { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
                 { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' },
                 { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' }
@@ -384,6 +427,8 @@
             if (data.type === 'STATE_UPDATE') {
                 lastState = data;
                 updateUI(data);
+            } else if (data.type === 'BET_RESULT') {
+                showCustomAlert(data.msg);
             }
         }
 
@@ -399,8 +444,22 @@
             const isMe = state.activePlayer.id === myId;
             document.getElementById('m-ctrl').style.display = isMe ? 'grid' : 'none';
             document.getElementById('special-ctrl').style.display = (isMe && !state.revealed) ? 'flex' : 'none';
+            const errBtn = document.getElementById('btn-error-track');
+            if (errBtn) errBtn.style.display = (isMe && state.isPlaying) ? 'block' : 'none';
 
-            if (state.revealed) {
+            // Sabotajes: visibles solo cuando otros juegan
+            const canSabotage = !isMe && state.isPlaying && !state.revealed;
+            const sabCtrl = document.getElementById('sabotage-ctrl');
+            const sabMsg = document.getElementById('sabotage-status-msg');
+            if (sabCtrl) sabCtrl.style.display = canSabotage ? 'block' : 'none';
+            if (sabMsg) sabMsg.style.display = canSabotage ? 'none' : 'block';
+
+            // Duelo
+            const isDuel = state.turnPhase === 'DUEL' && state.currentDuel;
+            const duelUI = document.getElementById('duel-mode-ui');
+            if (duelUI) duelUI.style.display = (isDuel && state.currentDuel && (state.currentDuel.challenger === myId || state.currentDuel.target === myId)) ? 'flex' : 'none';
+
+            if (state.revealed && state.currentTrack) {
                 document.getElementById('card').classList.add('flipped');
                 document.getElementById('c-artist').innerText = state.currentTrack.artist;
                 document.getElementById('c-song').innerText = state.currentTrack.song;
@@ -417,6 +476,15 @@
                 h += renderSlot(idx + 1, state);
             });
             document.getElementById('my-cards-list').innerHTML = h;
+
+            updateMarket(state);
+
+            // FEEDBACK PLAY BOTÓN
+            const playBtn = document.querySelector('.btn-play');
+            if (playBtn) {
+                if (state.isPlaying) playBtn.classList.add('playing-active');
+                else playBtn.classList.remove('playing-active');
+            }
         }
 
         function renderSlot(idx, state) {
@@ -447,6 +515,40 @@
             if (conn && conn.open) conn.send({ type: 'COMMAND', action: type, value: value });
         }
 
+        function updateMarket(state) {
+            const container = document.getElementById('market-container');
+            if (!container) return;
+            const isMe = state.activePlayer.id === myId;
+            let h = "";
+            h += `<button class="btn" style="font-size:0.7em; padding:12px;" ${(!isMe || !state.myWildcards || state.myWildcards < 1) ? 'disabled' : ''} onclick="send('MARKET_WILDCARD', 'artist')">PISTA ARTISTA (${state.myWildcards || 0} 🃏)</button>`;
+            h += `<button class="btn" style="font-size:0.7em; padding:12px;" ${(state.myTokens < 3) ? 'disabled' : ''} onclick="send('MARKET_SHIELD')">ESCUDO (3 🔵)</button>`;
+            container.innerHTML = h;
+        }
+
+        function handleCooldownSabotage(action, id) { send(action); }
+        function sendDuelGuess() {
+            var y = document.getElementById('duel-year-input').value;
+            if (y) { send('DUEL_GUESS', y); document.getElementById('duel-wait-msg').style.display = 'block'; }
+        }
+
+        function showCustomAlert(msg) {
+            const el = document.getElementById('custom-alert');
+            const msgEl = document.getElementById('custom-alert-msg');
+            if (el && msgEl) { msgEl.innerText = msg; el.style.display = 'flex'; }
+            else { alert(msg); }
+        }
+        function toggleRules() {
+            const el = document.getElementById('rules-overlay');
+            if (el) el.style.display = (el.style.display === 'flex') ? 'none' : 'flex';
+        }
+        function switchTab(id, el) {
+            document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            const tab = document.getElementById(id);
+            if (tab) tab.style.display = 'flex';
+            el.classList.add('active');
+        }
+
         function handleAvatarSelect(e) {
             const file = e.target.files[0];
             if (!file) return;
@@ -473,6 +575,23 @@
             reader.readAsDataURL(file);
         }
     </script>
-    <div style="position:fixed; bottom:5px; right:5px; font-size:10px; opacity:0.3; color:white; z-index:10000; font-family: 'Montserrat', sans-serif;">v149</div>
+    <div style="position:fixed; bottom:5px; right:5px; font-size:10px; opacity:0.3; color:white; z-index:10000; font-family: 'Montserrat', sans-serif;">v157</div>
+    <div id="rules-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:9500; flex-direction:column; align-items:center; padding:20px; overflow-y:auto;">
+        <h2 style="font-family:'Bungee'; color:var(--neon); font-size:1em;">📖 REGLAS</h2>
+        <div style="color:#ddd; font-size:0.75em; max-width:400px; line-height:1.5; padding:20px;">
+            <p><strong>OBJETIVO:</strong> Coloca las películas/series en orden cronológico. Gana quien llegue a 10 cartas.</p>
+            <p><strong>TURNO:</strong> Escucha el tema musical y elige dónde va en tu cronología.</p>
+            <p><strong>FICHAS:</strong> Úsalas para sabotear o comprar pistas.</p>
+        </div>
+        <button onclick="toggleRules()" style="background:#333; color:#fff; border:1px solid #666; padding:10px 30px; border-radius:10px; font-family:'Bungee'; cursor:pointer;">CERRAR</button>
+    </div>
+    <div id="custom-alert" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:20000; align-items:center; justify-content:center;">
+        <div style="background:#111; border:2px solid var(--neon); border-radius:15px; padding:20px; width:80%; max-width:350px; text-align:center;">
+            <h3 style="font-family:'Bungee'; color:var(--neon);">AVISO</h3>
+            <p id="custom-alert-msg" style="font-size:0.9em; margin:15px 0;"></p>
+            <button onclick="document.getElementById('custom-alert').style.display='none'" style="background:var(--neon); color:#000; border:none; padding:10px 30px; border-radius:8px; font-family:'Bungee'; cursor:pointer;">OK</button>
+        </div>
+    </div>
+
 </body>
 </html>

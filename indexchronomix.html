@@ -191,12 +191,18 @@
         }
 
         function goToHost() {
-            const active = Array.from(document.querySelectorAll('.mix-chip.active')).map(c => c.dataset.type);
-            if (active.length === 0) {
-                alert("Selecciona al menos una categoría para mezclar.");
-                return;
+            try {
+                const chips = document.querySelectorAll('.mix-chip.active');
+                const active = Array.from(chips).map(c => c.dataset.type).filter(Boolean);
+                if (active.length === 0) {
+                    alert("Selecciona al menos una categoría para mezclar.");
+                    return;
+                }
+                window.location.href = 'host_digital_mix.html?mix=' + active.join(',');
+            } catch (e) {
+                // Fallback: ir con todas las categorías activas por defecto
+                window.location.href = 'host_digital_mix.html?mix=orig,anime,movies,videojuegos';
             }
-            window.location.href = `host_digital_mix.html?mix=${active.join(',')}`;
         }
     </script>
 </body>

@@ -478,8 +478,13 @@
                 config: {
                     'iceServers': [
                         { urls: 'stun:stun.l.google.com:19302' },
+                        { urls: 'stun:stun1.l.google.com:19302' },
+                        { urls: 'stun:stun2.l.google.com:19302' },
                         { urls: 'stun:global.stun.twilio.com:3478' },
-                        { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' }
+                        { urls: 'stun:stun.cloudflare.com:3478' },
+                        { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
+                        { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' },
+                        { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' }
                     ]
                 }
             });
@@ -548,7 +553,7 @@
             }
 
             // Carta
-            if (state.revealed) {
+            if (state.revealed && state.currentTrack) {
                 document.getElementById('card').classList.add('flipped');
                 document.getElementById('c-artist').innerText = state.currentTrack.artist;
                 document.getElementById('c-song').innerText = state.currentTrack.song;
@@ -642,6 +647,6 @@
         function handleCooldownSabotage(action, id) { send(action); }
         function showCustomAlert(msg) { document.getElementById('custom-alert-msg').innerText = msg; document.getElementById('custom-alert').style.display = 'flex'; }
     </script>
-    <div style="position:fixed; bottom:5px; right:5px; font-size:8px; opacity:0.3; color:white; z-index:10000; font-family: 'Shojumaru';">v150</div>
+    <div style="position:fixed; bottom:5px; right:5px; font-size:8px; opacity:0.3; color:white; z-index:10000; font-family: 'Shojumaru';">v157</div>
 </body>
 </html>

@@ -160,14 +160,25 @@
             color: var(--neon); text-decoration: none; font-family: 'Limelight';
             font-size: 1.5em; cursor: pointer;
         }
+
+        #flash-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: white; z-index: 99999; pointer-events: none; opacity: 0;
+        }
+        @keyframes gunshot-flash { 0% { opacity: 0; } 10% { opacity: 0.9; } 100% { opacity: 0; } }
+        .animate-flash { animation: gunshot-flash 0.4s ease-out forwards; }
     </style>
 </head>
 
 <body>
+    <div id="flash-overlay"></div>
+    <div id="joputismo-audio-player" style="display:none;"></div>
+    <div id="audio-player-container" style="display:none;"></div>
     <a href="index.html" class="btn-hub" title="Volver al Hub">H</a>
     
     <div id="winner-screen" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:1000; flex-direction:column; align-items:center; justify-content:center; text-align:center;">
         <h1 style="font-family:'Bungee'; font-size:4em; color:var(--gold);">¡THE END!</h1>
+        <div id="winner-avatar-img" style="margin: 20px 0;"></div>
         <h2 id="winner-name" style="font-family:'Limelight'; font-size:3em; color:var(--neon);">---</h2>
         <button class="btn-start" onclick="location.reload()" style="margin-top:30px">OTRA SESIÓN</button>
     </div>
@@ -178,6 +189,13 @@
     <div id="lobby">
         <div class="room-code" id="join-code">------</div>
         <div class="player-list" id="lobby-players" style="margin-bottom: 20px;"></div>
+        <div style="margin: 15px 0;">
+            <label style="font-family:'Bungee'; color:var(--neon); font-size:0.8em; display:block; margin-bottom:8px;">MODO DE JUEGO</label>
+            <select id="game-mode-select" style="padding:10px; font-family:'Montserrat'; border-radius:8px; background:#222; color:#fff; border:1px solid var(--neon);">
+                <option value="normal">CLÁSICO (Gana a las 10)</option>
+                <option value="rey">MODO REY (Adivina Año Final)</option>
+            </select>
+        </div>
         <button class="btn-start" onclick="startGame()" style="display:none; margin-top: 20px;" id="start-btn">ACCION</button>
     </div>
 
@@ -202,11 +220,16 @@
                     <button class="reveal-btn" id="btn-reveal-host" onclick="revealData()" style="display:block; margin: 15px auto;">REVELAR</button>
                     <div class="actions" id="validation-buttons" style="display:none; gap: 10px; width: 100%; margin-top: 15px;">
                         <button class="btn-val btn-ok" onclick="validateResult(true, false)">CORRECTO</button>
-                        <button class="btn-val btn-ok" style="background:#ffd700;" onclick="validateResult(true, true)">ESTRELLA</button>
+                        <button class="btn-val btn-ok" style="background:#ffd700;" onclick="validateResult(true, true)">ESTRELLA ⭐</button>
                         <button class="btn-val btn-fail" onclick="validateResult(false, false)">ERROR</button>
+                    </div>
+                    <div id="challenger-validation" style="display:none; margin-top:15px;">
+                        <p style="font-family:'Bungee'; color:var(--gold); font-size:0.8em; margin-bottom:8px;">¿QUIÉN APOSTÓ BIEN?</p>
+                        <div id="challenger-buttons" style="display:flex; flex-direction:column; gap:8px;"></div>
                     </div>
                 </div>
                 <div id="host-instructions">CÁMARA...</div>
+                <div id="active-player-inventory" style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-top:15px; padding:10px; background:rgba(255,255,255,0.05); border-radius:10px;"></div>
             </div>
         </div>
     </div>
@@ -215,26 +238,66 @@
     <script>
         var peer, roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
         var ytPlayer, players = [], connections = {}, songs = [], currentSongIdx = -1, activePlayerIdx = 0, isRevealed = false;
-        var activeGuess = null, currentBets = {};
+        var activeGuess = null, currentBets = {}, bettingAgainst = [], bettingFor = [];
+        var isPlaying = false, isMuted = false, muteTimeRemaining = 0, muteIntervalTimer = null;
+        var panicTimer = 0, panicActive = false, panicInterval = null;
+        var joputismoLevel = 0, isFogActive = false, hasShield = {}, duelTriggered = false, currentDuel = null, duelResult = null;
+        var gameMode = 'normal', turnPhase = 'NORMAL', kingOptions = [], gameStarted = false;
+        var cheatsEnabled = true, segundosAcumulados = 0, momentoDeInicio = 0, queuedDuel = null, wakeLock = null;
 
         document.getElementById('join-code').innerText = roomCode;
+
+        function updateTokens(player, delta) {
+            if (!player) return;
+            player.tokens = Math.max(0, Math.min(5, (player.tokens || 0) + delta));
+        }
+
+        function playBuzzerWebAudio() {
+            try { new Audio('https://www.myinstants.com/media/sounds/wrong-answer-buzzer.mp3').play(); } catch(e) {}
+        }
+
+        function playGunshot() {
+            try { new Audio('https://www.myinstants.com/media/sounds/pistol-shot.mp3').play(); } catch(e) {}
+        }
+
+        function playDuelMusic() {
+            var tc = document.getElementById('joputismo-audio-player');
+            if (tc) tc.innerHTML = '<iframe id="duel-iframe" width="1" height="1" src="https://www.youtube-nocookie.com/embed/AFa1-kciCb4?autoplay=1&end=45" allow="autoplay" style="display:none;"></iframe>';
+        }
+
+        function triggerFlash() {
+            var overlay = document.getElementById('flash-overlay');
+            if (overlay) { overlay.classList.remove('animate-flash'); void overlay.offsetWidth; overlay.classList.add('animate-flash'); }
+        }
+
+        function refundBets() {
+            if (bettingAgainst.length > 0) { bettingAgainst.forEach(function(pid){ var p=players.find(pl=>pl.id===pid); if(p) updateTokens(p,1); }); }
+            if (bettingFor.length > 0) { bettingFor.forEach(function(pid){ var p=players.find(pl=>pl.id===pid); if(p) updateTokens(p,1); }); }
+            bettingAgainst = []; bettingFor = [];
+        }
 
         function onYouTubeIframeAPIReady() {
             ytPlayer = new YT.Player('youtube-player', {
                 height: '1', width: '1', videoId: '',
                 playerVars: { 'autoplay': 0, 'controls': 0 },
-                events: { 'onStateChange': onPlayerStateChange }
+                events: { 'onStateChange': onPlayerStateChange, 'onError': function() { handlePlayerCommand('SYSTEM', 'SYSTEM_ERROR_TRACK', null); } }
             });
         }
 
         function onPlayerStateChange(event) {
             if (event.data === YT.PlayerState.PLAYING) {
-                document.getElementById('host-instructions').innerText = "RODANDO...";
+                isPlaying = true;
+                document.getElementById('host-instructions').innerText = isMuted ? "RODANDO (MUTE)" : "RODANDO...";
                 syncState();
-            }
-            if (event.data === YT.PlayerState.ENDED) {
-                document.getElementById('host-instructions').innerText = "CORTE!";
-                setTimeout(nextTurn, 3000);
+            } else if (event.data === YT.PlayerState.PAUSED) {
+                isPlaying = false; syncState();
+            } else if (event.data === YT.PlayerState.ENDED) {
+                if (!isRevealed) {
+                    isPlaying = false;
+                    document.getElementById('host-instructions').innerText = "¡CORTE! ⏰";
+                    setTimeout(nextTurn, 3000);
+                    syncState();
+                }
             }
         }
 
@@ -255,11 +318,14 @@
                             existing.id = conn.peer;
                             connections[conn.peer] = conn;
                         } else {
-                            players.push({ id: conn.peer, name: data.name, avatar: data.avatar, score: 1, cards: [], tokens: 2, wildcards: 3 });
+                            players.push({ id: conn.peer, name: data.name, avatar: data.avatar || null, score: 1, cards: [], tokens: 2, canReload: true, wildcards: 3 });
                             connections[conn.peer] = conn;
                         }
                         updateLobby();
                         syncState();
+                    } else if (data.type === 'AVATAR_UPDATE') {
+                        var existing = players.find(function(p){ return p.name.toLowerCase() === data.name.toLowerCase(); });
+                        if (existing) { existing.avatar = data.avatar; updateLobby(); }
                     } else if (data.type === 'COMMAND') {
                         handlePlayerCommand(conn.peer, data.action, data.value);
                     }
@@ -267,96 +333,579 @@
             });
         }
 
-        function handlePlayerCommand(pid, action, value) {
-            const isMe = players.length > 0 && players[activePlayerIdx].id === pid;
-            if (action === 'PLAY' && isMe) ytPlayer.playVideo();
-            if (action === 'PAUSE' && isMe) ytPlayer.pauseVideo();
-            if (action === 'GUESS' && isMe) { activeGuess = value; syncState(); }
-            if (action === 'BET' && !isMe) { currentBets[pid] = value; syncState(); }
-        }
 
-        function revealData() {
-            isRevealed = true;
-            ytPlayer.pauseVideo();
-            document.getElementById('ui-card-artist').innerText = songs[currentSongIdx].artist;
-            document.getElementById('ui-card-song').innerText = songs[currentSongIdx].song;
-            document.getElementById('ui-card-year').innerText = songs[currentSongIdx].year;
-            document.getElementById('validation-buttons').style.display = 'flex';
-            document.getElementById('btn-reveal-host').style.display = 'none';
-            syncState();
-        }
-
-        function validateResult(success, perfect) {
-            var p = players[activePlayerIdx];
-            if (success) {
-                p.cards.push(songs[currentSongIdx].year);
-                p.cards.sort((a,b) => a-b);
-                p.score = p.cards.length + 1;
-                if (perfect) p.tokens++;
-            }
-            if (p.score >= 12) {
-                document.getElementById('winner-name').innerText = p.name;
-                document.getElementById('winner-screen').style.display = 'flex';
+        function resolveDuel() {
+            if (!currentDuel) return;
+            var s = songs[currentSongIdx];
+            var actualYear = parseInt(s.year);
+            var ch = players.find(p => p.id === currentDuel.challenger);
+            var tg = players.find(p => p.id === currentDuel.target);
+            
+            var chDist = currentDuel.challengerYear !== null ? Math.abs(currentDuel.challengerYear - actualYear) : 999;
+            var tgDist = currentDuel.targetYear !== null ? Math.abs(currentDuel.targetYear - actualYear) : 999;
+            
+            var winnerId = null;
+            if (chDist < tgDist) {
+                winnerId = currentDuel.challenger;
+            } else if (tgDist < chDist) {
+                winnerId = currentDuel.target;
             } else {
+                // Empate en distancia o ambos exactos
+                // Quick Draw: el que tenga el timestamp más bajo gana
+                if (currentDuel.challengerTime < currentDuel.targetTime) {
+                    winnerId = currentDuel.challenger;
+                } else {
+                    winnerId = currentDuel.target;
+                }
+            }
+            
+            var winner = players.find(p => p.id === winnerId);
+            var loser = players.find(p => p.id === (winnerId === (ch ? ch.id : currentDuel.challenger) ? (tg ? tg.id : currentDuel.target) : (ch ? ch.id : currentDuel.challenger)));
+            
+            // Frases cabronas
+            var winnerPhrases = [
+                "¡Felicidades, lumbreras! Hasta un reloj parado acierta dos veces al día.",
+                "Qué potra tienes, chaval. A la próxima no te salva ni la caridad.",
+                "¡Victoria! Aunque con esa cara, dudo que te sirva de mucho.",
+                "Mira cómo brilla... es tu ego, no tu inteligencia."
+            ];
+            var loserPhrases = [
+                "¡Qué ridículo! Mi abuela sorda lo habría hecho mejor.",
+                "A fregar, que para adivinar años no sirves.",
+                "¿En serio? ¿Ese año? Vuelve a la guardería.",
+                "Palizón gitano. A casa a llorar con tu madre."
+            ];
+
+            duelResult = {
+                winnerId: winner.id,
+                loserId: loser.id,
+                winnerMsg: winnerPhrases[Math.floor(Math.random() * winnerPhrases.length)],
+                loserMsg: loserPhrases[Math.floor(Math.random() * loserPhrases.length)]
+            };
+            
+            if (winner && loser) {
+                // Premio: Gana la carta
+                winner.score++;
+                winner.cards.push(actualYear);
+                winner.cards.sort(function(a, b){return a - b});
+                
+                // Robo: 2 fichas al oponente (Capped at 5)
+                var theft = Math.min(loser.tokens, 2);
+                updateTokens(loser, -theft);
+                triggerFlash();
+                updateTokens(winner, theft);
+                
+                document.getElementById('host-instructions').innerHTML = "<span style='color:var(--gold); font-size:1.5em; font-family:Bungee;'>¡" + winner.name + " GANA EL DUELO!</span><br>Robó " + theft + " fichas y se queda la carta.";
+            } else {
+                document.getElementById('host-instructions').innerHTML = "<span style='color:#ff4444; font-size:1.5em; font-family:Bungee;'>EL DUELO QUEDÓ DESIERTO</span>";
+            }
+            document.getElementById('host-instructions').innerHTML += "<br><button class='btn' style='margin-top:10px; padding:10px; font-family:Bungee; background:var(--neon); color:#000;' onclick='finishDuel()'>SIGUIENTE TURNO</button>";
+        }
+
+        function finishDuel() {
+            triggerFlash();
+            turnPhase = 'NORMAL';
+            currentDuel = null;
+            duelTriggered = false;
+            nextTurn();
+        }
+
+        function resolveKingMode(won) {
+            triggerFlash();
+            document.getElementById('host-instructions').innerHTML = "CARGANDO SIGUIENTE FASE...";
+            if (won && activePlayerIdx < players.length) {
+                showWinner(players[activePlayerIdx].name);
+            } else {
+                activePlayerIdx = (activePlayerIdx + 1) % players.length;
+                players[activePlayerIdx].canReload = true;
                 nextTurn();
             }
         }
 
-        function nextTurn() {
-            activePlayerIdx = (activePlayerIdx + 1) % players.length;
-            currentSongIdx++;
-            activeGuess = null; currentBets = {}; isRevealed = false;
-            
-            if (songs[currentSongIdx]) {
-                ytPlayer.loadVideoById(songs[currentSongIdx].id);
-                ytPlayer.pauseVideo();
+        function reportSystemError() {
+            refundBets();
+            var s = songs[currentSongIdx];
+            if (!s || !s.id) return;
+            var newYear = prompt("ERROR EN DATOS: " + s.artist + " - " + s.song + "\nIntroduce el AÑO CORRECTO para registro:");
+            if (newYear) {
+                var recipient = "xavi.rifa@gmail.com";
+                var subject = "CORRECCION CHRONOBEATS: Fila " + s.line;
+                var body = "DETECTADO ERROR EN LISTA\n\n" +
+                    "Fila: " + s.line + "\n" +
+                    "Artista: " + s.artist + "\n" +
+                    "Canción: " + s.song + "\n" +
+                    "Año en TXT: " + s.year + "\n" +
+                    "Año Correcto: " + newYear + "\n\n" +
+                    "Instrucciones: Abrir lista_final.txt en la fila " + s.line + " y corregir el año.";
+
+                var mailtoUrl = "mailto:" + recipient + "?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
+
+                console.log("!!! ERROR DE SISTEMA DETECTADO !!!");
+                console.log("Referencia: " + s.artist + " - " + s.song + " (Fila " + s.line + ")");
+                console.log("Corrección: " + s.year + " -> " + newYear);
+
+                window.location.href = mailtoUrl;
+                alert("¡Error registrado! Se ha preparado un email para " + recipient + ".\nSe descarta esta canción y repites el turno.");
+            }
+            if (turnPhase === 'KING_GUESS' || turnPhase === 'KING_GUESS_RESULT' || turnPhase === 'KING_SELECTION') {
+                activePlayerIdx--;
+                if (activePlayerIdx < 0) activePlayerIdx = players.length - 1;
+            }
+            nextTurn();
+        }
+
+        async function requestWakeLock() { try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch (err) {} }
+
+
+        function handlePlayerCommand(pid, action, value) {
+            var activeP = players[activePlayerIdx];
+            var isMe = activeP && activeP.id === pid;
+            switch(action) {
+                case 'PLAY':
+                    if (!isMe) return;
+                    if (!isPlaying && ytPlayer) { ytPlayer.playVideo(); if(isMuted) ytPlayer.mute(); else ytPlayer.unMute(); isPlaying = true; document.getElementById('host-instructions').innerText = "RODANDO..."; syncState(); }
+                    break;
+                case 'PAUSE':
+                    if (!isMe) return;
+                    if (isPlaying && ytPlayer) { ytPlayer.pauseVideo(); isPlaying = false; document.getElementById('host-instructions').innerText = "PAUSADO"; syncState(); }
+                    break;
+                case 'STOP':
+                    if (!isMe) return;
+                    isPlaying = false; if(ytPlayer) ytPlayer.stopVideo();
+                    document.getElementById('host-instructions').innerText = "¿ACERTÓ?";
+                    revealData(); syncState();
+                    break;
+                case 'SKIP':
+                    if (!isMe) return;
+                    if(ytPlayer && ytPlayer.getCurrentTime) ytPlayer.seekTo(ytPlayer.getCurrentTime() + (value||10), true);
+                    break;
+                case 'GUESS':
+                    if (!isMe || activeGuess !== null) return;
+                    activeGuess = parseInt(value); syncState();
+                    break;
+                case 'BET':
+                    var pBet = players.find(function(x){ return x.id === pid; });
+                    var valNum = parseInt(value);
+                    if (pBet && pBet.id !== activeP.id && pBet.tokens >= 1 && currentBets[pid] === undefined && activeGuess !== null) {
+                        updateTokens(pBet, -1); currentBets[pid] = valNum; syncState();
+                    }
+                    break;
+                case 'BET_FOR_ACTIVE':
+                    var pFor = players.find(function(x){ return x.id === pid; });
+                    if(pFor && pFor.tokens >= 1 && !bettingFor.includes(pid) && !bettingAgainst.includes(pid)){ updateTokens(pFor,-1); bettingFor.push(pid); syncState(); }
+                    break;
+                case 'BET_AGAINST_ACTIVE':
+                    var pAg = players.find(function(x){ return x.id === pid; });
+                    if(pAg && pAg.tokens >= 1 && !bettingAgainst.includes(pid) && !bettingFor.includes(pid)){ updateTokens(pAg,-1); bettingAgainst.push(pid); syncState(); }
+                    break;
+                case 'SABOTAGE_MUTE':
+                    if(hasShield[activeP.id]){ var ps=players.find(function(x){return x.id===pid;}); if(ps && connections[ps.id]) try{connections[ps.id].send({type:'BET_RESULT',msg:"¡ESCUDO! El sabotaje ha rebotado."});}catch(e){} hasShield[activeP.id]=false; syncState(); break; }
+                    var pMute = players.find(function(x){ return x.id===pid; });
+                    if(pMute && pMute.tokens>=1 && pMute.id!==activeP.id && isPlaying){
+                        updateTokens(pMute,-1); muteTimeRemaining+=15000;
+                        if(!isMuted){ isMuted=true; if(ytPlayer) ytPlayer.mute(); document.getElementById('host-instructions').innerText="RODANDO (MUTE)";
+                            muteIntervalTimer=setInterval(function(){ if(isPlaying) muteTimeRemaining-=1000; if(muteTimeRemaining<=0){clearInterval(muteIntervalTimer);muteIntervalTimer=null;muteTimeRemaining=0;if(isMuted&&isPlaying){isMuted=false;if(ytPlayer)ytPlayer.unMute();document.getElementById('host-instructions').innerText="RODANDO...";syncState();}} },1000); }
+                        syncState();
+                    }
+                    break;
+                case 'SABOTAGE_BUZZER':
+                    var pBuzz=players.find(function(x){return x.id===pid;}); if(pBuzz&&pBuzz.tokens>=1&&pBuzz.id!==activeP.id&&isPlaying){updateTokens(pBuzz,-1);playBuzzerWebAudio();syncState();}
+                    break;
+                case 'SABOTAGE_PANIC':
+                    var pPanic=players.find(function(x){return x.id===pid;});
+                    if(pPanic&&pPanic.id!==activeP.id&&pPanic.tokens>=2&&!panicActive&&isPlaying){
+                        updateTokens(pPanic,-2);panicActive=true;panicTimer=10;
+                        panicInterval=setInterval(function(){panicTimer--;if(panicTimer<=0){clearInterval(panicInterval);panicActive=false;if(ytPlayer)ytPlayer.stopVideo();revealData();}syncState();},1000);
+                        syncState();
+                    }
+                    break;
+                case 'SABOTAGE_FOG':
+                    var pFog=players.find(function(x){return x.id===pid;});
+                    if(pFog&&pFog.id!==activeP.id&&pFog.tokens>=2&&!isFogActive&&turnPhase==='NORMAL'){updateTokens(pFog,-2);isFogActive=true;syncState();}
+                    break;
+                case 'SABOTAGE_VETO':
+                    var pVeto=players.find(function(x){return x.id===pid;});
+                    if(pVeto&&pVeto.id!==activeP.id&&pVeto.tokens>=1&&activeGuess!==null&&!isRevealed){
+                        updateTokens(pVeto,-1); activeGuess=null;
+                        if(connections[pid]) try{connections[pid].send({type:'BET_RESULT',msg:"¡VETO! Le has bloqueado la adivinanza. Tiene que volver a elegir."});}catch(e){}
+                        if(connections[activeP.id]) try{connections[activeP.id].send({type:'BET_RESULT',msg:"¡VETADO! Tienes que volver a elegir posición."});}catch(e){}
+                        syncState();
+                    }
+                    break;
+                case 'SABOTAGE_FORCE_SKIP':
+                    var pSkip=players.find(function(x){return x.id===pid;});
+                    if(pSkip&&pSkip.id!==activeP.id&&pSkip.tokens>=3){updateTokens(pSkip,-3);refundBets();nextTurn();}
+                    break;
+                case 'SABOTAGE_RUSSIAN_ROULETTE':
+                    var pRR=players.find(function(x){return x.id===pid;});
+                    if(pRR&&pRR.tokens>=2&&turnPhase==='NORMAL'){
+                        updateTokens(pRR,-2);playGunshot();triggerFlash();
+                        var others=players.filter(function(x){return x.id!==pRR.id;});
+                        var target=others.length>0?others[Math.floor(Math.random()*others.length)]:null;
+                        var res=Math.floor(Math.random()*4);
+                        if(res===0&&target&&target.cards&&target.cards.length>0){var card=target.cards.pop();pRR.cards.push(card);}
+                        else if(res===1&&target&&target.tokens>0){updateTokens(target,-1);updateTokens(pRR,1);}
+                        else if(res===2){updateTokens(pRR,-1);}
+                        else if(res===3){updateTokens(pRR,-2);}
+                        syncState();
+                    }
+                    break;
+                case 'SABOTAGE_STEAL_TOKEN':
+                    var pST=players.find(function(x){return x.id===pid;});
+                    if(pST&&pST.tokens>=4&&activeP&&activeP.tokens>0){updateTokens(pST,-4);updateTokens(activeP,-1);updateTokens(pST,1);syncState();}
+                    break;
+                case 'SABOTAGE_STEAL_TURN':
+                    var pSTurn=players.find(function(x){return x.id===pid;});
+                    if(pSTurn&&pSTurn.tokens>=4&&!isRevealed){updateTokens(pSTurn,-4);activePlayerIdx=players.indexOf(pSTurn);activeGuess=null;currentBets={};bettingAgainst=[];bettingFor=[];document.getElementById('ui-current-player').innerText=pSTurn.name;syncState();}
+                    break;
+                case 'SABOTAGE_BLACKHOLE':
+                    var pBH=players.find(function(x){return x.id===pid;});
+                    if(pBH&&pBH.tokens>=5){updateTokens(pBH,-5);if(activeP&&activeP.cards&&activeP.cards.length>0){activeP.cards.pop();}syncState();}
+                    break;
+                case 'SABOTAGE_DUEL':
+                    var pD=players.find(function(x){return x.id===pid;});
+                    if(pD&&pD.tokens>=3&&!duelTriggered){updateTokens(pD,-3);duelTriggered=true;turnPhase='DUEL';currentDuel={challenger:pD.id,target:activeP.id,challengerYear:null,targetYear:null,challengerTime:0,targetTime:0};if(ytPlayer)ytPlayer.stopVideo();playGunshot();syncState();}
+                    break;
+                case 'DUEL_GUESS':
+                    if(currentDuel){
+                        playGunshot();
+                        if(pid===currentDuel.challenger){currentDuel.challengerYear=parseInt(value);currentDuel.challengerTime=Date.now();}
+                        else if(pid===currentDuel.target){currentDuel.targetYear=parseInt(value);currentDuel.targetTime=Date.now();}
+                        if(currentDuel.challengerYear!==null&&currentDuel.targetYear!==null) revealData();
+                        syncState();
+                    }
+                    break;
+                case 'MARKET_SHIELD':
+                    var pMSh=players.find(function(x){return x.id===pid;});
+                    if(pMSh&&pMSh.tokens>=3){updateTokens(pMSh,-3);hasShield[pid]=true;syncState();}
+                    break;
+                case 'MARKET_WILDCARD':
+                    var pMW=players.find(function(x){return x.id===pid;});
+                    if(pMW&&pMW.id===activeP.id&&pMW.wildcards>0){
+                        pMW.wildcards--;
+                        if(value==='artist') document.getElementById('ui-card-artist').innerText=songs[currentSongIdx].artist;
+                        else document.getElementById('ui-card-song').innerText=songs[currentSongIdx].song;
+                        syncState();
+                    }
+                    break;
+                case 'RELOAD_SONG':
+                    var pRL=players.find(function(x){return x.id===pid;});
+                    if(pRL&&pRL.tokens>=1&&pRL.canReload){updateTokens(pRL,-1);pRL.canReload=false;refundBets();nextTurn();}
+                    break;
+                case 'AUTO_WIN':
+                    var pAW=players.find(function(x){return x.id===pid;});
+                    if(pAW&&pAW.tokens>=3){updateTokens(pAW,-3);validateResult(true,false);}
+                    break;
+                case 'SYSTEM_ERROR_TRACK':
+                    refundBets(); isPlaying=false; if(ytPlayer)ytPlayer.stopVideo();
+                    currentSongIdx++;
+                    isRevealed=false; document.getElementById('ui-card-artist').innerText='????'; document.getElementById('ui-card-song').innerText='????'; document.getElementById('ui-card-year').innerText='????';
+                    document.getElementById('btn-reveal-host').style.display='block'; document.getElementById('validation-buttons').style.display='none';
+                    document.getElementById('host-instructions').innerText='VÍDEO ROTO. CANCIÓN CAMBIADA.';
+                    if(ytPlayer&&songs[currentSongIdx]){ytPlayer.loadVideoById({videoId:songs[currentSongIdx].id,startSeconds:0});ytPlayer.stopVideo();}
+                    syncState();
+                    break;
+                case 'TOGGLE_CHEAT':
+                    cheatsEnabled=!cheatsEnabled; syncState();
+                    break;
+            }
+        }
+
+        function isSlotCorrect(idx, year, cards) {
+            year = parseInt(year);
+            if (cards.length === 0) return true;
+            if (idx === 0) return year <= parseInt(cards[0]);
+            if (idx === cards.length) return year >= parseInt(cards[cards.length - 1]);
+            return year >= parseInt(cards[idx - 1]) && year <= parseInt(cards[idx]);
+        }
+
+        function revealData() {
+            isRevealed = true;
+            if(ytPlayer) ytPlayer.pauseVideo();
+            var s = songs[currentSongIdx];
+            document.getElementById('ui-card-artist').innerText = s.artist;
+            document.getElementById('ui-card-song').innerText = s.song;
+            document.getElementById('ui-card-year').innerText = s.year;
+            document.getElementById('btn-reveal-host').style.display = 'none';
+
+            if (turnPhase === 'DUEL') {
+                resolveDuel();
+                return;
             }
 
+            var isCorrect = activeGuess !== null && isSlotCorrect(activeGuess, parseInt(s.year), players[activePlayerIdx].cards);
+            document.getElementById('validation-buttons').style.display = 'flex';
+            document.getElementById('host-instructions').innerText = isCorrect ? "¡CORRECTO!" : "FALLO!";
+            syncState();
+        }
+
+        function validateResult(isCardOk, isTokenOk) {
+            var p = players[activePlayerIdx];
+            if (isTokenOk) updateTokens(p, 1);
+            // RESOLVER APUESTAS "NI DE COÑA" y "ESTOY CONTIGO"
+            if ((bettingAgainst && bettingAgainst.length > 0) || (bettingFor && bettingFor.length > 0)) {
+                if (isCardOk) {
+                    // El jugador activo ACIERTA: los que apostaron en contra pierden. los que apostaron a favor ganan.
+                    var losesPhrases = [
+                        "Has dudado de un puto experto... y has perdido.",
+                        "¿Ni de coña? Ni de coña vas a recuperar esa ficha, pringao.",
+                        "Para la próxima te callas. El maestro sabe lo que hace.",
+                        "A llorar a la llorería. Esa ficha es historia.",
+                        "Has apostado contra Dios y te has quemado.",
+                        "¿Te creías muy listo, eh? Pues toma zasca en toda la boca.",
+                        "Poca fe para tanta ignorancia. Ficha perdida.",
+                        "Silencio en la sala. Ha hablado el puto amo del tiempo.",
+                        "Tu envidia alimenta su victoria. Menos 1 ficha para ti.",
+                        "¿En serio pensabas que iba a fallar? Qué pardillo.",
+                        "Nunca apuestes contra el jefe, novato.",
+                        "Te has comido el amago entero. Despídete de la ficha.",
+                        "Mucha boquita pero poca ficha te queda.",
+                        "Con esa intuición de mierda normal que pierdas fichas.",
+                        "Vaya patinazo. Esa masterclass te ha costado una ficha.",
+                        "Has ido a por lana y has salido trasquilado.",
+                        "Te ha retratado. Sigue mirando y aprende.",
+                        "Ni de coña tienes tú tanto nivel. Ficha al pozo.",
+                        "Acaso pensabas que dudar del amo del juego te iba a salir gratis?",
+                        "Te pones chulito y te quedas sin blanca. Clásico.",
+                        "Esa ficha era tuya, ahora es solo un mal recuerdo.",
+                        "¿Querías sangre? Toma dos tazas de humillación.",
+                        "Le has tirado un órdago y te ha sacado la chorra.",
+                        "El rey no se mancha las manos con plebeyos como tú.",
+                        "Has tropezado con la piedra de su sabiduría.",
+                        "Ficha denegada por listillo. A tu cueva.",
+                        "Te la ha clavado por la escuadra. A pastar.",
+                        "Tu intento de sabotaje da más pena que otra cosa.",
+                        "Otra fichita pal bote. Gracias por la donación, pringao.",
+                        "Te iba a devolver la ficha por pena, pero mejor me la quedo.",
+                        "Cárgate de paciencia, porque de fichas vas justito.",
+                        "El oráculo musical ataca de nuevo. Tú agacha la cabeza.",
+                        "Ni con un DeLorean aciertas tú tantas veces. Asúmelo.",
+                        "Ojo al dato: acabas de perder una ficha contra el mejor.",
+                        "Sigue apostando en contra, a ver si así te arruinas antes.",
+                        "Dudar de un dios solo trae castigos divinos en forma de fichas.",
+                        "¿Te sobra el dinero? Porque las fichas azules parece que las regalas.",
+                        "Has intentado hacerle el lío al máster y has cobrado tú.",
+                        "Por favor, un aplauso para el que acaba de perder otra ficha absurda.",
+                        "El rey manda, tú pagas la entrada al espectáculo.",
+                        "La próxima vez guarda la ficha, que igual te hace falta para no dar pena.",
+                        "Que ponga la música y tú pones las fichas perdidas. Trato justo."
+                    ];
+                    if (bettingAgainst) {
+                        bettingAgainst.forEach(function (pid) {
+                            if (connections[pid]) {
+                                var msg = losesPhrases[Math.floor(Math.random() * losesPhrases.length)];
+                                connections[pid].send({ type: 'BET_RESULT', msg: "JAJAJAJA...\n\n" + msg });
+                            }
+                        });
+                    }
+                    if (bettingFor) {
+                        bettingFor.forEach(function (pid) {
+                            var p = players.find(x => x.id === pid);
+                            if (p) {
+                                updateTokens(p, 2);
+                                if (connections[pid]) {
+                                    connections[pid].send({ type: 'BET_RESULT', msg: "¡SABÍAS QUE IBA A ACERTAR Y HAS GANADO!\n\nRecompensa: +2 FICHAS AZULES." });
+                                }
+                            }
+                        });
+                    }
+                } else {
+                    // El jugador activo FALLA: los que apostaron en contra ganan. los que apostaron a favor pierden.
+                    if (bettingAgainst) {
+                        bettingAgainst.forEach(function (pid) {
+                            var p = players.find(x => x.id === pid);
+                            if (p) {
+                                updateTokens(p, 2);
+                                if (connections[pid]) {
+                                    connections[pid].send({ type: 'BET_RESULT', msg: "¡SABÍAS QUE IBA A FALLAR Y HAS GANADO!\n\nRecompensa: +2 FICHAS AZULES." });
+                                }
+                            }
+                        });
+                    }
+                    if (bettingFor) {
+                        var losesPhrasesFor = [
+                            "Confiaste en un inútil y has pagado el pato.",
+                            "Tanta fe para nada. Menudo patinazo.",
+                            "Ni estando contigo logra acertar. Ficha perdida.",
+                            "Has apostado al caballo perdedor.",
+                            "Qué mala vista tienes para elegir aliados."
+                        ];
+                        bettingFor.forEach(function (pid) {
+                            if (connections[pid]) {
+                                var msg = losesPhrasesFor[Math.floor(Math.random() * losesPhrasesFor.length)];
+                                connections[pid].send({ type: 'BET_RESULT', msg: "JAJAJAJA...\n\n" + msg });
+                            }
+                        });
+                    }
+                }
+            }
+
+            if (isCardOk) {
+                p.score++;
+                p.cards.push(parseInt(songs[currentSongIdx].year));
+                p.cards.sort(function(a,b){ return parseInt(a)-parseInt(b); });
+                if (p.score >= 10 && gameMode === 'normal') { showWinner(p.name); return; }
+                activePlayerIdx = (activePlayerIdx + 1) % players.length;
+                players[activePlayerIdx].canReload = true;
+                nextTurn();
+            } else {
+                var challengersExist = Object.keys(currentBets).length > 0;
+                var anyChallengerCorrect = false;
+                for (var pid in currentBets) {
+                    if (isSlotCorrect(currentBets[pid], songs[currentSongIdx].year, p.cards)) anyChallengerCorrect = true;
+                }
+                if (challengersExist && anyChallengerCorrect) {
+                    document.getElementById('host-instructions').innerText = "VAMOS A LAS APUESTAS...";
+                    document.getElementById('validation-buttons').style.display = 'none';
+                    document.getElementById('challenger-validation').style.display = 'block';
+                    var h = "";
+                    for (var pid in currentBets) {
+                        var cp = players.find(function(x){ return x.id === pid; });
+                        var slotOk = isSlotCorrect(currentBets[pid], songs[currentSongIdx].year, p.cards);
+                        if (cp && slotOk) h += '<button class="btn-val" style="background:var(--gold);color:#000;border:2px solid #00ff00;" onclick="awardToChallenger(\''+pid+'\')">'+cp.name+' GANÓ ✅</button>';
+                        else if (cp) h += '<button class="btn-val" style="background:#555;color:#888;cursor:not-allowed;" disabled>'+cp.name+' FALLÓ ❌</button>';
+                    }
+                    document.getElementById('challenger-buttons').innerHTML = h;
+                } else {
+                    activePlayerIdx = (activePlayerIdx + 1) % players.length;
+                    players[activePlayerIdx].canReload = true;
+                    nextTurn();
+                }
+            }
+        }
+
+        function awardToChallenger(pid) {
+            var cp = players.find(function(x){ return x.id === pid; });
+            if (cp) {
+                cp.score++;
+                cp.cards.push(parseInt(songs[currentSongIdx].year));
+                cp.cards.sort(function(a,b){ return parseInt(a)-parseInt(b); });
+                if (cp.score >= 10 && gameMode === 'normal') { showWinner(cp.name); return; }
+            }
+            activePlayerIdx = (activePlayerIdx + 1) % players.length;
+            players[activePlayerIdx].canReload = true;
+            nextTurn();
+        }
+
+        function showWinner(name) {
+            document.getElementById('winner-name').innerText = name;
+            var winner = players.find(function(p){ return p.name === name; });
+            var avatarHtml = winner && winner.avatar ? '<img src="'+winner.avatar+'" style="width:150px;height:150px;border-radius:50%;border:4px solid var(--neon);">' : (name ? name.charAt(0) : '?');
+            document.getElementById('winner-avatar-img').innerHTML = avatarHtml;
+            document.getElementById('winner-screen').style.display = 'flex';
+            if (typeof confetti === 'function') confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+        }
+
+        function nextTurn() {
+            turnPhase = 'NORMAL'; currentDuel = null; duelResult = null; isRevealed = false; isPlaying = false;
+            currentSongIdx++;
+            currentBets = {}; activeGuess = null; bettingAgainst = []; bettingFor = [];
+            isMuted = false; muteTimeRemaining = 0; if(muteIntervalTimer){clearInterval(muteIntervalTimer);muteIntervalTimer=null;}
+            panicActive = false; panicTimer = 0; if(panicInterval){clearInterval(panicInterval);panicInterval=null;}
+            isFogActive = false;
+            var tc = document.getElementById('joputismo-audio-player'); if(tc) tc.innerHTML='';
+            document.getElementById('challenger-validation').style.display = 'none';
+
+            var s = songs[currentSongIdx];
             document.getElementById('ui-card-artist').innerText = "????";
             document.getElementById('ui-card-song').innerText = "????";
             document.getElementById('ui-card-year').innerText = "????";
-            document.getElementById('validation-buttons').style.display = 'none';
             document.getElementById('btn-reveal-host').style.display = 'block';
+            document.getElementById('val-card-ui').style.display = 'block';
+            document.getElementById('validation-buttons').style.display = 'none';
             document.getElementById('ui-current-player').innerText = players[activePlayerIdx].name;
+            document.getElementById('host-instructions').innerText = "ESPERANDO ACCIÓN...";
+            if (ytPlayer && s) { ytPlayer.loadVideoById({ videoId: s.id, startSeconds: 0 }); ytPlayer.stopVideo(); }
             syncState();
         }
 
         function syncState() {
-            players.forEach(p => {
-                if (connections[p.id]) {
-                    connections[p.id].send({
-                        type: 'STATE_UPDATE',
-                        leader: players.reduce((prev, curr) => (prev.score > curr.score) ? prev : curr, players[0]),
-                        activePlayer: { id: players[activePlayerIdx].id, name: players[activePlayerIdx].name },
-                        myCards: p.cards, myTokens: p.tokens, myWildcards: p.wildcards,
-                        activeTimeline: players[activePlayerIdx].cards,
-                        revealed: isRevealed,
-                        currentTrack: isRevealed ? songs[currentSongIdx] : { artist: '???', song: '???', year: '???' },
-                        activeGuess: activeGuess, currentBets: currentBets, isPlaying: true
-                    });
-                }
-            });
+            var leaderName = "---", leaderScore = 0;
+            if (players.length > 0) {
+                var leader = players.reduce(function(prev, curr){ return prev.score > curr.score ? prev : curr; });
+                leaderName = leader.name; leaderScore = leader.score;
+            }
+            for (var id in connections) {
+                var p = players.find(function(px){ return px.id.toLowerCase() === id.toLowerCase(); });
+                var state = {
+                    type: 'STATE_UPDATE',
+                    players: players,
+                    activePlayer: { id: players[activePlayerIdx] ? players[activePlayerIdx].id : null, name: players[activePlayerIdx] ? players[activePlayerIdx].name : null },
+                    leader: { name: leaderName, score: leaderScore },
+                    currentTrack: songs[currentSongIdx],
+                    revealed: isRevealed,
+                    isPlaying: isPlaying,
+                    isMuted: isMuted,
+                    muteTimeRemaining: muteTimeRemaining,
+                    panicActive: panicActive,
+                    panicTimer: panicTimer,
+                    isFogActive: isFogActive,
+                    joputismoLevel: joputismoLevel,
+                    bettingAgainst: bettingAgainst,
+                    bettingFor: bettingFor,
+                    myCards: p ? p.cards : [],
+                    myTokens: p ? p.tokens : 0,
+                    myWildcards: p && p.wildcards !== undefined ? p.wildcards : 3,
+                    canReload: p ? p.canReload : false,
+                    activeTimeline: players[activePlayerIdx] ? players[activePlayerIdx].cards : [],
+                    currentBets: currentBets,
+                    activeGuess: activeGuess,
+                    currentDuel: currentDuel,
+                    duelResult: duelResult,
+                    kingOptions: kingOptions,
+                    cheatsEnabled: cheatsEnabled,
+                    turnPhase: turnPhase,
+                    hasShield: hasShield,
+                    duelTriggered: duelTriggered,
+                    gameStarted: document.getElementById('lobby').style.display === 'none'
+                };
+                try { if (connections[id] && connections[id].open) connections[id].send(state); } catch(e) {}
+            }
             updateLeaderboard();
         }
 
         function updateLeaderboard() {
-            let h = "";
-            [...players].sort((a,b) => b.score - a.score).forEach(p => h += `<div class="player-tag">${p.name}: ${p.score}</div>`);
+            var h = "";
+            var sorted = players.slice().sort(function(a,b){ return b.score - a.score; });
+            sorted.forEach(function(p) {
+                var activeCls = players[activePlayerIdx] && p.id === players[activePlayerIdx].id ? 'active' : '';
+                h += '<div class="leader-item '+activeCls+'"><span>'+p.name+'</span><span>'+p.score+' pts</span></div>';
+            });
             document.getElementById('leaderboard-list').innerHTML = h;
+            var invH = "";
+            if (players[activePlayerIdx]) players[activePlayerIdx].cards.forEach(function(y){ invH += '<div class="mini-card">'+(isFogActive?'????':y)+'</div>'; });
+            var inv = document.getElementById('active-player-inventory');
+            if (inv) inv.innerHTML = invH;
+            var timelinesHtml = "";
+            players.forEach(function(p) {
+                timelinesHtml += '<div class="player-row"><div style="font-size:0.6em;color:#888;">'+p.name+'</div><div class="slots">';
+                for (var k = 0; k < 10; k++) timelinesHtml += '<div class="slot '+(p.cards[k]?'filled':'')+'">'+(p.cards[k]?(isFogActive?'????':p.cards[k]):'')+'</div>';
+                timelinesHtml += '</div></div>';
+            });
+            document.getElementById('global-timelines').innerHTML = timelinesHtml;
         }
 
         function updateLobby() {
-            let h = "";
-            players.forEach(p => h += `<div class="player-tag">${p.name}</div>`);
+            var h = "";
+            players.forEach(function(p){ h += '<div class="player-tag">'+p.name+'</div>'; });
             document.getElementById('lobby-players').innerHTML = h;
             if (players.length > 0) document.getElementById('start-btn').style.display = 'block';
         }
 
         function startGame() {
+            requestWakeLock();
+            gameMode = document.getElementById('game-mode-select') ? document.getElementById('game-mode-select').value : 'normal';
+            players.forEach(function(p) {
+                currentSongIdx++;
+                if (songs[currentSongIdx]) p.cards.push(songs[currentSongIdx].year);
+            });
             document.getElementById('lobby').style.display = 'none';
             document.getElementById('dashboard').style.display = 'grid';
+            gameStarted = true;
             nextTurn();
         }
+
+        function setJoputismo(l) { joputismoLevel = parseInt(l); syncState(); }
 
         fetch('lista_final_pelis.txt?v=' + new Date().getTime()).then(r => r.text()).then(t => {
             songs = t.split('\n').filter(l => l.trim() !== '').map(l => {

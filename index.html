@@ -11,10 +11,20 @@
             --neon: #00f2fe;
             --gold: #ffaa00;
             --accent: #ff0055;
+            --glass: rgba(15, 15, 15, 0.5);
+            --glass-border: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0.2) 100%);
+            --aurora-1: hsla(180, 100%, 20%, 0.35);
+            --aurora-2: hsla(280, 100%, 20%, 0.35);
+            --aurora-3: hsla(220, 100%, 20%, 0.35);
         }
 
         body {
-            background: var(--bg);
+            background: #020202 !important;
+            background-image: 
+                radial-gradient(circle at 20% 30%, var(--aurora-1), transparent 40%),
+                radial-gradient(circle at 80% 70%, var(--aurora-2), transparent 40%),
+                radial-gradient(circle at 50% 50%, var(--aurora-3), transparent 60%) !important;
+            background-attachment: fixed !important;
             color: #fff;
             font-family: 'Montserrat', sans-serif;
             margin: 0;
@@ -25,6 +35,22 @@
             min-height: 100vh;
             overflow-x: hidden;
             overflow-y: auto;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.4) 100%);
+            animation: aurora-orbit 30s linear infinite;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        @keyframes aurora-orbit {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
 
         .hub-title {
@@ -52,8 +78,11 @@
         .game-card {
             flex: 0 0 230px;
             height: 360px;
-            background: #111;
+            background: var(--glass);
+            backdrop-filter: blur(25px) saturate(200%);
+            -webkit-backdrop-filter: blur(25px) saturate(200%);
             border: 2px solid #333;
+            border-image: var(--glass-border) 1;
             border-radius: 20px;
             display: flex;
             flex-direction: column;
@@ -64,55 +93,6 @@
             position: relative;
             overflow: hidden;
             text-align: center;
-        }
-
-        @keyframes shine {
-            from { transform: translateX(-100%); }
-            to { transform: translateX(100%); }
-        }
-
-        /* --- ELITE-PREMIUM UI V1.6: AURORA & TEXTURE --- */
-        :root {
-            --glass: rgba(15, 15, 15, 0.5);
-            --glass-border: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0.2) 100%);
-            --aurora-1: hsla(180, 100%, 20%, 0.35);
-            --aurora-2: hsla(280, 100%, 20%, 0.35);
-            --aurora-3: hsla(220, 100%, 20%, 0.35);
-        }
-
-        body {
-            background: #020202 !important;
-            background-image: 
-                radial-gradient(circle at 20% 30%, var(--aurora-1), transparent 40%),
-                radial-gradient(circle at 80% 70%, var(--aurora-2), transparent 40%),
-                radial-gradient(circle at 50% 50%, var(--aurora-3), transparent 60%) !important;
-            background-attachment: fixed !important;
-            position: relative;
-            overflow-x: hidden;
-        }
-
-        body::before {
-            content: "";
-            position: fixed;
-            top: -50%; left: -50%; width: 200%; height: 200%;
-            background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.4) 100%);
-            animation: aurora-orbit 30s linear infinite;
-            z-index: -1;
-            pointer-events: none;
-        }
-
-        @keyframes aurora-orbit {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        /* Glass Grain Texture */
-        .game-card, .btn, #custom-alert > div, #custom-confirm > div {
-            background: var(--glass);
-            backdrop-filter: blur(25px) saturate(200%);
-            -webkit-backdrop-filter: blur(25px) saturate(200%);
-            border-image: var(--glass-border) 1;
-            position: relative;
             box-shadow: 0 15px 35px rgba(0,0,0,0.5);
             box-sizing: border-box;
         }
@@ -127,6 +107,11 @@
             pointer-events: none;
             mix-blend-mode: overlay;
             border-radius: inherit;
+        }
+
+        @keyframes shine {
+            from { transform: translateX(-100%); }
+            to { transform: translateX(100%); }
         }
 
         /* Bokeh Particles */
@@ -195,7 +180,7 @@
         .card-anime .card-logo {
             font-family: 'Shojumaru';
             text-shadow: 0 0 15px #ff00ff;
-            font-size: 2.2em; /* Aumentado un punto según petición */
+            font-size: 2.2em;
         }
 
         .card-anime .card-sub {
@@ -243,18 +228,21 @@
             color: #bf00ff;
             box-shadow: 0 0 20px rgba(191, 0, 255, 0.1);
         }
+
         .card-games:hover {
             box-shadow: 0 10px 40px rgba(191, 0, 255, 0.4), inset 0 0 20px rgba(191, 0, 255, 0.2);
             background: rgba(191, 0, 255, 0.05);
             border-color: #bf00ff;
         }
+
         .card-games .card-logo {
             font-family: 'Press Start 2P';
-            font-size: 2.0em; /* Reducido un punto según petición */
+            font-size: 2.0em;
             text-shadow: 0 0 15px #bf00ff;
         }
+
         .card-games .card-sub {
-            font-size: 0.42em; /* Reducido proporcionalmente */
+            font-size: 0.42em;
         }
 
         @media (max-width: 768px) {
@@ -288,8 +276,7 @@
                 font-size: 2.2em;
             }
         }
-    
-</style>
+    </style>
 </head>
 
 <body>

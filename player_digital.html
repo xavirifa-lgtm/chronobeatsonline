@@ -364,6 +364,7 @@
     <script>
         var peer, conn, myId, playerName, lastState;
         var playerAvatarDataUrl = null;
+        var sabotageCooldowns = {};
 
         window.addEventListener('load', () => {
             document.getElementById('player-name').value = localStorage.getItem('cb_player_name') || '';
@@ -397,22 +398,60 @@
             reader.readAsDataURL(file);
         }
 
+        function status(msg) {
+            const btn = document.getElementById('join-btn');
+            if (btn) btn.innerText = msg;
+            console.log("PeerStatus:", msg);
+        }
+
         function conectar() {
             var hostId = document.getElementById('host-id').value.toUpperCase().trim();
             playerName = document.getElementById('player-name').value.trim();
             if(!hostId || !playerName) return alert("FALTAN DATOS");
             localStorage.setItem('cb_player_name', playerName);
-            document.getElementById('join-btn').disabled = true;
-            document.getElementById('join-btn').innerText = "...";
-            peer = new Peer({ debug: 3, host: '0.peerjs.com', port: 443, secure: true, path: '/', pingInterval: 5000, config: { 'iceServers': [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' }] } });
+            const btn = document.getElementById('join-btn');
+            btn.disabled = true;
+            status("1/3: Peer...");
+            peer = new Peer({
+                debug: 3, host: '0.peerjs.com', port: 443, secure: true, path: '/', pingInterval: 5000,
+                config: { 'iceServers': [
+                    { urls: 'stun:stun.l.google.com:19302' },
+                    { urls: 'stun:stun1.l.google.com:19302' },
+                    { urls: 'stun:stun2.l.google.com:19302' },
+                    { urls: 'stun:global.stun.twilio.com:3478' },
+                    { urls: 'stun:stun.cloudflare.com:3478' },
+                    { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
+                    { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' },
+                    { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' }
+                ]}
+            });
             peer.on('open', (id) => {
-                myId = id; conn = peer.connect("CB-HOST-" + hostId);
+                myId = id;
+                status("2/3: Buscando...");
+
+                const connectTimeout = setTimeout(() => {
+                    if (peer) peer.destroy();
+                    alert("¡TIEMPO AGOTADO! La conexión no se abrió tras 20s.");
+                    location.reload();
+                }, 20000);
+
+                conn = peer.connect("CB-HOST-" + hostId);
                 conn.on('open', () => {
+                    clearTimeout(connectTimeout);
+                    status("3/3: Entrando...");
                     conn.send({ type: 'JOIN', name: playerName, avatar: playerAvatarDataUrl });
                     document.getElementById('login-screen').style.display = 'none';
                     document.getElementById('game-screen').style.display = 'flex';
                 });
                 conn.on('data', handle);
+                conn.on('error', (err) => {
+                    alert("Error de Conexión: " + err);
+                    btn.disabled = false; status("REINTENTAR");
+                });
+            });
+            peer.on('error', (err) => {
+                alert("Error de Red: " + err.type);
+                btn.disabled = false; status("REINTENTAR");
             });
         }
 
@@ -435,7 +474,7 @@
             if (document.getElementById('btn-error-track')) {
                 document.getElementById('btn-error-track').style.display = (isMe && state.isPlaying) ? 'block' : 'none';
             }
-            if (state.revealed) { document.getElementById('card').classList.add('flipped'); document.getElementById('c-artist').innerText = state.currentTrack.artist; document.getElementById('c-song').innerText = state.currentTrack.song; document.getElementById('c-year').innerText = state.currentTrack.year; }
+            if (state.revealed && state.currentTrack) { document.getElementById('card').classList.add('flipped'); document.getElementById('c-artist').innerText = state.currentTrack.artist || '???'; document.getElementById('c-song').innerText = state.currentTrack.song || '???'; document.getElementById('c-year').innerText = state.currentTrack.year || '???'; }
             else { document.getElementById('card').classList.remove('flipped'); }
             let h = ""; const timeline = isMe ? state.myCards : state.activeTimeline;
             h += renderSlot(0, state);
@@ -444,11 +483,15 @@
             const canSabotage = !isMe && state.isPlaying && !state.revealed;
             document.getElementById('sabotage-ctrl').style.display = canSabotage ? 'block' : 'none';
             document.getElementById('sabotage-status-msg').style.display = canSabotage ? 'none' : 'block';
-            
             if (document.getElementById('quick-bets-ctrl')) {
                 document.getElementById('quick-bets-ctrl').style.display = canSabotage ? 'flex' : 'none';
             }
-            document.getElementById('duel-mode-ui').style.display = (isDuel && (state.currentDuel.challenger === myId || state.currentDuel.target === myId)) ? 'flex' : 'none';
+
+            // Duelo
+            const isDuel = state.turnPhase === 'DUEL' && state.currentDuel;
+            document.getElementById('duel-mode-ui').style.display = (isDuel && state.currentDuel && (state.currentDuel.challenger === myId || state.currentDuel.target === myId)) ? 'flex' : 'none';
+
+            updateMarket(state);
 
             // FEEDBACK PLAY BOTÓN
             const playBtn = document.querySelector('.btn-play');
@@ -456,6 +499,16 @@
                 if (state.isPlaying) playBtn.classList.add('playing-active');
                 else playBtn.classList.remove('playing-active');
             }
+        }
+
+        function updateMarket(state) {
+            const container = document.getElementById('market-container');
+            if (!container) return;
+            const isMe = state.activePlayer.id === myId;
+            let h = "";
+            h += `<button class="btn" style="font-size:0.6em; padding:12px;" ${(!isMe || !state.myWildcards || state.myWildcards < 1) ? 'disabled' : ''} onclick="send('MARKET_WILDCARD', 'artist')">PISTA AUTOR (${state.myWildcards || 0} 🃏)</button>`;
+            h += `<button class="btn" style="font-size:0.6em; padding:12px;" ${(state.myTokens < 3) ? 'disabled' : ''} onclick="send('MARKET_SHIELD')">ESCUDO (3 🔵)</button>`;
+            container.innerHTML = h;
         }
 
         function renderSlot(idx, state) {
@@ -470,8 +523,30 @@
         function sendDuelGuess() { const y = document.getElementById('duel-year-input').value; if (y) { send('DUEL_GUESS', y); document.getElementById('duel-wait-msg').style.display = 'block'; } }
         function toggleRules() { const el = document.getElementById('rules-overlay'); el.style.display = (el.style.display === 'flex') ? 'none' : 'flex'; }
         function switchTab(id, el) { document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none'); document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); document.getElementById(id).style.display = 'flex'; el.classList.add('active'); }
+        function handleCooldownSabotage(action, id) { send(action); }
         function showCustomAlert(msg) { document.getElementById('custom-alert-msg').innerText = msg; document.getElementById('custom-alert').style.display = 'flex'; }
     </script>
-    <div style="position:fixed; bottom:5px; right:5px; font-size:8px; opacity:0.3; color:white; z-index:10000; font-family: 'Bungee';">v150</div>
+    <div style="position:fixed; bottom:5px; right:5px; font-size:8px; opacity:0.3; color:white; z-index:10000; font-family: 'Bungee';">v157</div>
+    <!-- OVERLAY REGLAS -->
+    <div id="rules-overlay" class="overlay-full" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:9500; flex-direction:column; align-items:center; padding:20px; overflow-y:auto;">
+        <h2 style="font-family:'Bungee'; color:var(--neon); font-size:1em;">📖 REGLAS</h2>
+        <div style="color:#ddd; font-size:0.75em; max-width:400px; line-height:1.5; padding:20px; font-family:'Montserrat';">
+            <p><strong>OBJETIVO:</strong> Coloca las canciones en orden cronológico en tu línea de tiempo. Gana quien llegue a 10 cartas.</p>
+            <p><strong>TURNO:</strong> Escucha la canción y elige dónde va en tu cronología.</p>
+            <p><strong>FICHAS:</strong> Úsalas para sabotear a rivales o comprar pistas en el mercado.</p>
+        </div>
+        <button onclick="toggleRules()" style="background:#333; color:#fff; border:1px solid #666; padding:10px 30px; border-radius:10px; font-family:'Bungee'; cursor:pointer;">CERRAR</button>
+    </div>
+
+    <!-- CUSTOM ALERT -->
+    <div id="custom-alert" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:20000; align-items:center; justify-content:center;">
+        <div style="background:#111; border:2px solid var(--neon); border-radius:15px; padding:20px; width:80%; max-width:350px; text-align:center;">
+            <h3 style="font-family:'Bungee'; color:var(--neon);">AVISO</h3>
+            <p id="custom-alert-msg" style="font-size:0.9em; margin:15px 0;"></p>
+            <button onclick="document.getElementById('custom-alert').style.display='none'" style="background:var(--neon); color:#000; border:none; padding:10px 30px; border-radius:8px; font-family:'Bungee'; cursor:pointer;">OK</button>
+        </div>
+    </div>
+
+
 </body>
 </html>
