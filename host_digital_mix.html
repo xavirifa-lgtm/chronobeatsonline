@@ -121,6 +121,17 @@
             padding: 20px;
             border-radius: 20px;
             border: 1px solid rgba(0,242,255,0.15);
+            overflow-y: auto;
+            max-height: calc(100vh - 60px);
+        }
+        /* Con 6+ jugadores el leaderboard usa 2 columnas */
+        #leaderboard-list.two-cols {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4px;
+        }
+        #leaderboard-list.two-cols .leader-item {
+            font-size: 0.85em;
         }
 
         .active-player-name {
@@ -269,90 +280,6 @@
             transition: 0.3s;
         }
 
-        /* ── CHAT ── */
-        #chat-panel {
-            position: fixed;
-            bottom: 0;
-            right: 0;
-            width: 280px;
-            height: 340px;
-            background: rgba(5,5,10,0.95);
-            border: 1px solid #222;
-            border-bottom: none;
-            border-right: none;
-            border-radius: 12px 0 0 0;
-            display: flex;
-            flex-direction: column;
-            z-index: 500;
-            backdrop-filter: blur(10px);
-        }
-        #chat-header {
-            font-family: 'Bungee';
-            font-size: 0.65em;
-            color: var(--neon);
-            padding: 8px 12px;
-            border-bottom: 1px solid #222;
-            letter-spacing: 2px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        #chat-messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 8px;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            -webkit-overflow-scrolling: touch;
-        }
-        .chat-msg {
-            font-size: 0.72em;
-            line-height: 1.3;
-            padding: 4px 8px;
-            border-radius: 8px;
-            background: rgba(255,255,255,0.04);
-            word-break: break-word;
-        }
-        .chat-msg .chat-name {
-            font-family: 'Bungee';
-            font-size: 0.85em;
-            color: var(--neon);
-            margin-right: 4px;
-        }
-        .chat-msg.system {
-            color: #555;
-            font-style: italic;
-            background: transparent;
-            font-size: 0.65em;
-        }
-        #chat-badge {
-            background: var(--accent);
-            color: #fff;
-            font-size: 0.7em;
-            border-radius: 50%;
-            width: 16px;
-            height: 16px;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Bungee';
-        }
-        #chat-toggle {
-            cursor: pointer;
-            color: #555;
-            font-size: 0.8em;
-            font-family: 'Bungee';
-        }
-        #chat-collapsed {
-            display: none;
-        }
-        #chat-body {
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-            min-height: 0;
-        }
 
         /* ── REACCIONES FLOTANTES ── */
         .reaction-bubble {
@@ -704,19 +631,6 @@
     </div>
     <div class="timeline-grid" id="global-timelines"></div>
 
-    <!-- CHAT PANEL -->
-    <div id="chat-panel">
-        <div id="chat-header">
-            💬 CHAT
-            <div style="display:flex;align-items:center;gap:8px;">
-                <div id="chat-badge">0</div>
-                <span id="chat-toggle" onclick="toggleChat()">▼</span>
-            </div>
-        </div>
-        <div id="chat-body">
-            <div id="chat-messages"></div>
-        </div>
-    </div>
 
     <script>
         // Wake Lock
@@ -875,7 +789,7 @@
         }
 
         function onPlayerReady(event) {
-            console.log("CB: YouTube Player Listo ✓ — player:", !!player);
+            console.log("YouTube Player Listo");
         }
 
         function onPlayerStateChange(event) {
@@ -1084,15 +998,11 @@
             cachedTxts = results;
             var built = buildSongsFromCache(false);
             if (built.length < 10) {
-                console.warn('CB: Pocas canciones (' + built.length + '), limpiando historial played');
                 localStorage.removeItem('CB_PlayedSongs');
                 songs = buildSongsFromCache(true);
             } else {
                 songs = built;
             }
-            console.log('CB: Canciones cargadas:', songs.length, '| currentSongIdx:', currentSongIdx);
-        }).catch(function(err) {
-            console.error('CB: Error cargando TXT:', err);
         });
 
         function updateLobby() {
@@ -1245,14 +1155,11 @@
             document.getElementById('ui-current-player').innerText = players[activePlayerIdx].name;
             document.getElementById('host-instructions').innerText = "ESPERANDO ACCIÓN...";
             if (player && player.loadVideoById && s) {
-                console.log('CB: Cargando vídeo', s.id, s.artist, s.year);
                 player.loadVideoById({
                     'videoId': s.id,
                     'startSeconds': 0
                 });
                 player.stopVideo();
-            } else {
-                console.warn('CB: player no disponible o song undefined. player:', !!player, 's:', !!s);
             }
             syncState();
         }
@@ -2114,16 +2021,7 @@
                         syncState();
                     }
                     break;
-                case 'CHAT':
-                    var p = players.find(function(pl) { return pl.id === peerId; });
-                    if (p && value && value.length > 0 && value.length <= 120) {
-                        addChatMessage(p.name, value.replace(/</g,'&lt;').replace(/>/g,'&gt;'));
-                        // Reenviar a todos los players para que lo vean
-                        for (var cid in connections) {
-                            try { connections[cid].send({ type: 'CHAT_MSG', name: p.name, text: value }); } catch(e) {}
-                        }
-                    }
-                    break;
+
             }
             // Eliminamos el syncState duplicado que podría causar problemas de carrera
         }
@@ -2601,7 +2499,14 @@
                      '<span style="flex:1; font-family:\'Bungee\'; font-size:0.8em;">' + p.name + '<br><span style="opacity:0.6; font-size:0.7em;">' + chipsHtml + '</span></span>' + 
                      '<span class="score" style="font-family:\'Bungee\'; color:var(--gold);">' + p.score + ' p</span></div>';
             });
-            document.getElementById('leaderboard-list').innerHTML = h;
+            var lbEl = document.getElementById('leaderboard-list');
+            lbEl.innerHTML = h;
+            // 2 columnas si hay 6 o más jugadores
+            if (sortedPlayers.length >= 6) {
+                lbEl.classList.add('two-cols');
+            } else {
+                lbEl.classList.remove('two-cols');
+            }
 
             // Mostrar cartas del jugador actual en el centro
             var currentCardsHtml = "";
@@ -2617,43 +2522,6 @@
             });
             document.getElementById('global-timelines').innerHTML = timelinesHtml;
         }    
-        // ── CHAT ──
-        var chatMessages = [];
-        var chatOpen = true;
-        var chatUnread = 0;
-
-        function toggleChat() {
-            chatOpen = !chatOpen;
-            document.getElementById('chat-body').style.display = chatOpen ? 'flex' : 'none';
-            document.getElementById('chat-toggle').innerText = chatOpen ? '▼' : '▲';
-            if (chatOpen) {
-                chatUnread = 0;
-                document.getElementById('chat-badge').style.display = 'none';
-            }
-        }
-
-        function addChatMessage(name, text, isSystem) {
-            var el = document.getElementById('chat-messages');
-            if (!el) return;
-            var div = document.createElement('div');
-            div.className = 'chat-msg' + (isSystem ? ' system' : '');
-            if (isSystem) {
-                div.innerText = text;
-            } else {
-                div.innerHTML = '<span class="chat-name">' + name + '</span>' + text;
-            }
-            el.appendChild(div);
-            el.scrollTop = el.scrollHeight;
-            // Limitar a 50 mensajes
-            while (el.children.length > 50) el.removeChild(el.firstChild);
-            if (!chatOpen) {
-                chatUnread++;
-                var badge = document.getElementById('chat-badge');
-                badge.style.display = 'flex';
-                badge.innerText = chatUnread > 9 ? '9+' : chatUnread;
-            }
-        }
-
         // ── LOG DE EVENTOS ──
         var eventLog = [];
         function addEvent(html) {
