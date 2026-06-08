@@ -875,7 +875,7 @@
         }
 
         function onPlayerReady(event) {
-            console.log("YouTube Player Listo");
+            console.log("CB: YouTube Player Listo ✓ — player:", !!player);
         }
 
         function onPlayerStateChange(event) {
@@ -1084,11 +1084,15 @@
             cachedTxts = results;
             var built = buildSongsFromCache(false);
             if (built.length < 10) {
+                console.warn('CB: Pocas canciones (' + built.length + '), limpiando historial played');
                 localStorage.removeItem('CB_PlayedSongs');
                 songs = buildSongsFromCache(true);
             } else {
                 songs = built;
             }
+            console.log('CB: Canciones cargadas:', songs.length, '| currentSongIdx:', currentSongIdx);
+        }).catch(function(err) {
+            console.error('CB: Error cargando TXT:', err);
         });
 
         function updateLobby() {
@@ -1241,11 +1245,14 @@
             document.getElementById('ui-current-player').innerText = players[activePlayerIdx].name;
             document.getElementById('host-instructions').innerText = "ESPERANDO ACCIÓN...";
             if (player && player.loadVideoById && s) {
+                console.log('CB: Cargando vídeo', s.id, s.artist, s.year);
                 player.loadVideoById({
                     'videoId': s.id,
                     'startSeconds': 0
                 });
                 player.stopVideo();
+            } else {
+                console.warn('CB: player no disponible o song undefined. player:', !!player, 's:', !!s);
             }
             syncState();
         }
