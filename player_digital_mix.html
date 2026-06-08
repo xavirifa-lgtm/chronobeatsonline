@@ -28,6 +28,28 @@
             --c-gamer:  #bf00ff;
         }
 
+        /* ── FONDOS DINÁMICOS POR CATEGORÍA ── */
+        body.theme-orig {
+            background-image:
+                radial-gradient(circle at 15% 25%, rgba(0,242,255,0.10) 0%, transparent 50%),
+                radial-gradient(circle at 85% 75%, rgba(0,100,180,0.07) 0%, transparent 50%) !important;
+        }
+        body.theme-anime {
+            background-image:
+                radial-gradient(circle at 20% 15%, rgba(255,0,204,0.12) 0%, transparent 45%),
+                radial-gradient(circle at 80% 85%, rgba(191,0,255,0.08) 0%, transparent 45%) !important;
+        }
+        body.theme-movies {
+            background-image:
+                radial-gradient(circle at 50% 20%, rgba(255,170,0,0.10) 0%, transparent 50%),
+                radial-gradient(circle at 30% 80%, rgba(180,120,0,0.07) 0%, transparent 45%) !important;
+        }
+        body.theme-videojuegos {
+            background-image:
+                radial-gradient(circle at 15% 80%, rgba(191,0,255,0.12) 0%, transparent 45%),
+                radial-gradient(circle at 85% 20%, rgba(100,0,200,0.08) 0%, transparent 45%) !important;
+        }
+
         * {
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
@@ -984,7 +1006,17 @@
             
             <h4 id="inventory-title" style="margin: 0 0 5px 0; font-family: 'Bungee'; font-size: 0.6em; color: #888; text-align: center;">MIS CARTAS</h4>
             <div id="turn-status">TURNO DE: <span id="cur-player">---</span></div>
-            
+
+            <!-- REACCIONES: visibles para todos cuando la partida está activa -->
+            <div class="reaction-bar" id="reaction-bar" style="display:none;">
+                <button class="reaction-btn" onclick="sendReaction('😂')">😂</button>
+                <button class="reaction-btn" onclick="sendReaction('🔥')">🔥</button>
+                <button class="reaction-btn" onclick="sendReaction('😤')">😤</button>
+                <button class="reaction-btn" onclick="sendReaction('👏')">👏</button>
+                <button class="reaction-btn" onclick="sendReaction('💀')">💀</button>
+                <button class="reaction-btn" onclick="sendReaction('🎯')">🎯</button>
+            </div>
+
             <div id="cheat-indicator" style="display:none; position: fixed; top: 80px; left: 50%; transform: translateX(-50%); background: var(--accent); color: #fff; padding: 5px 15px; border-radius: 20px; font-family: 'Bungee'; font-size: 0.8em; z-index: 10000; box-shadow: 0 0 15px var(--accent);">TRUCOS OFF</div>
             
             <div class="chip-display" id="my-tokens-ui">MIS FICHAS: <span class="neon-chip"></span><span class="neon-chip"></span></div>
@@ -1019,14 +1051,18 @@
                 <div id="wait-msg">ESPERANDO SIGUIENTE TRACK...</div>
             </div>
 
-            <!-- BARRA DE REACCIONES -->
-            <div class="reaction-bar" id="reaction-bar">
-                <button class="reaction-btn" onclick="sendReaction('😂')">😂</button>
-                <button class="reaction-btn" onclick="sendReaction('🔥')">🔥</button>
-                <button class="reaction-btn" onclick="sendReaction('😤')">😤</button>
-                <button class="reaction-btn" onclick="sendReaction('👏')">👏</button>
-                <button class="reaction-btn" onclick="sendReaction('💀')">💀</button>
-                <button class="reaction-btn" onclick="sendReaction('🎯')">🎯</button>
+            <!-- APUESTAS: solo visibles fuera del turno propio -->
+            <div id="bet-btns" style="display:none; flex-direction:column; gap:8px; width:100%; max-width:340px; margin-top:4px;">
+                <button class="spec-btn" id="btn-bet-against"
+                    style="background:var(--bg); border-color:var(--accent); color:var(--accent); font-size:0.8em;"
+                    onclick="send('BET_AGAINST_ACTIVE')">
+                    ¡NI DE COÑA! (1 <span class="neon-chip" style="width:10px;height:10px;background:var(--accent);box-shadow:0 0 6px var(--accent);"></span>)
+                </button>
+                <button class="spec-btn" id="btn-bet-for"
+                    style="background:var(--bg); border-color:#00ff88; color:#00ff88; font-size:0.8em;"
+                    onclick="send('BET_FOR_ACTIVE')">
+                    ¡CONMIGO! (1 <span class="neon-chip" style="width:10px;height:10px;background:#00ff88;box-shadow:0 0 6px #00ff88;"></span>)
+                </button>
             </div>
 
             <div class="collection-summary" id="normal-collection">
@@ -1070,7 +1106,6 @@
             <div class="special-actions" id="sabotage-ctrl" style="display:none; width:100%; max-width:340px; margin-top:10px;">
                 <div id="sabotage-grid">
                     <button class="spec-btn" id="btn-sabotage-mute" style="background:var(--bg); border-color:#ff0055; color:#ff0055;" onclick="send('SABOTAGE_MUTE')">MUTE 15s (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
-                    <button class="spec-btn" id="btn-sabotage-bet" style="background:var(--bg); border-color:#00f2fe; color:#00f2fe;" onclick="send('BET_AGAINST_ACTIVE')">¡NI DE COÑA! (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
                     <button class="spec-btn" id="btn-sabotage-buzzer" style="background:var(--bg); border-color:#00ff00; color:#00ff00;" onclick="send('SABOTAGE_BUZZER')">¡ZUMBIDO! (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
                     <button class="spec-btn" id="btn-sabotage-duel" style="background:var(--bg); border:2px dashed var(--gold); color:var(--gold);" onclick="if(lastState && lastState.myTokens >= 3) { send('SABOTAGE_DUEL'); } else { showCustomAlert('Necesitas al menos 3 fichas para retar a duelo (1 de coste + 2 de garantía).'); }">🔫 DUELO 🔫 (1 <span class="neon-chip" style="width:10px;height:10px; background:var(--gold);"></span>)</button>
                     <button class="spec-btn" id="btn-sabotage-veto" style="background:var(--bg); border-color:#ff8800; color:#ff8800;" onclick="send('SABOTAGE_VETO')">VETO CAMBIAR (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
@@ -1483,6 +1518,10 @@
             if (indicator && indicator.style.display !== 'none') {
                 indicator.style.boxShadow = '0 0 15px ' + color;
             }
+
+            // Fondo dinámico por categoría
+            document.body.classList.remove('theme-orig','theme-anime','theme-movies','theme-videojuegos');
+            if (type && type !== 'mix') document.body.classList.add('theme-' + type);
         }
 
         // Wake Lock — evita que la pantalla se apague durante la partida
@@ -1862,6 +1901,9 @@
 
                 document.getElementById('m-ctrl').style.display = showMusic ? 'grid' : 'none';
                 document.getElementById('s-ctrl').style.display = showMusic ? 'grid' : 'none';
+                // Reacciones: visibles para TODOS cuando la partida está activa
+                var reactionBar = document.getElementById('reaction-bar');
+                if (reactionBar) reactionBar.style.display = data.gameStarted ? 'flex' : 'none';
 
                 // Estado visual de PLAY/PAUSE/STOP según isPlaying
                 var btnPlay  = document.getElementById('btn-play');
@@ -1878,6 +1920,8 @@
                 if (isMyTurn && !data.revealed && (!data.turnPhase || data.turnPhase === 'NORMAL')) {
                     specialCtrl.style.display = 'flex';
                     sabotageCtrl.style.display = 'none';
+                    var betBtnsHide = document.getElementById('bet-btns');
+                    if (betBtnsHide) betBtnsHide.style.display = 'none';
                     if (sabotageStatusMsg) sabotageStatusMsg.style.display = 'block';
                     
                     document.getElementById('btn-autowin').style.display = (!data.isPlaying) ? 'block' : 'none';
@@ -1892,10 +1936,15 @@
                     let jLevel = data.joputismoLevel || 0;
                     var btnMute = document.getElementById('btn-sabotage-mute');
                     if (btnMute) { btnMute.style.display = 'flex'; btnMute.disabled = (data.myTokens < 1); }
-                    var btnBet = document.getElementById('btn-sabotage-bet');
-                    if (btnBet) {
-                        btnBet.style.display = 'flex';
-                        btnBet.disabled = (data.myTokens < 3);
+                    // Mostrar botones de apuesta solo cuando está sonando y no es mi turno
+                    var betBtns = document.getElementById('bet-btns');
+                    if (betBtns) betBtns.style.display = isSabotageVisible ? 'flex' : 'none';
+                    // Resetear textos si cambia de turno
+                    if (!isSabotageVisible) {
+                        var bba = document.getElementById('btn-bet-against');
+                        var bbf = document.getElementById('btn-bet-for');
+                        if (bba) { bba.innerHTML = '¡NI DE COÑA! (1 <span class="neon-chip" style="width:10px;height:10px;background:var(--accent);"></span>)'; bba.disabled=false; bba.style.opacity='1'; }
+                        if (bbf) { bbf.innerHTML = '¡CONMIGO! (1 <span class="neon-chip" style="width:10px;height:10px;background:#00ff88;"></span>)'; bbf.disabled=false; bbf.style.opacity='1'; }
                     }
 
                     let disp1 = jLevel >= 1 ? 'flex' : 'none';
@@ -2101,17 +2150,20 @@
                         document.getElementById('panic-timer').style.color = 'white';
                     }
 
-                    var btnSabotageBet = document.getElementById('btn-sabotage-bet');
-                    if (btnSabotageBet) {
-                        var alreadyBet = data.bettingAgainst && data.bettingAgainst.includes(myId);
-                        btnSabotageBet.disabled = (data.myTokens < 1 || alreadyBet);
-                        if (alreadyBet || data.myTokens < 1) {
-                            btnSabotageBet.style.opacity = '0.5';
-                            if (alreadyBet) btnSabotageBet.innerText = "APUESTA HECHA";
-                        } else {
-                            btnSabotageBet.style.opacity = '1';
-                            btnSabotageBet.innerHTML = '¡NI DE COÑA! (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)';
-                        }
+                    // Actualizar estado de botones de apuesta
+                    var btnAgainst = document.getElementById('btn-bet-against');
+                    var btnFor = document.getElementById('btn-bet-for');
+                    var alreadyAgainst = data.bettingAgainst && data.bettingAgainst.includes(myId);
+                    var alreadyFor = data.bettingFor && data.bettingFor.includes(myId);
+                    if (btnAgainst) {
+                        btnAgainst.disabled = (data.myTokens < 1 || alreadyAgainst || alreadyFor);
+                        btnAgainst.style.opacity = (data.myTokens < 1 || alreadyAgainst) ? '0.5' : '1';
+                        if (alreadyAgainst) btnAgainst.innerText = '✓ APOSTADO EN CONTRA';
+                    }
+                    if (btnFor) {
+                        btnFor.disabled = (data.myTokens < 1 || alreadyFor || alreadyAgainst);
+                        btnFor.style.opacity = (data.myTokens < 1 || alreadyFor) ? '0.5' : '1';
+                        if (alreadyFor) btnFor.innerText = '✓ APOSTADO CONTIGO';
                     }
                 }
             }

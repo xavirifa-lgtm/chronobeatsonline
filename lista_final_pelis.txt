@@ -141,12 +141,10 @@ Wendy Carlos|El Resplandor|1980|https://www.youtube.com/watch?v=pylfy_L6Bjs
 Phil Harris|El Libro de la Selva|1967|https://www.youtube.com/watch?v=sQq-Ffh6gfo
 Leona Lewis|Avatar|2009|https://www.youtube.com/watch?v=dxvlE_Vygm0
 Anthony Gonzalez|Coco|2017|https://www.youtube.com/watch?v=MalsRkzmnWU
-Despistaos|FÃ­sica o QuÃ­mica|2008|https://www.youtube.com/watch?v=rWATSUhQ5Yg
 Survivor|Rocky IV|2017|https://www.youtube.com/watch?v=Nm7AA78Vq8o
 Joe "Bean" Esposito|The Karate Kid|2018|https://www.youtube.com/watch?v=p44G0U4sLCE
 Whitney Houston|The Bodyguard|2011|https://www.youtube.com/watch?v=6BTNH3p4mmM
 Ãlex Ubago|El planeta del Tesoro|2007|https://www.youtube.com/watch?v=uHOSfYkd3RI
-
 The Terminator Soundtrack - Main Theme|The Terminator|1984|https://www.youtube.com/watch?v=mpMg1upld0w
 Terminator 2 Theme|Terminator 2|1991|https://www.youtube.com/watch?v=pVZ2NShfCE8
 RoboCop (1987) Theme|RoboCop|1987|https://www.youtube.com/watch?v=D7rjLQuW2nQ
@@ -186,7 +184,6 @@ Escape from New York Theme (extended audio) - John Carpenter|Escape from New Yor
 King Kong - Soundtrack (In the Beginning)|King Kong (In the Beginning)|1933|https://www.youtube.com/watch?v=qmNupV6jiVA
 Godzilla Theme Song|Godzilla|1954|https://www.youtube.com/watch?v=AWrcJnKhs7w
 Jerry Goldsmith - ''Main Title'' Planet Of The Apes (1968)|Jerry Goldsmith ''Main Title''|1968|https://www.youtube.com/watch?v=a1rq6NoddX0
-[Private video]|Unknown Movie|2000|https://www.youtube.com/watch?v=sQUr44SO_Is
 Requiem, for Soprano, Mezzo-Soprano, 2 Mixed Choirs & Orchestra|Requiem, for Soprano, Mezzo So|1968|https://www.youtube.com/watch?v=6z2mf0kjEP8
 2001 A Space Odyssey Opening in 1080 HD|2001 A Space Odyssey in 1080 H|1968|https://www.youtube.com/watch?v=e-QFj59PON4
 Star Trek Original Series Intro (HQ)|Star Trek Series ()|1966|https://www.youtube.com/watch?v=hdjL8WXjlGI
@@ -281,7 +278,7 @@ Yub Nub (Star Wars Episode VI: Return of the Jedi Ending)|Yub Nub (Star Wars Epi
 john williams duel of the fates|john williams duel of the fate|1999|https://www.youtube.com/watch?v=MbPX4xrKNlM
 Star Wars- The Imperial March (Darth Vader's Theme)|Star Wars The Imperial March (|1980|https://www.youtube.com/watch?v=-bzWSJG93P8
 Star Wars Main Theme (Full)|Star Wars|1977|https://www.youtube.com/watch?v=_D0ZQPqeJkk
-Indiana Jones Theme Song (HD)|Indiana Jones|1981|https://www.youtube.com/watch?v=GzLZJaAm2hwThe Simpsons|Main Title Theme|1989|https://www.youtube.com/watch?v=Xqog63KOANc
+Indiana Jones Theme Song (HD)|Indiana Jones|1981|https://www.youtube.com/watch?v=GzLZJaAm2hwThe Simpsons
 Doctor Who Theme|Doctor Who|1963|https://www.youtube.com/watch?v=7zMFHNrpAqo
 Cornfield Chase|Interstellar|2014|https://www.youtube.com/watch?v=1Vko01DcPXk
 Circle of Life|The Lion King|1994|https://www.youtube.com/watch?v=GibiNy4d4gc

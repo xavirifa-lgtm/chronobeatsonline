@@ -33,6 +33,7 @@
                 radial-gradient(circle at 15% 20%, rgba(0,242,255,0.06) 0%, transparent 50%),
                 radial-gradient(circle at 85% 80%, rgba(255,0,204,0.06) 0%, transparent 50%);
             color: #fff;
+            transition: background-image 1s ease;
             font-family: 'Montserrat', sans-serif;
             margin: 0;
             padding: 20px;
@@ -280,6 +281,91 @@
             transition: 0.3s;
         }
 
+
+        /* ── FONDOS DINÁMICOS POR CATEGORÍA ── */
+        body.theme-orig {
+            background-image:
+                radial-gradient(circle at 10% 20%, rgba(0,242,255,0.12) 0%, transparent 45%),
+                radial-gradient(circle at 90% 80%, rgba(0,100,180,0.08) 0%, transparent 45%),
+                repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(0,242,255,0.02) 40px, rgba(0,242,255,0.02) 41px),
+                repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(0,242,255,0.02) 40px, rgba(0,242,255,0.02) 41px);
+        }
+        body.theme-anime {
+            background-image:
+                radial-gradient(circle at 20% 10%, rgba(255,0,204,0.15) 0%, transparent 40%),
+                radial-gradient(circle at 80% 90%, rgba(191,0,255,0.10) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(255,100,200,0.05) 0%, transparent 60%);
+        }
+        body.theme-movies {
+            background-image:
+                repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(255,170,0,0.015) 3px, rgba(255,170,0,0.015) 4px),
+                radial-gradient(circle at 50% 30%, rgba(255,170,0,0.10) 0%, transparent 50%),
+                radial-gradient(circle at 20% 80%, rgba(180,120,0,0.08) 0%, transparent 40%);
+        }
+        body.theme-videojuegos {
+            background-image:
+                repeating-linear-gradient(0deg, transparent, transparent 15px, rgba(191,0,255,0.03) 15px, rgba(191,0,255,0.03) 16px),
+                repeating-linear-gradient(90deg, transparent, transparent 15px, rgba(191,0,255,0.03) 15px, rgba(191,0,255,0.03) 16px),
+                radial-gradient(circle at 15% 85%, rgba(191,0,255,0.12) 0%, transparent 40%),
+                radial-gradient(circle at 85% 15%, rgba(100,0,200,0.08) 0%, transparent 40%);
+        }
+
+        /* ── COUNTDOWN CIRCULAR ── */
+        #countdown-ring {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 10px;
+            display: none;
+        }
+        #countdown-ring svg {
+            transform: rotate(-90deg);
+        }
+        #countdown-ring .ring-bg {
+            fill: none;
+            stroke: #222;
+            stroke-width: 6;
+        }
+        #countdown-ring .ring-fill {
+            fill: none;
+            stroke: var(--neon);
+            stroke-width: 6;
+            stroke-linecap: round;
+            stroke-dasharray: 226;
+            stroke-dashoffset: 0;
+            transition: stroke-dashoffset 1s linear, stroke 0.3s;
+            filter: drop-shadow(0 0 6px var(--neon));
+        }
+        #countdown-ring .ring-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Bungee';
+            font-size: 1.4em;
+            color: var(--neon);
+        }
+
+        /* ── ANIMACIÓN CARTA VOLANDO ── */
+        .card-fly {
+            position: fixed;
+            background: linear-gradient(135deg, var(--neon), #006688);
+            border: 2px solid var(--neon);
+            border-radius: 12px;
+            padding: 8px 16px;
+            font-family: 'Bungee';
+            font-size: 1.4em;
+            color: #000;
+            z-index: 9998;
+            pointer-events: none;
+            box-shadow: 0 0 30px var(--neon), 0 0 60px rgba(0,242,255,0.4);
+            animation: card-fly-anim 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+        @keyframes card-fly-anim {
+            0%   { opacity: 1; transform: scale(1.5) translateY(0); }
+            60%  { opacity: 1; transform: scale(1.1) translateY(-60px); }
+            100% { opacity: 0; transform: scale(0.5) translateY(-120px); }
+        }
 
         /* ── REACCIONES FLOTANTES ── */
         .reaction-bubble {
@@ -624,7 +710,14 @@
                             onclick="advanceAndNextTurn()">NADIE ACERTÓ</button>
                     </div>
                 </div>
-                <div id="host-instructions">ESPERANDO ACCIÓN...</div>
+                <div id="countdown-ring">
+            <svg width="80" height="80" viewBox="0 0 80 80">
+                <circle class="ring-bg" cx="40" cy="40" r="36"/>
+                <circle class="ring-fill" id="ring-fill" cx="40" cy="40" r="36"/>
+            </svg>
+            <div class="ring-text" id="countdown-num">--</div>
+        </div>
+        <div id="host-instructions">ESPERANDO ACCIÓN...</div>
                 <div id="active-player-inventory" class="active-player-cards"></div>
             </div>
         </div>
@@ -933,6 +1026,10 @@
             document.documentElement.style.setProperty('--neon', color);
             let catSpan = document.getElementById('ui-song-category');
             if (catSpan) catSpan.innerText = label;
+
+            // Fondo dinámico por categoría
+            document.body.classList.remove('theme-orig','theme-anime','theme-movies','theme-videojuegos');
+            if (type && type !== 'mix') document.body.classList.add('theme-' + type);
         }
 
         initPeer();
@@ -1076,6 +1173,7 @@
         }
 
         function nextTurn() {
+            stopCountdown();
             turnPhase = 'NORMAL';
             currentDuel = null;
             duelResult = null;
@@ -1298,6 +1396,7 @@
                         isPlaying = true;
                         document.getElementById('host-instructions').innerText = "REPRODUCIENDO" + (isMuted ? " (MUTE)" : "");
                         syncState();
+                        startCountdown();
                     }
                     break;
                 case 'PAUSE':
@@ -1309,6 +1408,7 @@
                         isPlaying = false;
                         document.getElementById('host-instructions').innerText = "PAUSADO";
                         syncState();
+                        stopCountdown();
                     }
                     break;
                 case 'STOP':
@@ -2255,6 +2355,7 @@
                 players[activePlayerIdx].cards.push(parseInt(songs[currentSongIdx].year));
                 players[activePlayerIdx].cards.sort(function(a,b){return a-b;});
                 addEvent('<span class="ev-name">' + players[activePlayerIdx].name + '</span> <span class="ev-good">acertó ✅</span> ' + songs[currentSongIdx].year);
+                flyCard(songs[currentSongIdx].year, players[activePlayerIdx].name);
                 if (players[activePlayerIdx].score >= 10) {
                     if (gameMode === 'normal') {
                         showWinner(players[activePlayerIdx].name);
@@ -2309,6 +2410,7 @@
                 p.cards.push(parseInt(songs[currentSongIdx].year));
                 p.cards.sort(function(a,b){return a-b;});
                 addEvent('<span class="ev-name">' + p.name + '</span> <span class="ev-good">robó la carta 🎯</span> ' + songs[currentSongIdx].year);
+                flyCard(songs[currentSongIdx].year, p.name);
                 if (p.score >= 10) {
                     if (gameMode === 'normal') {
                         showWinner(p.name);
@@ -2541,6 +2643,61 @@
             });
             document.getElementById('global-timelines').innerHTML = timelinesHtml;
         }    
+        // ── COUNTDOWN CIRCULAR ──
+        var countdownInterval = null;
+        var maxSeconds = 120; // máximo razonable de escucha
+
+        function startCountdown() {
+            stopCountdown();
+            var ring = document.getElementById('countdown-ring');
+            var ringFill = document.getElementById('ring-fill');
+            var numEl = document.getElementById('countdown-num');
+            if (!ring) return;
+            ring.style.display = 'block';
+            var circumference = 226;
+
+            countdownInterval = setInterval(function() {
+                var elapsed = Math.floor(segundosAcumulados + (isPlaying ? (Date.now() - momentoDeInicio) / 1000 : 0));
+                if (numEl) numEl.innerText = elapsed + 's';
+
+                // Colores progresivos
+                if (elapsed < 10) {
+                    ringFill.style.stroke = 'var(--neon)';
+                } else if (elapsed < 20) {
+                    ringFill.style.stroke = 'var(--gold)';
+                } else {
+                    ringFill.style.stroke = '#ff4444';
+                }
+
+                // El anillo se llena (no se vacía — muestra tiempo transcurrido)
+                var pct = Math.min(elapsed / maxSeconds, 1);
+                var offset = circumference * (1 - pct);
+                ringFill.style.strokeDashoffset = offset;
+            }, 250);
+        }
+
+        function stopCountdown() {
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+                countdownInterval = null;
+            }
+            var ring = document.getElementById('countdown-ring');
+            if (ring) ring.style.display = 'none';
+        }
+
+        // ── ANIMACIÓN CARTA VOLANDO ──
+        function flyCard(year, playerName) {
+            var card = document.createElement('div');
+            card.className = 'card-fly';
+            card.innerText = year;
+            // Posición central de la pantalla
+            card.style.left = '50%';
+            card.style.top = '45%';
+            card.style.transform = 'translateX(-50%)';
+            document.body.appendChild(card);
+            setTimeout(function() { card.remove(); }, 950);
+        }
+
         // ── LOG DE EVENTOS ──
         var eventLog = [];
         function addEvent(html) {
