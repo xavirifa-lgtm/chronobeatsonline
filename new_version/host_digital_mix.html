@@ -14,14 +14,23 @@
     <script src="https://www.youtube.com/iframe_api"></script>
     <style>
         :root {
-            --neon: #00ff00; /* Verde por defecto para MIX */
-            --bg: #0d0d0d;
+            --neon:   #00f2ff;
+            --pink:   #ff00cc;
+            --bg:     #020810;
             --accent: #ff0055;
-            --gold: #ffd700;
+            --gold:   #ffd700;
+            /* Colores por categoría */
+            --c-orig:   #00f2ff;
+            --c-anime:  #ff00cc;
+            --c-movies: #ffaa00;
+            --c-gamer:  #bf00ff;
         }
 
         body {
             background: var(--bg);
+            background-image:
+                radial-gradient(circle at 15% 20%, rgba(0,242,255,0.06) 0%, transparent 50%),
+                radial-gradient(circle at 85% 80%, rgba(255,0,204,0.06) 0%, transparent 50%);
             color: #fff;
             font-family: 'Montserrat', sans-serif;
             margin: 0;
@@ -33,11 +42,14 @@
 
         .logo {
             font-family: 'Bungee';
-            font-size: 2em;
-            color: var(--neon);
-            text-shadow: 0 0 20px var(--neon);
+            font-size: 1.8em;
+            background: linear-gradient(90deg, var(--neon), var(--pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             text-align: center;
             margin-bottom: 20px;
+            filter: drop-shadow(0 0 12px rgba(0,242,255,0.5));
         }
 
         #lobby {
@@ -50,9 +62,13 @@
         .room-code {
             font-family: 'Bungee';
             font-size: 4em;
-            color: var(--gold);
+            background: linear-gradient(90deg, var(--neon), var(--pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             letter-spacing: 10px;
             margin: 20px 0;
+            filter: drop-shadow(0 0 15px rgba(0,242,255,0.6));
         }
 
         .music-controls {
@@ -100,10 +116,10 @@
         }
 
         .sidebar {
-            background: rgba(255, 255, 255, 0.03);
+            background: rgba(0,242,255,0.03);
             padding: 20px;
             border-radius: 20px;
-            border: 1px solid #333;
+            border: 1px solid rgba(0,242,255,0.15);
         }
 
         .active-player-name {
@@ -192,7 +208,8 @@
         }
 
         .btn-ok {
-            background: #00ff88;
+            background: var(--neon);
+            color: #000;
         }
 
         .btn-fail {
@@ -234,11 +251,12 @@
             background: var(--neon);
             color: #000;
             font-weight: bold;
-            border: 1px solid #fff;
+            border: 1px solid var(--neon);
+            box-shadow: 0 0 6px var(--neon);
         }
 
         .btn-start {
-            background: var(--neon);
+            background: linear-gradient(90deg, var(--neon), var(--pink));
             color: #000;
             border: none;
             padding: 20px 60px;
@@ -246,6 +264,8 @@
             font-family: 'Bungee';
             font-size: 1.4em;
             cursor: pointer;
+            box-shadow: 0 0 25px rgba(0,242,255,0.4), 0 0 50px rgba(255,0,204,0.2);
+            transition: 0.3s;
         }
 
         /* Pantalla Ganador */
@@ -274,7 +294,10 @@
         #winner-screen h2 {
             font-family: 'Bungee';
             font-size: 2em;
-            color: var(--neon);
+            background: linear-gradient(90deg, var(--neon), var(--pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .active-player-cards {
@@ -499,7 +522,7 @@
                             style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;"></div>
                         <button class="btn-val"
                             style="background:#444; margin-top:10px; font-size: 0.6em; padding: 10px;"
-                            onclick="nextTurn()">NADIE ACERTÓ</button>
+                            onclick="advanceAndNextTurn()">NADIE ACERTÓ</button>
                     </div>
                 </div>
                 <div id="host-instructions">ESPERANDO ACCIÓN...</div>
@@ -581,7 +604,6 @@
         var hasShield = {}; // playerId -> boolean
 
         // Duel Mode variables
-        var queuedDuel = null; // { challenger: id, target: id }
         var currentDuel = null;
         var duelResult = null; // Para mensajes de fin de duelo
         var duelTriggered = false; // Bloqueo de un duelo por turno
@@ -650,7 +672,11 @@
                     try { connections[activeP.id].send({ type: 'BET_RESULT', msg: "¡TIEMPO AGOTADO!\n" + phrase }); } catch(e){}
                 }
 
+                // Devolver fichas de apuestas pendientes (nadie gana si no hubo apuesta del activo)
+                refundBets();
                 setTimeout(function() {
+                    activePlayerIdx = (activePlayerIdx + 1) % players.length;
+                    players[activePlayerIdx].canReload = true;
                     nextTurn();
                 }, 4000);
                 
@@ -660,7 +686,7 @@
 
         function updateTokens(player, delta) {
             if (!player) return;
-            player.tokens = Math.max(0, Math.min(5, (player.tokens || 0) + delta));
+            player.tokens = Math.max(0, Math.min(10, (player.tokens || 0) + delta));
         }
 
         function initPeer() {
@@ -707,7 +733,7 @@
                             connections[conn.peer] = conn;
                             syncState(); // Force state sync to reconnecting player
                         } else {
-                            players.push({ id: conn.peer, name: data.name, avatar: data.avatar || null, score: 1, cards: [], tokens: 2, canReload: true, wildcards: 3 });
+                            players.push({ id: conn.peer, name: data.name, avatar: data.avatar || null, score: 1, cards: [], tokens: 3, canReload: true, wildcards: 3 });
                             connections[conn.peer] = conn;
                         }
                         updateLobby();
@@ -735,7 +761,7 @@
             });
         }
         function applyTheme(type) {
-            let color = '#00ff00'; // Mix / Default
+            let color = '#00f2ff'; // Mix / Default
             let label = ' - MODO MIX';
             if (type === 'orig') { color = '#00f2ff'; label = ' - ORIGINAL EDITION'; }
             if (type === 'anime') { color = '#ff00cc'; label = ' - ANIME EDITION'; }
@@ -752,26 +778,14 @@
         var urlParams = new URLSearchParams(window.location.search);
         var mixParam = urlParams.get('mix') || 'orig,anime,movies,videojuegos';
         var mixTypes = mixParam.split(',');
-        var fetchPromises = [];
 
-        if (mixTypes.includes('orig')) {
-            fetchPromises.push(fetch('lista_final.txt?v=' + new Date().getTime()).then(function (r) { return r.text() }).then(function (t) { return { text: t, type: 'orig', color: '#00f2ff' } }));
-        }
-        if (mixTypes.includes('anime')) {
-            fetchPromises.push(fetch('lista_final_anime.txt?v=' + new Date().getTime()).then(function (r) { return r.text() }).then(function (t) { return { text: t, type: 'anime', color: '#ff00cc' } }));
-        }
-        if (mixTypes.includes('movies')) {
-            fetchPromises.push(fetch('lista_final_pelis.txt?v=' + new Date().getTime()).then(function (r) { return r.text() }).then(function (t) { return { text: t, type: 'movies', color: '#ffaa00' } }));
-        }
-        if (mixTypes.includes('videojuegos')) {
-            fetchPromises.push(fetch('lista_videojuegos.txt?v=' + new Date().getTime()).then(function (r) { return r.text() }).then(function (t) { return { text: t, type: 'videojuegos', color: '#bf00ff' } }));
-        }
+        var cachedTxts = [];
 
-        Promise.all(fetchPromises).then(function (results) {
+        function buildSongsFromCache(ignorePlayedIds) {
             var rawSongs = [];
             var uniqueIds = new Set();
-            var playedIds = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]');
-            results.forEach(function (res) {
+            var playedIds = ignorePlayedIds ? [] : JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]');
+            cachedTxts.forEach(function (res) {
                 var categorySongs = [];
                 var lines = res.text.replace(/\r/g, '').split('\n');
                 lines.forEach(function (l, index) {
@@ -782,35 +796,51 @@
                         if (!uniqueIds.has(currentId) && !playedIds.includes(currentId)) {
                             uniqueIds.add(currentId);
                             categorySongs.push({
-                                artist: p[0],
-                                song: p[1],
-                                year: p[2],
-                                id: currentId,
-                                line: index + 1,
-                                type: res.type,
-                                color: res.color
+                                artist: p[0], song: p[1], year: p[2],
+                                id: currentId, line: index + 1,
+                                type: res.type, color: res.color
                             });
                         }
                     }
                 });
-
-                // Mezclar la categoría antes de recortar
                 categorySongs.sort(function() { return Math.random() - 0.5; });
-
-                // Tomar máximo 60 para equilibrar el Mix
-                var selectedSongs = categorySongs.slice(0, 60);
-                rawSongs = rawSongs.concat(selectedSongs);
+                rawSongs = rawSongs.concat(categorySongs.slice(0, 60));
             });
-
-            if (rawSongs.length < 10 && playedIds.length > 0) {
-                localStorage.removeItem('CB_PlayedSongs');
-                location.reload();
-                return;
-            }
-
-            // Mezcla final de todo el mix
             rawSongs.sort(function() { return Math.random() - 0.5; });
-            songs = rawSongs;
+            return rawSongs;
+        }
+
+        function reloadSongsMidGame() {
+            console.log("CANCIONES AGOTADAS — recargando lista completa sin resetear partida.");
+            localStorage.removeItem('CB_PlayedSongs');
+            songs = buildSongsFromCache(true);
+            currentSongIdx = -1;
+            console.log("Lista recargada:", songs.length, "canciones.");
+        }
+
+        var fetchPromises = [];
+        if (mixTypes.includes('orig')) {
+            fetchPromises.push(fetch('lista_final.txt?v=' + new Date().getTime()).then(function(r){return r.text()}).then(function(t){return {text:t,type:'orig',color:'#00f2ff'}}));
+        }
+        if (mixTypes.includes('anime')) {
+            fetchPromises.push(fetch('lista_final_anime.txt?v=' + new Date().getTime()).then(function(r){return r.text()}).then(function(t){return {text:t,type:'anime',color:'#ff00cc'}}));
+        }
+        if (mixTypes.includes('movies')) {
+            fetchPromises.push(fetch('lista_final_pelis.txt?v=' + new Date().getTime()).then(function(r){return r.text()}).then(function(t){return {text:t,type:'movies',color:'#ffaa00'}}));
+        }
+        if (mixTypes.includes('videojuegos')) {
+            fetchPromises.push(fetch('lista_videojuegos.txt?v=' + new Date().getTime()).then(function(r){return r.text()}).then(function(t){return {text:t,type:'videojuegos',color:'#bf00ff'}}));
+        }
+
+        Promise.all(fetchPromises).then(function (results) {
+            cachedTxts = results;
+            var built = buildSongsFromCache(false);
+            if (built.length < 10) {
+                localStorage.removeItem('CB_PlayedSongs');
+                songs = buildSongsFromCache(true);
+            } else {
+                songs = built;
+            }
         });
 
         function updateLobby() {
@@ -863,17 +893,18 @@
         }
 
         function startGame() {
-            requestWakeLock(); // Activar Wake Lock al empezar la partida
+            requestWakeLock();
             var tc = document.getElementById('joputismo-audio-player');
             if (tc) tc.innerHTML = '';
 
             gameMode = document.getElementById('game-mode-select').value;
+            hasShield = {}; // Resetear escudos al inicio de partida
 
             // MECÁNICA INICIAL: Repartir una carta a cada jugador
             players.forEach(function (p) {
                 currentSongIdx++; if(songs[currentSongIdx] && songs[currentSongIdx].id) { var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]'); if(!_pl.includes(songs[currentSongIdx].id)){ _pl.push(songs[currentSongIdx].id); localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl)); } }
                 var s = songs[currentSongIdx];
-                if (s) p.cards.push(s.year);
+                if (s) p.cards.push(parseInt(s.year));
             });
 
             document.getElementById('lobby').style.display = 'none';
@@ -886,6 +917,7 @@
             turnPhase = 'NORMAL';
             currentDuel = null;
             duelResult = null;
+            duelTriggered = false;
             currentSongIdx++; if(songs[currentSongIdx] && songs[currentSongIdx].id) { var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]'); if(!_pl.includes(songs[currentSongIdx].id)){ _pl.push(songs[currentSongIdx].id); localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl)); } } isRevealed = false;
             segundosAcumulados = 0;
             momentoDeInicio = 0;
@@ -917,7 +949,8 @@
                 var numOptions = Math.max(1, players.length - 1);
                 for (var i = 0; i < numOptions; i++) {
                     currentSongIdx++; if(songs[currentSongIdx] && songs[currentSongIdx].id) { var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]'); if(!_pl.includes(songs[currentSongIdx].id)){ _pl.push(songs[currentSongIdx].id); localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl)); } }
-                    kingOptions.push(songs[currentSongIdx]);
+                    if (!songs[currentSongIdx]) { reloadSongsMidGame(); currentSongIdx++; }
+                    if (songs[currentSongIdx]) kingOptions.push(songs[currentSongIdx]);
                 }
 
                 document.getElementById('ui-card-artist').innerText = "ELIGIENDO CARTA...";
@@ -939,7 +972,17 @@
             // Duelo ya no se activa en nextTurn sino inmediatamente
 
             var s = songs[currentSongIdx];
-            applyTheme(s ? s.type : 'mix');
+
+            // PROTECCIÓN: lista agotada → recargar todas sin reiniciar partida
+            if (!s) {
+                document.getElementById('host-instructions').innerHTML =
+                    "<span style='color:#ffaa00;font-family:Bungee;font-size:1.1em;'>♻️ LISTA AGOTADA — VOLVIENDO A MEZCLAR...</span>";
+                reloadSongsMidGame();
+                nextTurn();
+                return;
+            }
+
+            applyTheme(s.type);
             document.getElementById('ui-card-artist').innerText = "????";
             document.getElementById('ui-card-song').innerText = "????";
             document.getElementById('ui-card-year').innerText = "????";
@@ -1037,6 +1080,11 @@
                 winner.score++;
                 winner.cards.push(actualYear);
                 winner.cards.sort(function(a, b){return a - b});
+                // Comprobar victoria tras ganar carta en duelo
+                if (winner.score >= 10 && gameMode === 'normal') {
+                    showWinner(winner.name);
+                    return;
+                }
                 
                 // Robo: 2 fichas al oponente (Capped at 5)
                 var theft = Math.min(loser.tokens, 2);
@@ -1049,6 +1097,12 @@
                 document.getElementById('host-instructions').innerHTML = "<span style='color:#ff4444; font-size:1.5em; font-family:Bungee;'>EL DUELO QUEDÓ DESIERTO</span>";
             }
             document.getElementById('host-instructions').innerHTML += "<br><button class='btn' style='margin-top:10px; padding:10px; font-family:Bungee; background:var(--neon); color:#000;' onclick='finishDuel()'>SIGUIENTE TURNO</button>";
+        }
+
+        function advanceAndNextTurn() {
+            activePlayerIdx = (activePlayerIdx + 1) % players.length;
+            players[activePlayerIdx].canReload = true;
+            nextTurn();
         }
 
         function finishDuel() {
@@ -1099,7 +1153,7 @@
                     break;
                 case 'SABOTAGE_RUSSIAN_ROULETTE':
                     var p = players.find(x => x.id === peerId);
-                    if (p && p.tokens >= 2 && (!turnPhase || turnPhase === 'NORMAL')) {
+                    if (p && p.tokens >= 2 && (!turnPhase || turnPhase === 'NORMAL') && !isRevealed) {
                         updateTokens(p, -2);
                         playGunshot();
                         triggerFlash();
@@ -1115,7 +1169,9 @@
                         if (result === 0) { // Robar 1 carta
                             if (target && target.cards && target.cards.length > 0) {
                                 var card = target.cards.pop();
-                                p.cards.push(card);
+                                p.cards.push(parseInt(card));
+                                p.cards.sort(function(a,b){return a-b;});
+                                target.cards.sort(function(a,b){return a-b;});
                                 msgP = "¡ZAS! Le has mangado una carta a " + target.name + ". ¡Vaya suerte de forajido!";
                                 msgT = "¡MALAS NOTICIAS! " + p.name + " te ha levantado una carta en la Ruleta Rusa. ¡Es un mangante!";
                             } else {
@@ -1204,6 +1260,7 @@
                         isPlaying = false;
                         if (player && player.stopVideo) player.stopVideo();
                         currentSongIdx++; if(songs[currentSongIdx] && songs[currentSongIdx].id) { var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]'); if(!_pl.includes(songs[currentSongIdx].id)){ _pl.push(songs[currentSongIdx].id); localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl)); } } // Descartar y pasar a la siguiente
+                        if (!songs[currentSongIdx]) { reloadSongsMidGame(); }
                         if(songs[currentSongIdx]) applyTheme(songs[currentSongIdx].type);
                         segundosAcumulados = 0;
                         momentoDeInicio = 0;
@@ -1214,6 +1271,10 @@
                         document.getElementById('btn-reveal-host').style.display = 'block';
                         document.getElementById('val-card-ui').style.display = 'block';
                         document.getElementById('validation-buttons').style.display = 'none';
+                        if (songs[currentSongIdx] && player && player.loadVideoById) {
+                            player.loadVideoById({ videoId: songs[currentSongIdx].id, startSeconds: 0 });
+                            player.stopVideo();
+                        }
                         document.getElementById('host-instructions').innerText = "CANCIÓN CAMBIADA (DALE A PLAY)";
                         syncState();
                     }
@@ -1225,6 +1286,8 @@
                         isPlaying = false;
                         if (player && player.stopVideo) player.stopVideo();
                         currentSongIdx++; if(songs[currentSongIdx] && songs[currentSongIdx].id) { var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]'); if(!_pl.includes(songs[currentSongIdx].id)){ _pl.push(songs[currentSongIdx].id); localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl)); } }
+                        // Protección: si se agota la lista tras el skip, recargar
+                        if (!songs[currentSongIdx]) { reloadSongsMidGame(); }
                         if(songs[currentSongIdx]) applyTheme(songs[currentSongIdx].type);
                         segundosAcumulados = 0;
                         momentoDeInicio = 0;
@@ -1235,13 +1298,18 @@
                         document.getElementById('btn-reveal-host').style.display = 'block';
                         document.getElementById('val-card-ui').style.display = 'block';
                         document.getElementById('validation-buttons').style.display = 'none';
+                        // Cargar el nuevo vídeo en YouTube sin reproducir
+                        if (songs[currentSongIdx] && player && player.loadVideoById) {
+                            player.loadVideoById({ videoId: songs[currentSongIdx].id, startSeconds: 0 });
+                            player.stopVideo();
+                        }
                         document.getElementById('host-instructions').innerText = "VÍDEO ROTO. CANCIÓN CAMBIADA.";
                         syncState();
                     }
                     break;
                 case 'AUTO_WIN':
                     var p = players.find(function (pl) { return pl.id === peerId; });
-                    if (p && p.tokens >= 3) {
+                    if (p && p.id === players[activePlayerIdx].id && p.tokens >= 3 && !isRevealed) {
                         updateTokens(p, -3);
                         validateResult(true, false);
                     }
@@ -1255,7 +1323,8 @@
                     var slotOccupied = (activeGuess == valNum);
                     for (var pid in currentBets) { if (currentBets[pid] == valNum) slotOccupied = true; }
 
-                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 1 && currentBets[peerId] === undefined && !slotOccupied && activeGuess !== null) {
+                    var maxSlot = players[activePlayerIdx] ? players[activePlayerIdx].cards.length : 0;
+                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 1 && currentBets[peerId] === undefined && !slotOccupied && activeGuess !== null && valNum >= 0 && valNum <= maxSlot) {
                         console.log("[OK] Apuesta (Duelo) aceptada para", p.name);
                         updateTokens(p, -1);
                         currentBets[peerId] = valNum;
@@ -1339,7 +1408,7 @@
                                 // PARAR MÚSICA Y REVELAR (V30)
                                 isPlaying = false;
                                 if (player && player.stopVideo) player.stopVideo();
-                                revealData(); 
+                                if (!isRevealed) revealData();
                                 syncState();
                                 // Quitamos el setTimeout para que el Host valide manualmente o pase turno
                             } else {
@@ -1407,6 +1476,8 @@
                         isPlaying = false;
                         if (player && player.stopVideo) player.stopVideo();
                         currentSongIdx++; if(songs[currentSongIdx] && songs[currentSongIdx].id) { var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]'); if(!_pl.includes(songs[currentSongIdx].id)){ _pl.push(songs[currentSongIdx].id); localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl)); } }
+                        // Protección: si se agota la lista tras el skip, recargar
+                        if (!songs[currentSongIdx]) { reloadSongsMidGame(); }
                         if(songs[currentSongIdx]) applyTheme(songs[currentSongIdx].type);
                         segundosAcumulados = 0;
                         momentoDeInicio = 0;
@@ -1417,6 +1488,11 @@
                         document.getElementById('btn-reveal-host').style.display = 'block';
                         document.getElementById('val-card-ui').style.display = 'block';
                         document.getElementById('validation-buttons').style.display = 'none';
+                        // Cargar el nuevo vídeo en YouTube sin reproducir
+                        if (songs[currentSongIdx] && player && player.loadVideoById) {
+                            player.loadVideoById({ videoId: songs[currentSongIdx].id, startSeconds: 0 });
+                            player.stopVideo();
+                        }
 
                         document.getElementById('host-instructions').innerHTML = "<span style='color:#ff00ff; font-size:1.5em; font-family:Bungee;'>¡" + p.name + " HA OBLIGADO A CAMBIAR LA CANCIÓN!</span>";
                         
@@ -1439,7 +1515,7 @@
                 case 'SABOTAGE_DUEL':
                     if (turnPhase === 'DUEL' || duelTriggered) return;
                     var p = players.find(x => x.id === peerId);
-                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 3 && (!turnPhase || turnPhase === 'NORMAL') && !currentDuel) {
+                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 3 && (!turnPhase || turnPhase === 'NORMAL') && !currentDuel && !isRevealed) {
                         updateTokens(p, -3);
                         duelTriggered = true;
                         var target = players[activePlayerIdx];
@@ -1487,14 +1563,27 @@
                             currentDuel.targetTime = Date.now();
                         }
                         
-                        // Si ambos han contestado, podemos revelar automáticamente o esperar al host
+                        // Si ambos han contestado, revelar automáticamente
                         if (currentDuel.challengerYear !== null && currentDuel.targetYear !== null) {
-                            // Parar musica de duelo inmediatamente
                             var audioContainer = document.getElementById('audio-player-container');
                             if (audioContainer) audioContainer.innerHTML = '';
-                            
                             document.getElementById('host-instructions').innerHTML = "<div style='color:var(--gold); font-family:Bungee; font-size:2em;'>¡DUELO FINALIZADO!</div><div style='font-size:1.2em;'>Calculando resultados...</div>";
                             revealData();
+                        } else {
+                            // Timeout de seguridad: si en 60s no contesta el otro, forzar resolución
+                            if (!currentDuel._timeout) {
+                                currentDuel._timeout = setTimeout(function() {
+                                    if (currentDuel) {
+                                        // Dar año imposible al que no contestó
+                                        if (currentDuel.challengerYear === null) currentDuel.challengerYear = 9999;
+                                        if (currentDuel.targetYear === null) currentDuel.targetYear = 9999;
+                                        var audioContainer = document.getElementById('audio-player-container');
+                                        if (audioContainer) audioContainer.innerHTML = '';
+                                        document.getElementById('host-instructions').innerHTML = "<div style='color:#ff4444; font-family:Bungee;'>TIEMPO AGOTADO EN DUELO</div>";
+                                        revealData();
+                                    }
+                                }, 60000);
+                            }
                         }
                         syncState();
                     }
@@ -1527,7 +1616,9 @@
                     if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 4 && isPlaying && !isRevealed) {
                         updateTokens(p, -4);
                         var oldActive = players[activePlayerIdx];
-                        activePlayerIdx = players.indexOf(p);
+                        var newIdx = players.indexOf(p);
+                        if (newIdx === -1) break; // jugador no encontrado, abortar
+                        activePlayerIdx = newIdx;
 
                         // Clear bets and guesses because turn changes
                         currentBets = {};
@@ -1546,11 +1637,11 @@
                 case 'SABOTAGE_BLACKHOLE':
                     var p = players.find(function (pl) { return pl.id === peerId; });
                     if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 5 && (!turnPhase || turnPhase === 'NORMAL')) {
-                        var validTargets = players.filter(function (t) { return t.id !== p.id && t.score > 1; });
+                        var validTargets = players.filter(function (t) { return t.id !== p.id && t.score > 1 && t.cards.length > 0; });
                         if (validTargets.length > 0) {
                             updateTokens(p, -5);
                             var target = validTargets[Math.floor(Math.random() * validTargets.length)];
-                            target.score -= 1;
+                            target.score = Math.max(0, target.score - 1);
                             var cardIdx = Math.floor(Math.random() * target.cards.length);
                             target.cards.splice(cardIdx, 1);
 
@@ -1564,7 +1655,7 @@
                     break;
                 case 'SABOTAGE_STEAL_TOKEN':
                     var p = players.find(function (pl) { return pl.id === peerId; });
-                    if (p && p.tokens >= 4) {
+                    if (p && p.tokens >= 4 && gameStarted && (!turnPhase || turnPhase === 'NORMAL')) {
                         var possibleTargets = players.filter(function (pt) { return pt.id !== peerId && pt.tokens > 0; });
                         if (possibleTargets.length > 0) {
                             updateTokens(p, -4); // Pay the cost
@@ -1600,7 +1691,8 @@
                     var slotOccupiedByBet = false;
                     for (var pid in currentBets) { if (currentBets[pid] == valNum) slotOccupiedByBet = true; }
 
-                    if (p && p.id === players[activePlayerIdx].id && !slotOccupiedByBet && activeGuess === null) {
+                    var maxSlotGuess = players[activePlayerIdx] ? players[activePlayerIdx].cards.length : 0;
+                    if (p && p.id === players[activePlayerIdx].id && !slotOccupiedByBet && activeGuess === null && valNum >= 0 && valNum <= maxSlotGuess) {
                         console.log("[OK] Marca del activo fijada en", valNum);
                         activeGuess = valNum;
 
@@ -1668,38 +1760,12 @@
                     }
                     break;
                 case 'REMOTE_START_GAME':
-                    startGame();
-                    break;
-                case 'REMOTE_REVEAL':
-                    revealData();
-                    break;
-                case 'REMOTE_CORRECT':
-                    validateResult(true, false);
-                    break;
-                case 'REMOTE_CORRECT_TOKEN':
-                    validateResult(true, true);
-                    break;
-                case 'REMOTE_INCORRECT':
-                    validateResult(false, false);
-                    break;
-                case 'REMOTE_INCORRECT_TOKEN':
-                    validateResult(false, true);
-                    break;
-                case 'REMOTE_SYSTEM_ERROR':
-                    reportSystemError();
-                    break;
-                case 'REMOTE_JOPUTISMO':
-                    if (turnPhase === 'LOBBY' || players.length === 0) {
-                        setJoputismo(parseInt(value));
-                    }
-                    break;
-                case 'REMOTE_START_GAME':
                     if (!gameStarted) {
                         startGame();
                     }
                     break;
                 case 'REMOTE_JOPUTISMO':
-                    setJoputismo(value);
+                    setJoputismo(parseInt(value));
                     syncState();
                     break;
                 case 'REMOTE_REVEAL':
@@ -1734,9 +1800,9 @@
                     break;
                 case 'REMOTE_NEXT_TURN':
                     if (turnPhase === 'DUEL' && !currentDuel) {
-                        nextTurn();
+                        advanceAndNextTurn();
                     } else if (isRevealed) {
-                        nextTurn();
+                        advanceAndNextTurn();
                     }
                     break;
                 case 'REMOTE_DUEL_FINISH':
@@ -1788,11 +1854,12 @@
         }
 
         function isSlotCorrect(slotIdx, songYear, timeline) {
-            if (timeline.length === 0) return true;
-            if (slotIdx === 0) return songYear <= timeline[0];
-            if (slotIdx === timeline.length) return songYear >= timeline[timeline.length - 1];
-            // En medio
-            return (songYear >= timeline[slotIdx - 1] && songYear <= timeline[slotIdx]);
+            var year = parseInt(songYear);
+            var tl = timeline.map(function(y){ return parseInt(y); });
+            if (tl.length === 0) return true;
+            if (slotIdx === 0) return year <= tl[0];
+            if (slotIdx === tl.length) return year >= tl[tl.length - 1];
+            return (year >= tl[slotIdx - 1] && year <= tl[slotIdx]);
         }
 
         function resolveKingMode(won) {
@@ -2006,8 +2073,8 @@
 
             if (isCardOk) {
                 players[activePlayerIdx].score++;
-                players[activePlayerIdx].cards.push(songs[currentSongIdx].year);
-                players[activePlayerIdx].cards.sort();
+                players[activePlayerIdx].cards.push(parseInt(songs[currentSongIdx].year));
+                players[activePlayerIdx].cards.sort(function(a,b){return a-b;});
                 if (players[activePlayerIdx].score >= 10 && gameMode === 'normal') {
                     showWinner(players[activePlayerIdx].name);
                     return;
@@ -2052,8 +2119,8 @@
             var p = players.find(x => x.id === pid);
             if (p) {
                 p.score++;
-                p.cards.push(songs[currentSongIdx].year);
-                p.cards.sort();
+                p.cards.push(parseInt(songs[currentSongIdx].year));
+                p.cards.sort(function(a,b){return a-b;});
                 if (p.score >= 10 && gameMode === 'normal') {
                     showWinner(p.name);
                     return;
@@ -2159,7 +2226,7 @@
                     activePlayer: { id: players[activePlayerIdx] ? players[activePlayerIdx].id : null, name: players[activePlayerIdx] ? players[activePlayerIdx].name : null },
                     judgeId: currentJudgeId,
                     leader: { name: leaderName, score: leaderScore },
-                    currentTrack: songs[currentSongIdx],
+                    currentTrack: songs[currentSongIdx] || null,
                     revealed: isRevealed,
                     isPlaying: isPlaying,
                     isMuted: isMuted,
@@ -2174,7 +2241,7 @@
                     myTokens: p ? p.tokens : 0,
                     myWildcards: p && p.wildcards !== undefined ? p.wildcards : 3,
                     canReload: p ? p.canReload : false,
-                    activeTimeline: players[activePlayerIdx] ? players[activePlayerIdx].cards : [],
+                    activeTimeline: (players[activePlayerIdx] && players[activePlayerIdx].cards) ? players[activePlayerIdx].cards : [],
                     currentBets: currentBets,
                     activeGuess: activeGuess,
                     currentDuel: currentDuel,
