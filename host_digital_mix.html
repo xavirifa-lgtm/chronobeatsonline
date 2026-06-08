@@ -2100,7 +2100,6 @@
                         syncState();
                     }
                     break;
-            }
                 case 'REACTION':
                     var p = players.find(function(pl) { return pl.id === peerId; });
                     if (p && value) {
@@ -2118,6 +2117,7 @@
                         }
                     }
                     break;
+            }
             // Eliminamos el syncState duplicado que podría causar problemas de carrera
         }
 
