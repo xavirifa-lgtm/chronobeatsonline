@@ -10,6 +10,7 @@
     <title>HOST - CHRONOBEATS MIX</title>
     <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script src="https://www.youtube.com/iframe_api"></script>
     <style>
@@ -437,6 +438,10 @@
         CODE</div>
     <div id="lobby">
         <div class="room-code" id="join-code">------</div>
+        <div id="qr-container" style="margin: 10px auto 20px; display:flex; flex-direction:column; align-items:center; gap:8px;">
+            <div id="qr-code" style="background:#fff; padding:12px; border-radius:12px; display:inline-block;"></div>
+            <div style="font-family:'Bungee'; font-size:0.55em; color:#666; letter-spacing:2px;">ESCANEA PARA UNIRTE</div>
+        </div>
         <div class="player-list" id="lobby-players" style="margin-bottom: 20px;"></div>
 
         <!-- NEW MODE SELECTOR -->
@@ -610,6 +615,27 @@
 
         document.getElementById('join-code').innerText = roomCode;
 
+        // Generar QR con el código de sala
+        var qrGenerated = false;
+        function generateQR() {
+            if (qrGenerated) return;
+            var qrEl = document.getElementById('qr-code');
+            if (qrEl && typeof QRCode !== 'undefined') {
+                qrEl.innerHTML = '';
+                new QRCode(qrEl, {
+                    text: roomCode,
+                    width: 160,
+                    height: 160,
+                    colorDark: '#000000',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.M
+                });
+                qrGenerated = true;
+            }
+        }
+        // Intentar generar al cargar y también cuando el peer esté listo
+        window.addEventListener('load', function() { setTimeout(generateQR, 500); });
+
         // Eliminadas funciones de YT API
         function onYouTubeIframeAPIReady() {
             player = new YT.Player('youtube-player', {
@@ -714,6 +740,7 @@
                 console.log("Host Peer Abierto:", id);
                 document.getElementById('live-room-code').innerText = roomCode;
                 document.getElementById('live-room-code').style.display = 'block';
+                generateQR(); // Asegurar que el QR está generado
             });
             peer.on('connection', function (conn) {
                 console.log("Nueva conexión entrante:", conn.peer);

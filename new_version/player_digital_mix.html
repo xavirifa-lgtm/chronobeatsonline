@@ -13,6 +13,7 @@
     <title>CHRONOBEATS ONLINE</title>
     <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Montserrat:wght@400;700&display=swap"
         rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
         :root {
@@ -861,6 +862,15 @@
             onchange="handleAvatarSelect(event)">
 
         <input type="text" id="host-id" placeholder="CÓDIGO SALA" maxlength="6">
+        <button class="btn" id="qr-btn" onclick="toggleQR()"
+            style="background:transparent; border:2px solid var(--neon); color:var(--neon); box-shadow:none; padding:12px; font-size:0.75em; margin-top:-6px; margin-bottom:4px;">
+            📷 ESCANEAR QR
+        </button>
+        <div id="qr-scanner" style="display:none; flex-direction:column; align-items:center; gap:8px; width:100%; max-width:280px;">
+            <video id="qr-video" style="width:100%; border-radius:12px; border:2px solid var(--neon);"></video>
+            <button class="btn" onclick="stopQR()" style="background:#333; color:#fff; box-shadow:none; padding:10px; font-size:0.75em;">CANCELAR</button>
+        </div>
+        <canvas id="qr-canvas" style="display:none;"></canvas>
         <input type="text" id="player-name" placeholder="TU NOMBRE">
         <button class="btn" id="join-btn" onclick="conectar()">ENTRAR</button>
     </div>
@@ -899,6 +909,7 @@
                 <div id="card" class="card">
                     <div class="card-face card-front">
                         <div style="font-family:'Bungee';color:var(--neon);opacity:0.2;font-size:1.8em;text-align:center;line-height:0.95;word-wrap:break-word;width:100%">CHRONO<br>BEATS</div>
+                        <div id="card-mode-label" style="font-family:'Bungee';color:var(--neon);opacity:0.5;font-size:0.55em;margin-top:12px;letter-spacing:2px;">MIX</div>
                     </div>
                     <div class="card-face card-back">
                         <div id="c-artist">ARTISTA</div>
@@ -1186,6 +1197,71 @@
             confirmDialog.style.display = 'flex';
         }
 
+        // ── QR SCANNER ──
+        let qrVideoStream = null;
+        let qrAnimFrame = null;
+
+        function toggleQR() {
+            const scanner = document.getElementById('qr-scanner');
+            if (scanner.style.display === 'none' || scanner.style.display === '') {
+                scanner.style.display = 'flex';
+                document.getElementById('qr-btn').style.display = 'none';
+                startQR();
+            } else {
+                stopQR();
+            }
+        }
+
+        function startQR() {
+            const video = document.getElementById('qr-video');
+            const canvas = document.getElementById('qr-canvas');
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+                .then(function(stream) {
+                    qrVideoStream = stream;
+                    video.srcObject = stream;
+                    video.play();
+                    video.addEventListener('loadedmetadata', function() { scanQR(video, canvas); });
+                })
+                .catch(function(err) {
+                    showCustomAlert('No se pudo acceder a la cámara: ' + err.message);
+                    stopQR();
+                });
+        }
+
+        function scanQR(video, canvas) {
+            if (!qrVideoStream) return;
+            const ctx = canvas.getContext('2d');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            if (canvas.width > 0) {
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const code = jsQR(imageData.data, imageData.width, imageData.height);
+                if (code && code.data) {
+                    // Extraer código de sala del QR (puede ser URL o código directo)
+                    let roomCode = code.data;
+                    const match = roomCode.match(/[A-Z0-9]{6}$/);
+                    if (match) roomCode = match[0];
+                    document.getElementById('host-id').value = roomCode;
+                    stopQR();
+                    showCustomAlert('✅ Código escaneado: ' + roomCode);
+                    return;
+                }
+            }
+            qrAnimFrame = requestAnimationFrame(function() { scanQR(video, canvas); });
+        }
+
+        function stopQR() {
+            if (qrVideoStream) {
+                qrVideoStream.getTracks().forEach(t => t.stop());
+                qrVideoStream = null;
+            }
+            if (qrAnimFrame) { cancelAnimationFrame(qrAnimFrame); qrAnimFrame = null; }
+            document.getElementById('qr-scanner').style.display = 'none';
+            document.getElementById('qr-btn').style.display = 'block';
+        }
+
+
         function conectar() {
             var hostId = document.getElementById('host-id').value.toUpperCase().trim();
             hostId = hostId.replace('CB-HOST-', '').replace('CB-ANIME-HOST-', '').replace('CB-MOVIES-HOST-', '');
@@ -1234,6 +1310,7 @@
 
                 conn.on('open', function () {
                     console.log("¡Conectado!");
+                    requestWakeLockPlayer();
                     conn.send({ type: 'JOIN', name: playerName, avatar: playerAvatarDataUrl });
                     document.getElementById('login-screen').style.display = 'none';
                     document.getElementById('game-screen').style.display = 'flex';
@@ -1258,11 +1335,15 @@
 
         function applyTheme(type) {
             let color = '#00f2ff'; // Mix / Default
-            if (type === 'orig') color = '#00f2ff';
-            if (type === 'anime') color = '#ff00cc';
-            if (type === 'movies') color = '#ffaa00';
+            let label = 'MIX';
+            if (type === 'orig')        { color = '#00f2ff'; label = 'ORIGINAL'; }
+            if (type === 'anime')       { color = '#ff00cc'; label = 'ANIME'; }
+            if (type === 'movies')      { color = '#ffaa00'; label = 'PELIS & TV'; }
+            if (type === 'videojuegos') { color = '#bf00ff'; label = 'GAMER'; }
             
             document.documentElement.style.setProperty('--neon', color);
+            const modeLabel = document.getElementById('card-mode-label');
+            if (modeLabel) modeLabel.innerText = label;
             let metaTheme = document.querySelector('meta[name="theme-color"]');
             if (metaTheme) metaTheme.setAttribute('content', color);
             
@@ -1272,6 +1353,29 @@
                 indicator.style.boxShadow = '0 0 15px ' + color;
             }
         }
+
+        // Wake Lock — evita que la pantalla se apague durante la partida
+        let wakeLockPlayer = null;
+        async function requestWakeLockPlayer() {
+            try {
+                if ('wakeLock' in navigator) {
+                    wakeLockPlayer = await navigator.wakeLock.request('screen');
+                    console.log('Wake Lock Player activo');
+                    wakeLockPlayer.addEventListener('release', () => {
+                        // Reintentar si se suelta (p.ej. al volver de segundo plano)
+                        requestWakeLockPlayer();
+                    });
+                }
+            } catch (err) {
+                console.warn('Wake Lock no disponible:', err.name, err.message);
+            }
+        }
+        // Reactivar wake lock cuando la página vuelve a primer plano
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                requestWakeLockPlayer();
+            }
+        });
 
         function send(action, value) {
             if (conn && conn.open) {
