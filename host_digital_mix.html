@@ -1104,7 +1104,7 @@
             isFogActive = false;
 
             // --- INICIO MODO REY CHECK ---
-            if (gameMode === 'rey' && players.length >= 3 && players[activePlayerIdx] && players[activePlayerIdx].score >= 10) {
+            if (gameMode === 'rey' && players.length >= 2 && players[activePlayerIdx] && players[activePlayerIdx].score >= 10) {
                 turnPhase = 'KING_SELECTION';
                 kingOptions = [];
                 // Calcular un número de cartas igual a (players.length - 1)
@@ -1243,9 +1243,15 @@
                 winner.cards.push(actualYear);
                 winner.cards.sort(function(a, b){return a - b});
                 // Comprobar victoria tras ganar carta en duelo
-                if (winner.score >= 10 && gameMode === 'normal') {
-                    showWinner(winner.name);
-                    return;
+                if (winner.score >= 10) {
+                    if (gameMode === 'normal') {
+                        showWinner(winner.name);
+                        return;
+                    } else if (gameMode === 'rey') {
+                        activePlayerIdx = players.indexOf(winner);
+                        nextTurn();
+                        return;
+                    }
                 }
                 
                 // Robo: 2 fichas al oponente (Capped at 5)
@@ -2249,9 +2255,15 @@
                 players[activePlayerIdx].cards.push(parseInt(songs[currentSongIdx].year));
                 players[activePlayerIdx].cards.sort(function(a,b){return a-b;});
                 addEvent('<span class="ev-name">' + players[activePlayerIdx].name + '</span> <span class="ev-good">acertó ✅</span> ' + songs[currentSongIdx].year);
-                if (players[activePlayerIdx].score >= 10 && gameMode === 'normal') {
-                    showWinner(players[activePlayerIdx].name);
-                    return;
+                if (players[activePlayerIdx].score >= 10) {
+                    if (gameMode === 'normal') {
+                        showWinner(players[activePlayerIdx].name);
+                        return;
+                    } else if (gameMode === 'rey') {
+                        // En modo rey: NO avanzar jugador — nextTurn detectará score>=10 y activará KING_SELECTION
+                        nextTurn();
+                        return;
+                    }
                 }
                 activePlayerIdx = (activePlayerIdx + 1) % players.length;
                 players[activePlayerIdx].canReload = true;
@@ -2297,9 +2309,16 @@
                 p.cards.push(parseInt(songs[currentSongIdx].year));
                 p.cards.sort(function(a,b){return a-b;});
                 addEvent('<span class="ev-name">' + p.name + '</span> <span class="ev-good">robó la carta 🎯</span> ' + songs[currentSongIdx].year);
-                if (p.score >= 10 && gameMode === 'normal') {
-                    showWinner(p.name);
-                    return;
+                if (p.score >= 10) {
+                    if (gameMode === 'normal') {
+                        showWinner(p.name);
+                        return;
+                    } else if (gameMode === 'rey') {
+                        // Apuntar al challenger que llegó a 10 para que nextTurn active KING_SELECTION
+                        activePlayerIdx = players.indexOf(p);
+                        nextTurn();
+                        return;
+                    }
                 }
             }
             activePlayerIdx = (activePlayerIdx + 1) % players.length;
