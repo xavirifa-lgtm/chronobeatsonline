@@ -50,6 +50,232 @@
                 radial-gradient(circle at 85% 20%, rgba(100,0,200,0.08) 0%, transparent 45%) !important;
         }
 
+        /* ── MODAL ROBO INTELIGENTE ── */
+        #smart-steal-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            z-index: 9500;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 20px;
+        }
+        .steal-title {
+            font-family: 'Bungee';
+            font-size: 1.2em;
+            color: var(--gold);
+            text-align: center;
+            letter-spacing: 2px;
+        }
+        .steal-btn {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            font-family: 'Bungee';
+            font-size: 0.85em;
+            padding: 14px 24px;
+            border-radius: 12px;
+            cursor: pointer;
+            width: 100%;
+            max-width: 300px;
+            text-align: left;
+            transition: 0.2s;
+        }
+        .steal-btn:active { background: rgba(255,170,0,0.15); transform: scale(0.97); }
+        .steal-cancel {
+            font-family: 'Bungee';
+            font-size: 0.7em;
+            color: #555;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+
+        /* ── BANNER CANCIÓN COMPARTIDA ── */
+        #shared-song-player-banner {
+            display: none;
+            background: linear-gradient(90deg, var(--gold), #ff8800);
+            color: #000;
+            font-family: 'Bungee';
+            font-size: 0.75em;
+            letter-spacing: 1px;
+            text-align: center;
+            padding: 8px;
+            border-radius: 8px;
+            margin: 6px 0;
+            animation: pulse-banner 1s ease-in-out infinite alternate;
+        }
+
+        /* ── ROBO DE TURNO: BOTÓN RESISTIR ── */
+        #resist-steal-btn {
+            display: none;
+            background: linear-gradient(90deg, #ff4444, #cc0000);
+            color: #fff;
+            border: none;
+            font-family: 'Bungee';
+            font-size: 1em;
+            padding: 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            width: 100%;
+            max-width: 340px;
+            margin: 8px 0;
+            animation: pulse-active 0.6s ease-in-out infinite alternate;
+            letter-spacing: 1px;
+        }
+        #resist-steal-countdown {
+            font-size: 0.7em;
+            opacity: 0.8;
+        }
+
+        /* ── CANCIÓN RELÁMPAGO EN PLAYER ── */
+        #lightning-player-banner {
+            display: none;
+            background: linear-gradient(90deg, #ffaa00, #ff6600);
+            color: #000;
+            font-family: 'Bungee';
+            font-size: 0.9em;
+            text-align: center;
+            padding: 10px;
+            border-radius: 10px;
+            margin: 6px 0;
+            animation: pulse-banner 0.5s ease-in-out infinite alternate;
+        }
+
+        /* ── DANGER ALERT ── */
+        .danger-alert-popup {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 9800;
+            font-family: 'Bungee';
+            font-size: 1.1em;
+            text-align: center;
+            padding: 14px;
+            pointer-events: none;
+            animation: danger-slide 3s ease forwards;
+        }
+        .danger-alert-popup.normal { background: rgba(255,100,0,0.95); color: #fff; }
+        .danger-alert-popup.critical { background: rgba(255,0,50,0.97); color: #fff; font-size: 1.3em; }
+        @keyframes danger-slide {
+            0%   { transform: translateY(-100%); opacity: 0; }
+            10%  { transform: translateY(0);     opacity: 1; }
+            75%  { transform: translateY(0);     opacity: 1; }
+            100% { transform: translateY(-100%); opacity: 0; }
+        }
+
+        /* ── RACHA DE ACIERTOS ── */
+        #streak-counter {
+            display: none;
+            font-family: 'Bungee';
+            font-size: 1.4em;
+            text-align: center;
+            color: var(--gold);
+            text-shadow: 0 0 15px var(--gold);
+            margin: 6px 0;
+            animation: streak-glow 1s ease-in-out infinite alternate;
+        }
+        @keyframes streak-glow {
+            from { text-shadow: 0 0 8px var(--gold); }
+            to   { text-shadow: 0 0 25px var(--gold), 0 0 40px rgba(255,170,0,0.5); }
+        }
+
+        /* ── ANIMACIÓN ROBO DE FICHA ── */
+        .token-stolen-anim {
+            position: fixed;
+            top: 30%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Bungee';
+            font-size: 3em;
+            color: #ff2244;
+            z-index: 9999;
+            pointer-events: none;
+            text-shadow: 0 0 20px #ff2244;
+            animation: token-stolen 1.8s ease-out forwards;
+        }
+        @keyframes token-stolen {
+            0%   { opacity: 0; transform: translateX(-50%) scale(0.5) translateY(0); }
+            20%  { opacity: 1; transform: translateX(-50%) scale(1.3) translateY(0); }
+            60%  { opacity: 1; transform: translateX(-50%) scale(1.0) translateY(-30px); }
+            100% { opacity: 0; transform: translateX(-50%) scale(0.8) translateY(-80px); }
+        }
+
+        /* ── EQUIPOS EN PLAYER ── */
+        #my-team-badge {
+            display: none;
+            font-family: 'Bungee';
+            font-size: 1em;
+            text-align: center;
+            padding: 8px 16px;
+            border-radius: 10px;
+            margin: 6px 0;
+        }
+        #my-team-badge.red  { background:rgba(255,50,50,0.15); border:1px solid #ff3333; color:#ff6666; }
+        #my-team-badge.blue { background:rgba(50,100,255,0.15); border:1px solid #3366ff; color:#6699ff; }
+        #team-timeline {
+            display: none;
+            flex-direction: column;
+            gap: 4px;
+            margin: 6px 0;
+            font-size: 0.7em;
+        }
+        .team-timeline-row { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
+        .team-year-chip {
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Bungee';
+            font-size: 0.85em;
+        }
+        .team-year-chip.red  { background:#ff333322; color:#ff6666; border:1px solid #ff333355; }
+        .team-year-chip.blue { background:#3366ff22; color:#6699ff; border:1px solid #3366ff55; }
+
+        /* ── PANTALLA DE ESPERA ── */
+        @keyframes vinyl-spin {
+            from { transform: rotate(0deg); }
+            to   { transform: rotate(360deg); }
+        }
+        .waiting-player-chip {
+            background: rgba(0,242,255,0.08);
+            border: 1px solid rgba(0,242,255,0.3);
+            border-radius: 20px;
+            padding: 6px 16px;
+            font-family: 'Bungee';
+            font-size: 0.75em;
+            color: var(--neon);
+            animation: chip-in 0.4s ease both;
+        }
+        @keyframes chip-in {
+            from { opacity:0; transform: scale(0.7); }
+            to   { opacity:1; transform: scale(1); }
+        }
+
+        /* ── VIDAS SUPERVIVENCIA ── */
+        .my-lives {
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+            margin: 6px 0;
+        }
+        .my-life-vinyl {
+            width: 32px;
+            height: 32px;
+            transition: opacity 0.3s, transform 0.3s;
+        }
+        .my-life-vinyl.lost {
+            opacity: 0.15;
+            transform: scale(0.85);
+            filter: grayscale(1);
+        }
+        @keyframes pulse-life {
+            0%,100% { filter: drop-shadow(0 0 4px var(--neon)); }
+            50%      { filter: drop-shadow(0 0 12px var(--neon)); }
+        }
+        .my-life-vinyl.active {
+            animation: pulse-life 2s ease-in-out infinite;
+        }
+
         * {
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
@@ -291,6 +517,53 @@
             font-size: 0.85em;
             cursor: pointer;
             transition: 0.2s;
+        }
+
+        /* ── SLIDER VOLUMEN ── */
+        #volume-ctrl {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            max-width: 340px;
+            padding: 6px 0;
+        }
+        #volume-ctrl span {
+            font-size: 1.2em;
+            width: 24px;
+            text-align: center;
+        }
+        #volume-slider {
+            flex: 1;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 4px;
+            border-radius: 2px;
+            background: linear-gradient(90deg, var(--neon) var(--val, 70%), #333 var(--val, 70%));
+            outline: none;
+            cursor: pointer;
+        }
+        #volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px; height: 18px;
+            border-radius: 50%;
+            background: var(--neon);
+            box-shadow: 0 0 8px var(--neon);
+            cursor: pointer;
+        }
+        #volume-slider::-moz-range-thumb {
+            width: 18px; height: 18px;
+            border-radius: 50%;
+            background: var(--neon);
+            border: none;
+            cursor: pointer;
+        }
+        #volume-label {
+            font-family: 'Bungee';
+            font-size: 0.7em;
+            color: var(--neon);
+            min-width: 32px;
+            text-align: right;
         }
 
         .btn-play {
@@ -856,47 +1129,69 @@
         <h2
             style="font-family:'Bungee'; color:var(--neon); margin-bottom:10px; font-size:2em; text-align:center; width:100%; margin-top:20px;">
             📖 REGLAS</h2>
-        <div
-            style="color:#ddd; font-family:'Montserrat'; font-size:0.9em; max-width:400px; width:100%; line-height:1.5;">
-            <p><strong style="color:var(--neon);">OBJETIVO:</strong> Coloca las canciones en el orden correcto en tu
-                cronología. Quien llegue a 10 gana.</p>
-            <p><strong style="color:var(--neon);">TURNO NORMAL:</strong> Escucha la canción, márcate un tanto
-                colocándola en tu cronología.</p>
-            <p><strong style="color:var(--gold);">FICHAS AZULES (🔵):</strong> Sirven para sabotear. Se ganan si el Host
-                te da la razón, o si aciertas en un Duelo.</p>
-            <p><strong style="color:var(--accent);">DUELOS (¡NI DE COÑA!):</strong> Cuesta 1🔵. ¿Crees que el jugador
-                activo la ha cagado y sabes el hueco real? Rétale. Si él falla y tú acertaste el hueco real, tú te
-                llevas la carta. Si él acierta, palmas 1🔵 extra por listo.</p>
+        <div style="color:#ddd; font-family:'Montserrat'; font-size:0.85em; max-width:420px; width:100%; line-height:1.5; padding-bottom:10px;">
 
-            <h3
-                style="color:var(--neon); font-family:'Bungee'; margin-top:20px; border-bottom:1px solid #333; padding-bottom:5px;">
-                JOPUTISMO 1 (TROLL)</h3>
-            <ul style="padding-left:15px; margin-top:10px;">
-                <li style="margin-bottom:8px;"><strong style="color:#00bdff;">MUTEAR (1🔵):</strong> Quita el sonido de
-                    su canción durante 5 segundos.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#00ff00;">¡ZUMBIDO! (1🔵):</strong> Despista con un
-                    ruido molesto.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#ff8800;">VETO CAMBIAR (1🔵):</strong> Le quita al
-                    activo la recarga (no puede cambiar de canción esa ronda).</li>
-                <li style="margin-bottom:8px;"><strong style="color:#ff00ff;">FORZAR SALTO (1🔵):</strong> Obliga al
-                    activo a pasar de canción automáticamente.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#ff0000;">PÁNICO 10s (2🔵):</strong> ¡Rápido! El
-                    activo solo tiene 10 segundos para poner su carta.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#aaaaaa;">NIEBLA TIEMPO (2🔵):</strong> Borra los
-                    años de su pantalla en ese turno.</li>
+            <!-- OBJETIVO -->
+            <h3 style="color:var(--neon); font-family:'Bungee'; border-bottom:1px solid #333; padding-bottom:5px;">🎯 OBJETIVO</h3>
+            <p>Coloca las canciones en orden cronológico en tu línea de tiempo. Quien llegue a <strong>10 cartas</strong> gana.</p>
+            <p>Cada jugador empieza con <strong>1 carta</strong> ya colocada y <strong>3 fichas 🔵</strong>.</p>
+            <p>Si la canción termina sin que hayas elegido posición → cuenta como <strong>fallo</strong>.</p>
+
+            <!-- MODOS DE JUEGO -->
+            <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">🕹️ MODOS DE JUEGO</h3>
+            <ul style="padding-left:15px; margin-top:8px;">
+                <li style="margin-bottom:8px;"><strong style="color:var(--neon);">CLÁSICO:</strong> Primero en llegar a 10 cartas gana.</li>
+                <li style="margin-bottom:8px;"><strong style="color:var(--gold);">MODO REY:</strong> Al llegar a 10, los rivales eligen una canción entre ellos. El Rey tiene que adivinar el año con ±2 de margen para ganar.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#ff4444;">SUPERVIVENCIA:</strong> Cada jugador tiene 3 vidas (💿). Cada fallo quita una vida. El último en pie gana.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#4488ff;">EQUIPOS:</strong> Rojo vs Azul. Los jugadores se asignan en equipos y comparten una cronología. Gana el equipo que llega a 10 cartas.</li>
             </ul>
 
-            <h3
-                style="color:var(--neon); font-family:'Bungee'; margin-top:20px; border-bottom:1px solid #333; padding-bottom:5px;">
-                JOPUTISMO 2 (SUPERMAN)</h3>
-            <ul style="padding-left:15px; margin-top:10px;">
-                <li style="margin-bottom:8px;"><strong style="color:#ffff00;">ROBAR FICHA (4🔵):</strong> Le quitas 1
-                    ficha a un pringado al azar.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#ff00ff;">ROBAR TURNO (4🔵):</strong> Interrumpe al
-                    activo de inmediato y te quedas con su turno actual.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#00f2fe; text-shadow:0 0 5px white;">AGUJERO NEGRO
-                        (5🔵):</strong> Borra la última carta de su cronología. Adiós punto.</li>
+            <!-- FICHAS Y APUESTAS -->
+            <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">🔵 FICHAS Y APUESTAS</h3>
+            <ul style="padding-left:15px; margin-top:8px;">
+                <li style="margin-bottom:8px;"><strong style="color:var(--accent);">¡NI DE COÑA! (1🔵):</strong> Apuesta a que el jugador activo falla. Si acierta el hueco real → te llevas la carta y +2🔵. Si él acierta → pierdes la ficha.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#00ff88;">¡CONMIGO! (1🔵):</strong> Apuesta a que el jugador activo acierta. Si acierta → ganas +2🔵. Si falla → pierdes la ficha.</li>
+                <li style="margin-bottom:8px;"><strong style="color:var(--gold);">AUTO-GANAR (3🔵):</strong> Si conoces el año exacto, gasta 3 fichas para colocarte la carta directamente.</li>
             </ul>
+
+            <!-- MERCADO -->
+            <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">🏪 MERCADO</h3>
+            <ul style="padding-left:15px; margin-top:8px;">
+                <li style="margin-bottom:8px;"><strong style="color:#00ff88;">ESCUDO (3🔵):</strong> Bloquea el próximo sabotaje que recibas. El sabotaje rebota y el atacante pierde la ficha.</li>
+                <li style="margin-bottom:8px;"><strong style="color:var(--gold);">PISTA ARTISTA (comodín):</strong> Revela el nombre del artista de la canción actual. 3 usos por partida.</li>
+            </ul>
+
+            <!-- ESPECIALES -->
+            <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">✨ ESPECIALES</h3>
+            <ul style="padding-left:15px; margin-top:8px;">
+                <li style="margin-bottom:8px;"><strong style="color:var(--gold);">🎵 CANCIÓN COMPARTIDA:</strong> Cada 5 turnos, cualquier jugador puede ganar la carta. El primero que acierte el hueco se la lleva (cuesta 1🔵 para los no-activos).</li>
+                <li style="margin-bottom:8px;"><strong style="color:#ffaa00;">⚡ RELÁMPAGO:</strong> El host puede activar el modo relámpago: la canción suena solo 5 segundos. ¡Decide rápido!</li>
+            </ul>
+
+            <!-- SABOTAJES TROLL -->
+            <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">💀 SABOTAJES — TROLL</h3>
+            <ul style="padding-left:15px; margin-top:8px;">
+                <li style="margin-bottom:8px;"><strong style="color:#00bdff;">MUTEAR (1🔵):</strong> Quita el sonido 15 segundos.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#00ff88;">¡ZUMBIDO! (1🔵):</strong> Suena un ruido molesto para despistar.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#ff8800;">VETO (1🔵):</strong> El activo no puede cambiar de canción esta ronda.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#ff4444;">PÁNICO (2🔵):</strong> El activo solo tiene 10 segundos para decidir.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#aaaaaa;">NIEBLA (2🔵):</strong> Oculta los años de su cronología durante ese turno.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#ff00cc;">RULETA RUSA (2🔵):</strong> El activo hace girar la ruleta. Puede ganar o perder cartas/fichas al azar.</li>
+            </ul>
+
+            <!-- SABOTAJES SUPERMAN -->
+            <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">💀 SABOTAJES — SUPERMAN</h3>
+            <ul style="padding-left:15px; margin-top:8px;">
+                <li style="margin-bottom:8px;"><strong style="color:#ffff00;">ROBAR FICHA (4🔵):</strong> Le quitas 1 ficha a un rival al azar.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#ff00ff;">ROBAR TURNO (4🔵):</strong> Robas el turno al jugador activo. ⚠️ La víctima puede <strong>RESISTIR</strong> gastando 2🔵 en 5 segundos.</li>
+                <li style="margin-bottom:8px;"><strong style="color:var(--gold);">🃏 ROBO INTELIGENTE (4🔵):</strong> Elige qué carta robarle al líder: la más antigua, la más reciente o la más extrema.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#bf00ff;">AGUJERO NEGRO (5🔵):</strong> Destruye una carta aleatoria de la cronología de un rival.</li>
+            </ul>
+
+            <!-- DUELO -->
+            <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">⚔️ DUELO (3🔵)</h3>
+            <p>Reta a otro jugador. Ambos intentáis adivinar el año de la canción actual. El que más se acerque (y más rápido en caso de empate) gana la carta.</p>
+
         </div>
         <button class="btn" onclick="toggleRules()"
             style="margin-top:30px; margin-bottom: 40px; background:#333; color:white; border-color:#555; width:100%; max-width:300px; padding:15px;">CERRAR
@@ -995,7 +1290,38 @@
         <button class="btn" id="join-btn" onclick="conectar()">ENTRAR</button>
     </div>
 
+    <!-- MODAL ROBO INTELIGENTE -->
+    <div id="smart-steal-modal">
+        <div class="steal-title">🃏 ROBO INTELIGENTE<br><span style="font-size:0.6em;color:#888;">Elige qué carta robar al líder</span></div>
+        <button class="steal-btn" onclick="confirmSmartSteal('first')">⬅️ CARTA MÁS ANTIGUA<br><span style="font-size:0.75em;opacity:0.7;">La de menor año</span></button>
+        <button class="steal-btn" onclick="confirmSmartSteal('last')">➡️ CARTA MÁS RECIENTE<br><span style="font-size:0.75em;opacity:0.7;">La de mayor año</span></button>
+        <button class="steal-btn" onclick="confirmSmartSteal('extreme')">🎯 CARTA MÁS EXTREMA<br><span style="font-size:0.75em;opacity:0.7;">La más alejada del promedio</span></button>
+        <div class="steal-cancel" onclick="closeSmartSteal()">CANCELAR</div>
+    </div>
+
     <div id="bet-notification" class="bet-notification"></div>
+    <!-- PANTALLA DE ESPERA -->
+    <div id="waiting-screen" style="display:none; position:fixed; inset:0; background:var(--bg); z-index:500; flex-direction:column; align-items:center; justify-content:center; gap:16px;">
+        <div style="font-family:'Bungee'; font-size:1.1em; color:var(--neon); letter-spacing:3px;">ESPERANDO AL HOST...</div>
+        <!-- Vinilo girando SVG -->
+        <div id="waiting-vinyl" style="animation:vinyl-spin 3s linear infinite; width:120px; height:120px;">
+            <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="60" cy="60" r="55" fill="#111" stroke="var(--neon)" stroke-width="2"/>
+                <circle cx="60" cy="60" r="44" fill="none" stroke="var(--neon)" stroke-width="0.5" opacity="0.4"/>
+                <circle cx="60" cy="60" r="33" fill="none" stroke="var(--neon)" stroke-width="0.5" opacity="0.4"/>
+                <circle cx="60" cy="60" r="22" fill="none" stroke="var(--neon)" stroke-width="0.5" opacity="0.4"/>
+                <circle cx="60" cy="60" r="12" fill="var(--pink)"/>
+                <circle cx="60" cy="60" r="5" fill="#111" stroke="var(--neon)" stroke-width="1.5"/>
+                <path d="M 25 55 Q 25 20 60 20 Q 95 20 95 55" fill="none" stroke="var(--pink)" stroke-width="5" stroke-linecap="round"/>
+                <rect x="20" y="50" width="10" height="18" rx="5" fill="var(--pink)"/>
+                <rect x="90" y="50" width="10" height="18" rx="5" fill="var(--pink)"/>
+            </svg>
+        </div>
+        <div style="font-family:'Bungee'; font-size:0.7em; color:#444; letter-spacing:2px;">JUGADORES CONECTADOS</div>
+        <div id="waiting-players-list" style="display:flex; flex-direction:column; gap:6px; align-items:center; max-height:200px; overflow-y:auto;"></div>
+        <div style="font-size:0.6em; color:#333; font-family:'Montserrat';">La partida empezará cuando el host pulse INICIAR</div>
+    </div>
+
     <div id="game-screen">
         <!-- PESTAÑA JUEGO -->
         <div id="tab-game" class="tab-content active">
@@ -1005,7 +1331,17 @@
             </div>
             
             <h4 id="inventory-title" style="margin: 0 0 5px 0; font-family: 'Bungee'; font-size: 0.6em; color: #888; text-align: center;">MIS CARTAS</h4>
+            <div id="my-team-badge"></div>
+            <button id="resist-steal-btn" onclick="send('RESIST_STEAL')">
+                🛡️ RESISTIR ROBO (2🔵)<br>
+                <span id="resist-steal-countdown"></span>
+            </button>
+            <div id="lightning-player-banner">⚡ MODO RELÁMPAGO — ¡5 SEGUNDOS!</div>
             <div id="turn-status">TURNO DE: <span id="cur-player">---</span></div>
+            <div id="team-timeline"></div>
+            <div id="shared-song-player-banner">🎵 ¡CANCIÓN COMPARTIDA! PRIMER SLOT CORRECTO GANA 🎵</div>
+            <div id="streak-counter"></div>
+            <div id="my-lives-bar" class="my-lives" style="display:none;"></div>
 
             <!-- REACCIONES: visibles para todos cuando la partida está activa -->
             <div class="reaction-bar" id="reaction-bar" style="display:none;">
@@ -1027,6 +1363,16 @@
                 <button class="ctrl-btn" id="btn-pause" onclick="send('PAUSE')">PAUSE</button>
                 <button class="ctrl-btn btn-stop" id="btn-stop" onclick="send('STOP')">STOP</button>
             </div>
+            <!-- Slider de volumen — solo visible para el jugador activo -->
+            <div id="volume-ctrl">
+                <span>🔈</span>
+                <input type="range" id="volume-slider" min="0" max="100" value="70"
+                    oninput="onVolumeChange(this.value)"
+                    style="--val:70%">
+                <span>🔊</span>
+                <span id="volume-label">70%</span>
+            </div>
+
             <div class="skip-controls" id="s-ctrl">
                 <button class="sk-btn sk-fwd" id="btn-skip-p5" onclick="flashBtn(this);send('SKIP',5)">+5s</button>
                 <button class="sk-btn sk-fwd" onclick="flashBtn(this);send('SKIP',10)">+10s</button>
@@ -1105,16 +1451,17 @@
             <!-- Cuadrícula de Sabotajes (Rivales) -->
             <div class="special-actions" id="sabotage-ctrl" style="display:none; width:100%; max-width:340px; margin-top:10px;">
                 <div id="sabotage-grid">
-                    <button class="spec-btn" id="btn-sabotage-mute" style="background:var(--bg); border-color:#ff0055; color:#ff0055;" onclick="send('SABOTAGE_MUTE')">MUTE 15s (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
+                    <button class="spec-btn" id="btn-sabotage-mute" style="background:var(--bg); border-color:#ff0055; color:#ff0055;" onclick="soundMute();send('SABOTAGE_MUTE')">MUTE 15s (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
                     <button class="spec-btn" id="btn-sabotage-buzzer" style="background:var(--bg); border-color:#00ff00; color:#00ff00;" onclick="send('SABOTAGE_BUZZER')">¡ZUMBIDO! (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
                     <button class="spec-btn" id="btn-sabotage-duel" style="background:var(--bg); border:2px dashed var(--gold); color:var(--gold);" onclick="if(lastState && lastState.myTokens >= 3) { send('SABOTAGE_DUEL'); } else { showCustomAlert('Necesitas al menos 3 fichas para retar a duelo (1 de coste + 2 de garantía).'); }">🔫 DUELO 🔫 (1 <span class="neon-chip" style="width:10px;height:10px; background:var(--gold);"></span>)</button>
                     <button class="spec-btn" id="btn-sabotage-veto" style="background:var(--bg); border-color:#ff8800; color:#ff8800;" onclick="send('SABOTAGE_VETO')">VETO CAMBIAR (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
-                    <button class="spec-btn" id="btn-sabotage-skip" style="background:var(--bg); border-color:#ff00ff; color:#ff00ff;" onclick="send('SABOTAGE_FORCE_SKIP')">FORZAR SALTO (3 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
-                    <button class="spec-btn" id="btn-sabotage-panic" style="background:var(--bg); border-color:#ff0000; color:#ff0000;" onclick="send('SABOTAGE_PANIC')">PÁNICO 10s (2 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
-                    <button class="spec-btn" id="btn-sabotage-fog" style="background:var(--bg); border-color:#aaaaaa; color:#aaaaaa;" onclick="send('SABOTAGE_FOG')">NIEBLA TIEMPO (2 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
+                    <button class="spec-btn" id="btn-sabotage-skip" style="background:var(--bg); border-color:#ff00ff; color:#ff00ff;" onclick="soundSkip();send('SABOTAGE_FORCE_SKIP')">FORZAR SALTO (3 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
+                    <button class="spec-btn" id="btn-sabotage-panic" style="background:var(--bg); border-color:#ff0000; color:#ff0000;" onclick="soundPanic();send('SABOTAGE_PANIC')">PÁNICO 10s (2 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
+                    <button class="spec-btn" id="btn-sabotage-fog" style="background:var(--bg); border-color:#aaaaaa; color:#aaaaaa;" onclick="soundFog();send('SABOTAGE_FOG')">NIEBLA TIEMPO (2 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
                     <button class="spec-btn" id="btn-sabotage-steal-token" style="background:var(--bg); border-color:#ffff00; color:#ffff00;" onclick="send('SABOTAGE_STEAL_TOKEN')">ROBAR FICHA (4 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
                     <button class="spec-btn" id="btn-sabotage-steal-turn" style="background:var(--bg); border-color:#ff00ff; color:#ff00ff;" onclick="send('SABOTAGE_STEAL_TURN')">ROBAR TURNO (4 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
-                    <button class="spec-btn" id="btn-sabotage-blackhole" style="background:var(--bg); border-color:#9900ff; color:#9900ff; grid-column: span 2;" onclick="send('SABOTAGE_BLACKHOLE')">AGUJERO NEGRO (5 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
+                    <button class="spec-btn" id="btn-sabotage-blackhole" style="background:var(--bg); border-color:#9900ff; color:#9900ff; grid-column: span 2;" onclick="soundBlackhole();send('SABOTAGE_BLACKHOLE')">AGUJERO NEGRO (5 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
+                    <button class="spec-btn" id="btn-smart-steal" style="background:var(--bg); border-color:var(--gold); color:var(--gold); grid-column: span 2;" onclick="openSmartSteal()">🃏 ROBO INTELIGENTE (4 <span class="neon-chip" style="width:10px;height:10px;background:var(--gold);"></span>)</button>
                 </div>
             </div>
         </div>
@@ -1479,7 +1826,8 @@
                     requestWakeLockPlayer();
                     conn.send({ type: 'JOIN', name: playerName, avatar: playerAvatarDataUrl });
                     document.getElementById('login-screen').style.display = 'none';
-                    document.getElementById('game-screen').style.display = 'flex';
+                    document.getElementById('waiting-screen').style.display = 'flex';
+                    document.getElementById('game-screen').style.display = 'none';
                     initCheatSystem();
                 });
 
@@ -1571,27 +1919,67 @@
         }
 
         function soundCorrect() {
-            // Dos notas ascendentes — acierto
-            playTone(523, 0.15, 'sine', 0.3);
-            setTimeout(function() { playTone(784, 0.25, 'sine', 0.3); }, 120);
+            // Fanfarria de acierto — 3 notas ascendentes
+            playTone(523, 0.12, 'sine', 0.25);
+            setTimeout(function() { playTone(659, 0.12, 'sine', 0.25); }, 100);
+            setTimeout(function() { playTone(784, 0.25, 'sine', 0.3); },  200);
         }
         function soundWrong() {
-            // Nota grave descendente — fallo
-            playTone(200, 0.3, 'sawtooth', 0.2);
+            // Bocina de fallo — nota grave + vibrato
+            playTone(220, 0.1, 'sawtooth', 0.2);
+            setTimeout(function() { playTone(196, 0.3, 'sawtooth', 0.25); }, 80);
         }
         function soundSabotage() {
-            // Zumbido corto — sabotaje recibido
+            // Sonido genérico de sabotaje
             playTone(150, 0.15, 'square', 0.25);
             setTimeout(function() { playTone(120, 0.2, 'square', 0.2); }, 120);
         }
         function soundToken() {
-            // Tono alegre — ficha ganada
-            playTone(660, 0.1, 'sine', 0.25);
-            setTimeout(function() { playTone(880, 0.15, 'sine', 0.25); }, 80);
+            // Campanita de ficha ganada
+            playTone(880, 0.08, 'sine', 0.2);
+            setTimeout(function() { playTone(1100, 0.15, 'sine', 0.2); }, 70);
         }
         function soundBet() {
-            // Clic suave — alguien apostó
-            playTone(440, 0.08, 'sine', 0.15);
+            // Clic de apuesta
+            playTone(440, 0.06, 'sine', 0.12);
+        }
+        // Sonidos específicos por sabotaje
+        function soundMute() {
+            // Silbato cortado — mute
+            playTone(1200, 0.08, 'sine', 0.2);
+            setTimeout(function() { playTone(0, 0.05, 'sine', 0); }, 80); // silencio brusco
+        }
+        function soundPanic() {
+            // Alarma de pánico — dos tonos alternos urgentes
+            [0,80,160,240,320].forEach(function(t) {
+                setTimeout(function() { playTone(t%160===0?880:660, 0.07, 'square', 0.2); }, t);
+            });
+        }
+        function soundDuel() {
+            // Duelo — sonido de pistola (click + reverb)
+            playTone(300, 0.05, 'square', 0.3);
+            setTimeout(function() { playTone(150, 0.3, 'sawtooth', 0.15); }, 50);
+        }
+        function soundFog() {
+            // Niebla — sweep descendente
+            playTone(600, 0.4, 'sine', 0.15);
+            setTimeout(function() { playTone(400, 0.3, 'sine', 0.1); }, 150);
+            setTimeout(function() { playTone(200, 0.3, 'sine', 0.08); }, 300);
+        }
+        function soundBlackhole() {
+            // Agujero negro — sonido de succión profunda
+            playTone(80, 0.6, 'sawtooth', 0.3);
+            setTimeout(function() { playTone(40, 0.4, 'sawtooth', 0.2); }, 200);
+        }
+        function soundSkip() {
+            // Skip/Salto — whoosh corto
+            playTone(800, 0.05, 'sine', 0.2);
+            setTimeout(function() { playTone(400, 0.15, 'sine', 0.15); }, 50);
+        }
+        function soundSteal() {
+            // Robo de carta — zip corto
+            playTone(1000, 0.04, 'square', 0.15);
+            setTimeout(function() { playTone(600, 0.1, 'square', 0.1); }, 40);
         }
 
         // ── NOTIFICACIÓN DE APUESTA ──
@@ -1609,6 +1997,40 @@
 
         // ── ESTADO ANTERIOR para detectar cambios ──
         var prevState = null;
+
+        function vinylSVGSmall(active) {
+            var col = active ? 'var(--neon)' : '#333';
+            var col2 = active ? 'var(--pink)' : '#222';
+            return '<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">' +
+                '<circle cx="20" cy="20" r="18" fill="#111" stroke="' + col + '" stroke-width="1.5"/>' +
+                '<circle cx="20" cy="20" r="14" fill="none" stroke="' + col + '" stroke-width="0.4" opacity="0.4"/>' +
+                '<circle cx="20" cy="20" r="10" fill="none" stroke="' + col + '" stroke-width="0.4" opacity="0.4"/>' +
+                '<circle cx="20" cy="20" r="6" fill="none" stroke="' + col + '" stroke-width="0.4" opacity="0.4"/>' +
+                '<circle cx="20" cy="20" r="4" fill="' + col2 + '"/>' +
+                '<line x1="20" y1="20" x2="20" y2="8" stroke="white" stroke-width="1.2" stroke-linecap="round" opacity="' + (active ? '0.9' : '0.2') + '"/>' +
+                '<line x1="20" y1="20" x2="28" y2="20" stroke="white" stroke-width="0.8" stroke-linecap="round" opacity="' + (active ? '0.9' : '0.2') + '"/>' +
+                '<path d="M 7 18 Q 7 6 20 6 Q 33 6 33 18" fill="none" stroke="' + col2 + '" stroke-width="2" stroke-linecap="round"/>' +
+                '<rect x="5" y="17" width="4" height="7" rx="2" fill="' + col2 + '"/>' +
+                '<rect x="31" y="17" width="4" height="7" rx="2" fill="' + col2 + '"/>' +
+                '</svg>';
+        }
+
+        function updateMyLives(data) {
+            var livesBar = document.getElementById('my-lives-bar');
+            if (!livesBar) return;
+            if (data.gameMode !== 'supervivencia') { livesBar.style.display = 'none'; return; }
+            var myPlayer = data.players && data.players.find(function(p) { return p.id === myId; });
+            if (!myPlayer) return;
+            var lives = myPlayer.lives !== undefined ? myPlayer.lives : 3;
+            livesBar.style.display = 'flex';
+            livesBar.innerHTML = '';
+            for (var i = 0; i < 3; i++) {
+                var div = document.createElement('div');
+                div.className = 'my-life-vinyl' + (i < lives ? ' active' : ' lost');
+                div.innerHTML = vinylSVGSmall(i < lives);
+                livesBar.appendChild(div);
+            }
+        }
 
         function detectStateChanges(data) {
             if (!prevState) { prevState = data; return; }
@@ -1672,12 +2094,109 @@
                 }
             }
 
+            // Actualizar racha visible
+            var myPlayer2 = data.players && data.players.find(function(p) { return p.id === myId; });
+            var streakEl = document.getElementById('streak-counter');
+            if (streakEl && myPlayer2) {
+                var myStreak = (data.stats && data.stats.streaks && data.stats.streaks[myId]) || 0;
+                if (myStreak >= 2) {
+                    var fires = '🔥'.repeat(Math.min(myStreak, 5));
+                    streakEl.innerText = fires + ' RACHA ×' + myStreak;
+                    streakEl.style.display = 'block';
+                } else {
+                    streakEl.style.display = 'none';
+                }
+            }
             prevState = data;
+            updateMyLives(data);
+        }
+
+        function openSmartSteal() {
+            document.getElementById('smart-steal-modal').style.display = 'flex';
+        }
+        function closeSmartSteal() {
+            document.getElementById('smart-steal-modal').style.display = 'none';
+        }
+        function confirmSmartSteal(type) {
+            closeSmartSteal();
+            send('SABOTAGE_SMART_STEAL', type);
+            soundSabotage();
+        }
+
+        // ── ROBO DE TURNO: mostrar botón de resistencia ──
+        var resistTimeout = null;
+        var resistInterval = null;
+
+        function showStealIncoming(thiefName, canResist) {
+            soundSabotage();
+            var btn = document.getElementById('resist-steal-btn');
+            var cd = document.getElementById('resist-steal-countdown');
+            if (!btn) return;
+
+            if (canResist) {
+                var secs = 5;
+                btn.style.display = 'block';
+                if (cd) cd.innerText = secs + 's para decidir';
+                resistInterval = setInterval(function() {
+                    secs--;
+                    if (cd) cd.innerText = secs + 's para decidir';
+                    if (secs <= 0) {
+                        clearInterval(resistInterval);
+                        btn.style.display = 'none';
+                    }
+                }, 1000);
+                resistTimeout = setTimeout(function() { btn.style.display = 'none'; }, 5500);
+            }
+            showDangerAlert('⚡ ' + thiefName + ' TE ROBA EL TURNO' + (canResist ? ' — ¡RESISTE!' : ''), true);
+        }
+
+        function showLightningMode() {
+            soundPanic();
+            var banner = document.getElementById('lightning-player-banner');
+            if (banner) {
+                banner.style.display = 'block';
+                setTimeout(function() { banner.style.display = 'none'; }, 6000);
+            }
+            showDangerAlert('⚡ ¡MODO RELÁMPAGO! Solo 5 segundos', false);
+        }
+
+        function showDangerAlert(msg, critical) {
+            var el = document.createElement('div');
+            el.className = 'danger-alert-popup ' + (critical ? 'critical' : 'normal');
+            el.innerText = msg;
+            document.body.appendChild(el);
+            if (critical) soundSabotage(); else soundBet();
+            setTimeout(function() { el.remove(); }, 3100);
+        }
+
+        function showTokenStolen(thiefName) {
+            var el = document.createElement('div');
+            el.className = 'token-stolen-anim';
+            el.innerHTML = '−1🔵<br><span style="font-size:0.45em;color:#ff6677;">🥷 ' + (thiefName || '?') + '</span>';
+            document.body.appendChild(el);
+            soundSabotage();
+            setTimeout(function() { el.remove(); }, 1900);
         }
 
         function sendReaction(emoji) {
             send('REACTION', emoji);
             // Feedback visual local: agrandar el botón pulsado brevemente
+        }
+
+        // ── CONTROL DE VOLUMEN ──
+        var volumeTimeout = null;
+        function onVolumeChange(val) {
+            val = parseInt(val);
+            // Actualizar la barra CSS
+            var slider = document.getElementById('volume-slider');
+            if (slider) slider.style.setProperty('--val', val + '%');
+            var label = document.getElementById('volume-label');
+            if (label) label.innerText = val + '%';
+            // Enviar al host con debounce (no spamear)
+            if (volumeTimeout) clearTimeout(volumeTimeout);
+            volumeTimeout = setTimeout(function() {
+                send('VOLUME', val);
+            }, 80);
         }
 
         function flashBtn(btn) {
@@ -1741,6 +2260,24 @@
             } else if (data.type === 'SABOTAGE_SKIP_ALERT') {
                 showCustomAlert(data.msg);
                 return;
+            } else if (data.type === 'TOKEN_STOLEN') {
+                showTokenStolen(data.thief);
+                return;
+            } else if (data.type === 'REMATCH') {
+                // Reset visual para la revancha
+                showCustomAlert('🔄 ¡REVANCHA! Nueva partida comenzando...');
+                // Resetear estado local del player
+                prevState = null;
+                myId = myId; // mantener ID
+                return;
+            } else if (data.type === 'STEAL_INCOMING') {
+                showStealIncoming(data.thiefName, data.canResist);
+                return;
+            } else if (data.type === 'LIGHTNING_MODE') {
+                showLightningMode();
+            } else if (data.type === 'DANGER_ALERT') {
+                showDangerAlert(data.msg, data.critical);
+                return;
             }
 
             // Retroalimentación de trucos para Xavi
@@ -1758,10 +2295,57 @@
             if (data.type === 'STATE_UPDATE') {
                 detectStateChanges(data);
                 applyTheme(data.currentType || 'mix');
+                // Actualizar lista de espera si aún no ha empezado
+                if (!data.gameStarted) {
+                    var waitingList = document.getElementById('waiting-players-list');
+                    if (waitingList && data.players) {
+                        waitingList.innerHTML = data.players.map(function(p) {
+                            return '<div class="waiting-player-chip">' + p.name + '</div>';
+                        }).join('');
+                    }
+                }
                 updateMarket(data);
                 document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('waiting-screen').style.display = 'none';
                 document.getElementById('game-screen').style.display = 'flex';
                 document.getElementById('cur-player').innerText = data.activePlayer && data.activePlayer.name ? data.activePlayer.name : "---";
+
+                // Ocultar botón resistir si ya no hay robo pendiente
+                if (!data.pendingSteal || data.pendingSteal.victimId !== myId) {
+                    var rBtn = document.getElementById('resist-steal-btn');
+                    if (rBtn && rBtn.style.display !== 'none') {
+                        rBtn.style.display = 'none';
+                        if (resistInterval) { clearInterval(resistInterval); resistInterval = null; }
+                        if (resistTimeout) { clearTimeout(resistTimeout); resistTimeout = null; }
+                    }
+                }
+
+                // Modo equipos: badge y cronología compartida
+                var myTeamBadge = document.getElementById('my-team-badge');
+                var teamTimeline = document.getElementById('team-timeline');
+                if (data.gameMode === 'equipos' && data.players) {
+                    var myP2 = data.players.find(function(p) { return p.id === myId; });
+                    if (myP2 && myP2.team && myTeamBadge) {
+                        myTeamBadge.className = myP2.team;
+                        myTeamBadge.innerText = myP2.team === 'red' ? '🔴 EQUIPO ROJO' : '🔵 EQUIPO AZUL';
+                        myTeamBadge.style.display = 'block';
+                    }
+                    if (teamTimeline && data.teamCards) {
+                        var rowRed = (data.teamCards.red || []).map(function(y) {
+                            return '<span class="team-year-chip red">' + y + '</span>';
+                        }).join('');
+                        var rowBlue = (data.teamCards.blue || []).map(function(y) {
+                            return '<span class="team-year-chip blue">' + y + '</span>';
+                        }).join('');
+                        teamTimeline.innerHTML =
+                            '<div class="team-timeline-row">🔴 ' + (rowRed||'<span style="color:#555">vacío</span>') + '</div>' +
+                            '<div class="team-timeline-row">🔵 ' + (rowBlue||'<span style="color:#555">vacío</span>') + '</div>';
+                        teamTimeline.style.display = 'flex';
+                    }
+                } else {
+                    if (myTeamBadge) myTeamBadge.style.display = 'none';
+                    if (teamTimeline) teamTimeline.style.display = 'none';
+                }
 
                 // LOGICA DEL MANDO HOST
                 var fab = document.getElementById('fab-remote');
@@ -1901,6 +2485,13 @@
 
                 document.getElementById('m-ctrl').style.display = showMusic ? 'grid' : 'none';
                 document.getElementById('s-ctrl').style.display = showMusic ? 'grid' : 'none';
+                // Slider de volumen: solo para el jugador activo
+                var volCtrl = document.getElementById('volume-ctrl');
+                if (volCtrl) volCtrl.style.display = (isMyTurn && data.gameStarted) ? 'flex' : 'none';
+                // Banner canción compartida
+                var sharedBanner = document.getElementById('shared-song-player-banner');
+                if (sharedBanner) sharedBanner.style.display = (data.isSharedSong && data.gameStarted) ? 'block' : 'none';
+
                 // Reacciones: visibles para TODOS cuando la partida está activa
                 var reactionBar = document.getElementById('reaction-bar');
                 if (reactionBar) reactionBar.style.display = data.gameStarted ? 'flex' : 'none';
@@ -1960,6 +2551,12 @@
                     if (document.getElementById('btn-sabotage-steal-token')) { document.getElementById('btn-sabotage-steal-token').style.display = disp2; document.getElementById('btn-sabotage-steal-token').disabled = (data.myTokens < 4); }
                     if (document.getElementById('btn-sabotage-steal-turn')) { document.getElementById('btn-sabotage-steal-turn').style.display = disp2; document.getElementById('btn-sabotage-steal-turn').disabled = (data.myTokens < 4); }
                     if (document.getElementById('btn-sabotage-blackhole')) { document.getElementById('btn-sabotage-blackhole').style.display = disp2; document.getElementById('btn-sabotage-blackhole').disabled = (data.myTokens < 5); }
+                    if (document.getElementById('btn-smart-steal')) {
+                        // Solo visible si hay rivales con cartas y no es tu turno
+                        var hasTargets = data.players && data.players.some(function(pl) { return pl.id !== myId && pl.cards && pl.cards.length > 0; });
+                        document.getElementById('btn-smart-steal').style.display = (!isMyTurn && hasTargets) ? 'block' : 'none';
+                        document.getElementById('btn-smart-steal').disabled = (data.myTokens < 4);
+                    }
                 }
 
                 // DUEL PHASE HANDLING
