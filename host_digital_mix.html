@@ -163,7 +163,8 @@
             /* Mínima opacidad pero técnicamente visible para el navegador */
         }
 
-        #player-container iframe {
+        /* Solo el player de YouTube original es mini — el iframe de victoria tiene su propio size */
+        #player-container #youtube-player iframe {
             width: 1px;
             height: 1px;
             border: none;
@@ -954,6 +955,7 @@
                     <button class="reveal-btn" id="btn-reveal-host" onclick="revealData()"
                         style="display:block; margin: 15px auto;">REVELAR DATOS</button>
                     <button id="lightning-btn" onclick="activateLightning()">⚡ MODO RELÁMPAGO (5s)</button>
+                    <button id="resolve-team-btn" onclick="resolveTeamVote()" style="display:none; background:linear-gradient(90deg,#ff3333,#cc0000); color:#fff; border:none; font-family:Bungee; font-size:0.75em; padding:8px 14px; border-radius:8px; cursor:pointer; letter-spacing:1px;">⚡ RESOLVER VOTACIÓN</button>
                     <div class="actions" id="validation-buttons"
                         style="display:none; gap: 10px; width: 100%; margin-top: 15px;">
                         <button class="btn-val btn-ok" onclick="validateResult(true, false)">ACERTÓ</button>
@@ -1049,7 +1051,10 @@
         var teams = { red: [], blue: [] };
         var pendingSteal = null; // { thief: player, victim: player } — esperando respuesta // IDs de jugadores por equipo
         var teamCards = { red: [], blue: [] }; // cronología compartida por equipo
-        var teamScore = { red: 0, blue: 0 }; // 'all' | '60s70s' | '80s' | '90s' | '2000s' | '2010s'
+        var teamScore = { red: 0, blue: 0 };
+        var teamTurn = 'red';
+        var teamVotes = {};
+        var teamVoteResolved = false; // 'all' | '60s70s' | '80s' | '90s' | '2000s' | '2010s'
         var turnCounter = 0;       // contador de turnos para canción compartida
         var isSharedSong = false;
         var isLightningSong = false; // modo relámpago: 5s y para  // indica si la canción actual es compartida
@@ -1265,6 +1270,11 @@
         }
 
         function handleSongEnd() {
+            // Modo equipos: resolver con los votos que haya
+            if (gameMode === 'equipos' && !teamVoteResolved) {
+                resolveTeamVote();
+                return;
+            }
             if (isRevealed) return; // ya procesado
             isPlaying = false;
 
@@ -1312,18 +1322,11 @@
                     'iceServers': [
                         { urls: 'stun:stun.l.google.com:19302' },
                         { urls: 'stun:stun1.l.google.com:19302' },
-                        { urls: 'stun:stun2.l.google.com:19302' },
-                        { urls: 'stun:stun3.l.google.com:19302' },
-                        { urls: 'stun:stun4.l.google.com:19302' },
-                        { urls: 'stun:global.stun.twilio.com:3478' },
                         { urls: 'stun:stun.cloudflare.com:3478' },
-                        { urls: 'stun:stun.stunprotocol.org:3478' },
-                        { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
-                        { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' },
-                        { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
-                        { urls: 'turn:relay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
-                        { urls: 'turn:relay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
-                        { urls: 'turn:relay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' }
+                        { urls: 'stun:freestun.net:3478' },
+                        { urls: 'turn:freestun.net:3478',  username: 'free', credential: 'free' },
+                        { urls: 'turn:freestun.net:5349',  username: 'free', credential: 'free' },
+                        { urls: 'turns:freestun.net:5349', username: 'free', credential: 'free' }
                     ]
                 }
             });
@@ -1549,9 +1552,14 @@
                 teams = { red: [], blue: [] };
                 teamCards = { red: [], blue: [] };
                 teamScore = { red: 0, blue: 0 };
-                players.forEach(function(p, i) {
-                    p.team = i % 2 === 0 ? 'red' : 'blue';
-                    teams[p.team].push(p.id);
+                teamTurn = 'red';
+                teamVotes = {};
+                teamVoteResolved = false;
+                var shuffled = players.slice().sort(function() { return Math.random() - 0.5; });
+                shuffled.forEach(function(pl, i) {
+                    var rp = players.find(function(p) { return p.id === pl.id; });
+                    rp.team = i % 2 === 0 ? 'red' : 'blue';
+                    teams[rp.team].push(rp.id);
                 });
                 document.getElementById('team-display').style.display = 'flex';
             } else {
@@ -1581,7 +1589,6 @@
             stopCountdown();
             resetLightning();
             isSharedSong = false;
-            // Cancelar robo de turno pendiente si hay turno nuevo
             if (pendingSteal) {
                 clearTimeout(pendingSteal.timeout);
                 pendingSteal = null;
@@ -1589,6 +1596,39 @@
                 if (bannerEl) bannerEl.style.display = 'none';
             }
             turnPhase = 'NORMAL';
+
+            // ── MODO EQUIPOS: turno por equipo, no por jugador ──
+            if (gameMode === 'equipos') {
+                teamVotes = {};
+                teamVoteResolved = false;
+                // Apuntar activePlayerIdx al primer miembro del equipo activo (para compatibilidad de display)
+                var activeTeamMembers = players.filter(function(pl) { return pl.team === teamTurn; });
+                if (activeTeamMembers.length > 0) {
+                    activePlayerIdx = players.indexOf(activeTeamMembers[0]);
+                }
+                turnCounter++;
+                currentSongIdx++;
+                if (songs[currentSongIdx] && songs[currentSongIdx].id) {
+                    var _plT = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]');
+                    if (!_plT.includes(songs[currentSongIdx].id)) {
+                        _plT.push(songs[currentSongIdx].id);
+                        localStorage.setItem('CB_PlayedSongs', JSON.stringify(_plT));
+                    }
+                }
+                if (!songs[currentSongIdx]) { reloadSongsMidGame(); currentSongIdx++; }
+                var s = songs[currentSongIdx];
+                applyTheme(s ? s.type : 'mix');
+                isRevealed = false; isPlaying = false; isMuted = false; isFogActive = false;
+                currentBets = {}; activeGuess = null; bettingAgainst = []; bettingFor = [];
+                var tName = teamTurn === 'red' ? '🔴 EQUIPO ROJO' : '🔵 EQUIPO AZUL';
+                var nMembers = activeTeamMembers.length;
+                document.getElementById('ui-current-player').innerText = tName;
+                document.getElementById('host-instructions').innerText = 'TURNO DE ' + tName + ' — TODOS VOTAN (' + nMembers + ' miembros)';
+                if (s && player && player.cueVideoById) player.cueVideoById({ videoId: s.id, startSeconds: 15 });
+                updateTeamDisplay();
+                syncState();
+                return;
+            }
             currentDuel = null;
             duelResult = null;
             duelTriggered = false;
@@ -1641,7 +1681,10 @@
                 document.getElementById('challenger-validation').style.display = 'none';
                 document.getElementById('ui-current-player').innerText = players[activePlayerIdx].name + " (REY)";
                 document.getElementById('host-instructions').innerText = "ESPERANDO A QUE LOS JUGADORES ELIJAN QUÉ CARTA TE TOCA...";
-                document.getElementById('player-container').innerHTML = '';
+                // Ocultar (NO destruir) el player de YouTube para que siga válido
+                if (player && player.stopVideo) player.stopVideo();
+                var pc = document.getElementById('player-container');
+                if (pc) pc.style.display = 'none';
                 applyTheme('mix');
                 syncState();
                 return;
@@ -1672,7 +1715,9 @@
             document.getElementById('ui-current-player').innerText = players[activePlayerIdx].name;
             // Botón relámpago: visible cuando está sonando y no está ya activado
             var lbtn = document.getElementById('lightning-btn');
-            if (lbtn) lbtn.style.display = (isPlaying && !isRevealed && !isLightningSong) ? 'inline-block' : 'none';
+            if (lbtn) lbtn.style.display = (isPlaying && !isRevealed && !isLightningSong && gameMode !== 'equipos') ? 'inline-block' : 'none';
+            var rtbtn = document.getElementById('resolve-team-btn');
+            if (rtbtn) rtbtn.style.display = (gameMode === 'equipos' && isPlaying && !teamVoteResolved && Object.keys(teamVotes).length > 0) ? 'inline-block' : 'none';
             // Mini-perfil del jugador activo
             var ap = players[activePlayerIdx];
             var miniEl = document.getElementById('active-player-mini-stats');
@@ -1827,7 +1872,11 @@
 
             switch (action) {
                 case 'PLAY':
-                    if (peerId !== activeP.id) return;
+                    // En modo equipos: cualquier miembro del equipo activo puede controlar la música
+                    var isTeamMember = gameMode === 'equipos' && players.some(function(pl){
+                        return pl.id === peerId && pl.team === teamTurn;
+                    });
+                    if (peerId !== activeP.id && !isTeamMember) return;
                     if (!isPlaying) {
                         momentoDeInicio = Date.now();
                         if (player && player.playVideo) {
@@ -1853,7 +1902,10 @@
                     }
                     break;
                 case 'STOP':
-                    if (peerId !== activeP.id) return;
+                    var isTeamMemberStop = gameMode === 'equipos' && players.some(function(pl){
+                        return pl.id === peerId && pl.team === teamTurn;
+                    });
+                    if (peerId !== activeP.id && !isTeamMemberStop) return;
                     isPlaying = false;
                     if (player && player.stopVideo) player.stopVideo();
                     document.getElementById('host-instructions').innerText = "¿ACERTÓ?";
@@ -2471,6 +2523,21 @@
                     var valNum = parseInt(value);
                     if (isNaN(valNum)) break;
 
+                    // ── MODO EQUIPOS: registro de voto ──
+                    if (gameMode === 'equipos') {
+                        if (!p || p.team !== teamTurn || teamVoteResolved || teamVotes[peerId] !== undefined) break;
+                        var maxSlotTeam = (teamCards[teamTurn] || []).length;
+                        if (valNum < 0 || valNum > maxSlotTeam) break;
+                        teamVotes[peerId] = { slot: valNum, time: Date.now() };
+                        addEvent('<span class="ev-name">' + p.name + '</span> ha votado 🗳️');
+                        syncState();
+                        // Comprobar si ya votaron todos
+                        var activeTeamPls = players.filter(function(pl){ return pl.team === teamTurn; });
+                        var allVoted = activeTeamPls.every(function(pl){ return teamVotes[pl.id] !== undefined; });
+                        if (allVoted) setTimeout(function(){ resolveTeamVote(); }, 1200);
+                        break;
+                    }
+
                     var slotOccupiedByBet = false;
                     for (var pid in currentBets) { if (currentBets[pid] == valNum) slotOccupiedByBet = true; }
 
@@ -2511,11 +2578,44 @@
                         document.getElementById('ui-card-artist').innerText = "????";
                         document.getElementById('ui-card-song').innerText = "????";
                         document.getElementById('ui-card-year').innerText = "????";
-                        document.getElementById('host-instructions').innerHTML = "CARTA ELEGIDA.<br>ESPERANDO A QUE EL REY INTRODUZCA EL AÑO...";
-                        document.getElementById('player-container').innerHTML = '<div id="youtube-player"></div>';
+                        document.getElementById('host-instructions').innerHTML = "CARTA ELEGIDA.<br>EL REY PUEDE REPRODUCIR Y LUEGO INTRODUCIR EL AÑO...";
+                        // Mostrar player-container y cargar el video elegido (SIN destruir YT player)
+                        var pcKing = document.getElementById('player-container');
+                        if (pcKing) pcKing.style.display = '';
+                        if (player && player.loadVideoById) {
+                            player.loadVideoById({ videoId: cartaElegida.id, startSeconds: 0 });
+                            player.stopVideo();
+                        }
                         syncState();
                     }
                     break;
+                case 'KING_SKIP_VIDEO':
+                    // El rey salta el video (link inválido) — volver a selección con cartas nuevas
+                    if (turnPhase !== 'KING_GUESS') return;
+                    if (peerId !== players[activePlayerIdx].id) return;
+                    turnPhase = 'KING_SELECTION';
+                    kingOptions = [];
+                    var numOpts2 = Math.max(1, players.length - 1);
+                    for (var ki = 0; ki < numOpts2; ki++) {
+                        currentSongIdx++;
+                        if (songs[currentSongIdx] && songs[currentSongIdx].id) {
+                            var _pl2 = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]');
+                            if (!_pl2.includes(songs[currentSongIdx].id)) {
+                                _pl2.push(songs[currentSongIdx].id);
+                                localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl2));
+                            }
+                        }
+                        if (!songs[currentSongIdx]) { reloadSongsMidGame(); currentSongIdx++; }
+                        if (songs[currentSongIdx]) kingOptions.push(songs[currentSongIdx]);
+                    }
+                    if (player && player.stopVideo) player.stopVideo();
+                    var pcSkip = document.getElementById('player-container');
+                    if (pcSkip) pcSkip.style.display = 'none';
+                    document.getElementById('host-instructions').innerText = 'VIDEO INVÁLIDO — LOS JUGADORES ELIGEN NUEVA CARTA...';
+                    addEvent('<span class="ev-info">⏭️ Rey saltó el video — eligiendo carta nueva</span>');
+                    syncState();
+                    break;
+
                 case 'KING_GUESS':
                     if (turnPhase !== 'KING_GUESS') return;
                     if (peerId !== players[activePlayerIdx].id) return; // Solo Rey
@@ -2671,9 +2771,17 @@
         function resolveKingMode(won) {
             triggerFlash();
             document.getElementById('host-instructions').innerHTML = "CARGANDO SIGUIENTE FASE...";
+            // Restaurar visibilidad del player-container (ocultado durante KING_SELECTION)
+            var pc = document.getElementById('player-container');
+            if (pc) pc.style.display = '';
             if (won && activePlayerIdx < players.length) {
                 showWinner(players[activePlayerIdx].name);
             } else {
+                // El rey falló: reducir su score a 9 para que no vuelva a activar modo rey
+                // en su próximo turno (debe volver a ganar una carta para intentarlo de nuevo)
+                if (players[activePlayerIdx] && players[activePlayerIdx].score >= 10) {
+                    players[activePlayerIdx].score = 9;
+                }
                 activePlayerIdx = (activePlayerIdx + 1) % players.length;
                 players[activePlayerIdx].canReload = true;
                 nextTurn();
@@ -2903,7 +3011,9 @@
                         showWinner(players[activePlayerIdx].name);
                         return;
                     } else if (gameMode === 'rey') {
-                        // En modo rey: NO avanzar jugador — nextTurn detectará score>=10 y activará KING_SELECTION
+                        // Avanzar al siguiente jugador primero — cuando vuelva al rey, nextTurn activará KING_SELECTION
+                        activePlayerIdx = (activePlayerIdx + 1) % players.length;
+                        players[activePlayerIdx].canReload = true;
                         nextTurn();
                         return;
                     }
@@ -3073,6 +3183,101 @@
             }
             awardsHtml += '</div></div>';
 
+            // ── PREMIOS DE CONSOLACIÓN ──
+            if (players.length >= 2) {
+                var jokeHtml = '<div style="width:100%;max-width:700px;margin:12px 0;">';
+                jokeHtml += '<div style="font-family:Bungee,sans-serif;font-size:0.6em;color:#333;letter-spacing:3px;text-align:center;margin-bottom:10px;">PREMIOS DE CONSOLACIÓN</div>';
+                jokeHtml += '<div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;">';
+
+                // 1. Al Espíritu Libre — peor % acierto (mín 2 intentos)
+                var worstAcc = null, worstPct = -1;
+                players.forEach(function(pl) {
+                    var c = stats.playerCorrect[pl.id] || 0;
+                    var f = stats.playerFails[pl.id] || 0;
+                    if ((c + f) >= 2) {
+                        var pct = f / (c + f);
+                        if (pct > worstPct) { worstPct = pct; worstAcc = pl; }
+                    }
+                });
+                if (worstAcc) {
+                    jokeHtml += '<div class="award-card" style="border-color:#555;">' +
+                        '<div class="award-icon">🎖️</div>' +
+                        '<div class="award-title" style="color:#aaa;">EL OÍDO DE PALO</div>' +
+                        '<div class="award-val" style="color:#ccc;">' + worstAcc.name + '</div>' +
+                        '<div class="award-sub">La música le emociona. Adivinar el año, no tanto</div>' +
+                        '</div>';
+                }
+
+                // 2. A la Popularidad Involuntaria — más veces saboteado
+                var mostSab = players.slice().sort(function(a,b){
+                    return (stats.playerSabotaged[b.id]||0)-(stats.playerSabotaged[a.id]||0);
+                })[0];
+                if (mostSab && (stats.playerSabotaged[mostSab.id]||0) > 0) {
+                    jokeHtml += '<div class="award-card" style="border-color:#555;">' +
+                        '<div class="award-icon">🎖️</div>' +
+                        '<div class="award-title" style="color:#aaa;">EL PARARRAYOS</div>' +
+                        '<div class="award-val" style="color:#ccc;">' + mostSab.name + '</div>' +
+                        '<div class="award-sub">Consiguió despertar lo peor de sus amigos. Eso también es un talento</div>' +
+                        '</div>';
+                }
+
+                // 3. A la Experiencia Completa — último puesto (excluir ganador)
+                var lastPlace = players.slice().sort(function(a,b){ return a.score - b.score; })[0];
+                if (lastPlace && lastPlace.name !== name) {
+                    jokeHtml += '<div class="award-card" style="border-color:#555;">' +
+                        '<div class="award-icon">🎖️</div>' +
+                        '<div class="award-title" style="color:#aaa;">EL GRAN TURISTA</div>' +
+                        '<div class="award-val" style="color:#ccc;">' + lastPlace.name + '</div>' +
+                        '<div class="award-sub">Vino, escuchó, y disfrutó del paisaje. El ranking es lo de menos</div>' +
+                        '</div>';
+                }
+
+                // 4. A la Convicción Inquebrantable — más fallos absolutos (si es distinto del anterior)
+                var mostFails = players.slice().sort(function(a,b){
+                    return (stats.playerFails[b.id]||0)-(stats.playerFails[a.id]||0);
+                })[0];
+                if (mostFails && (stats.playerFails[mostFails.id]||0) >= 3 && (!worstAcc || mostFails.id !== worstAcc.id)) {
+                    jokeHtml += '<div class="award-card" style="border-color:#555;">' +
+                        '<div class="award-icon">🎖️</div>' +
+                        '<div class="award-title" style="color:#aaa;">EL PALEONTÓLOGO</div>' +
+                        '<div class="award-val" style="color:#ccc;">' + mostFails.name + '</div>' +
+                        '<div class="award-sub">Para él/ella, las canciones de los 2000 suenan muy modernas</div>' +
+                        '</div>';
+                }
+
+                // 5. Al Juego Limpio — 0 sabotajes lanzados
+                var monkPlayer = players.find(function(pl) { return (stats.playerSabotages[pl.id]||0) === 0; });
+                if (monkPlayer) {
+                    jokeHtml += '<div class="award-card" style="border-color:#555;">' +
+                        '<div class="award-icon">🎖️</div>' +
+                        '<div class="award-title" style="color:#aaa;">EL MONJE SHAOLÍN</div>' +
+                        '<div class="award-val" style="color:#ccc;">' + monkPlayer.name + '</div>' +
+                        '<div class="award-sub">Podría haberte fastidiado. Decidió no hacerlo. Respétale</div>' +
+                        '</div>';
+                }
+
+                // 6. A la Elegancia Minimalista — menos acciones totales
+                var leastActive = players.slice().sort(function(a,b){
+                    var tA = (stats.playerCorrect[a.id]||0)+(stats.playerFails[a.id]||0)+(stats.playerSabotages[a.id]||0);
+                    var tB = (stats.playerCorrect[b.id]||0)+(stats.playerFails[b.id]||0)+(stats.playerSabotages[b.id]||0);
+                    return tA - tB;
+                })[0];
+                if (leastActive) {
+                    var totalAct = (stats.playerCorrect[leastActive.id]||0)+(stats.playerFails[leastActive.id]||0)+(stats.playerSabotages[leastActive.id]||0);
+                    if (totalAct <= 4) {
+                        jokeHtml += '<div class="award-card" style="border-color:#555;">' +
+                            '<div class="award-icon">🎖️</div>' +
+                            '<div class="award-title" style="color:#aaa;">EL ESPECTADOR PRIVILEGIADO</div>' +
+                            '<div class="award-val" style="color:#ccc;">' + leastActive.name + '</div>' +
+                            '<div class="award-sub">Lo de participar lo veía más como una sugerencia</div>' +
+                            '</div>';
+                    }
+                }
+
+                jokeHtml += '</div></div>';
+                awardsHtml += jokeHtml;
+            }
+
             // Ranking final con detalles por jugador
             var rankHtml = '';
             var medals = ['🥇','🥈','🥉'];
@@ -3129,9 +3334,18 @@
 
             console.log("Ganador:", name, "| Sonando:", songTitle);
 
-            // Usar el contenedor de video para sonar (oculto)
+            // Parar el player del juego antes de reproducir la canción de victoria
+            // (evita conflicto de audio entre el player activo y el iframe de victoria)
+            try {
+                if (player && player.stopVideo) { player.stopVideo(); }
+                if (player && player.destroy)   { player.destroy(); }
+            } catch(e) {}
+            player = null;
+
+            // Inyectar el iframe de victoria
             var container = document.getElementById('player-container');
-            container.innerHTML = '<iframe src="https://www.youtube.com/embed/' + songId + '?autoplay=1&mute=0&enablejsapi=1&playsinline=1" allow="autoplay; encrypted-media" style="width:300px;height:200px;border:none;"></iframe>';
+            container.style.display = '';
+            container.innerHTML = '<iframe src="https://www.youtube.com/embed/' + songId + '?autoplay=1&mute=0&enablejsapi=1&playsinline=1&origin=' + window.location.origin + '" allow="autoplay; encrypted-media" allowfullscreen style="position:absolute;top:-9999px;left:-9999px;width:300px;height:200px;border:none;"></iframe>';
 
             // Confeti personalizado por categoría dominante del ganador
             function randomInRange(min, max) { return Math.random() * (max - min) + min; }
@@ -3220,6 +3434,9 @@
                     stats: { streaks: stats.streaks, maxStreaks: stats.maxStreaks },
                     teamCards: teamCards,
                     teamScore: teamScore,
+                    teamTurn: teamTurn,
+                    teamVotedIds: Object.keys(teamVotes),
+                    teamVoteCount: Object.keys(teamVotes).length,
                     pendingSteal: pendingSteal ? { thiefName: pendingSteal.thief.name, victimId: pendingSteal.victim.id } : null,
                     isLightningSong: isLightningSong,
                     joputismoLevel: joputismoLevel,
@@ -3411,6 +3628,83 @@
             syncState();
         }
 
+        // ── MODO EQUIPOS: votos y validación ──
+        function resolveTeamVote() {
+            if (teamVoteResolved) return;
+            teamVoteResolved = true;
+
+            var slotCounts = {};
+            var slotEarliest = {};
+            Object.keys(teamVotes).forEach(function(pid) {
+                var v = teamVotes[pid];
+                var s = String(v.slot);
+                slotCounts[s] = (slotCounts[s] || 0) + 1;
+                if (!slotEarliest[s] || v.time < slotEarliest[s]) slotEarliest[s] = v.time;
+            });
+
+            if (Object.keys(slotCounts).length === 0) {
+                // Sin votos → fallo automático
+                addEvent('<span class="ev-bad">Sin votos del ' + (teamTurn==='red'?'🔴':'🔵') + ' — fallo automático</span>');
+                teamTurn = teamTurn === 'red' ? 'blue' : 'red';
+                nextTurn();
+                return;
+            }
+
+            var maxCount = Math.max.apply(null, Object.keys(slotCounts).map(function(k){ return slotCounts[k]; }));
+            var topSlots = Object.keys(slotCounts).filter(function(s) { return slotCounts[s] === maxCount; });
+            var winningSlot;
+            if (topSlots.length === 1) {
+                winningSlot = parseInt(topSlots[0]);
+            } else {
+                // Empate → más rápido
+                topSlots.sort(function(a,b) { return slotEarliest[a] - slotEarliest[b]; });
+                winningSlot = parseInt(topSlots[0]);
+                addEvent('<span class="ev-info">⚡ Empate — gana el slot más rápido: ' + winningSlot + '</span>');
+            }
+
+            validateTeamResult(winningSlot);
+        }
+
+        function validateTeamResult(slot) {
+            if (!songs[currentSongIdx]) { nextTurn(); return; }
+            var actualYear = parseInt(songs[currentSongIdx].year);
+            var tc = teamCards[teamTurn] || [];
+            var correct = false;
+
+            if (tc.length === 0) {
+                correct = true;
+            } else if (slot === 0) {
+                correct = actualYear <= tc[0];
+            } else if (slot >= tc.length) {
+                correct = actualYear >= tc[tc.length - 1];
+            } else {
+                correct = (actualYear >= tc[slot - 1] && actualYear <= tc[slot]);
+            }
+
+            var tName = teamTurn === 'red' ? '🔴 Equipo Rojo' : '🔵 Equipo Azul';
+            revealData(); // mostrar la carta
+
+            if (correct) {
+                teamCards[teamTurn].push(actualYear);
+                teamCards[teamTurn].sort(function(a,b){ return a-b; });
+                teamScore[teamTurn] = teamCards[teamTurn].length;
+                addEvent('<span class="ev-good">' + tName + ' ACIERTA ✅ — año ' + actualYear + '</span>');
+                updateTeamDisplay();
+                if (teamScore[teamTurn] >= 10) {
+                    showWinner(teamTurn === 'red' ? '🔴 EQUIPO ROJO' : '🔵 EQUIPO AZUL');
+                    return;
+                }
+            } else {
+                addEvent('<span class="ev-bad">' + tName + ' FALLA ❌ — era ' + actualYear + '</span>');
+            }
+
+            // Cambiar de equipo
+            setTimeout(function() {
+                teamTurn = teamTurn === 'red' ? 'blue' : 'red';
+                nextTurn();
+            }, 3000);
+        }
+
         // ── MODO EQUIPOS: actualizar panel ──
         function updateTeamDisplay() {
             if (gameMode !== 'equipos') return;
@@ -3452,6 +3746,9 @@
             teams = { red: [], blue: [] };
             teamCards = { red: [], blue: [] };
             teamScore = { red: 0, blue: 0 };
+            teamTurn = 'red';
+            teamVotes = {};
+            teamVoteResolved = false;
 
             // Resetear estado de cada jugador pero conservar nombre/avatar/conexión
             players.forEach(function(p) {
@@ -3486,6 +3783,12 @@
             teams = { red: [], blue: [] };
             teamCards = { red: [], blue: [] };
             teamScore = { red: 0, blue: 0 };
+            teamTurn = 'red';
+            teamVotes = {};
+            teamVoteResolved = false;
+            teamTurn = 'red';
+            teamVotes = {};
+            teamVoteResolved = false;
 
             // Ocultar winner-screen, mostrar dashboard
             document.getElementById('winner-screen').style.display = 'none';
