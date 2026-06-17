@@ -194,6 +194,37 @@
         .rank-pill.leader { border-color: var(--gold); color: var(--gold); }
         .rank-pill .rname { max-width: 60px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
+        /* ── FAROLERO ── */
+        #btn-brag {
+            display: none;
+            background: linear-gradient(90deg, #1a0033, #440088);
+            color: #cc88ff;
+            border: 1px solid #6600cc;
+            font-family: 'Bungee';
+            font-size: 0.8em;
+            padding: 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            width: 100%;
+            max-width: 340px;
+            margin: 4px 0;
+            letter-spacing: 1px;
+        }
+        /* ── FLASH DEL AÑO ── */
+        #year-flash {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            padding: 16px;
+            background: linear-gradient(135deg, #003300, #006600);
+            border-bottom: 2px solid var(--neon);
+            text-align: center;
+            z-index: 9850;
+            animation: danger-slide 3s ease forwards;
+        }
+        #year-flash .yf-year { font-family: 'Bungee'; font-size: 2em; color: var(--neon); }
+        #year-flash .yf-info { font-family: 'Montserrat'; font-size: 0.7em; color: #aaa; }
+
         /* ── SEGURO DE FALLO ── */
         #btn-fail-safe {
             display: none;
@@ -1615,6 +1646,7 @@
             
             <h4 id="inventory-title" style="margin: 0 0 5px 0; font-family: 'Bungee'; font-size: 0.6em; color: #888; text-align: center;">MIS CARTAS</h4>
             <div id="my-team-badge"></div>
+            <div id="year-flash"><div class="yf-year" id="yf-year"></div><div class="yf-info" id="yf-info"></div></div>
             <div id="distraction-overlay">😂😂😂<br><span style="font-size:0.4em;font-family:'Bungee';color:#ff8800;margin-top:10px;">¡DISTRACCIÓN!</span></div>
             <div id="jinx-banner">💀 JINX activo — si fallas este turno, perderás 2 cartas</div>
             <div class="emoji-wildcard-bar" id="emoji-wildcard-bar">
@@ -1639,6 +1671,7 @@
             <div id="shared-song-player-banner">🎵 ¡¡TODOS JUEGAN!! PRIMER SLOT CORRECTO GANA 🎵</div>
             <div id="streak-counter"></div>
             <button id="btn-double-or-nothing" onclick="activateDoubleOrNothing()">🎲 DOBLE O NADA</button>
+            <button id="btn-brag" onclick="activateBrag()">🃏 FAROLEAR — +3 si acierto / −2 si fallo</button>
             <button id="btn-fail-safe" onclick="activateFailSafe()">🛡️ SEGURO DE FALLO (2🔵)</button>
             <button id="btn-steal-streak" onclick="stealStreak()">🔥 ROBAR RACHA (2🔵)</button>
             <div id="turn-counter-display"></div>
@@ -2453,6 +2486,25 @@
             if (btn) { btn.innerText = '✅ LISTO'; btn.disabled = true; btn.style.opacity = '0.5'; }
         }
 
+        // ── FAROLERO ──
+        function activateBrag() {
+            showCustomConfirm('🃏 ¿FAROLEAR? Si aciertas el slot: +3 cartas. Si fallas: −2 cartas. Sin vuelta atrás.', function(ok) {
+                if (ok) send('BRAG');
+            });
+        }
+
+        function showYearFlash(year, artist, playerName) {
+            var el = document.getElementById('year-flash');
+            var yrEl = document.getElementById('yf-year');
+            var infoEl = document.getElementById('yf-info');
+            if (!el || !yrEl || !infoEl) return;
+            yrEl.textContent = year;
+            infoEl.textContent = artist + ' · ' + playerName + ' acertó ✅';
+            el.style.display = 'block';
+            vibrate([50, 30, 100]);
+            setTimeout(function() { el.style.display = 'none'; }, 3000);
+        }
+
         // ── SEGURO DE FALLO ──
         function activateFailSafe() {
             showCustomConfirm('🛡️ SEGURO DE FALLO (2🔵): si fallas este turno no sufrirás penalizaciones extra (jinx, vidas, doble o nada). ¿Activar?', function(ok) {
@@ -2790,6 +2842,13 @@
                 soundBet();
                 showDangerAlert('⚡ ATENCIÓN: ' + data.name + ' lleva racha ×' + data.streak + ' — ¡SABELOTODO!', false);
                 return;
+            } else if (data.type === 'BRAG_ACTIVE') {
+                soundBet();
+                showDangerAlert('🃏 ¡TURNO DEL FAROLERO! ' + data.name + ' se juega todo', false);
+                return;
+            } else if (data.type === 'YEAR_FLASH') {
+                showYearFlash(data.year, data.artist, data.player);
+                return;
             } else if (data.type === 'QUICK_REACT') {
                 // Toast de reacción rápida
                 var qt = document.createElement('div');
@@ -3098,6 +3157,22 @@
                 if (isMyTurnNow && document.hidden) { startTabBlink(); } else { stopTabBlink(); }
 
                 // Botón seguro de fallo
+                // Botón farolero: solo antes de empezar a sonar, sin brag activo
+                var bragBtn = document.getElementById('btn-brag');
+                if (bragBtn) {
+                    bragBtn.style.display = (isMyTurn && data.gameStarted && !data.isPlaying && !data.isRevealed && !data.isBragging) ? 'block' : 'none';
+                    if (data.isBragging && isMyTurn) {
+                        bragBtn.style.display = 'block';
+                        bragBtn.disabled = true;
+                        bragBtn.innerText = '🃏 ¡FAROLERO ACTIVADO!';
+                        bragBtn.style.background = 'linear-gradient(90deg,#440000,#880000)';
+                    } else if (!data.isBragging) {
+                        bragBtn.disabled = false;
+                        bragBtn.innerText = '🃏 FAROLEAR — +3 si acierto / −2 si fallo';
+                        bragBtn.style.background = '';
+                    }
+                }
+
                 var fsBtn = document.getElementById('btn-fail-safe');
                 if (fsBtn) {
                     var myPl4 = data.players && data.players.find(function(pl){return pl.id===myId;});
