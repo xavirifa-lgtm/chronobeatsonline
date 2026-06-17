@@ -165,6 +165,30 @@
             100% { transform: translateY(-100%); opacity: 0; }
         }
 
+        /* ── CUENTA ATRÁS DE INICIO ── */
+        #countdown-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.92);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        #countdown-number {
+            font-family: 'Bungee';
+            font-size: 6em;
+            color: var(--neon);
+            text-shadow: 0 0 40px var(--neon);
+            animation: cd-pulse 0.85s ease-out;
+        }
+        @keyframes cd-pulse {
+            0% { transform: scale(1.8); opacity: 0; }
+            60% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(0.9); opacity: 0.8; }
+        }
+
         /* ── MINI RANKING ── */
         #mini-ranking {
             display: none;
@@ -1427,11 +1451,16 @@
                 <li style="margin-bottom:8px;"><strong style="color:var(--gold);">MODO REY:</strong> Al llegar a 10, el turno pasa al siguiente jugador. Cuando vuelva a tocarte, tus rivales eligen una canción y tienes que adivinar el año con ±2 de margen. Si aciertas, ganas. Si fallas, tu score baja a 9 y tienes que volver a ganar una carta para intentarlo de nuevo. Puedes saltar el vídeo si el enlace no funciona (⏭️ VIDEO NO VÁLIDO) y se elegirá una carta nueva.</li>
                 <li style="margin-bottom:8px;"><strong style="color:#ff4444;">SUPERVIVENCIA:</strong> Cada jugador tiene 3 vidas (💿). Cada fallo quita una vida. El último en pie gana.</li>
                 <li style="margin-bottom:8px;"><strong style="color:#4488ff;">EQUIPOS:</strong> Rojo vs Azul asignados al azar. Turno por equipo: suena una canción y <strong>todos los miembros del equipo votan</strong> un hueco. Gana el hueco con más votos. Si hay empate, gana el que se votó más rápido. El equipo que llega a 10 cartas gana.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#888;">🏆 MODO COMPETITIVO:</strong> Sin sabotajes, sin fichas, sin especiales. Solo cronología pura. Actívalo en el lobby antes de empezar. Para los que quieren demostrar quién sabe más de verdad.</li>
             </ul>
 
             <!-- BONUS DE RACHA -->
             <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">🔥 BONUS DE RACHA</h3>
             <p>Si llevas <strong>3 o más aciertos seguidos</strong>, cada carta adicional vale <strong>2 puntos</strong> en lugar de 1. El contador de racha es visible en tu móvil y en la pantalla del host.</p>
+
+            <!-- CAMINO DEL GUERRERO -->
+            <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">⚔️ EL CAMINO DEL GUERRERO</h3>
+            <p>Si fallas <strong>3 veces seguidas</strong>, la siguiente carta que aciertes vale <strong>2 puntos</strong> automáticamente. Sin coste, sin activación manual. Un empujón para remontar cuando la partida se pone cuesta arriba.</p>
 
             <!-- DOBLE O NADA -->
             <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">🎲 DOBLE O NADA</h3>
@@ -1441,6 +1470,15 @@
                 <li style="margin-bottom:6px;">Si <strong>fallas</strong> → pierdes <strong>1 carta</strong> ya colocada.</li>
             </ul>
             <p style="font-size:0.85em; color:#888; margin-top:4px;">Solo se puede activar una vez por turno, mientras la canción está sonando.</p>
+
+            <!-- TURNO DEL FAROLERO -->
+            <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">🃏 TURNO DEL FAROLERO</h3>
+            <p>Antes de que empiece a sonar la canción, puedes declarar que la conoces pulsando <strong>FAROLEAR</strong>:</p>
+            <ul style="padding-left:15px; margin-top:6px;">
+                <li style="margin-bottom:6px;">Si <strong>aciertas</strong> el hueco → ganas <strong>3 cartas</strong> en total.</li>
+                <li style="margin-bottom:6px;">Si <strong>fallas</strong> → pierdes <strong>2 cartas</strong> ya colocadas.</li>
+            </ul>
+            <p style="font-size:0.85em; color:#888; margin-top:4px;">Sin coste de ficha. Puro riesgo.</p>
 
             <!-- FICHAS Y APUESTAS -->
             <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">🔵 FICHAS Y APUESTAS</h3>
@@ -1455,6 +1493,8 @@
             <ul style="padding-left:15px; margin-top:8px;">
                 <li style="margin-bottom:8px;"><strong style="color:#00ff88;">ESCUDO (3🔵):</strong> Bloquea el próximo sabotaje que recibas. El sabotaje rebota y el atacante pierde la ficha.</li>
                 <li style="margin-bottom:8px;"><strong style="color:var(--gold);">PISTA ARTISTA (comodín):</strong> Revela el nombre del artista de la canción actual. 3 usos por partida.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#88bbff;">SEGURO DE FALLO (2🔵):</strong> Actívalo antes de colocar tu carta. Si fallas, no se aplican penalizaciones extra: ni jinx, ni pérdida de vida en Supervivencia, ni el coste del Doble o Nada. Solo cuenta como fallo normal.</li>
+                <li style="margin-bottom:8px;"><strong style="color:var(--gold);">ELEGIR CATEGORÍA (4🔵):</strong> Una vez por partida, elige que la siguiente canción sea de una categoría concreta: Anime 🎌, Películas 🎬 o Videojuegos 🎮. Útil si tienes punto fuerte en una categoría.</li>
             </ul>
 
             <!-- ESPECIALES -->
@@ -1462,6 +1502,7 @@
             <ul style="padding-left:15px; margin-top:8px;">
                 <li style="margin-bottom:8px;"><strong style="color:var(--gold);">🎵 ¡TODOS JUEGAN!:</strong> Cada 5 turnos, cualquier jugador puede ganar la carta. El primero que acierte el hueco se la lleva (cuesta 1🔵 para los no-activos). El jugador activo no paga ficha.</li>
                 <li style="margin-bottom:8px;"><strong style="color:#aaaaaa;">🗓️ FILTRO DE DÉCADAS:</strong> El host puede limitar las canciones a una época concreta (80s, 90s, 2000s…) antes de empezar la partida.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#4488ff;">🔵 AUTO-RECARGA:</strong> Si llegas a 0 fichas durante 2 turnos seguidos, recibes 1 ficha automáticamente. Para que nadie quede bloqueado para siempre.</li>
             </ul>
 
             <!-- SABOTAJES TROLL -->
@@ -1659,6 +1700,7 @@
                 <div class="sab-attacker" id="sab-attacker"></div>
                 <div class="sab-name" id="sab-name"></div>
             </div>
+            <div id="countdown-overlay"><div id="countdown-number">3</div></div>
             <div id="mini-ranking"></div>
             <div id="team-vote-banner"></div>
             <button id="resist-steal-btn" onclick="send('RESIST_STEAL')">
@@ -1677,6 +1719,10 @@
             <div id="turn-counter-display"></div>
             <div id="my-lives-bar" class="my-lives" style="display:none;"></div>
 
+            <!-- BOTÓN CATEGORÍA -->
+            <div id="request-cat-bar" style="display:none; justify-content:center; margin:4px 0;">
+                <button onclick="requestCategory()" style="background:rgba(255,255,255,0.04);border:1px solid #222;border-radius:20px;padding:6px 14px;font-size:0.65em;color:#555;cursor:pointer;font-family:Montserrat;">🎯 Pedir categoría (4🔵)</button>
+            </div>
             <!-- REACCIONES RÁPIDAS -->
             <div class="quick-react-bar" id="quick-react-bar">
                 <button class="qr-btn" onclick="sendQuickReact('¡Llevas tanto tiempo en el año equivocado que ya te han mandado el padrón municipal!')">📋 ¡Te han empadronado!</button>
@@ -2478,6 +2524,36 @@
 
         // ── READY CHECK ──
         var alreadySentReady = false;
+        // ── CUENTA ATRÁS ──
+        function showCountdown(n) {
+            var overlay = document.getElementById('countdown-overlay');
+            var numEl = document.getElementById('countdown-number');
+            if (!overlay || !numEl) return;
+            overlay.style.display = 'flex';
+            numEl.style.animation = 'none';
+            numEl.textContent = n > 0 ? n : '¡YA!';
+            numEl.style.color = n > 0 ? 'var(--neon)' : 'var(--gold)';
+            // Forzar reflow para reiniciar animación
+            void numEl.offsetWidth;
+            numEl.style.animation = 'cd-pulse 0.85s ease-out';
+            vibrate(n > 0 ? 80 : 300);
+            if (n === 0) setTimeout(function() { overlay.style.display = 'none'; }, 900);
+        }
+
+        // ── SOLICITAR CATEGORÍA ──
+        function requestCategory() {
+            showCustomConfirm('🎯 Elige la categoría de la próxima canción (cuesta 4🔵, 1 uso por partida):<br><br>' +
+                '<button onclick="document.getElementById(\'cat-choice\').value=\'orig\'" style="margin:4px;padding:6px 10px;background:#222;color:#fff;border:1px solid #444;border-radius:6px;cursor:pointer;">🎌 Anime</button>' +
+                '<button onclick="document.getElementById(\'cat-choice\').value=\'peliculas\'" style="margin:4px;padding:6px 10px;background:#222;color:#fff;border:1px solid #444;border-radius:6px;cursor:pointer;">🎬 Películas</button>' +
+                '<button onclick="document.getElementById(\'cat-choice\').value=\'videojuegos\'" style="margin:4px;padding:6px 10px;background:#222;color:#fff;border:1px solid #444;border-radius:6px;cursor:pointer;">🎮 Videojuegos</button>' +
+                '<input type="hidden" id="cat-choice" value="">',
+                function(ok) {
+                    var choice = document.getElementById('cat-choice');
+                    if (ok && choice && choice.value) send('REQUEST_CATEGORY', choice.value);
+                }
+            );
+        }
+
         function sendReady() {
             if (alreadySentReady) return;
             alreadySentReady = true;
@@ -2842,6 +2918,13 @@
                 soundBet();
                 showDangerAlert('⚡ ATENCIÓN: ' + data.name + ' lleva racha ×' + data.streak + ' — ¡SABELOTODO!', false);
                 return;
+            } else if (data.type === 'COUNTDOWN') {
+                showCountdown(data.count);
+                return;
+            } else if (data.type === 'WARRIOR_BONUS') {
+                soundToken();
+                showDangerAlert('⚔️ ¡CAMINO DEL GUERRERO! ' + data.name + ' remonta con carta extra', false);
+                return;
             } else if (data.type === 'BRAG_ACTIVE') {
                 soundBet();
                 showDangerAlert('🃏 ¡TURNO DEL FAROLERO! ' + data.name + ' se juega todo', false);
@@ -3190,7 +3273,18 @@
 
                 // Reacciones rápidas — visibles cuando hay partida
                 var qrBar = document.getElementById('quick-react-bar');
-                if (qrBar) qrBar.style.display = data.gameStarted ? 'flex' : 'none';
+                if (qrBar) qrBar.style.display = (data.gameStarted && !data.competitiveMode) ? 'flex' : 'none';
+                // Botón categoría
+                var catBar = document.getElementById('request-cat-bar');
+                if (catBar) {
+                    var myPlCat = data.players && data.players.find(function(pl){ return pl.id === myId; });
+                    catBar.style.display = (data.gameStarted && !data.competitiveMode && myPlCat && myPlCat.tokens >= 4 && !data.requestedCategory) ? 'flex' : 'none';
+                }
+                // Ocultar sabotajes y fichas en modo competitivo
+                var sabEl = document.getElementById('joputismo-container');
+                if (sabEl) sabEl.style.display = data.competitiveMode ? 'none' : '';
+                var ewBr = document.getElementById('emoji-wildcard-bar');
+                if (ewBr && data.competitiveMode) ewBr.style.display = 'none';
 
                 // Ready check — ocultar botón listo cuando empiece la partida
                 var readyBtn = document.getElementById('btn-ready');

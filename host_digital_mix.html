@@ -910,6 +910,10 @@
                 <option value="90s2000s">90s Y 2000s (1990-2009)</option>
             </select>
             <div id="song-counter" style="font-family:'Montserrat'; font-size:0.65em; color:#444; text-align:center; margin-top:6px;"></div>
+            <div style="margin-top:10px; display:flex; align-items:center; gap:8px;">
+                <input type="checkbox" id="competitive-mode-check" style="width:16px;height:16px;accent-color:var(--neon);">
+                <label for="competitive-mode-check" style="font-family:'Montserrat';font-size:0.7em;color:#666;cursor:pointer;">🏆 Modo Competitivo (sin sabotajes, sin fichas, solo cronología)</label>
+            </div>
         </div>
 
         <div id="joputismo-container-lobby" style="margin-bottom: 20px;">
@@ -1098,6 +1102,10 @@
         var nextBonusTurn = 7 + Math.floor(Math.random() * 4);      // carta bonificación (7-10)
         var isBonusCard = false;   // este turno la carta vale 2 puntos
         var voiceEnabled = false;
+        var competitiveMode = false;    // modo competitivo: sin sabotajes ni fichas
+        var requestedCategory = null;   // categoría solicitada para la siguiente canción
+        var reactionStartTime = 0;      // cuándo empezó a sonar la canción
+        var tokenStarvationTurns = {};  // {playerId: N} — turnos consecutivos sin fichas
         var readyPlayers = {};      // {playerId: true} — ready check
         var failSafeActive = false;
         var isBragging = false;     // turno del farolero activo // seguro de fallo activo este turno
@@ -1176,6 +1184,8 @@
             if (!stats.playerFails[pid]) stats.playerFails[pid] = 0;
             stats.playerFails[pid]++;
             stats.streaks[pid] = 0;
+            if (!stats.consecutiveFails[pid]) stats.consecutiveFails[pid] = 0;
+            stats.consecutiveFails[pid]++;
             var s = songs[currentSongIdx];
             if (s) {
                 var key = s.id;
@@ -1406,6 +1416,7 @@
 
         function updateTokens(player, delta) {
             if (!player) return;
+            if (competitiveMode) return; // modo competitivo: sin fichas
             player.tokens = Math.max(0, Math.min(10, (player.tokens || 0) + delta));
         }
 
@@ -1649,6 +1660,7 @@
             if (tc) tc.innerHTML = '';
 
             gameMode = document.getElementById('game-mode-select').value;
+            competitiveMode = document.getElementById('competitive-mode-check') && document.getElementById('competitive-mode-check').checked;
             hasShield = {};
             initStats();
             turnCounter = 0;
@@ -1661,10 +1673,15 @@
             isBragging = false;
             songHistory = [];
             readyPlayers = {};
+            requestedCategory = null;
             justSucceeded = false;
             emojiWildcardBonus = {};
             reactionBuffer = {};
             silentCurses = [];
+            competitiveMode = false;
+            requestedCategory = null;
+            reactionStartTime = 0;
+            tokenStarvationTurns = {};
             nextSharedSongTurn = 4 + Math.floor(Math.random() * 4);
             nextBonusTurn = 7 + Math.floor(Math.random() * 4);
             replayLog = [];
@@ -1720,7 +1737,14 @@
             document.getElementById('lobby').style.display = 'none';
             document.getElementById('dashboard').style.display = 'grid';
             gameStarted = true;
-            nextTurn();
+            // Cuenta atrás 3-2-1 antes del primer turno
+            (function doCountdown(n) {
+                for (var _cid in connections) {
+                    try { connections[_cid].send({ type: 'COUNTDOWN', count: n }); } catch(e) {}
+                }
+                if (n > 0) { setTimeout(function(){ doCountdown(n-1); }, 1000); }
+                else { setTimeout(function(){ nextTurn(); }, 1000); }
+            })(3);
         }
 
         function nextTurn() {
@@ -1751,6 +1775,16 @@
                 }
                 turnCounter++;
                 currentSongIdx++;
+                // Categoría solicitada: buscar la siguiente canción de ese tipo
+                if (requestedCategory) {
+                    for (var _ci = currentSongIdx; _ci < songs.length; _ci++) {
+                        if (songs[_ci] && songs[_ci].type === requestedCategory) {
+                            if (_ci !== currentSongIdx) { var _tmp = songs[currentSongIdx]; songs[currentSongIdx] = songs[_ci]; songs[_ci] = _tmp; }
+                            break;
+                        }
+                    }
+                    requestedCategory = null;
+                }
                 if (songs[currentSongIdx] && songs[currentSongIdx].id) {
                     var _plT = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]');
                     if (!_plT.includes(songs[currentSongIdx].id)) {
@@ -1895,6 +1929,20 @@
             if (player && player.cueVideoById && s) {
                 player.cueVideoById({ videoId: s.id, startSeconds: 15 });
             }
+            // Auto-recarga de fichas: 0 fichas por ≥2 turnos → +1 ficha
+            if (!competitiveMode) {
+                players.forEach(function(pl) {
+                    if (pl.tokens <= 0) {
+                        if (!tokenStarvationTurns[pl.id]) tokenStarvationTurns[pl.id] = 0;
+                        tokenStarvationTurns[pl.id]++;
+                        if (tokenStarvationTurns[pl.id] >= 2) {
+                            updateTokens(pl, 1);
+                            tokenStarvationTurns[pl.id] = 0;
+                            try { if (connections[pl.id]) connections[pl.id].send({ type: 'BET_RESULT', msg: '🔵 Auto-recarga: recibes 1 ficha por llevar 2 turnos sin fichas.' }); } catch(e) {}
+                        }
+                    } else { tokenStarvationTurns[pl.id] = 0; }
+                });
+            }
             syncState();
         }
 
@@ -2021,8 +2069,19 @@
             var s = songs[currentSongIdx];
             var container = document.getElementById('player-container');
 
+            // Modo competitivo: bloquear sabotajes, fichas y especiales
+            if (competitiveMode) {
+                var _blocked = ['SABOTAGE_MUTE','SABOTAGE_BUZZER','SABOTAGE_VETO','SABOTAGE_PANIC',
+                    'SABOTAGE_FOG','SABOTAGE_RUSSIAN_ROULETTE','SABOTAGE_STEAL_TOKEN',
+                    'SABOTAGE_STEAL_TURN','SABOTAGE_SMART_STEAL','SABOTAGE_BLACKHOLE',
+                    'SABOTAGE_STEAL_STREAK','BET','DUEL','AUTO_WIN','DOUBLE_OR_NOTHING',
+                    'FAIL_SAFE','BRAG','EMOJI_WILDCARD','REQUEST_CATEGORY'];
+                if (_blocked.indexOf(action) !== -1) return;
+            }
+
             switch (action) {
                 case 'PLAY':
+                    reactionStartTime = Date.now();
                     // En modo equipos: cualquier miembro del equipo activo puede controlar la música
                     var isTeamMember = gameMode === 'equipos' && players.some(function(pl){
                         return pl.id === peerId && pl.team === teamTurn;
@@ -2113,7 +2172,6 @@
                         if (target && msgT) try { connections[target.id].send({ type: 'BET_RESULT', msg: msgT }); } catch (e) { }
                         
                         document.getElementById('host-instructions').innerHTML = "<span style='color:#ff0055; font-size:1.5em; font-family:Bungee;'>¡" + p.name + " JUGÓ A LA RULETA RUSA!</span>";
-                        notifyVictim(players[activePlayerIdx].id, p.name, 'RULETA RUSA', '🎰');
                         notifyVictim(players[activePlayerIdx].id, p.name, 'RULETA RUSA', '🎰');
                         syncState();
                     }
@@ -2685,6 +2743,13 @@
                     var p = players.find(function (pl) { return pl.id === peerId; });
                     var valNum = parseInt(value);
                     if (isNaN(valNum)) break;
+                    // Registrar tiempo de reacción del jugador activo
+                    if (peerId === (players[activePlayerIdx]||{}).id && reactionStartTime > 0) {
+                        var _rt = (Date.now() - reactionStartTime) / 1000;
+                        if (!stats.reactionTimes[peerId]) stats.reactionTimes[peerId] = [];
+                        stats.reactionTimes[peerId].push(_rt);
+                        reactionStartTime = 0;
+                    }
 
                     // ── MODO EQUIPOS: registro de voto ──
                     if (gameMode === 'equipos') {
@@ -2928,6 +2993,19 @@
                         } else {
                             try { connections[peerId].send({ type: 'BET_RESULT', msg: 'Ningún rival lleva racha ×3 o más ahora mismo.' }); } catch(e) {}
                         }
+                    }
+                    break;
+
+                case 'REQUEST_CATEGORY':
+                    var p = players.find(function(pl){ return pl.id === peerId; });
+                    if (p && p.tokens >= 4 && !requestedCategory && gameStarted) {
+                        updateTokens(p, -4);
+                        requestedCategory = value; // 'orig', 'peliculas', 'videojuegos'
+                        var catNames = { orig: 'Anime 🎌', peliculas: 'Películas 🎬', videojuegos: 'Videojuegos 🎮' };
+                        addEvent('<span class="ev-info">🎯 ' + p.name + ' pidió categoría: ' + (catNames[value]||value) + '</span>');
+                        document.getElementById('host-instructions').innerHTML += ' <span style="color:var(--gold)">🎯 Próxima: ' + (catNames[value]||value) + '</span>';
+                        try { connections[peerId].send({ type: 'BET_RESULT', msg: '🎯 Categoría solicitada: ' + (catNames[value]||value) + '. Aplicada en el próximo turno.' }); } catch(e) {}
+                        syncState();
                     }
                     break;
 
@@ -3331,6 +3409,17 @@
                 }
                 // ── HISTORIAL: marcar acierto ──
                 if (songHistory.length > 0) songHistory[songHistory.length-1].correct = true;
+                // ── EL CAMINO DEL GUERRERO: 3 fallos seguidos → carta extra ──
+                if ((stats.consecutiveFails[players[activePlayerIdx].id] || 0) >= 3) {
+                    players[activePlayerIdx].score++;
+                    players[activePlayerIdx].cards.push(parseInt(songs[currentSongIdx].year));
+                    players[activePlayerIdx].cards.sort(function(a,b){return a-b;});
+                    addEvent('<span class="ev-good">⚔️ ¡CAMINO DEL GUERRERO! ' + players[activePlayerIdx].name + ' remonta con carta extra</span>', '⚔️');
+                    for (var _wc in connections) {
+                        try { connections[_wc].send({ type: 'WARRIOR_BONUS', name: players[activePlayerIdx].name }); } catch(e) {}
+                    }
+                }
+                stats.consecutiveFails[players[activePlayerIdx].id] = 0;
                 // ── COMODÍN 🔥: próximo acierto doble ──
                 if (emojiWildcardBonus[players[activePlayerIdx].id]) {
                     players[activePlayerIdx].score++;
@@ -3698,11 +3787,16 @@
                 var fails = stats.playerFails[p.id] || 0;
                 var sabotajes = stats.playerSabotages[p.id] || 0;
                 var pct = (correct + fails) > 0 ? Math.round(correct / (correct + fails) * 100) : 0;
+                // Mapa décadas
+                var _dm={};songHistory.forEach(function(s){if(s.playerName!==p.name)return;var _d=Math.floor(parseInt(s.year||0)/10)*10;if(!_dm[_d])_dm[_d]={ok:0,fl:0};if(s.correct===true)_dm[_d].ok++;else if(s.correct===false)_dm[_d].fl++;});
+                var _bD=null,_bP=-1,_wD=null,_wP=101;Object.keys(_dm).forEach(function(d){var t=_dm[d].ok+_dm[d].fl;if(!t)return;var pc=_dm[d].ok/t;if(pc>_bP){_bP=pc;_bD=d;}if(pc<_wP){_wP=pc;_wD=d;}});
+                var _dH=(_bD&&_wD&&_bD!==_wD)?'<div style="font-size:0.5em;color:#333;margin-top:1px;">🏆'+_bD+'s · 💀'+_wD+'s</div>':(_bD?'<div style="font-size:0.5em;color:#333;margin-top:1px;">🏆'+_bD+'s</div>':'');
                 rankHtml += '<div class="rank-card">' +
                     '<div class="rank-pos">' + medal + '</div>' +
                     '<div class="rank-name">' + p.name + '</div>' +
                     '<div class="rank-score">' + p.score + ' cartas</div>' +
                     '<div style="font-size:0.6em;color:#888;margin:4px 0;">✅' + correct + '  ❌' + fails + '  😈' + sabotajes + '  🎯' + pct + '%</div>' +
+                    _dH +
                     '<div style="margin-top:4px;flex-wrap:wrap;display:flex;gap:2px;">' + cardsHtml + '</div>' +
                     '</div>';
             });
@@ -3909,6 +4003,7 @@
                     isDoubleOrNothing: isDoubleOrNothing,
                     failSafeActive: failSafeActive,
                     isBragging: isBragging,
+                    competitiveMode: competitiveMode,
                     readyPlayers: readyPlayers,
                     isBonusCard: isBonusCard,
                     nextSharedSongTurn: nextSharedSongTurn,
@@ -4064,8 +4159,27 @@
                 if (pl.tokens >= 8)
                     plAch.push({ icon: '💰', name: 'El Tahúr', desc: 'Terminó con ' + pl.tokens + '🔵' });
 
+
+
                 if (plAch.length > 0) achievements.push({ player: pl.name, badges: plAch });
             });
+            // El Rayo: solo el jugador con menor reacción promedio (mín 3 turnos)
+            var fastestPid = null, fastestAvg = Infinity;
+            players.forEach(function(pl) {
+                var rts = stats.reactionTimes[pl.id] || [];
+                if (rts.length >= 3) {
+                    var avg = rts.reduce(function(a,b){return a+b;},0)/rts.length;
+                    if (avg < fastestAvg) { fastestAvg = avg; fastestPid = pl.id; }
+                }
+            });
+            if (fastestPid) {
+                var fastPl = players.find(function(pl){ return pl.id === fastestPid; });
+                var existingEntry = achievements.find(function(a){ return a.player === fastPl.name; });
+                var rayoBadge = { icon: '⚡', name: 'El Rayo', desc: 'Reacción media: ' + fastestAvg.toFixed(1) + 's' };
+                if (existingEntry) { existingEntry.badges.push(rayoBadge); }
+                else { achievements.push({ player: fastPl.name, badges: [rayoBadge] }); }
+            }
+
             return achievements;
         }
 
@@ -4369,6 +4483,9 @@
             nextSharedSongTurn = 4 + Math.floor(Math.random() * 4);
             nextBonusTurn = 7 + Math.floor(Math.random() * 4);
             replayLog = [];
+            requestedCategory = null;
+            reactionStartTime = 0;
+            tokenStarvationTurns = {};
             turnCounter = 0;
             pendingSteal = null;
             hasShield = {};
