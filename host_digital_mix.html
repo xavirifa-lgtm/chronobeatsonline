@@ -372,6 +372,35 @@
         .mini-stat.hot { color: var(--gold); border-color: var(--gold); }
         .mini-stat.danger { color: #ff4444; border-color: #ff4444; }
 
+        /* ── CARTA BONIFICACIÓN ── */
+        #bonus-card-indicator {
+            display: none;
+            background: linear-gradient(90deg, var(--gold), #ff8800);
+            color: #000;
+            font-family: 'Bungee';
+            font-size: 0.85em;
+            padding: 8px 14px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 6px;
+            animation: pulse-banner 0.7s ease-in-out infinite alternate;
+            letter-spacing: 1px;
+        }
+
+        /* ── DOBLE O NADA ── */
+        #double-or-nothing-indicator {
+            display: none;
+            background: linear-gradient(90deg, #ff6600, #ffaa00);
+            color: #000;
+            font-family: 'Bungee';
+            font-size: 0.8em;
+            padding: 6px 12px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 6px;
+            animation: pulse-banner 0.6s ease-in-out infinite alternate;
+        }
+
         /* ── CANCIÓN RELÁMPAGO ── */
         #lightning-btn {
             background: linear-gradient(90deg, #ffaa00, #ff6600);
@@ -406,7 +435,7 @@
             filter: drop-shadow(0 0 8px #ff6600);
         }
 
-        /* ── CANCIÓN COMPARTIDA ── */
+        /* ── ¡TODOS JUEGAN! ── */
         #shared-song-banner {
             display: none;
             background: linear-gradient(90deg, var(--gold), #ff8800);
@@ -830,6 +859,7 @@
         <h2 id="winner-name" style="font-size:2.5em; margin-bottom:5px;">---</h2>
         <div id="winner-stats" style="margin:15px 0; width:100%; max-width:600px;"></div>
         <div id="winner-ranking" style="margin:10px 0; width:100%; max-width:600px; display:flex; flex-wrap:wrap; gap:10px; justify-content:center;"></div>
+        <div id="winner-replay" style="display:none; width:100%; max-width:600px; margin:12px 0;"></div>
         <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin-top:20px;">
             <button class="btn-start" onclick="rematch()" style="background:linear-gradient(90deg,var(--neon),var(--pink));">🔄 REVANCHA</button>
             <button class="btn-start" onclick="location.reload()" style="background:#333; color:#fff; box-shadow:none;">🏠 MENÚ PRINCIPAL</button>
@@ -867,7 +897,7 @@
             <label style="font-family:'Bungee'; color:var(--gold); font-size:0.7em; display:block; margin-bottom:8px; letter-spacing:2px;">🗓️ FILTRO DE DÉCADAS</label>
             <select id="decade-filter-select"
                 style="padding:10px; font-family:'Montserrat'; font-size:1em; border-radius:8px; background:#222; color:var(--gold); border:1px solid var(--gold); width:100%;"
-                onchange="decadeFilter=this.value">
+                onchange="decadeFilter=this.value; updateSongCounter();">
                 <option value="all">TODAS LAS ÉPOCAS</option>
                 <option value="pre80s">ANTES DE LOS 80s (→1979)</option>
                 <option value="80s">LOS 80s (1980-1989)</option>
@@ -878,6 +908,7 @@
                 <option value="80s90s">80s Y 90s (1980-1999)</option>
                 <option value="90s2000s">90s Y 2000s (1990-2009)</option>
             </select>
+            <div id="song-counter" style="font-family:'Montserrat'; font-size:0.65em; color:#444; text-align:center; margin-top:6px;"></div>
         </div>
 
         <div id="joputismo-container-lobby" style="margin-bottom: 20px;">
@@ -955,6 +986,7 @@
                     <button class="reveal-btn" id="btn-reveal-host" onclick="revealData()"
                         style="display:block; margin: 15px auto;">REVELAR DATOS</button>
                     <button id="lightning-btn" onclick="activateLightning()">⚡ MODO RELÁMPAGO (5s)</button>
+                    <button id="voice-btn" onclick="voiceEnabled=!voiceEnabled; this.style.opacity=voiceEnabled?'1':'0.4'; this.title=voiceEnabled?'Voz ON':'Voz OFF';" title="Voz OFF" style="background:#222; color:#888; border:1px solid #333; font-family:Bungee; font-size:0.7em; padding:8px 12px; border-radius:8px; cursor:pointer; opacity:0.4;">🔊 VOZ</button>
                     <button id="resolve-team-btn" onclick="resolveTeamVote()" style="display:none; background:linear-gradient(90deg,#ff3333,#cc0000); color:#fff; border:none; font-family:Bungee; font-size:0.75em; padding:8px 14px; border-radius:8px; cursor:pointer; letter-spacing:1px;">⚡ RESOLVER VOTACIÓN</button>
                     <div class="actions" id="validation-buttons"
                         style="display:none; gap: 10px; width: 100%; margin-top: 15px;">
@@ -975,8 +1007,10 @@
                     </div>
                 </div>
                 <div id="steal-resistance-banner"></div>
+        <div id="bonus-card-indicator">⭐ ¡CARTA BONIFICACIÓN! — VALE 2 PUNTOS</div>
+        <div id="double-or-nothing-indicator">🎲 ¡DOBLE O NADA ACTIVADO!</div>
         <div id="lightning-banner">⚡ MODO RELÁMPAGO — <span id="lightning-countdown">5</span>s ⚡</div>
-        <div id="shared-song-banner">🎵 ¡CANCIÓN COMPARTIDA! — EL PRIMERO EN ACERTAR SE LA LLEVA 🎵</div>
+        <div id="shared-song-banner">🎵 ¡TODOS JUEGAN! — EL PRIMERO EN ACERTAR SE LA LLEVA 🎵</div>
         <div id="countdown-ring">
             <svg width="80" height="80" viewBox="0 0 80 80">
                 <circle class="ring-bg" cx="40" cy="40" r="36"/>
@@ -1055,8 +1089,19 @@
         var teamTurn = 'red';
         var teamVotes = {};
         var teamVoteResolved = false; // 'all' | '60s70s' | '80s' | '90s' | '2000s' | '2010s'
-        var turnCounter = 0;       // contador de turnos para canción compartida
+        var turnCounter = 0;       // contador de turnos para ¡Todos Juegan!
         var isSharedSong = false;
+        var isDoubleOrNothing = false;
+        var replayLog = [];
+        var nextSharedSongTurn = 4 + Math.floor(Math.random() * 4); // ¡Todos Juegan! aleatorio (4-7)
+        var nextBonusTurn = 7 + Math.floor(Math.random() * 4);      // carta bonificación (7-10)
+        var isBonusCard = false;   // este turno la carta vale 2 puntos
+        var voiceEnabled = false;
+        var reactionBuffer = {};        // { emoji: [{id, time}] } — sistema colectivo
+        var jinxActive = false;         // 💀 activo este turno
+        var justSucceeded = false;      // 🔥 homenaje: acaba de acertar
+        var emojiWildcardBonus = {};    // {playerId: true} — próximo acierto doble
+        var silentCurses = [];          // [{playerId}] — maldiciones silenciosas  // síntesis de voz al revelar // [{turn, text, icon}] — momentos clave para el replay // jugador activó doble o nada
         var isLightningSong = false; // modo relámpago: 5s y para  // indica si la canción actual es compartida
 
         // ── TRACKING DE ESTADÍSTICAS ──
@@ -1096,6 +1141,15 @@
             stats.streaks[pid] = (stats.streaks[pid] || 0) + 1;
             if (stats.streaks[pid] > (stats.maxStreaks[pid] || 0)) stats.maxStreaks[pid] = stats.streaks[pid];
             stats.totalSongs++;
+            // Racha rival: avisar a todos al alcanzar racha ×3
+            if (stats.streaks[pid] === 3) {
+                var rp = players.find(function(pl) { return pl.id === pid; });
+                var rpName = rp ? rp.name : '?';
+                for (var _rc in connections) {
+                    try { connections[_rc].send({ type: 'RIVAL_STREAK', name: rpName, streak: 3 }); } catch(e) {}
+                }
+                addEvent('<span class="ev-info">⚡ ' + rpName + ' lleva racha ×3 — ¡SABELOTODO!</span>', '⚡');
+            }
             // Notificar a todos cuando alguien llega a 7 cartas (a 3 de ganar)
             var scorer = players.find(function(p) { return p.id === pid; });
             if (scorer && scorer.score === 7) {
@@ -1287,6 +1341,33 @@
                     try { connections[activeP.id].send({ type: 'BET_RESULT', msg: "¡TIEMPO AGOTADO!\n" + phrase }); } catch(e){}
                 }
                 trackFail(players[activePlayerIdx].id);
+                // ── JINX COLECTIVO: fallo con jinx activo = pierde carta extra ──
+                if (jinxActive && players[activePlayerIdx].cards.length > 1) {
+                    players[activePlayerIdx].cards.pop();
+                    players[activePlayerIdx].score = Math.max(1, players[activePlayerIdx].score - 1);
+                    addEvent('<span class="ev-bad">💀 JINX — ' + players[activePlayerIdx].name + ' pierde carta extra</span>');
+                }
+                jinxActive = false;
+                justSucceeded = false;
+                // ── MALDICIONES SILENCIOSAS: el activo falló, los que maldijeron cobran ──
+                silentCurses.forEach(function(curse) {
+                    var curser = players.find(function(pl) { return pl.id === curse.playerId; });
+                    if (curser) {
+                        updateTokens(curser, 2);
+                        try { if (connections[curse.playerId]) connections[curse.playerId].send({ type: 'BET_RESULT', msg: '💀 ¡Maldición exitosa! +2🔵' }); } catch(e) {}
+                    }
+                });
+                silentCurses = [];
+
+                // Doble o nada: fallo → perder una carta
+                if (isDoubleOrNothing) {
+                    if (players[activePlayerIdx].cards.length > 1) {
+                        players[activePlayerIdx].cards.pop();
+                        players[activePlayerIdx].score = Math.max(1, players[activePlayerIdx].score - 1);
+                        addEvent('<span class="ev-bad">🎲 DOBLE O NADA — ' + players[activePlayerIdx].name + ' falla: pierde una carta</span>', '🎲');
+                    }
+                    isDoubleOrNothing = false;
+                }
                 if (gameMode === 'supervivencia') loseLife(players[activePlayerIdx], null);
                 refundBets();
                 stopCountdown();
@@ -1482,6 +1563,7 @@
                 songs = built;
             }
             console.log('Canciones cargadas:', songs.length, '| Filtro:', decadeFilter);
+            updateSongCounter();
         });
 
         function updateLobby() {
@@ -1544,6 +1626,25 @@
             turnCounter = 0;
             isSharedSong = false;
             isLightningSong = false;
+            isDoubleOrNothing = false;
+            isBonusCard = false;
+            jinxActive = false;
+            justSucceeded = false;
+            emojiWildcardBonus = {};
+            silentCurses = [];
+            nextSharedSongTurn = 4 + Math.floor(Math.random() * 4);
+            nextBonusTurn = 7 + Math.floor(Math.random() * 4);
+            replayLog = [];
+            replayLog = [];
+            nextSharedSongTurn = 4 + Math.floor(Math.random() * 4);
+            nextBonusTurn = 7 + Math.floor(Math.random() * 4);
+            isBonusCard = false;
+            jinxActive = false;
+            justSucceeded = false;
+            emojiWildcardBonus = {};
+            silentCurses = [];
+            nextSharedSongTurn = 4 + Math.floor(Math.random() * 4);
+            nextBonusTurn = 7 + Math.floor(Math.random() * 4);
             pendingSteal = null;
             decadeFilter = document.getElementById('decade-filter-select').value;
 
@@ -1589,6 +1690,9 @@
             stopCountdown();
             resetLightning();
             isSharedSong = false;
+            isDoubleOrNothing = false;
+            jinxActive = false;
+            justSucceeded = false;
             if (pendingSteal) {
                 clearTimeout(pendingSteal.timeout);
                 pendingSteal = null;
@@ -1633,10 +1737,15 @@
             duelResult = null;
             duelTriggered = false;
             turnCounter++;
-            // Cada 5 turnos → canción compartida
-            isSharedSong = (turnCounter % 5 === 0 && players.length >= 2);
+            // Cada 5 turnos → ¡Todos Juegan!
+            // ¡TODOS JUEGAN! aleatorio — no siempre cae al mismo jugador
+            isSharedSong = (turnCounter === nextSharedSongTurn && players.length >= 2);
+            if (isSharedSong) nextSharedSongTurn = turnCounter + 4 + Math.floor(Math.random() * 4);
             var banner = document.getElementById('shared-song-banner');
             if (banner) banner.style.display = isSharedSong ? 'block' : 'none';
+            // CARTA BONIFICACIÓN aleatoria
+            isBonusCard = (turnCounter === nextBonusTurn);
+            if (isBonusCard) nextBonusTurn = turnCounter + 7 + Math.floor(Math.random() * 4);
             currentSongIdx++; if(songs[currentSongIdx] && songs[currentSongIdx].id) { var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]'); if(!_pl.includes(songs[currentSongIdx].id)){ _pl.push(songs[currentSongIdx].id); localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl)); } } isRevealed = false;
             segundosAcumulados = 0;
             momentoDeInicio = 0;
@@ -1682,7 +1791,8 @@
                 document.getElementById('ui-current-player').innerText = players[activePlayerIdx].name + " (REY)";
                 document.getElementById('host-instructions').innerText = "ESPERANDO A QUE LOS JUGADORES ELIJAN QUÉ CARTA TE TOCA...";
                 // Ocultar (NO destruir) el player de YouTube para que siga válido
-                if (player && player.stopVideo) player.stopVideo();
+                if (player && player.pauseVideo) player.pauseVideo();
+                isPlaying = false;
                 var pc = document.getElementById('player-container');
                 if (pc) pc.style.display = 'none';
                 applyTheme('mix');
@@ -1716,6 +1826,10 @@
             // Botón relámpago: visible cuando está sonando y no está ya activado
             var lbtn = document.getElementById('lightning-btn');
             if (lbtn) lbtn.style.display = (isPlaying && !isRevealed && !isLightningSong && gameMode !== 'equipos') ? 'inline-block' : 'none';
+            var donInd = document.getElementById('double-or-nothing-indicator');
+            if (donInd) donInd.style.display = isDoubleOrNothing ? 'block' : 'none';
+            var bonusInd = document.getElementById('bonus-card-indicator');
+            if (bonusInd) bonusInd.style.display = isBonusCard ? 'block' : 'none';
             var rtbtn = document.getElementById('resolve-team-btn');
             if (rtbtn) rtbtn.style.display = (gameMode === 'equipos' && isPlaying && !teamVoteResolved && Object.keys(teamVotes).length > 0) ? 'inline-block' : 'none';
             // Mini-perfil del jugador activo
@@ -1737,12 +1851,10 @@
                 miniEl.innerHTML = chips.join('');
             }
             document.getElementById('host-instructions').innerText = "ESPERANDO ACCIÓN...";
-            if (player && player.loadVideoById && s) {
-                player.loadVideoById({
-                    'videoId': s.id,
-                    'startSeconds': 0
-                });
-                player.stopVideo();
+            // cueVideoById prepara el vídeo SIN reproducirlo ni disparar eventos PLAYING
+            // (loadVideoById causaba eventos asíncronos que corrompían isPlaying)
+            if (player && player.cueVideoById && s) {
+                player.cueVideoById({ videoId: s.id, startSeconds: 15 });
             }
             syncState();
         }
@@ -1944,6 +2056,7 @@
                                 updateTokens(p, 1);
                                 // Animación de robo en el target
                                 if (connections[target.id]) try { connections[target.id].send({ type: 'TOKEN_STOLEN', thief: p.name }); } catch(e){}
+                            broadcastSabotage(p.name, target.name, 'ROBAR FICHA', '💸');
                                 msgP = "¡Dichosa suerte! Le has birlado una ficha a " + target.name + ".";
                                 msgT = "¡AY! " + p.name + " te ha robado una ficha en la Ruleta Rusa. ¡Vigila tu bolsa!";
                             } else {
@@ -1961,6 +2074,8 @@
                         if (target && msgT) try { connections[target.id].send({ type: 'BET_RESULT', msg: msgT }); } catch (e) { }
                         
                         document.getElementById('host-instructions').innerHTML = "<span style='color:#ff0055; font-size:1.5em; font-family:Bungee;'>¡" + p.name + " JUGÓ A LA RULETA RUSA!</span>";
+                        notifyVictim(players[activePlayerIdx].id, p.name, 'RULETA RUSA', '🎰');
+                        notifyVictim(players[activePlayerIdx].id, p.name, 'RULETA RUSA', '🎰');
                         syncState();
                     }
                     break;
@@ -1971,6 +2086,7 @@
                             try { if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "¡ZASCA! El Escudo de " + activeP.name + " ha rebotado tu sabotaje y lo has perdido todo jajaja" }); } catch (e) { }
                         }
                         hasShield[activeP.id] = false;
+                        notifyVictim(players[activePlayerIdx].id, p.name, 'MUTEAR', '🔇');
                         syncState();
                         break;
                     }
@@ -1985,6 +2101,7 @@
                             document.getElementById('host-instructions').innerText = "REPRODUCIENDO (MUTE)";
                         addEvent('<span class="ev-name">' + p.name + '</span> <span class="ev-info">usó MUTE 🔇</span>');
                         trackSabotage(p.id, players[activePlayerIdx].id);
+                        broadcastSabotage(p.name, players[activePlayerIdx].name, 'MUTEAR', '🔇');
 
                             muteIntervalTimer = setInterval(function () {
                                 if (isPlaying) muteTimeRemaining -= 1000;
@@ -2138,6 +2255,7 @@
                             try { if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "¡ZASCA! El Escudo de " + activeP.name + " ha rebotado tu sabotaje y lo has perdido todo jajaja" }); } catch (e) { }
                         }
                         hasShield[activeP.id] = false;
+                        notifyVictim(players[activePlayerIdx].id, p.name, 'PÁNICO', '😱');
                         syncState();
                         break;
                     }
@@ -2191,6 +2309,7 @@
                     if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 1 && isPlaying && !isRevealed && (!turnPhase || turnPhase === 'NORMAL')) {
                         updateTokens(p, -1);
                         playBuzzerWebAudio();
+                        notifyVictim(players[activePlayerIdx].id, p.name, '¡ZUMBIDO!', '🔊');
                         syncState();
                     }
                     break;
@@ -2201,6 +2320,7 @@
                             try { if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "¡ZASCA! El Escudo de " + activeP.name + " ha rebotado tu sabotaje y lo has perdido todo jajaja" }); } catch (e) { }
                         }
                         hasShield[activeP.id] = false;
+                        notifyVictim(players[activePlayerIdx].id, p.name, 'NIEBLA', '🌫');
                         syncState();
                         break;
                     }
@@ -2365,6 +2485,7 @@
                             try { if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "¡ZASCA! El Escudo de " + activeP.name + " ha rebotado tu sabotaje y lo has perdido todo jajaja" }); } catch (e) { }
                         }
                         hasShield[activeP.id] = false;
+                        notifyVictim(players[activePlayerIdx].id, p.name, 'VETO', '🚫');
                         syncState();
                         break;
                     }
@@ -2396,6 +2517,7 @@
                                 canResist: victim.tokens >= 2
                             }); } catch(e) {}
                         }
+                            broadcastSabotage(p.name, target.name, 'ROBAR FICHA', '💸');
 
                         // Banner en el host
                         var bannerEl = document.getElementById('steal-resistance-banner');
@@ -2447,11 +2569,13 @@
                             var cardIdx = Math.floor(Math.random() * target.cards.length);
                             target.cards.splice(cardIdx, 1);
 
+                            broadcastSabotage(p.name, target.name, 'AGUJERO NEGRO', '🕳️');
                             document.getElementById('host-instructions').innerHTML = "<span style='color:#9900ff; font-size:1.5em; font-family:Bungee;'>¡" + p.name + " CREÓ UN AGUJERO NEGRO Y DESTRUYÓ UNA CARTA DE " + target.name + "!</span>";
                             setTimeout(function () {
                                 if (!isRevealed && !panicActive) document.getElementById('host-instructions').innerText = (isMuted ? "REPRODUCIENDO (MUTE)" : "REPRODUCIENDO");
                             }, 4000);
-                            syncState();
+                            notifyVictim(target.id, p.name, 'AGUJERO NEGRO', '🕳️');
+                        syncState();
                         }
                     }
                     break;
@@ -2582,9 +2706,9 @@
                         // Mostrar player-container y cargar el video elegido (SIN destruir YT player)
                         var pcKing = document.getElementById('player-container');
                         if (pcKing) pcKing.style.display = '';
-                        if (player && player.loadVideoById) {
-                            player.loadVideoById({ videoId: cartaElegida.id, startSeconds: 0 });
-                            player.stopVideo();
+                        // cueVideoById: prepara sin reproducir, el rey pulsa PLAY en su móvil
+                        if (player && player.cueVideoById) {
+                            player.cueVideoById({ videoId: cartaElegida.id, startSeconds: 0 });
                         }
                         syncState();
                     }
@@ -2736,6 +2860,62 @@
                         syncState();
                     }
                     break;
+                case 'SABOTAGE_STEAL_STREAK':
+                    // Robar la racha de un rival que tenga racha ≥ 3
+                    var p = players.find(function(pl){ return pl.id === peerId; });
+                    if (p && p.tokens >= 2 && gameStarted) {
+                        // Encontrar rival con mayor racha ≥ 3
+                        var bestRival = null, bestStreak = 2;
+                        players.forEach(function(pl) {
+                            if (pl.id !== peerId && (stats.streaks[pl.id]||0) > bestStreak) {
+                                bestStreak = stats.streaks[pl.id];
+                                bestRival = pl;
+                            }
+                        });
+                        if (bestRival) {
+                            updateTokens(p, -2);
+                            var stolenStreak = stats.streaks[bestRival.id] || 0;
+                            stats.streaks[bestRival.id] = 0;
+                            stats.streaks[p.id] = stolenStreak;
+                            addEvent('<span class="ev-name">' + p.name + '</span> <span class="ev-info">🔥 robó la racha ×' + stolenStreak + ' a ' + bestRival.name + '</span>', '🔥');
+                            // Notificar a todos
+                            for (var _sc in connections) {
+                                try { connections[_sc].send({ type: 'STREAK_STOLEN', thief: p.name, victim: bestRival.name, streak: stolenStreak }); } catch(e) {}
+                            }
+                            // Notificar al rival víctima
+                            if (connections[bestRival.id]) try { connections[bestRival.id].send({ type: 'DANGER_ALERT', msg: '🔥 ' + p.name + ' te ha robado la racha ×' + stolenStreak, critical: false }); } catch(e) {}
+                            trackSabotage(p.id, bestRival.id);
+                            syncState();
+                        } else {
+                            try { connections[peerId].send({ type: 'BET_RESULT', msg: 'Ningún rival lleva racha ×3 o más ahora mismo.' }); } catch(e) {}
+                        }
+                    }
+                    break;
+
+                case 'EMOJI_WILDCARD':
+                    var p = players.find(function(pl) { return pl.id === peerId; });
+                    if (p && p.tokens >= 1 && gameStarted) {
+                        if (!p.emojiWildcardUsed) p.emojiWildcardUsed = {};
+                        if (p.emojiWildcardUsed[value]) {
+                            try { connections[peerId].send({ type: 'BET_RESULT', msg: 'Ya usaste el comodín ' + value + ' en esta partida.' }); } catch(e) {}
+                        } else {
+                            updateTokens(p, -1);
+                            p.emojiWildcardUsed[value] = true;
+                            handleEmojiWildcard(peerId, value);
+                            syncState();
+                        }
+                    }
+                    break;
+
+                case 'DOUBLE_OR_NOTHING':
+                    // Solo el jugador activo puede activar doble o nada
+                    if (players[activePlayerIdx] && peerId === players[activePlayerIdx].id && isPlaying && !isRevealed && !isDoubleOrNothing) {
+                        isDoubleOrNothing = true;
+                        addEvent('<span class="ev-info">🎲 ' + players[activePlayerIdx].name + ' activa DOBLE O NADA</span>');
+                        document.getElementById('host-instructions').innerHTML = "<span style='color:#ff8800;font-family:Bungee;font-size:1.2em;'>🎲 ¡DOBLE O NADA ACTIVADO!</span>";
+                        syncState();
+                    }
+                    break;
                 case 'VOLUME':
                     // Solo el jugador activo puede controlar el volumen
                     var activeP = players[activePlayerIdx];
@@ -2752,6 +2932,16 @@
                     if (p && value) {
                         showReaction(value, p.name);
                         syncState();
+                        // ── Sistema 2: efectos colectivos ──
+                        if (!reactionBuffer[value]) reactionBuffer[value] = [];
+                        reactionBuffer[value] = reactionBuffer[value].filter(function(r) { return Date.now() - r.time < 5000; });
+                        if (!reactionBuffer[value].some(function(r) { return r.id === peerId; })) {
+                            reactionBuffer[value].push({ id: peerId, time: Date.now() });
+                        }
+                        if (reactionBuffer[value].length >= 3) {
+                            triggerCollectiveEffect(value);
+                            reactionBuffer[value] = [];
+                        }
                     }
                     break;
 
@@ -2777,8 +2967,10 @@
             if (won && activePlayerIdx < players.length) {
                 showWinner(players[activePlayerIdx].name);
             } else {
-                // El rey falló: reducir su score a 9 para que no vuelva a activar modo rey
-                // en su próximo turno (debe volver a ganar una carta para intentarlo de nuevo)
+                // El rey falló: parar el vídeo antes de pasar al siguiente turno
+                if (player && player.stopVideo) player.stopVideo();
+                isPlaying = false;
+                // Reducir score a 9 para que no vuelva a activar modo rey inmediatamente
                 if (players[activePlayerIdx] && players[activePlayerIdx].score >= 10) {
                     players[activePlayerIdx].score = 9;
                 }
@@ -2847,6 +3039,13 @@
             document.getElementById('ui-card-artist').innerText = s.artist;
             document.getElementById('ui-card-song').innerText = s.song;
             document.getElementById('ui-card-year').innerText = s.year;
+            // Síntesis de voz opcional al revelar
+            if (voiceEnabled && s && 'speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                var utter = new SpeechSynthesisUtterance(s.artist + ' ... ' + s.year);
+                utter.lang = 'es-ES'; utter.rate = 0.85; utter.pitch = 1.1;
+                window.speechSynthesis.speak(utter);
+            }
             document.getElementById('btn-reveal-host').style.display = 'none';
 
             if (turnPhase === 'DUEL') {
@@ -2989,6 +3188,47 @@
                 players[activePlayerIdx].score++;
                 players[activePlayerIdx].cards.push(parseInt(songs[currentSongIdx].year));
                 players[activePlayerIdx].cards.sort(function(a,b){return a-b;});
+                // ── STREAK BONUS: racha ≥ 3 → carta extra (trackCorrect se llama después) ──
+                var streakNow = stats.streaks[players[activePlayerIdx].id] || 0;
+                if (streakNow >= 3) {
+                    players[activePlayerIdx].score++;
+                    players[activePlayerIdx].cards.push(parseInt(songs[currentSongIdx].year));
+                    players[activePlayerIdx].cards.sort(function(a,b){return a-b;});
+                    addEvent('<span class="ev-good">🔥 STREAK BONUS — ' + players[activePlayerIdx].name + ' obtiene carta extra (racha ×' + streakNow + ')</span>', '🔥');
+                    document.getElementById('host-instructions').innerHTML = "<span style='color:var(--gold);font-family:Bungee;font-size:1.3em;'>🔥 STREAK BONUS ×" + streakNow + " — CARTA EXTRA!</span>";
+                    // Notificar a todos
+                    for (var _cid in connections) { try { connections[_cid].send({ type: 'STREAK_BONUS', name: players[activePlayerIdx].name, streak: streakNow }); } catch(e){} }
+                }
+                // ── CARTA BONIFICACIÓN: este turno vale 2 puntos ──
+                if (isBonusCard) {
+                    players[activePlayerIdx].score++;
+                    players[activePlayerIdx].cards.push(parseInt(songs[currentSongIdx].year));
+                    players[activePlayerIdx].cards.sort(function(a,b){return a-b;});
+                    addEvent('<span class="ev-good">⭐ CARTA BONIFICACIÓN — ' + players[activePlayerIdx].name + ' +2 cartas</span>', '⭐');
+                    document.getElementById('host-instructions').innerHTML = "<span style='color:var(--gold);font-family:Bungee;font-size:1.2em;'>⭐ ¡CARTA BONIFICACIÓN! +2</span>";
+                }
+                // ── COMODÍN 🔥: próximo acierto doble ──
+                if (emojiWildcardBonus[players[activePlayerIdx].id]) {
+                    players[activePlayerIdx].score++;
+                    players[activePlayerIdx].cards.push(parseInt(songs[currentSongIdx].year));
+                    players[activePlayerIdx].cards.sort(function(a,b){return a-b;});
+                    addEvent('<span class="ev-good">🔥 COMODÍN ACTIVO — ' + players[activePlayerIdx].name + ' +1 carta extra</span>', '🔥');
+                    delete emojiWildcardBonus[players[activePlayerIdx].id];
+                }
+                // ── MALDICIÓN SILENCIOSA: el activo acertó, maldiciones se cancelan ──
+                silentCurses = [];
+                // ── HOMENAJE: marcar que acaba de acertar ──
+                justSucceeded = true;
+                setTimeout(function() { justSucceeded = false; }, 8000);
+
+                // ── DOBLE O NADA: si estaba activo, sumar punto extra adicional ──
+                if (isDoubleOrNothing) {
+                    players[activePlayerIdx].score++;
+                    players[activePlayerIdx].cards.push(parseInt(songs[currentSongIdx].year));
+                    players[activePlayerIdx].cards.sort(function(a,b){return a-b;});
+                    addEvent('<span class="ev-good">🎲 DOBLE O NADA — ' + players[activePlayerIdx].name + ' acierta: +2 cartas</span>', '🎲');
+                    isDoubleOrNothing = false;
+                }
                 // Modo equipos: también añadir a la cronología del equipo
                 if (gameMode === 'equipos' && players[activePlayerIdx].team) {
                     var team = players[activePlayerIdx].team;
@@ -3024,6 +3264,23 @@
             } else {
                 addEvent('<span class="ev-name">' + players[activePlayerIdx].name + '</span> <span class="ev-bad">falló ❌</span>');
                 trackFail(players[activePlayerIdx].id);
+                // ── JINX COLECTIVO: fallo con jinx activo = pierde carta extra ──
+                if (jinxActive && players[activePlayerIdx].cards.length > 1) {
+                    players[activePlayerIdx].cards.pop();
+                    players[activePlayerIdx].score = Math.max(1, players[activePlayerIdx].score - 1);
+                    addEvent('<span class="ev-bad">💀 JINX — ' + players[activePlayerIdx].name + ' pierde carta extra</span>');
+                }
+                jinxActive = false;
+                justSucceeded = false;
+                // ── MALDICIONES SILENCIOSAS: el activo falló, cobran ──
+                silentCurses.forEach(function(curse) {
+                    var curser = players.find(function(pl) { return pl.id === curse.playerId; });
+                    if (curser) {
+                        updateTokens(curser, 2);
+                        try { if (connections[curse.playerId]) connections[curse.playerId].send({ type: 'BET_RESULT', msg: '💀 ¡Maldición exitosa! +2🔵' }); } catch(e) {}
+                    }
+                });
+                silentCurses = [];
                 // Modo supervivencia: perder vida al fallar
                 if (gameMode === 'supervivencia') {
                     loseLife(players[activePlayerIdx], null);
@@ -3334,6 +3591,22 @@
 
             console.log("Ganador:", name, "| Sonando:", songTitle);
 
+            // ── REPLAY DE MOMENTOS CLAVE ──
+            var replayEl = document.getElementById('winner-replay');
+            if (replayEl && replayLog.length > 0) {
+                var topMoments = replayLog.slice(-6); // últimos 6 o menos
+                var replayHtml = '<div style="font-family:Bungee;font-size:0.55em;color:#444;letter-spacing:3px;text-align:center;margin-bottom:8px;">MOMENTOS CLAVE</div>';
+                replayHtml += '<div style="display:flex;flex-direction:column;gap:6px;">';
+                topMoments.forEach(function(ev) {
+                    replayHtml += '<div style="background:rgba(255,255,255,0.04);border:1px solid #222;border-radius:8px;padding:8px 12px;font-size:0.75em;color:#aaa;font-family:Montserrat;">';
+                    replayHtml += '<span style="color:#555;font-size:0.85em;">Turno ' + ev.turn + ' · </span>' + ev.icon + ' ' + ev.text;
+                    replayHtml += '</div>';
+                });
+                replayHtml += '</div>';
+                replayEl.innerHTML = replayHtml;
+                replayEl.style.display = 'block';
+            }
+
             // Parar el player del juego antes de reproducir la canción de victoria
             // (evita conflicto de audio entre el player activo y el iframe de victoria)
             try {
@@ -3439,6 +3712,9 @@
                     teamVoteCount: Object.keys(teamVotes).length,
                     pendingSteal: pendingSteal ? { thiefName: pendingSteal.thief.name, victimId: pendingSteal.victim.id } : null,
                     isLightningSong: isLightningSong,
+                    isDoubleOrNothing: isDoubleOrNothing,
+                    isBonusCard: isBonusCard,
+                    nextSharedSongTurn: nextSharedSongTurn,
                     joputismoLevel: joputismoLevel,
                     bettingAgainst: bettingAgainst,
                     bettingFor: bettingFor,
@@ -3543,6 +3819,109 @@
             if (!confirm('¿Generar un nuevo código de sala? Los jugadores actuales perderán la conexión.')) return;
             localStorage.removeItem('CB_RoomCode');
             location.reload();
+        }
+
+        // ── CONTADOR DE CANCIONES ──
+        function updateSongCounter() {
+            var counter = document.getElementById('song-counter');
+            if (!counter || !cachedTxts || cachedTxts.length === 0) return;
+            var total = buildSongsFromCache(true).length;
+            var available = buildSongsFromCache(false).length;
+            counter.innerHTML = available + ' canciones disponibles' +
+                (total !== available ? ' <span style="color:#333">(' + (total - available) + ' ya jugadas)</span>' : '') +
+                (decadeFilter !== 'all' ? ' <span style="color:var(--gold)">con filtro activo</span>' : '');
+        }
+
+        // ── EFECTOS COLECTIVOS DE EMOJIS ──
+        function triggerCollectiveEffect(emoji) {
+            var activo = players[activePlayerIdx];
+            if (!activo) return;
+            if (emoji === '😂') {
+                // DISTRACCIÓN: overlay de risas en el móvil del activo
+                try { if (connections[activo.id]) connections[activo.id].send({ type: 'DISTRACTION' }); } catch(e) {}
+                addEvent('<span class="ev-info">😂 ¡DISTRACCIÓN COLECTIVA! — ' + activo.name + ' ha sido distraído</span>', '😂');
+                document.getElementById('host-instructions').innerHTML = "<span style='font-size:1.4em;'>😂😂😂 ¡DISTRACCIÓN!</span>";
+                setTimeout(function() {
+                    if (!isRevealed) document.getElementById('host-instructions').innerText = isPlaying ? "REPRODUCIENDO" : "DECIDE TU JUGADA";
+                }, 3200);
+            } else if (emoji === '🔥' && justSucceeded) {
+                // HOMENAJE: el activo gana +1 ficha
+                updateTokens(activo, 1);
+                addEvent('<span class="ev-good">🔥 ¡HOMENAJE! — ' + activo.name + ' recibe +1🔵</span>', '🔥');
+                for (var _h in connections) {
+                    try { connections[_h].send({ type: 'HOMENAJE', name: activo.name }); } catch(e) {}
+                }
+                syncState();
+            } else if (emoji === '💀') {
+                // JINX: si el activo falla este turno pierde carta extra
+                if (jinxActive) return; // ya hay jinx activo
+                jinxActive = true;
+                addEvent('<span class="ev-bad">💀 ¡JINX COLECTIVO! — si ' + activo.name + ' falla, pierde 2 cartas</span>', '💀');
+                for (var _j in connections) {
+                    try { connections[_j].send({ type: 'JINX_ACTIVE', name: activo.name }); } catch(e) {}
+                }
+            }
+        }
+
+        // ── COMODÍN EMOJI (Sistema 3) ──
+        function handleEmojiWildcard(playerId, emoji) {
+            var p = players.find(function(pl) { return pl.id === playerId; });
+            if (!p) return;
+            var activo = players[activePlayerIdx];
+            if (emoji === '🔥') {
+                // Próximo acierto del jugador = carta doble
+                emojiWildcardBonus[playerId] = true;
+                addEvent('<span class="ev-good">🔥 ' + p.name + ' activa PRÓXIMO ACIERTO DOBLE</span>');
+                try { if (connections[playerId]) connections[playerId].send({ type: 'BET_RESULT', msg: '🔥 Comodín activado: tu próximo acierto valdrá 2 cartas' }); } catch(e) {}
+            } else if (emoji === '😂') {
+                // Ocultar años de la cronología del activo 5 segundos
+                if (!activo) return;
+                try { if (connections[activo.id]) connections[activo.id].send({ type: 'FOG_YEARS', duration: 5000 }); } catch(e) {}
+                addEvent('<span class="ev-bad">😂 ' + p.name + ' ocultó la cronología de ' + activo.name + ' 5s</span>');
+            } else if (emoji === '💀') {
+                // Maldición silenciosa
+                silentCurses.push({ playerId: playerId });
+                addEvent('<span class="ev-info">💀 ' + p.name + ' lanzó una maldición silenciosa...</span>');
+                try { if (connections[playerId]) connections[playerId].send({ type: 'BET_RESULT', msg: '💀 Maldición lanzada. Si falla, +2🔵 para ti.' }); } catch(e) {}
+            }
+        }
+
+        // ── SONIDO WEB AUDIO EN EL HOST ──
+        var _hostAudioCtx = null;
+        function playToneHost(frequency, duration, type, volume) {
+            try {
+                if (!_hostAudioCtx) _hostAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                var osc = _hostAudioCtx.createOscillator();
+                var gain = _hostAudioCtx.createGain();
+                osc.connect(gain); gain.connect(_hostAudioCtx.destination);
+                osc.type = type || 'sine';
+                osc.frequency.value = frequency;
+                gain.gain.setValueAtTime(volume || 0.1, _hostAudioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, _hostAudioCtx.currentTime + duration);
+                osc.start(); osc.stop(_hostAudioCtx.currentTime + duration);
+            } catch(e) {}
+        }
+
+        // ── NOTIFICACIÓN A LA VÍCTIMA ──
+        function notifyVictim(victimId, attackerName, sabotageName, icon) {
+            if (!connections[victimId]) return;
+            try {
+                connections[victimId].send({
+                    type: 'SABOTAGE_RECEIVED',
+                    attacker: attackerName,
+                    sabotage: sabotageName,
+                    icon: icon || '💀'
+                });
+            } catch(e) {}
+        }
+
+        // ── BROADCAST DE SABOTAJES ──
+        function broadcastSabotage(attackerName, victimName, sabotageName, icon) {
+            var msg = icon + ' ' + attackerName + ' saboteó a ' + victimName + ': ' + sabotageName;
+            for (var _bs in connections) {
+                try { connections[_bs].send({ type: 'SABOTAGE_BROADCAST', msg: msg }); } catch(e) {}
+            }
+            addEvent('<span class="ev-bad">' + msg + '</span>', icon);
         }
 
         // ── ROBO DE TURNO: ejecutar o cancelar ──
@@ -3736,6 +4115,14 @@
             isFogActive = false;
             isSharedSong = false;
             isLightningSong = false;
+            isDoubleOrNothing = false;
+            isBonusCard = false;
+            jinxActive = false;
+            justSucceeded = false;
+            silentCurses = [];
+            nextSharedSongTurn = 4 + Math.floor(Math.random() * 4);
+            nextBonusTurn = 7 + Math.floor(Math.random() * 4);
+            replayLog = [];
             turnCounter = 0;
             pendingSteal = null;
             hasShield = {};
@@ -3757,6 +4144,7 @@
                 p.tokens = 3;
                 p.canReload = true;
                 p.wildcards = 3;
+                p.emojiWildcardUsed = {};
                 p.lives = INITIAL_LIVES;
             });
 
@@ -3779,6 +4167,7 @@
             pendingSteal = null;
             isLightningSong = false;
             isSharedSong = false;
+            isDoubleOrNothing = false;
             turnCounter = 0;
             teams = { red: [], blue: [] };
             teamCards = { red: [], blue: [] };
@@ -3927,6 +4316,11 @@
                     else { ringFill.style.stroke = '#ff4444';
                         // Pulso cuando queda poco
                         ring.style.transform = remaining <= 5 ? 'scale(' + (1 + Math.sin(Date.now()/200)*0.05) + ')' : '';
+                        // ── TICK SONORO en los últimos 10 segundos ──
+                        if (remaining <= 10 && remaining > 0) {
+                            var freq = remaining <= 3 ? 1200 : remaining <= 5 ? 900 : 660;
+                            playToneHost(freq, 0.06, 'sine', 0.08);
+                        }
                     }
                     ringFill.style.strokeDashoffset = circumference * (1 - pct);
                 } else {
@@ -3966,7 +4360,7 @@
 
         // ── LOG DE EVENTOS ──
         var eventLog = [];
-        function addEvent(html) {
+        function addEvent(html, replayIcon) {
             var ts = new Date().toLocaleTimeString('es', {hour:'2-digit', minute:'2-digit'});
             eventLog.unshift({ html: html, ts: ts });
             if (eventLog.length > 20) eventLog.pop();
@@ -3975,6 +4369,12 @@
                 el.innerHTML = eventLog.slice(0, 8).map(function(e) {
                     return '<div class="event-entry">' + e.html + '</div>';
                 }).join('');
+            }
+            // Guardar en replayLog si es un momento clave
+            if (replayIcon) {
+                var txt = html.replace(/<[^>]+>/g, '').trim();
+                replayLog.push({ turn: turnCounter, text: txt, icon: replayIcon });
+                if (replayLog.length > 20) replayLog.shift();
             }
         }
 
