@@ -1146,6 +1146,10 @@
                 stats.playerBetsWon[p.id] = 0; stats.playerBetsLost[p.id] = 0;
                 stats.streaks[p.id] = 0; stats.maxStreaks[p.id] = 0;
             });
+            stats.braggingWins = {};
+            stats.braggingAttempts = {};
+            stats.consecutiveFails = {};
+            stats.reactionTimes = {};
         }
 
         function trackCorrect(pid, songId) {
@@ -1678,6 +1682,8 @@
             emojiWildcardBonus = {};
             reactionBuffer = {};
             silentCurses = [];
+            stats.consecutiveFails = {};
+            stats.reactionTimes = {};
             competitiveMode = false;
             requestedCategory = null;
             reactionStartTime = 0;
