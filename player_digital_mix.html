@@ -165,6 +165,91 @@
             100% { transform: translateY(-100%); opacity: 0; }
         }
 
+        /* ── MINI RANKING ── */
+        #mini-ranking {
+            display: none;
+            width: 100%;
+            max-width: 420px;
+            background: rgba(0,0,0,0.6);
+            border-bottom: 1px solid #1a1a1a;
+            padding: 6px 10px;
+            font-family: 'Montserrat';
+            font-size: 0.6em;
+            gap: 6px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .rank-pill {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid #222;
+            border-radius: 20px;
+            padding: 3px 8px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: #666;
+            transition: border-color 0.3s;
+        }
+        .rank-pill.me { border-color: var(--neon); color: var(--neon); }
+        .rank-pill.leader { border-color: var(--gold); color: var(--gold); }
+        .rank-pill .rname { max-width: 60px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+        /* ── SEGURO DE FALLO ── */
+        #btn-fail-safe {
+            display: none;
+            background: linear-gradient(90deg, #003366, #0055aa);
+            color: #88bbff;
+            border: 1px solid #0055aa;
+            font-family: 'Bungee';
+            font-size: 0.8em;
+            padding: 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            width: 100%;
+            max-width: 340px;
+            margin: 4px 0;
+            letter-spacing: 1px;
+        }
+
+        /* ── REACCIONES RÁPIDAS ── */
+        .quick-react-bar {
+            display: none;
+            flex-wrap: wrap;
+            gap: 5px;
+            justify-content: center;
+            margin: 6px 0;
+        }
+        .qr-btn {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid #222;
+            border-radius: 20px;
+            padding: 5px 10px;
+            font-size: 0.6em;
+            color: #666;
+            cursor: pointer;
+            font-family: 'Montserrat';
+            transition: all 0.2s;
+        }
+        .qr-btn:active { background: rgba(255,255,255,0.1); border-color: var(--neon); color: var(--neon); }
+
+        /* ── TOAST REACCIÓN RÁPIDA ── */
+        .qr-toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.9);
+            border: 1px solid #333;
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-family: 'Montserrat';
+            font-size: 0.8em;
+            color: #aaa;
+            z-index: 9600;
+            pointer-events: none;
+            animation: danger-slide 3s ease forwards;
+        }
+
         /* ── DISTRACCIÓN EMOJI ── */
         #distraction-overlay {
             display: none;
@@ -1516,6 +1601,7 @@
         <div style="font-family:'Bungee'; font-size:0.7em; color:#444; letter-spacing:2px;">JUGADORES CONECTADOS</div>
         <div id="waiting-players-list" style="display:flex; flex-direction:column; gap:6px; align-items:center; max-height:200px; overflow-y:auto;"></div>
         <div style="font-size:0.6em; color:#333; font-family:'Montserrat';">La partida empezará cuando el host pulse INICIAR</div>
+        <button id="btn-ready" onclick="sendReady()" style="background:linear-gradient(90deg,#003300,#006600);color:#00ff88;border:1px solid #00aa44;font-family:'Bungee';font-size:0.85em;padding:14px 28px;border-radius:12px;cursor:pointer;margin-top:10px;letter-spacing:1px;">✅ ESTOY LISTO</button>
         <div id="session-stats"></div>
     </div>
 
@@ -1541,6 +1627,7 @@
                 <div class="sab-attacker" id="sab-attacker"></div>
                 <div class="sab-name" id="sab-name"></div>
             </div>
+            <div id="mini-ranking"></div>
             <div id="team-vote-banner"></div>
             <button id="resist-steal-btn" onclick="send('RESIST_STEAL')">
                 🛡️ RESISTIR ROBO (2🔵)<br>
@@ -1552,10 +1639,22 @@
             <div id="shared-song-player-banner">🎵 ¡¡TODOS JUEGAN!! PRIMER SLOT CORRECTO GANA 🎵</div>
             <div id="streak-counter"></div>
             <button id="btn-double-or-nothing" onclick="activateDoubleOrNothing()">🎲 DOBLE O NADA</button>
+            <button id="btn-fail-safe" onclick="activateFailSafe()">🛡️ SEGURO DE FALLO (2🔵)</button>
             <button id="btn-steal-streak" onclick="stealStreak()">🔥 ROBAR RACHA (2🔵)</button>
             <div id="turn-counter-display"></div>
             <div id="my-lives-bar" class="my-lives" style="display:none;"></div>
 
+            <!-- REACCIONES RÁPIDAS -->
+            <div class="quick-react-bar" id="quick-react-bar">
+                <button class="qr-btn" onclick="sendQuickReact('¡Llevas tanto tiempo en el año equivocado que ya te han mandado el padrón municipal!')">📋 ¡Te han empadronado!</button>
+                <button class="qr-btn" onclick="sendQuickReact('¡Con ese nivel de acierto, Spotify te ha mandado un correo de condolencias!')">🎧 ¡Condolencias de Spotify!</button>
+                <button class="qr-btn" onclick="sendQuickReact('¡Eso lo sabía hasta mi vecino el sordo... y él no tenía altavoces!')">🦻 ¡Lo sabía el sordo!</button>
+                <button class="qr-btn" onclick="sendQuickReact('¡Te has equivocado tanto que ya eres Patrimonio Nacional del Desastre Musical!')">🏛️ ¡Patrimonio Nacional!</button>
+                <button class="qr-btn" onclick="sendQuickReact('¡Eso sonaba en el recreo del cole de tu abuelo... y tu abuelo llegó tarde!')">🏫 ¡El cole del abuelo!</button>
+                <button class="qr-btn" onclick="sendQuickReact('¡Has fallado más que el botón del portal de tu comunidad de vecinos!')">🔔 ¡El botón del portal!</button>
+                <button class="qr-btn" onclick="sendQuickReact('¡Tu cronología ya la han catalogado en el Museo del Prado como obra surrealista!')">🖼️ ¡Al Museo del Prado!</button>
+                <button class="qr-btn" onclick="sendQuickReact('¡Si Shazam te hiciera una auditoría musical, te cerraba la cuenta y te mandaba a un monasterio!')">🔍 ¡Auditoría del Shazam!</button>
+            </div>
             <!-- REACCIONES: visibles para todos cuando la partida está activa -->
             <div class="reaction-bar" id="reaction-bar" style="display:none;">
                 <button class="reaction-btn" onclick="sendReaction('😂')">😂</button>
@@ -2344,6 +2443,85 @@
         var resistTimeout = null;
         var resistInterval = null;
 
+        // ── READY CHECK ──
+        var alreadySentReady = false;
+        function sendReady() {
+            if (alreadySentReady) return;
+            alreadySentReady = true;
+            send('PLAYER_READY');
+            var btn = document.getElementById('btn-ready');
+            if (btn) { btn.innerText = '✅ LISTO'; btn.disabled = true; btn.style.opacity = '0.5'; }
+        }
+
+        // ── SEGURO DE FALLO ──
+        function activateFailSafe() {
+            showCustomConfirm('🛡️ SEGURO DE FALLO (2🔵): si fallas este turno no sufrirás penalizaciones extra (jinx, vidas, doble o nada). ¿Activar?', function(ok) {
+                if (ok) send('FAIL_SAFE');
+            });
+        }
+
+        // ── MINI RANKING ──
+        function updateMiniRanking(players, myId) {
+            var el = document.getElementById('mini-ranking');
+            if (!el || !players) return;
+            var sorted = players.slice().sort(function(a,b){ return b.score - a.score; });
+            var maxScore = sorted[0] ? sorted[0].score : 1;
+            el.innerHTML = sorted.map(function(pl, i) {
+                var cls = pl.id === myId ? 'me' : (i === 0 ? 'leader' : '');
+                var medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '';
+                return '<div class="rank-pill ' + cls + '">' + medal + '<span class="rname">' + pl.name + '</span><strong>' + pl.score + '</strong>🃏</div>';
+            }).join('');
+            el.style.display = 'flex';
+        }
+
+        // ── REACCIONES RÁPIDAS ──
+        function sendQuickReact(text) {
+            send('QUICK_REACT', text);
+        }
+
+        // ── TAB BLINK ──
+        var _tabBlinkInterval = null;
+        var _origTitle = document.title;
+        function startTabBlink() {
+            if (_tabBlinkInterval) return;
+            _tabBlinkInterval = setInterval(function() {
+                document.title = document.title === _origTitle ? '🎵 ¡ES TU TURNO!' : _origTitle;
+            }, 900);
+        }
+        function stopTabBlink() {
+            if (_tabBlinkInterval) { clearInterval(_tabBlinkInterval); _tabBlinkInterval = null; }
+            document.title = _origTitle;
+        }
+
+        // ── LEADERBOARD ENTRE SESIONES ──
+        function showLeaderboard() {
+            var el = document.getElementById('session-stats');
+            if (!el) return;
+            try {
+                var entries = [];
+                for (var i = 0; i < localStorage.length; i++) {
+                    var key = localStorage.key(i);
+                    if (key && key.startsWith('CB_Stats_')) {
+                        var name = key.replace('CB_Stats_', '').replace(/_/g,' ');
+                        var s = JSON.parse(localStorage.getItem(key) || '{}');
+                        var total = (s.correct||0)+(s.fails||0);
+                        entries.push({ name: name, games: s.games||0, pct: total>0?Math.round(s.correct/total*100):0, bestStreak: s.bestStreak||0 });
+                    }
+                }
+                if (entries.length === 0) return;
+                entries.sort(function(a,b){ return b.pct - a.pct; });
+                var html = '<div style="font-family:Bungee;font-size:0.8em;color:#444;letter-spacing:2px;margin-bottom:6px;">🏆 LEADERBOARD</div>';
+                entries.slice(0,8).forEach(function(e,i) {
+                    var medal = i===0?'🥇':i===1?'🥈':i===2?'🥉':'  ';
+                    html += '<div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid #111;">';
+                    html += '<span>' + medal + ' <strong style="color:#666;">' + e.name + '</strong></span>';
+                    html += '<span style="color:#444;">' + e.pct + '% · ' + e.games + 'p</span></div>';
+                });
+                el.innerHTML = html;
+                el.style.display = 'block';
+            } catch(e) {}
+        }
+
         // ── ROBO DE RACHA ──
         function stealStreak() {
             showCustomConfirm('\u{1F525} \u00BFRobar la racha del rival? (Coste: 2\u{1F535} \u2014 solo funciona si alguien lleva racha \u00D73+)', function(ok) {
@@ -2611,6 +2789,14 @@
             } else if (data.type === 'RIVAL_STREAK') {
                 soundBet();
                 showDangerAlert('⚡ ATENCIÓN: ' + data.name + ' lleva racha ×' + data.streak + ' — ¡SABELOTODO!', false);
+                return;
+            } else if (data.type === 'QUICK_REACT') {
+                // Toast de reacción rápida
+                var qt = document.createElement('div');
+                qt.className = 'qr-toast';
+                qt.innerHTML = '<strong style="color:var(--neon);">' + (data.from||'?') + ':</strong> ' + (data.text||'');
+                document.body.appendChild(qt);
+                setTimeout(function(){ qt.remove(); }, 3200);
                 return;
             } else if (data.type === 'DISTRACTION') {
                 showDistraction();
@@ -2902,6 +3088,39 @@
                 // Slider de volumen: solo para el jugador activo
                 var volCtrl = document.getElementById('volume-ctrl');
                 if (volCtrl) volCtrl.style.display = (isMyTurn && data.gameStarted) ? 'flex' : 'none';
+                // Mini ranking
+                updateMiniRanking(data.players, myId);
+
+                // Tab blink — si es mi turno y la pestaña está oculta
+                var isMyTurnNow = data.players && data.players.find(function(pl){return pl.id===myId;}) &&
+                    data.gameStarted && !data.isRevealed &&
+                    data.players[data.activePlayerIdx] && data.players[data.activePlayerIdx].id === myId;
+                if (isMyTurnNow && document.hidden) { startTabBlink(); } else { stopTabBlink(); }
+
+                // Botón seguro de fallo
+                var fsBtn = document.getElementById('btn-fail-safe');
+                if (fsBtn) {
+                    var myPl4 = data.players && data.players.find(function(pl){return pl.id===myId;});
+                    var showFs = isMyTurn && data.gameStarted && !data.failSafeActive && myPl4 && myPl4.tokens >= 2;
+                    fsBtn.style.display = showFs ? 'block' : 'none';
+                    if (data.failSafeActive && isMyTurn) {
+                        fsBtn.innerText = '🛡️ SEGURO ACTIVO';
+                        fsBtn.disabled = true;
+                        fsBtn.style.display = 'block';
+                    } else if (fsBtn.disabled && !data.failSafeActive) {
+                        fsBtn.disabled = false;
+                        fsBtn.innerText = '🛡️ SEGURO DE FALLO (2🔵)';
+                    }
+                }
+
+                // Reacciones rápidas — visibles cuando hay partida
+                var qrBar = document.getElementById('quick-react-bar');
+                if (qrBar) qrBar.style.display = data.gameStarted ? 'flex' : 'none';
+
+                // Ready check — ocultar botón listo cuando empiece la partida
+                var readyBtn = document.getElementById('btn-ready');
+                if (readyBtn && data.gameStarted) readyBtn.style.display = 'none';
+
                 // Contador de turnos
                 var tcDisp = document.getElementById('turn-counter-display');
                 if (tcDisp && data.gameStarted && data.turnCounter > 0) {
