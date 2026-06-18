@@ -848,10 +848,76 @@
         .animate-flash {
             animation: gunshot-flash 0.4s ease-out forwards;
         }
+    
+        /* ══ GRID + ORBS + SCANLINES ══ */
+        .bg-grid {
+            position: fixed; inset: 0; z-index: 0; pointer-events: none;
+            background-image:
+                linear-gradient(rgba(0,242,255,0.015) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,242,255,0.015) 1px, transparent 1px);
+            background-size: 55px 55px;
+            animation: grid-drift 30s linear infinite;
+        }
+        @keyframes grid-drift { from { transform:translate(0,0); } to { transform:translate(55px,55px); } }
+        .orb { position:fixed; border-radius:50%; filter:blur(100px); opacity:0.1; z-index:0; pointer-events:none; }
+        .orb-1 { width:500px; height:500px; background:#00f2ff; top:-150px; left:-150px; }
+        .orb-2 { width:400px; height:400px; background:#ff00cc; bottom:-100px; right:-100px; }
+        .orb-3 { width:280px; height:280px; background:#bf00ff; top:35%; left:55%; }
+        .scanlines {
+            position:fixed; inset:0; z-index:1; pointer-events:none;
+            background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.04) 3px,rgba(0,0,0,0.04) 4px);
+        }
+        /* ══ GLOW EN CONTENEDORES CLAVE ══ */
+        #ui-card-box {
+            border: 1px solid rgba(0,242,255,0.2) !important;
+            box-shadow: 0 0 20px rgba(0,242,255,0.06), inset 0 0 20px rgba(0,0,0,0.2) !important;
+        }
+        #host-instructions {
+            text-shadow: 0 0 10px rgba(0,242,255,0.4);
+        }
+        /* ══ GRADIENTE EN TÍTULOS PRINCIPALES HOST ══ */
+        .host-gradient-title {
+            background: linear-gradient(90deg,#00f2ff,#ff00cc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        /* ══ RANKING CARDS CON BRILLO ══ */
+        .rank-card {
+            border: 1px solid rgba(255,255,255,0.06) !important;
+            box-shadow: 0 0 8px rgba(0,0,0,0.4) !important;
+            background: rgba(255,255,255,0.03) !important;
+        }
+
+
+        /* ── PANEL STATS EN VIVO ── */
+        #live-stats-toggle {
+            position: fixed; bottom: 20px; right: 20px; z-index: 9000;
+            background: var(--bg); border: 1px solid #333; color: #555;
+            font-family: 'Bungee'; font-size: 0.55em; letter-spacing: 2px;
+            padding: 8px 12px; border-radius: 20px; cursor: pointer;
+            transition: border-color 0.2s, color 0.2s;
+        }
+        #live-stats-toggle:hover { border-color: var(--neon); color: var(--neon); }
+        #live-stats-panel {
+            display: none; position: fixed; bottom: 60px; right: 20px; z-index: 8999;
+            background: rgba(2,8,16,0.95); border: 1px solid #1a1a1a;
+            border-radius: 12px; padding: 14px; min-width: 200px; max-width: 260px;
+            font-family: 'Montserrat'; font-size: 0.65em; color: #555;
+            box-shadow: 0 0 20px rgba(0,0,0,0.6);
+        }
+        .ls-row { display:flex; justify-content:space-between; align-items:center; padding:4px 0; border-bottom:1px solid #0d0d0d; }
+        .ls-label { color: #333; font-size:0.85em; }
+        .ls-val { color: var(--neon); font-family:'Bungee'; font-size:0.9em; }
     </style>
 </head>
 
 <body>
+    <div class="bg-grid"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="scanlines"></div>
     <a href="index.html" class="btn-hub" title="Volver al Hub">H</a>
     <div id="flash-overlay"></div>
     <div id="winner-screen" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(2,8,16,0.97); z-index:1000; flex-direction:row; align-items:stretch; overflow:hidden;">
@@ -874,16 +940,32 @@
         </div>
     </div>
     <div class="logo">CHRONOBEATS</div>
+    <button id="live-stats-toggle" style="display:none;" onclick="toggleLiveStats()">📊 STATS</button>
+    <div id="live-stats-panel">
+        <div style="font-family:'Bungee';font-size:0.7em;color:#444;letter-spacing:2px;margin-bottom:8px;">📊 STATS EN VIVO</div>
+        <div class="ls-row"><span class="ls-label">Turno</span><span class="ls-val" id="ls-turn">—</span></div>
+        <div class="ls-row"><span class="ls-label">Racha más larga</span><span class="ls-val" id="ls-streak">—</span></div>
+        <div class="ls-row"><span class="ls-label">Reacción más rápida</span><span class="ls-val" id="ls-reaction">—</span></div>
+        <div class="ls-row"><span class="ls-label">Más saboteado</span><span class="ls-val" id="ls-sabbed">—</span></div>
+        <div class="ls-row"><span class="ls-label">Más saboteador</span><span class="ls-val" id="ls-saber">—</span></div>
+        <div class="ls-row" style="border:none;"><span class="ls-label">Canciones jugadas</span><span class="ls-val" id="ls-songs">—</span></div>
+    </div>
     <div id="live-room-code"
-        style="display:none; position:fixed; top:20px; right:20px; background:var(--bg); border:1px solid var(--neon); color:var(--neon); padding:8px 15px; border-radius:10px; font-family:'Bungee'; font-size:1.2em; z-index:10000; box-shadow:0 0 10px rgba(0,242,255,0.3);">
-        CODE</div>
+        style="display:none; position:fixed; top:20px; right:20px; background:var(--bg); border:1px solid var(--neon); color:var(--neon); padding:10px 14px; border-radius:12px; font-family:'Bungee'; font-size:1.2em; z-index:10000; box-shadow:0 0 12px rgba(0,242,255,0.3); cursor:pointer; user-select:none;"
+        onclick="toggleLiveQR()" title="Pulsa para ver el QR">
+        <span id="live-code-text">CODE</span>
+        <div id="live-qr-mini" style="display:none; margin-top:8px; text-align:center;">
+            <div id="live-qr-canvas" style="background:#fff; padding:4px; border-radius:6px; display:inline-block;"></div>
+            <div style="font-size:0.45em; color:#555; margin-top:4px; letter-spacing:1px;">ESCANEAR PARA UNIRSE</div>
+        </div>
+    </div>
     <div id="lobby">
         <div class="room-code" id="join-code">------</div>
         <button onclick="resetRoomCode()" style="font-family:'Bungee'; font-size:0.55em; color:#444; background:transparent; border:1px solid #333; border-radius:6px; padding:4px 10px; cursor:pointer; margin-top:-8px; margin-bottom:8px;">↺ Nueva sala</button>
         <div id="qr-container" style="margin: 10px auto 20px; display:flex; flex-direction:column; align-items:center; gap:8px;">
             <div id="qr-code" style="background:#fff; padding:12px; border-radius:12px; display:inline-block;"></div>
             <div style="font-family:'Bungee'; font-size:0.55em; color:#666; letter-spacing:2px;">ESCANEA PARA UNIRTE</div>
-            <a id="player-link" href="#" style="display:none; font-family:'Bungee'; font-size:0.55em; color:var(--neon); text-decoration:none; border:1px solid var(--neon); padding:6px 12px; border-radius:8px;" onclick="copyPlayerLink(event)">🔗 Copiar enlace jugador</a>
+            
         </div>
         <div class="player-list" id="lobby-players" style="margin-bottom: 20px;"></div>
 
@@ -1089,6 +1171,7 @@
         var reactionStartTime = 0;      // cuándo empezó a sonar la canción
         var tokenStarvationTurns = {};  // {playerId: N} — turnos consecutivos sin fichas
         var readyPlayers = {};      // {playerId: true} — ready check
+        var predictions = {};       // {playerId: nombrePredicho} — predicciones
         var failSafeActive = false;
         var isBragging = false;     // turno del farolero activo // seguro de fallo activo este turno
         var songHistory = [];       // historial de canciones jugadas
@@ -1221,55 +1304,33 @@
 
         // Generar QR con el código de sala
         var qrGenerated = false;
-        function copyPlayerLink(e) {
-            e.preventDefault();
-            var link = document.getElementById('player-link');
-            if (link && navigator.clipboard) {
-                navigator.clipboard.writeText(link.href).then(function() {
-                    var old = link.innerText;
-                    link.innerText = '✅ ¡Copiado!';
-                    setTimeout(function() { link.innerText = old; }, 2000);
-                });
-            } else if (link) {
-                // Fallback para iOS Safari
-                var ta = document.createElement('textarea');
-                ta.value = link.href;
-                document.body.appendChild(ta);
-                ta.select();
-                document.execCommand('copy');
-                document.body.removeChild(ta);
-                var old = link.innerText;
-                link.innerText = '✅ ¡Copiado!';
-                setTimeout(function() { link.innerText = old; }, 2000);
-            }
-        }
 
         function generateQR() {
             if (qrGenerated) return;
             var qrEl = document.getElementById('qr-code');
+            var baseUrl = window.location.href.replace('host_digital_mix.html', 'player_digital_mix.html').split('?')[0];
+            var playerUrl = baseUrl + '?sala=' + roomCode;
             if (qrEl && typeof QRCode !== 'undefined') {
                 qrEl.innerHTML = '';
-                // Generar URL directa al player con el código ya incluido
-                var baseUrl = window.location.href.replace('host_digital_mix.html', 'player_digital_mix.html');
-                baseUrl = baseUrl.split('?')[0]; // quitar parámetros del host
-                var playerUrl = baseUrl + '?sala=' + roomCode;
-                new QRCode(qrEl, {
-                    text: playerUrl,
-                    width: 160,
-                    height: 160,
-                    colorDark: '#000000',
-                    colorLight: '#ffffff',
-                    correctLevel: QRCode.CorrectLevel.M
-                });
+                new QRCode(qrEl, { text: playerUrl, width: 160, height: 160,
+                    colorDark: '#000000', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
                 qrGenerated = true;
-                // Mostrar también el enlace copiable
-                var linkEl = document.getElementById('player-link');
-                if (linkEl) {
-                    linkEl.href = playerUrl;
-                    linkEl.innerText = '🔗 Copiar enlace jugador';
-                    linkEl.style.display = 'block';
-                }
             }
+            // Generar también el mini QR del live-room-code
+            var miniEl = document.getElementById('live-qr-canvas');
+            if (miniEl && typeof QRCode !== 'undefined') {
+                miniEl.innerHTML = '';
+                new QRCode(miniEl, { text: playerUrl, width: 100, height: 100,
+                    colorDark: '#000000', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
+            }
+        }
+
+        function toggleLiveQR() {
+            var qrMini = document.getElementById('live-qr-mini');
+            if (!qrMini) return;
+            var visible = qrMini.style.display === 'block';
+            qrMini.style.display = visible ? 'none' : 'block';
+            if (!visible) generateQR(); // asegurar que está generado
         }
         // Intentar generar al cargar y también cuando el peer esté listo
         window.addEventListener('load', function() { setTimeout(generateQR, 500); });
@@ -1427,7 +1488,7 @@
             });
             peer.on('open', function (id) {
                 console.log("Host Peer Abierto:", id);
-                document.getElementById('live-room-code').innerText = roomCode;
+                document.getElementById('live-code-text').innerText = roomCode;
                 document.getElementById('live-room-code').style.display = 'block';
                 generateQR(); // Asegurar que el QR está generado
             });
@@ -1626,6 +1687,66 @@
 
 
 
+        function toggleLiveStats() {
+            var panel = document.getElementById('live-stats-panel');
+            if (panel) panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function updateLiveStats() {
+            if (!gameStarted) return;
+            var toggle = document.getElementById('live-stats-toggle');
+            if (toggle) toggle.style.display = 'block';
+            // Turno
+            var lsTurn = document.getElementById('ls-turn');
+            if (lsTurn) lsTurn.textContent = turnCounter || '—';
+            // Racha más larga activa
+            var lsStreak = document.getElementById('ls-streak');
+            if (lsStreak && stats.maxStreaks) {
+                var bestStreakPl = null, bestVal = 0;
+                players.forEach(function(pl) {
+                    var v = stats.maxStreaks[pl.id] || 0;
+                    if (v > bestVal) { bestVal = v; bestStreakPl = pl.name; }
+                });
+                lsStreak.textContent = bestStreakPl ? bestStreakPl + ' ×' + bestVal : '—';
+            }
+            // Reacción más rápida
+            var lsReact = document.getElementById('ls-reaction');
+            if (lsReact && stats.reactionTimes) {
+                var fastPl = null, fastAvg = Infinity;
+                players.forEach(function(pl) {
+                    var rts = stats.reactionTimes[pl.id] || [];
+                    if (rts.length >= 2) {
+                        var avg = rts.reduce(function(a,b){return a+b;},0)/rts.length;
+                        if (avg < fastAvg) { fastAvg = avg; fastPl = pl.name; }
+                    }
+                });
+                lsReact.textContent = fastPl ? fastPl + ' ' + fastAvg.toFixed(1) + 's' : '—';
+            }
+            // Más saboteado
+            var lsSabbed = document.getElementById('ls-sabbed');
+            if (lsSabbed && stats.playerSabotaged) {
+                var topSabbed = null, topSabbedV = 0;
+                players.forEach(function(pl) {
+                    var v = stats.playerSabotaged[pl.id] || 0;
+                    if (v > topSabbedV) { topSabbedV = v; topSabbed = pl.name; }
+                });
+                lsSabbed.textContent = topSabbed ? topSabbed + ' (' + topSabbedV + ')' : '—';
+            }
+            // Más saboteador
+            var lsSaber = document.getElementById('ls-saber');
+            if (lsSaber && stats.playerSabotages) {
+                var topSaber = null, topSaberV = 0;
+                players.forEach(function(pl) {
+                    var v = stats.playerSabotages[pl.id] || 0;
+                    if (v > topSaberV) { topSaberV = v; topSaber = pl.name; }
+                });
+                lsSaber.textContent = topSaber ? topSaber + ' (' + topSaberV + ')' : '—';
+            }
+            // Canciones jugadas
+            var lsSongs = document.getElementById('ls-songs');
+            if (lsSongs) lsSongs.textContent = (turnCounter || 0);
+        }
+
         function checkReadyAndStart() {
             var readyCount = Object.keys(readyPlayers).length;
             if (players.length < 2) { showCustomAlert('Necesitas al menos 2 jugadores para empezar.'); return; }
@@ -1649,6 +1770,7 @@
             isBragging = false;
             songHistory = [];
             readyPlayers = {};
+            predictions = {};
             requestedCategory = null;
             justSucceeded = false;
             emojiWildcardBonus = {};
@@ -1919,6 +2041,7 @@
                     } else { tokenStarvationTurns[pl.id] = 0; }
                 });
             }
+            updateLiveStats();
             syncState();
         }
 
@@ -2975,6 +3098,14 @@
                     }
                     break;
 
+                case 'PREDICT_WINNER':
+                    if (typeof value === 'string' && value.length > 0) {
+                        predictions[peerId] = value;
+                        addEvent('<span class="ev-info">🔮 ' + (players.find(function(pl){return pl.id===peerId;})||{name:'?'}).name + ' ha hecho su predicción</span>');
+                        syncState();
+                    }
+                    break;
+
                 case 'PLAYER_READY':
                     readyPlayers[peerId] = true;
                     updateLobby();
@@ -3579,6 +3710,12 @@
             }
             document.getElementById('winner-avatar-img').innerHTML = avatarHtml;
 
+            // ── GUARDAR VICTORIA en localStorage ──
+            var _wKey = 'CB_Stats_' + name.replace(/\s+/g, '_');
+            var _wData = JSON.parse(localStorage.getItem(_wKey) || '{}');
+            _wData.wins = (_wData.wins || 0) + 1;
+            localStorage.setItem(_wKey, JSON.stringify(_wData));
+
             document.getElementById('winner-screen').style.display = 'flex';
             // Confeti espectacular al mostrar el ganador
 if (typeof confetti === 'function') {
@@ -3822,6 +3959,29 @@ if (typeof confetti === 'function') {
 
             console.log("Ganador:", name, "| Sonando:", songTitle);
 
+            // ── PREDICCIONES ──
+            var predHtml = '';
+            var predWinners = [];
+            Object.keys(predictions).forEach(function(pid) {
+                var predictor = players.find(function(pl){ return pl.id === pid; });
+                if (!predictor) return;
+                var correct = predictions[pid] === name;
+                if (correct) {
+                    predWinners.push(predictor.name);
+                    // +1 ficha en siguiente partida via localStorage
+                    var _pKey = 'CB_PredictionBonus_' + predictor.name.replace(/\s+/g,'_');
+                    localStorage.setItem(_pKey, '1');
+                }
+                predHtml += '<div style="font-size:0.65em;color:' + (correct?'var(--neon)':'#555') + ';font-family:Montserrat;padding:3px 0;">' +
+                    (correct ? '✅ ' : '❌ ') + predictor.name + ' predijo: <strong>' + predictions[pid] + '</strong>' +
+                    (correct ? ' 🎯 +1🔵 próxima partida' : '') + '</div>';
+            });
+            if (predHtml) {
+                awardsHtml += '<div style="width:100%;max-width:700px;margin:10px 0;border-top:1px solid #1a1a1a;padding-top:10px;">' +
+                    '<div style="font-family:Bungee;font-size:0.55em;color:#333;letter-spacing:3px;margin-bottom:8px;">🔮 PREDICCIONES</div>' +
+                    predHtml + '</div>';
+            }
+
             // ── LOGROS ──
             var achData = calculateAchievements(players, stats);
             if (achData.length > 0) {
@@ -4009,6 +4169,8 @@ if (typeof confetti === 'function') {
                     isBragging: isBragging,
                     competitiveMode: competitiveMode,
                     readyPlayers: readyPlayers,
+                    predictions: predictions,
+                    playerNames: players.map(function(pl){ return pl.name; }),
                     isBonusCard: isBonusCard,
                     nextSharedSongTurn: nextSharedSongTurn,
                     bettingAgainst: bettingAgainst,
@@ -4363,6 +4525,7 @@ if (typeof confetti === 'function') {
                 if (!isRevealed && !panicActive) document.getElementById('host-instructions').innerText = (isMuted ? "REPRODUCIENDO (MUTE)" : "REPRODUCIENDO");
             }, 3000);
             trackSabotage(thief.id, victim.id);
+            updateLiveStats();
             syncState();
         }
 
@@ -4483,6 +4646,7 @@ if (typeof confetti === 'function') {
             failSafeActive = false;
             songHistory = [];
             readyPlayers = {};
+            predictions = {};
             emojiWildcardBonus = {};
             nextSharedSongTurn = 4 + Math.floor(Math.random() * 4);
             nextBonusTurn = 7 + Math.floor(Math.random() * 4);
