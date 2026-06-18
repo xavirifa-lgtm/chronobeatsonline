@@ -917,30 +917,16 @@
                 <option value="90s2000s">90s Y 2000s (1990-2009)</option>
             </select>
             <div id="song-counter" style="font-family:'Montserrat'; font-size:0.65em; color:#444; text-align:center; margin-top:6px;"></div>
-            <div style="margin-top:10px; display:flex; align-items:center; gap:8px;">
-                <input type="checkbox" id="competitive-mode-check" style="width:16px;height:16px;accent-color:var(--neon);">
-                <label for="competitive-mode-check" style="font-family:'Montserrat';font-size:0.7em;color:#666;cursor:pointer;">🏆 Modo Competitivo (sin sabotajes, sin fichas, solo cronología)</label>
-            </div>
+            
         </div>
 
-        <div id="joputismo-container-lobby" style="margin-bottom: 20px;">
-            <label
-                style="font-family: 'Bungee'; color: #ff0055; font-size: 1.2em; display: block; margin-bottom: 10px;">NIVEL
-                DE JOPUTISMO</label>
-            <select id="joputismo-select-lobby" onchange="setJoputismo(this.value)"
-                style="padding: 10px; font-family: 'Montserrat'; font-size: 1em; border-radius: 8px; background: #222; color: #fff; border: 1px solid #ff0055;">
-                <option value="0">LOSER (Modo Pacífico)</option>
-                <option value="1">TROLL (Nivel Cabrón)</option>
-                <option value="2">SUPERMAN (Guerra Total)</option>
-            </select>
-        </div>
+        
 
         <div id="lobby-ready-status" style="font-family:'Montserrat'; font-size:0.7em; color:#444; text-align:center; margin-top:8px; min-height:1.2em;"></div>
         <button class="btn-start" onclick="checkReadyAndStart()" style="display:none; margin-top: 8px;" id="start-btn">▶ EMPEZAR PARTIDA</button>
     </div>
 
-    <!-- AUDIO JOPUTISMO YOUTUBE -->
-    <div id="joputismo-audio-player" style="display:none;"></div>
+
     <div id="audio-player-container" style="display:none;"></div>
 
     <div id="dashboard">
@@ -963,18 +949,7 @@
                 <div id="active-player-mini-stats" style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-top:6px; font-size:0.6em; color:#666;"></div>
             </div>
 
-            <div
-                style="margin-bottom: 20px; text-align: center; border-top: 1px solid #333; padding-top: 10px; border-bottom: 1px solid #333; padding-bottom: 15px;">
-                <label
-                    style="font-family: 'Bungee'; color: #ff0055; font-size: 0.6em; display: block; margin-bottom: 5px;">NIVEL
-                    DE JOPUTISMO</label>
-                <select id="joputismo-select-game" onchange="setJoputismo(this.value)"
-                    style="width: 100%; padding: 5px; font-family: 'Montserrat'; font-size: 0.8em; border-radius: 5px; background: #111; color: #ff0055; border: 1px solid #ff0055;">
-                    <option value="0">LOSER</option>
-                    <option value="1">TROLL</option>
-                    <option value="2">SUPERMAN</option>
-                </select>
-            </div>
+            
             <div id="leaderboard-list"></div>
 
             <div id="event-log">
@@ -1234,7 +1209,6 @@
         var panicTimer = 0;
         var panicActive = false;
         var panicInterval = null;
-        var joputismoLevel = 0; // 0: LOSER, 1: HE-MAN, 2: SUPERMAN
         var isFogActive = false;
         var hasShield = {}; // playerId -> boolean
 
@@ -1626,38 +1600,7 @@
             if (players.length >= 1) document.getElementById('start-btn').style.display = 'inline-block';
         }
 
-        var joputismoAudioTimeout = null;
 
-        function setJoputismo(level) {
-            joputismoLevel = parseInt(level);
-            var selectLobby = document.getElementById('joputismo-select-lobby');
-            if (selectLobby) selectLobby.value = joputismoLevel;
-            var selectGame = document.getElementById('joputismo-select-game');
-            if (selectGame) selectGame.value = joputismoLevel;
-
-            var themeContainer = document.getElementById('joputismo-audio-player');
-            if (themeContainer) {
-                if (joputismoAudioTimeout) {
-                    clearTimeout(joputismoAudioTimeout);
-                    joputismoAudioTimeout = null;
-                }
-
-                if (document.getElementById('lobby').style.display !== 'none') {
-                    if (joputismoLevel === 1) {
-                        // Trololo meme
-                        themeContainer.innerHTML = '<iframe width="1" height="1" src="https://www.youtube-nocookie.com/embed/oavMtUWDBTM?autoplay=1&start=16" allow="autoplay" style="display:none;"></iframe>';
-                    } else if (joputismoLevel === 2) {
-                        // Superman theme - desde el principio
-                        themeContainer.innerHTML = '<iframe width="1" height="1" src="https://www.youtube-nocookie.com/embed/e9vrfEoc8_g?autoplay=1" allow="autoplay" style="display:none;"></iframe>';
-                    } else {
-                        themeContainer.innerHTML = '';
-                    }
-                } else {
-                    themeContainer.innerHTML = '';
-                }
-            }
-            syncState();
-        }
 
         function checkReadyAndStart() {
             var readyCount = Object.keys(readyPlayers).length;
@@ -1670,13 +1613,7 @@
         }
 
         function startGame() {
-            requestWakeLock();
-            var tc = document.getElementById('joputismo-audio-player');
-            if (tc) tc.innerHTML = '';
-
-            gameMode = document.getElementById('game-mode-select').value;
-            competitiveMode = document.getElementById('competitive-mode-check') && document.getElementById('competitive-mode-check').checked;
-            hasShield = {};
+            requestWakeLock();;
             initStats();
             turnCounter = 0;
             isSharedSong = false;
@@ -1850,8 +1787,6 @@
             if (muteIntervalTimer) { clearInterval(muteIntervalTimer); muteIntervalTimer = null; }
 
             // Parar música de duelo
-            var audioContainer = document.getElementById('joputismo-audio-player');
-            if (audioContainer) audioContainer.innerHTML = '';
 
             panicActive = false;
             panicTimer = 0;
@@ -1971,11 +1906,6 @@
         }
 
         function playDuelMusic() {
-            var tc = document.getElementById('joputismo-audio-player');
-            if (tc) {
-                // El bueno, el feo y el malo - Climax - Limitado a 45s
-                tc.innerHTML = '<iframe id="duel-iframe" width="1" height="1" src="https://www.youtube-nocookie.com/embed/AFa1-kciCb4?autoplay=1&end=45" allow="autoplay" style="display:none;"></iframe>';
-            }
         }
 
         function playGunshot() {
@@ -2894,10 +2824,6 @@
                     if (!gameStarted) {
                         startGame();
                     }
-                    break;
-                case 'REMOTE_JOPUTISMO':
-                    setJoputismo(parseInt(value));
-                    syncState();
                     break;
                 case 'REMOTE_REVEAL':
                     if (turnPhase !== 'LOBBY' && !isRevealed) {
@@ -4061,7 +3987,6 @@ if (typeof confetti === 'function') {
                     readyPlayers: readyPlayers,
                     isBonusCard: isBonusCard,
                     nextSharedSongTurn: nextSharedSongTurn,
-                    joputismoLevel: joputismoLevel,
                     bettingAgainst: bettingAgainst,
                     bettingFor: bettingFor,
                     myCards: p ? p.cards : [],

@@ -3235,14 +3235,6 @@
 
                     // Render Contextual Buttons
                     if (data.judgeId === 'ALL') {
-                        var currJop = data.joputismoLevel || 0;
-                        var jstr = "";
-                        jstr += "<h4 style='color:var(--neon); font-family:Bungee; font-size:1em; margin-bottom:5px; margin-top:0'>NIVEL JOPUTISMO:</h4>";
-                        jstr += "<div style='display:flex; gap:5px; margin-bottom: 20px; justify-content:center;'>";
-                        jstr += "<button class='btn' style='padding:10px; font-size:0.8em; flex:1; " + (currJop === 0 ? "background:var(--neon);color:#000;" : "background:#222;color:#888") + "' onclick=\"send('REMOTE_JOPUTISMO', 0)\">LOSER</button>";
-                        jstr += "<button class='btn' style='padding:10px; font-size:0.8em; flex:1; " + (currJop === 1 ? "background:var(--neon);color:#000;" : "background:#222;color:#888") + "' onclick=\"send('REMOTE_JOPUTISMO', 1)\">TROLL</button>";
-                        jstr += "<button class='btn' style='padding:10px; font-size:0.8em; flex:1; " + (currJop === 2 ? "background:var(--neon);color:#000;" : "background:#222;color:#888") + "' onclick=\"send('REMOTE_JOPUTISMO', 2)\">SUPERMAN</button>";
-                        jstr += "</div>";
 
                         var mstr = "<h4 style='color:var(--neon); font-family:Bungee; font-size:1em; margin-bottom:5px;'>MODO:</h4>";
                         mstr += "<div style='display:flex; gap:5px; margin-bottom: 20px;'>";
@@ -3430,7 +3422,7 @@
                 }
                 // Ocultar sabotajes y fichas en modo competitivo
                 var sabEl = document.getElementById('joputismo-container');
-                if (sabEl) sabEl.style.display = data.competitiveMode ? 'none' : '';
+                if (sabEl) sabEl.style.display = data.competitiveMode ? 'none' : 'block';
                 var ewBr = document.getElementById('emoji-wildcard-bar');
                 if (ewBr && data.competitiveMode) ewBr.style.display = 'none';
 
@@ -3540,7 +3532,6 @@
                     sabotageCtrl.style.display = isSabotageVisible ? 'block' : 'none';
                     if (sabotageStatusMsg) sabotageStatusMsg.style.display = isSabotageVisible ? 'none' : 'block';
 
-                    let jLevel = data.joputismoLevel || 0;
                     var btnMute = document.getElementById('btn-sabotage-mute');
                     if (btnMute) { btnMute.style.display = 'flex'; btnMute.disabled = (data.myTokens < 1); }
                     // Mostrar botones de apuesta solo cuando está sonando y no es mi turno
@@ -3554,13 +3545,13 @@
                         if (bbf) { bbf.innerHTML = '¡CONMIGO! (1 <span class="neon-chip" style="width:10px;height:10px;background:#00ff88;"></span>)'; bbf.disabled=false; bbf.style.opacity='1'; }
                     }
 
-                    let disp1 = jLevel >= 1 ? 'flex' : 'none';
+                    let disp1 = 'flex';
                     if (document.getElementById('btn-sabotage-buzzer')) { document.getElementById('btn-sabotage-buzzer').style.display = disp1; document.getElementById('btn-sabotage-buzzer').disabled = (data.myTokens < 1); }
                     if (document.getElementById('btn-sabotage-veto')) { document.getElementById('btn-sabotage-veto').style.display = disp1; document.getElementById('btn-sabotage-veto').disabled = (data.myTokens < 1); }
                     if (document.getElementById('btn-sabotage-panic')) { document.getElementById('btn-sabotage-panic').style.display = disp1; document.getElementById('btn-sabotage-panic').disabled = (data.myTokens < 2); }
                     if (document.getElementById('btn-sabotage-fog')) { document.getElementById('btn-sabotage-fog').style.display = disp1; document.getElementById('btn-sabotage-fog').disabled = (data.myTokens < 2); }
 
-                    let disp2 = jLevel >= 2 ? 'flex' : 'none';
+                    let disp2 = 'flex';
                     if (document.getElementById('btn-sabotage-skip')) { document.getElementById('btn-sabotage-skip').style.display = disp2; document.getElementById('btn-sabotage-skip').disabled = (data.myTokens < 3); }
                     if (document.getElementById('btn-sabotage-panic')) { document.getElementById('btn-sabotage-panic').style.display = disp2; document.getElementById('btn-sabotage-panic').disabled = (data.myTokens < 2); }
                     if (document.getElementById('btn-sabotage-fog')) { document.getElementById('btn-sabotage-fog').style.display = disp2; document.getElementById('btn-sabotage-fog').disabled = (data.myTokens < 2); }
