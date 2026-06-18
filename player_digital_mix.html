@@ -165,7 +165,7 @@
             100% { transform: translateY(-100%); opacity: 0; }
         }
 
-        /* ── CUENTA ATRÁS DE INICIO ── */
+        /* ── CUENTA ATRÁS CIRCULAR ── */
         #countdown-overlay {
             display: none;
             position: fixed;
@@ -176,17 +176,42 @@
             justify-content: center;
             flex-direction: column;
         }
+        #countdown-svg-wrap {
+            position: relative;
+            width: 160px;
+            height: 160px;
+        }
+        #countdown-svg-wrap svg {
+            position: absolute;
+            inset: 0;
+            transform: rotate(-90deg);
+        }
+        #cd-circle {
+            fill: none;
+            stroke: var(--neon);
+            stroke-width: 5;
+            stroke-linecap: round;
+            stroke-dasharray: 440;
+            stroke-dashoffset: 0;
+            filter: drop-shadow(0 0 8px var(--neon));
+            transition: stroke-dashoffset 0.9s linear, stroke 0.3s;
+        }
         #countdown-number {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-family: 'Bungee';
-            font-size: 6em;
+            font-size: 4em;
             color: var(--neon);
-            text-shadow: 0 0 40px var(--neon);
+            text-shadow: 0 0 30px var(--neon);
             animation: cd-pulse 0.85s ease-out;
         }
         @keyframes cd-pulse {
-            0% { transform: scale(1.8); opacity: 0; }
-            60% { transform: scale(1); opacity: 1; }
-            100% { transform: scale(0.9); opacity: 0.8; }
+            0%   { transform: scale(1.5); opacity: 0; }
+            60%  { transform: scale(1);   opacity: 1; }
+            100% { transform: scale(0.95); opacity: 1; }
         }
 
         /* ── MINI RANKING ── */
@@ -275,17 +300,20 @@
             margin: 6px 0;
         }
         .qr-btn {
-            background: rgba(255,255,255,0.04);
-            border: 1px solid #222;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid #333;
             border-radius: 20px;
-            padding: 5px 10px;
-            font-size: 0.6em;
-            color: #666;
+            padding: 6px 12px;
+            font-size: 0.62em;
+            color: #999;
             cursor: pointer;
             font-family: 'Montserrat';
+            font-weight: 700;
             transition: all 0.2s;
+            letter-spacing: 0.3px;
         }
-        .qr-btn:active { background: rgba(255,255,255,0.1); border-color: var(--neon); color: var(--neon); }
+        .qr-btn:hover { background: rgba(255,255,255,0.1); border-color: #555; color: #ccc; }
+        .qr-btn:active { background: rgba(0,242,255,0.1); border-color: var(--neon); color: var(--neon); transform: scale(0.96); }
 
         /* ── TOAST REACCIÓN RÁPIDA ── */
         .qr-toast {
@@ -423,10 +451,9 @@
         #session-stats strong { color: #666; }
 
         /* ── DOBLE O NADA ── */
-        #btn-double-or-nothing {
+        /* ── JERARQUÍA BOTONES PRE-PLAY ── */
+        .btn-preplay {
             display: none;
-            background: linear-gradient(90deg, #ff6600, #ffaa00);
-            color: #000;
             border: none;
             font-family: 'Bungee';
             font-size: 0.85em;
@@ -435,8 +462,15 @@
             cursor: pointer;
             width: 100%;
             max-width: 340px;
-            margin: 6px 0;
+            margin: 4px 0;
             letter-spacing: 1px;
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+        .btn-preplay:active { transform: scale(0.97); }
+        #btn-double-or-nothing {
+            background: linear-gradient(90deg, #ff6600, #ffaa00);
+            color: #000;
+            box-shadow: 0 0 12px rgba(255,110,0,0.3);
         }
         #btn-double-or-nothing.active {
             box-shadow: 0 0 20px rgba(255,170,0,0.8);
@@ -444,6 +478,25 @@
         }
 
         /* ── RACHA DE ACIERTOS ── */
+        /* ── MI SCORE DESTACADO ── */
+        #my-score-display {
+            font-family: 'Bungee';
+            font-size: 1.1em;
+            color: var(--neon);
+            text-align: center;
+            letter-spacing: 2px;
+            padding: 4px 0;
+            text-shadow: 0 0 12px rgba(0,242,255,0.6);
+        }
+        #my-score-display .score-num {
+            font-size: 1.8em;
+            line-height: 1;
+        }
+        #my-score-display .score-total {
+            color: var(--text-muted);
+            font-size: 0.7em;
+        }
+
         #streak-counter {
             display: none;
             font-family: 'Bungee';
@@ -508,6 +561,23 @@
             background: #333;
         }
         .vote-pip.done { background: var(--neon); box-shadow: 0 0 6px var(--neon); }
+
+        /* ── ANIMACIÓN CARTA NUEVA ── */
+        @keyframes card-appear {
+            0%   { transform: scale(0) rotate(-8deg); opacity: 0; }
+            60%  { transform: scale(1.12) rotate(2deg); opacity: 1; }
+            80%  { transform: scale(0.96) rotate(-1deg); }
+            100% { transform: scale(1) rotate(0); }
+        }
+        @keyframes card-glow {
+            0%   { box-shadow: 0 0 0 0 rgba(0,242,255,0.8); }
+            50%  { box-shadow: 0 0 24px 8px rgba(0,242,255,0.4); }
+            100% { box-shadow: 0 0 0 0 rgba(0,242,255,0); }
+        }
+        .card-row.new-card {
+            animation: card-appear 0.5s cubic-bezier(0.34,1.56,0.64,1) both,
+                       card-glow 1.2s ease 0.3s;
+        }
 
         /* ── EQUIPOS EN PLAYER ── */
         #my-team-badge {
@@ -778,6 +848,7 @@
 
         #game-screen {
             display: none;
+            transition: opacity 0.3s ease;
             flex: 1;
             min-height: 0;
             flex-direction: column;
@@ -1469,7 +1540,7 @@
                 <li style="margin-bottom:6px;">Si <strong>aciertas</strong> → ganas <strong>2 cartas</strong> en lugar de 1.</li>
                 <li style="margin-bottom:6px;">Si <strong>fallas</strong> → pierdes <strong>1 carta</strong> ya colocada.</li>
             </ul>
-            <p style="font-size:0.85em; color:#888; margin-top:4px;">Solo se puede activar una vez por turno, mientras la canción está sonando.</p>
+            <p style="font-size:0.85em; color:#888; margin-top:4px;">Solo se puede activar <strong>antes de pulsar PLAY</strong> (cuesta 4🔵).</p>
 
             <!-- TURNO DEL FAROLERO -->
             <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">🃏 TURNO DEL FAROLERO</h3>
@@ -1478,7 +1549,7 @@
                 <li style="margin-bottom:6px;">Si <strong>aciertas</strong> el hueco → ganas <strong>3 cartas</strong> en total.</li>
                 <li style="margin-bottom:6px;">Si <strong>fallas</strong> → pierdes <strong>2 cartas</strong> ya colocadas.</li>
             </ul>
-            <p style="font-size:0.85em; color:#888; margin-top:4px;">Sin coste de ficha. Puro riesgo.</p>
+            <p style="font-size:0.85em; color:#888; margin-top:4px;">Cuesta <strong>4🔵</strong>. Solo disponible antes de pulsar PLAY.</p>
 
             <!-- FICHAS Y APUESTAS -->
             <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">🔵 FICHAS Y APUESTAS</h3>
@@ -1493,7 +1564,7 @@
             <ul style="padding-left:15px; margin-top:8px;">
                 <li style="margin-bottom:8px;"><strong style="color:#00ff88;">ESCUDO (3🔵):</strong> Bloquea el próximo sabotaje que recibas. El sabotaje rebota y el atacante pierde la ficha.</li>
                 <li style="margin-bottom:8px;"><strong style="color:var(--gold);">PISTA ARTISTA (comodín):</strong> Revela el nombre del artista de la canción actual. 3 usos por partida.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#88bbff;">SEGURO DE FALLO (2🔵):</strong> Actívalo antes de colocar tu carta. Si fallas, no se aplican penalizaciones extra: ni jinx, ni pérdida de vida en Supervivencia, ni el coste del Doble o Nada. Solo cuenta como fallo normal.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#88bbff;">SEGURO DE FALLO (2🔵):</strong> Actívalo <strong>antes de pulsar PLAY</strong>. Si fallas, no se aplican penalizaciones extra: ni jinx, ni pérdida de vida en Supervivencia, ni el coste del Doble o Nada. Solo cuenta como fallo normal.</li>
                 <li style="margin-bottom:8px;"><strong style="color:var(--gold);">ELEGIR CATEGORÍA (4🔵):</strong> Una vez por partida, elige que la siguiente canción sea de una categoría concreta: Anime 🎌, Películas 🎬 o Videojuegos 🎮. Útil si tienes punto fuerte en una categoría.</li>
             </ul>
 
@@ -1700,7 +1771,15 @@
                 <div class="sab-attacker" id="sab-attacker"></div>
                 <div class="sab-name" id="sab-name"></div>
             </div>
-            <div id="countdown-overlay"><div id="countdown-number">3</div></div>
+            <div id="countdown-overlay">
+                <div id="countdown-svg-wrap">
+                    <svg viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="80" cy="80" r="70" fill="none" stroke="#111" stroke-width="5"/>
+                        <circle id="cd-circle" cx="80" cy="80" r="70"/>
+                    </svg>
+                    <div id="countdown-number">3</div>
+                </div>
+            </div>
             <div id="mini-ranking"></div>
             <div id="team-vote-banner"></div>
             <button id="resist-steal-btn" onclick="send('RESIST_STEAL')">
@@ -1711,10 +1790,11 @@
             <div id="turn-status">TURNO DE: <span id="cur-player">---</span></div>
             <div id="team-timeline"></div>
             <div id="shared-song-player-banner">🎵 ¡¡TODOS JUEGAN!! PRIMER SLOT CORRECTO GANA 🎵</div>
+            <div id="my-score-display"></div>
             <div id="streak-counter"></div>
-            <button id="btn-double-or-nothing" onclick="activateDoubleOrNothing()">🎲 DOBLE O NADA</button>
-            <button id="btn-brag" onclick="activateBrag()">🃏 FAROLEAR — +3 si acierto / −2 si fallo</button>
-            <button id="btn-fail-safe" onclick="activateFailSafe()">🛡️ SEGURO DE FALLO (2🔵)</button>
+            <button id="btn-double-or-nothing" class="btn-preplay" onclick="activateDoubleOrNothing()">🎲 DOBLE O NADA</button>
+            <button id="btn-brag" class="btn-preplay" onclick="activateBrag()">🃏 FAROLEAR — +3 si acierto / −2 si fallo</button>
+            <button id="btn-fail-safe" class="btn-preplay" onclick="activateFailSafe()">🛡️ SEGURO DE FALLO (2🔵)</button>
             <button id="btn-steal-streak" onclick="stealStreak()">🔥 ROBAR RACHA (2🔵)</button>
             <div id="turn-counter-display"></div>
             <div id="my-lives-bar" class="my-lives" style="display:none;"></div>
@@ -2527,17 +2607,30 @@
         // ── CUENTA ATRÁS ──
         function showCountdown(n) {
             var overlay = document.getElementById('countdown-overlay');
-            var numEl = document.getElementById('countdown-number');
+            var numEl   = document.getElementById('countdown-number');
+            var circle  = document.getElementById('cd-circle');
             if (!overlay || !numEl) return;
             overlay.style.display = 'flex';
+            // Número
             numEl.style.animation = 'none';
-            numEl.textContent = n > 0 ? n : '¡YA!';
-            numEl.style.color = n > 0 ? 'var(--neon)' : 'var(--gold)';
-            // Forzar reflow para reiniciar animación
             void numEl.offsetWidth;
             numEl.style.animation = 'cd-pulse 0.85s ease-out';
+            if (n > 0) {
+                numEl.textContent = n;
+                numEl.style.color = 'var(--neon)';
+                if (circle) {
+                    circle.style.stroke = 'var(--neon)';
+                    // Arco: 440 = circunferencia completa; cada número ocupa 1/3
+                    var offset = 440 * (1 - n / 3);
+                    circle.style.strokeDashoffset = offset;
+                }
+            } else {
+                numEl.textContent = '¡YA!';
+                numEl.style.color = 'var(--gold)';
+                if (circle) { circle.style.stroke = 'var(--gold)'; circle.style.strokeDashoffset = 0; }
+                setTimeout(function() { overlay.style.display = 'none'; }, 900);
+            }
             vibrate(n > 0 ? 80 : 300);
-            if (n === 0) setTimeout(function() { overlay.style.display = 'none'; }, 900);
         }
 
         // ── SOLICITAR CATEGORÍA ──
@@ -2564,7 +2657,7 @@
 
         // ── FAROLERO ──
         function activateBrag() {
-            showCustomConfirm('🃏 ¿FAROLEAR? Si aciertas el slot: +3 cartas. Si fallas: −2 cartas. Sin vuelta atrás.', function(ok) {
+            showCustomConfirm('🃏 ¿FAROLEAR? (Cuesta 4🔵) Si aciertas el slot: +3 cartas. Si fallas: −2 cartas. Sin vuelta atrás.', function(ok) {
                 if (ok) send('BRAG');
             });
         }
@@ -2593,11 +2686,23 @@
             var el = document.getElementById('mini-ranking');
             if (!el || !players) return;
             var sorted = players.slice().sort(function(a,b){ return b.score - a.score; });
-            var maxScore = sorted[0] ? sorted[0].score : 1;
+            var maxScore = Math.max(10, sorted[0] ? sorted[0].score : 1);
             el.innerHTML = sorted.map(function(pl, i) {
-                var cls = pl.id === myId ? 'me' : (i === 0 ? 'leader' : '');
-                var medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '';
-                return '<div class="rank-pill ' + cls + '">' + medal + '<span class="rname">' + pl.name + '</span><strong>' + pl.score + '</strong>🃏</div>';
+                var isMe = pl.id === myId;
+                var isLeader = i === 0;
+                var color = isMe ? 'var(--neon)' : isLeader ? 'var(--gold)' : 'var(--text-dim)';
+                var pct = Math.round((pl.score / 10) * 100);
+                var medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i+1)+'º';
+                return '<div class="rank-pill' + (isMe ? ' me' : '') + '" style="border-color:' + (isMe ? 'var(--neon)' : isLeader ? 'var(--gold)' : '#222') + ';min-width:70px;">' +
+                    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">' +
+                        '<span style="font-size:0.9em;">' + medal + '</span>' +
+                        '<strong style="color:' + color + ';font-size:0.85em;">' + pl.score + '<span style="color:#333;font-weight:400;">/10</span></strong>' +
+                    '</div>' +
+                    '<div style="font-size:0.75em;color:' + color + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:64px;margin-bottom:3px;">' + pl.name + '</div>' +
+                    '<div style="background:#111;border-radius:4px;height:3px;overflow:hidden;">' +
+                        '<div style="height:100%;width:' + pct + '%;background:' + color + ';border-radius:4px;transition:width 0.4s;"></div>' +
+                    '</div>' +
+                '</div>';
             }).join('');
             el.style.display = 'flex';
         }
@@ -2748,7 +2853,7 @@
         function activateDoubleOrNothing() {
             if (!lastState || !lastState.isMyTurn && !lastState.gameStarted) return;
             var btn = document.getElementById('btn-double-or-nothing');
-            showCustomConfirm('🎲 ¿Activar DOBLE O NADA? Si aciertas +2 cartas. Si fallas, pierdes una carta.', function(ok) {
+            showCustomConfirm('🎲 ¿Activar DOBLE O NADA? (Cuesta 4🔵) Si aciertas +2 cartas. Si fallas, pierdes una carta.', function(ok) {
                 if (ok) {
                     send('DOUBLE_OR_NOTHING');
                     if (btn) { btn.className = 'active'; btn.disabled = true; btn.innerText = '🎲 DOBLE O NADA ACTIVO'; }
@@ -2931,6 +3036,16 @@
                 return;
             } else if (data.type === 'YEAR_FLASH') {
                 showYearFlash(data.year, data.artist, data.player);
+                // Animar la última carta añadida al timeline
+                setTimeout(function() {
+                    var cards = document.querySelectorAll('.card-row');
+                    if (cards.length > 0) {
+                        var last = cards[cards.length - 1];
+                        last.classList.remove('new-card');
+                        void last.offsetWidth;
+                        last.classList.add('new-card');
+                    }
+                }, 200);
                 return;
             } else if (data.type === 'QUICK_REACT') {
                 // Toast de reacción rápida
@@ -3253,6 +3368,15 @@
                 // Slider de volumen: solo para el jugador activo
                 var volCtrl = document.getElementById('volume-ctrl');
                 if (volCtrl) volCtrl.style.display = (isMyTurn && data.gameStarted) ? 'flex' : 'none';
+                // Mi score destacado
+                var myScoreEl = document.getElementById('my-score-display');
+                if (myScoreEl && data.players) {
+                    var myPlScore = data.players.find(function(pl){ return pl.id === myId; });
+                    if (myPlScore) {
+                        myScoreEl.innerHTML = 'TÚ · <span class="score-num">' + myPlScore.score + '</span><span class="score-total">/10</span>';
+                        myScoreEl.style.display = data.gameStarted ? 'block' : 'none';
+                    }
+                }
                 // Mini ranking
                 updateMiniRanking(data.players, myId);
 
@@ -3266,7 +3390,8 @@
                 // Botón farolero: solo antes de empezar a sonar, sin brag activo
                 var bragBtn = document.getElementById('btn-brag');
                 if (bragBtn) {
-                    bragBtn.style.display = (isMyTurn && data.gameStarted && !data.isPlaying && !data.isRevealed && !data.isBragging) ? 'block' : 'none';
+                    var myPlBrag = data.players && data.players.find(function(pl){ return pl.id === myId; });
+                    bragBtn.style.display = (isMyTurn && data.gameStarted && !data.isPlaying && !data.isRevealed && !data.isBragging && myPlBrag && myPlBrag.tokens >= 4) ? 'block' : 'none';
                     if (data.isBragging && isMyTurn) {
                         bragBtn.style.display = 'block';
                         bragBtn.disabled = true;
@@ -3274,7 +3399,7 @@
                         bragBtn.style.background = 'linear-gradient(90deg,#440000,#880000)';
                     } else if (!data.isBragging) {
                         bragBtn.disabled = false;
-                        bragBtn.innerText = '🃏 FAROLEAR — +3 si acierto / −2 si fallo';
+                        bragBtn.innerText = '🃏 FAROLEAR (4🔵) — +3 si acierto / −2 si fallo';
                         bragBtn.style.background = '';
                     }
                 }
@@ -3282,7 +3407,7 @@
                 var fsBtn = document.getElementById('btn-fail-safe');
                 if (fsBtn) {
                     var myPl4 = data.players && data.players.find(function(pl){return pl.id===myId;});
-                    var showFs = isMyTurn && data.gameStarted && !data.failSafeActive && myPl4 && myPl4.tokens >= 2;
+                    var showFs = isMyTurn && data.gameStarted && !data.failSafeActive && !data.isPlaying && myPl4 && myPl4.tokens >= 2;
                     fsBtn.style.display = showFs ? 'block' : 'none';
                     if (data.failSafeActive && isMyTurn) {
                         fsBtn.innerText = '🛡️ SEGURO ACTIVO';
@@ -3366,8 +3491,9 @@
 
                 var donBtn = document.getElementById('btn-double-or-nothing');
                 if (donBtn) {
-                    var showDon = isMyTurn && data.gameStarted && !data.isDoubleOrNothing && !data.isRevealed;
-                    donBtn.style.display = showDon ? 'block' : 'none';
+                    var myPlDon = data.players && data.players.find(function(pl){ return pl.id === myId; });
+                    var showDon = isMyTurn && data.gameStarted && !data.isDoubleOrNothing && !data.isRevealed && !data.isPlaying && myPlDon && myPlDon.tokens >= 4;
+                    donBtn.style.display = showDon ? 'block' : (data.isDoubleOrNothing && isMyTurn ? 'block' : 'none');
                     if (data.isDoubleOrNothing) {
                         donBtn.className = 'active';
                         donBtn.disabled = true;
@@ -3375,7 +3501,7 @@
                     } else {
                         donBtn.className = '';
                         donBtn.disabled = false;
-                        donBtn.innerText = '🎲 DOBLE O NADA';
+                        donBtn.innerText = '🎲 DOBLE O NADA (4🔵)';
                     }
                 }
                 // Banner ¡Todos Juegan!
