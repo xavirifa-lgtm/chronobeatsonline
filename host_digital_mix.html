@@ -1501,6 +1501,30 @@
 
         var cachedTxts = [];
 
+        // Cuenta el total real disponible (sin cap por categoría) para el lobby
+        function countAllSongs(ignorePlayedIds) {
+            if (!cachedTxts || cachedTxts.length === 0) return { total: 0, available: 0 };
+            var uniqueIds = new Set();
+            var playedIds = ignorePlayedIds ? [] : JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]');
+            var total = 0, available = 0;
+            cachedTxts.forEach(function(res) {
+                var lines = (res.text||'').split('\n').map(function(l){return l.replace(/\r/,'');});
+                lines.forEach(function(l) {
+                    var p = l.split('|');
+                    var m = p[3] ? p[3].match(/[?&]v=([^&#]+)|youtu\.be\/([^?&#]+)/) : null;
+                    if (m) {
+                        var id = m[1] || m[2];
+                        if (!uniqueIds.has(id)) {
+                            uniqueIds.add(id);
+                            total++;
+                            if (!playedIds.includes(id)) available++;
+                        }
+                    }
+                });
+            });
+            return { total: total, available: available };
+        }
+
         function buildSongsFromCache(ignorePlayedIds) {
             var rawSongs = [];
             var uniqueIds = new Set();
@@ -4089,6 +4113,7 @@ if (typeof confetti === 'function') {
         function resetRoomCode() {
             if (!confirm('¿Generar un nuevo código de sala? Los jugadores actuales perderán la conexión.')) return;
             localStorage.removeItem('CB_RoomCode');
+            localStorage.removeItem('CB_PlayedSongs');
             location.reload();
         }
 
@@ -4096,11 +4121,11 @@ if (typeof confetti === 'function') {
         function updateSongCounter() {
             var counter = document.getElementById('song-counter');
             if (!counter || !cachedTxts || cachedTxts.length === 0) return;
-            var total = buildSongsFromCache(true).length;
-            var available = buildSongsFromCache(false).length;
-            counter.innerHTML = available + ' canciones disponibles' +
-                (total !== available ? ' <span style="color:#333">(' + (total - available) + ' ya jugadas)</span>' : '') +
-                (decadeFilter !== 'all' ? ' <span style="color:var(--gold)">con filtro activo</span>' : '');
+            var counts = countAllSongs(false);
+            var played = counts.total - counts.available;
+            counter.innerHTML = counts.available + ' canciones disponibles' +
+                (played > 0 ? ' <span style="color:#333">(' + played + ' ya jugadas)</span>' : '') +
+                (decadeFilter !== 'all' ? ' · <span style="color:var(--gold)">filtro de década activo</span>' : '');
         }
 
         // ── LOGROS ──
