@@ -3150,10 +3150,7 @@
                 // El rey falló: parar el vídeo antes de pasar al siguiente turno
                 if (player && player.stopVideo) player.stopVideo();
                 isPlaying = false;
-                // Reducir score a 9 para que no vuelva a activar modo rey inmediatamente
-                if (players[activePlayerIdx] && players[activePlayerIdx].score >= 10) {
-                    players[activePlayerIdx].score = 9;
-                }
+                // Se queda en 10 — lo intentará de nuevo en su próximo turno
                 activePlayerIdx = (activePlayerIdx + 1) % players.length;
                 players[activePlayerIdx].canReload = true;
                 nextTurn();

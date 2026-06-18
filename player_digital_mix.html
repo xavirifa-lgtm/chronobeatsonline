@@ -1448,7 +1448,7 @@
             <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">🕹️ MODOS DE JUEGO</h3>
             <ul style="padding-left:15px; margin-top:8px;">
                 <li style="margin-bottom:8px;"><strong style="color:var(--neon);">CLÁSICO:</strong> Primero en llegar a 10 cartas gana.</li>
-                <li style="margin-bottom:8px;"><strong style="color:var(--gold);">MODO REY:</strong> Al llegar a 10, el turno pasa al siguiente jugador. Cuando vuelva a tocarte, tus rivales eligen una canción y tienes que adivinar el año con ±2 de margen. Si aciertas, ganas. Si fallas, tu score baja a 9 y tienes que volver a ganar una carta para intentarlo de nuevo. Puedes saltar el vídeo si el enlace no funciona (⏭️ VIDEO NO VÁLIDO) y se elegirá una carta nueva.</li>
+                <li style="margin-bottom:8px;"><strong style="color:var(--gold);">MODO REY:</strong> Al llegar a 10, el turno pasa al siguiente jugador. Cuando vuelva a tocarte, tus rivales eligen una canción y tienes que adivinar el año con ±2 de margen. Si aciertas, ganas. Si fallas, <strong>te quedas en 10</strong> y en tu próximo turno vuelves a estar en modo rey — los rivales pueden seguir desafiándote hasta que aciertes. Puedes saltar el vídeo si el enlace no funciona (⏭️ VIDEO NO VÁLIDO) y se elegirá una carta nueva.</li>
                 <li style="margin-bottom:8px;"><strong style="color:#ff4444;">SUPERVIVENCIA:</strong> Cada jugador tiene 3 vidas (💿). Cada fallo quita una vida. El último en pie gana.</li>
                 <li style="margin-bottom:8px;"><strong style="color:#4488ff;">EQUIPOS:</strong> Rojo vs Azul asignados al azar. Turno por equipo: suena una canción y <strong>todos los miembros del equipo votan</strong> un hueco. Gana el hueco con más votos. Si hay empate, gana el que se votó más rápido. El equipo que llega a 10 cartas gana.</li>
                 <li style="margin-bottom:8px;"><strong style="color:#888;">🏆 MODO COMPETITIVO:</strong> Sin sabotajes, sin fichas, sin especiales. Solo cronología pura. Actívalo en el lobby antes de empezar. Para los que quieren demostrar quién sabe más de verdad.</li>
@@ -2991,9 +2991,12 @@
                     }
                 }
                 updateMarket(data);
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('waiting-screen').style.display = 'none';
-                document.getElementById('game-screen').style.display = 'flex';
+                // Solo cambiar pantalla si la partida ha empezado
+                if (data.gameStarted) {
+                    document.getElementById('login-screen').style.display = 'none';
+                    document.getElementById('waiting-screen').style.display = 'none';
+                    document.getElementById('game-screen').style.display = 'flex';
+                }
                 document.getElementById('cur-player').innerText = data.activePlayer && data.activePlayer.name ? data.activePlayer.name : "---";
 
                 // ── MODO EQUIPOS: banner de votación y slot picker del equipo ──
