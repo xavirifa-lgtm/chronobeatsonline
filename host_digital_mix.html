@@ -854,17 +854,23 @@
 <body>
     <a href="index.html" class="btn-hub" title="Volver al Hub">H</a>
     <div id="flash-overlay"></div>
-    <div id="winner-screen">
-        <h1 style="font-size:2.5em; margin-bottom:5px;">🏆 ¡GANADOR!</h1>
-        <div id="winner-avatar-img" style="margin: 15px 0;"></div>
-        <h2 id="winner-name" style="font-size:2.5em; margin-bottom:5px;">---</h2>
-        <div id="winner-stats" style="margin:15px 0; width:100%; max-width:600px;"></div>
-        <div id="winner-ranking" style="margin:10px 0; width:100%; max-width:600px; display:flex; flex-wrap:wrap; gap:10px; justify-content:center;"></div>
-        <div id="winner-replay" style="display:none; width:100%; max-width:600px; margin:12px 0;"></div>
-        <div id="winner-history" style="display:none; width:100%; max-width:700px; margin:12px 0;"></div>
-        <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin-top:20px;">
-            <button class="btn-start" onclick="rematch()" style="background:linear-gradient(90deg,var(--neon),var(--pink));">🔄 REVANCHA</button>
-            <button class="btn-start" onclick="location.reload()" style="background:#333; color:#fff; box-shadow:none;">🏠 MENÚ PRINCIPAL</button>
+    <div id="winner-screen" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(2,8,16,0.97); z-index:1000; flex-direction:row; align-items:stretch; overflow:hidden;">
+        <!-- Columna izquierda: foto + nombre + stats -->
+        <div id="winner-left" style="width:260px; min-width:220px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:28px 16px; border-right:1px solid #1a1a1a; background:rgba(0,242,255,0.02); flex-shrink:0;">
+            <div style="font-family:'Bungee'; font-size:0.65em; color:var(--gold); letter-spacing:4px; margin-bottom:14px;">🏆 GANADOR</div>
+            <div id="winner-avatar-img" style="margin-bottom:14px;"></div>
+            <h2 id="winner-name" style="font-family:'Bungee'; font-size:1.4em; color:var(--neon); text-align:center; text-shadow:0 0 20px var(--neon); margin-bottom:10px; word-break:break-word;">---</h2>
+            <div id="winner-stats" style="width:100%; font-size:0.8em; text-align:center;"></div>
+            <div style="display:flex; flex-direction:column; gap:8px; width:100%; margin-top:20px;">
+                <button class="btn-start" onclick="rematch()" style="background:linear-gradient(90deg,var(--neon),var(--pink)); font-size:0.72em; padding:10px;">🔄 REVANCHA</button>
+                <button class="btn-start" onclick="location.reload()" style="background:#1a1a1a; color:#555; box-shadow:none; font-size:0.72em; padding:10px;">🏠 MENÚ</button>
+            </div>
+        </div>
+        <!-- Columna derecha: medallas y contenido scrollable -->
+        <div id="winner-right" style="flex:1; overflow-y:auto; padding:20px 16px; display:flex; flex-direction:column; align-items:center; gap:8px;">
+            <div id="winner-ranking" style="width:100%; max-width:800px;"></div>
+            <div id="winner-replay" style="display:none; width:100%; max-width:700px;"></div>
+            <div id="winner-history" style="display:none; width:100%; max-width:700px;"></div>
         </div>
     </div>
     <div class="logo">CHRONOBEATS</div>
@@ -2845,6 +2851,8 @@
                         if (songs[currentSongIdx]) kingOptions.push(songs[currentSongIdx]);
                     }
                     if (player && player.stopVideo) player.stopVideo();
+                    isPlaying = false;
+                    stopCountdown();
                     var pcSkip = document.getElementById('player-container');
                     if (pcSkip) pcSkip.style.display = 'none';
                     document.getElementById('host-instructions').innerText = 'VIDEO INVÁLIDO — LOS JUGADORES ELIGEN NUEVA CARTA...';
@@ -3614,21 +3622,24 @@
             var winner = players.find(p => p.name === name);
             var avatarHtml = '';
             if (winner && winner.avatar) {
-                avatarHtml = '<img src="' + winner.avatar + '" style="width:200px; height:200px; border-radius:50%; border: 5px solid var(--neon); box-shadow: 0 0 30px var(--neon); object-fit: cover;">';
+                avatarHtml = '<img src="' + winner.avatar + '" style="width:150px; height:150px; border-radius:50%; border: 4px solid var(--neon); box-shadow: 0 0 30px var(--neon); object-fit: cover;">';
             } else {
                 var initial = name.charAt(0).toUpperCase();
-                avatarHtml = '<div style="width:150px; height:150px; border-radius:50%; background:#222; border:5px solid var(--neon); color:var(--neon); display:inline-flex; align-items:center; justify-content:center; font-family:Bungee,sans-serif; font-size:4em; box-shadow: 0 0 30px var(--neon);">' + initial + '</div>';
+                avatarHtml = '<div style="width:140px; height:140px; border-radius:50%; background:#0a1520; border:4px solid var(--neon); color:var(--neon); display:flex; align-items:center; justify-content:center; font-family:Bungee,sans-serif; font-size:3.5em; box-shadow:0 0 30px var(--neon);">' + initial + '</div>';
             }
             document.getElementById('winner-avatar-img').innerHTML = avatarHtml;
 
             document.getElementById('winner-screen').style.display = 'flex';
             // Confeti espectacular al mostrar el ganador
-            if (typeof confetti === 'function') {
-                var colors = ['#00f2ff','#ff00cc','#ffaa00','#ffffff','#bf00ff'];
-                confetti({ particleCount: 120, spread: 80, origin: { y: 0.4 }, colors: colors });
-                setTimeout(function(){ confetti({ particleCount: 80, spread: 120, origin: { y: 0.3, x: 0.2 }, colors: colors }); }, 400);
-                setTimeout(function(){ confetti({ particleCount: 80, spread: 120, origin: { y: 0.3, x: 0.8 }, colors: colors }); }, 700);
-                setTimeout(function(){ confetti({ particleCount: 60, spread: 60, origin: { y: 0.5 }, colors: ['#ffaa00','#ffffff'] }); }, 1200);
+if (typeof confetti === 'function') {
+                var _cc = ['#00f2ff','#ff00cc','#ffaa00','#ffffff','#bf00ff'];
+                var _cz = { zIndex: 2000 };
+                setTimeout(function() {
+                    confetti(Object.assign({}, _cz, { particleCount: 120, spread: 80, origin: { y: 0.4 }, colors: _cc }));
+                    setTimeout(function(){ confetti(Object.assign({}, _cz, { particleCount: 80, spread: 120, origin: { y: 0.3, x: 0.2 }, colors: _cc })); }, 400);
+                    setTimeout(function(){ confetti(Object.assign({}, _cz, { particleCount: 80, spread: 120, origin: { y: 0.3, x: 0.8 }, colors: _cc })); }, 700);
+                    setTimeout(function(){ confetti(Object.assign({}, _cz, { particleCount: 60, spread: 60,  origin: { y: 0.5  }, colors: ['#ffaa00','#ffffff'] })); }, 1200);
+                }, 300);
             }
 
             // ── ESTADÍSTICAS RICAS ──
