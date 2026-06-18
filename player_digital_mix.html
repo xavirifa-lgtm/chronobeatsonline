@@ -2985,9 +2985,29 @@
                 if (!data.gameStarted) {
                     var waitingList = document.getElementById('waiting-players-list');
                     if (waitingList && data.players) {
-                        waitingList.innerHTML = data.players.map(function(p) {
-                            return '<div class="waiting-player-chip">' + p.name + '</div>';
+                        var rp = data.readyPlayers || {};
+                        waitingList.innerHTML = data.players.map(function(pl) {
+                            var isReady = !!rp[pl.id];
+                            return '<div class="waiting-player-chip" style="' + (isReady ? 'border-color:var(--neon);color:var(--neon);' : '') + '">' +
+                                (isReady ? '✅ ' : '⏳ ') + pl.name + '</div>';
                         }).join('');
+                    }
+                    // Actualizar botón de listo y conteo
+                    var myRp = data.readyPlayers || {};
+                    var readyBtn = document.getElementById('btn-ready');
+                    if (readyBtn) {
+                        if (myRp[myId]) {
+                            // Ya hemos pulsado listo
+                            readyBtn.innerText = '✅ LISTO — esperando a los demás (' +
+                                Object.keys(myRp).length + '/' + (data.players ? data.players.length : '?') + ')';
+                            readyBtn.disabled = true;
+                            readyBtn.style.opacity = '0.6';
+                            alreadySentReady = true;
+                        } else if (!alreadySentReady) {
+                            readyBtn.innerText = '✅ ESTOY LISTO';
+                            readyBtn.disabled = false;
+                            readyBtn.style.opacity = '1';
+                        }
                     }
                 }
                 updateMarket(data);
@@ -3290,8 +3310,9 @@
                 if (ewBr && data.competitiveMode) ewBr.style.display = 'none';
 
                 // Ready check — ocultar botón listo cuando empiece la partida
-                var readyBtn = document.getElementById('btn-ready');
-                if (readyBtn && data.gameStarted) readyBtn.style.display = 'none';
+                // Ocultar botón listo al empezar la partida
+                var readyBtn2 = document.getElementById('btn-ready');
+                if (readyBtn2 && data.gameStarted) readyBtn2.style.display = 'none';
 
                 // Contador de turnos
                 var tcDisp = document.getElementById('turn-counter-display');

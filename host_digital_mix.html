@@ -928,8 +928,8 @@
             </select>
         </div>
 
-        <button class="btn-start" onclick="checkReadyAndStart()" style="display:none; margin-top: 20px;" id="start-btn">EMPEZAR
-            PARTIDA</button>
+        <div id="lobby-ready-status" style="font-family:'Montserrat'; font-size:0.7em; color:#444; text-align:center; margin-top:8px; min-height:1.2em;"></div>
+        <button class="btn-start" onclick="checkReadyAndStart()" style="display:none; margin-top: 8px;" id="start-btn">▶ EMPEZAR PARTIDA</button>
     </div>
 
     <!-- AUDIO JOPUTISMO YOUTUBE -->
@@ -3021,7 +3021,7 @@
                     // Actualizar botón INICIAR en host
                     var readyCount = Object.keys(readyPlayers).length;
                     var totalPlayers = players.length;
-                    var iniBtn = document.getElementById('btn-start-game');
+                    var iniBtn = document.getElementById('start-btn');
                     if (iniBtn) {
                         if (readyCount >= totalPlayers && totalPlayers >= 2) {
                             iniBtn.style.opacity = '1';
@@ -3034,6 +3034,14 @@
                         }
                     }
                     addEvent('<span class="ev-good">✅ ' + (players.find(function(pl){return pl.id===peerId;})||{name:'?'}).name + ' está listo</span>');
+                    // Mostrar estado ready en las instrucciones del lobby
+                    var lobbyStatus = document.getElementById('lobby-ready-status');
+                    if (lobbyStatus) {
+                        var rc = Object.keys(readyPlayers).length;
+                        var tc2 = players.length;
+                        lobbyStatus.innerText = rc + '/' + tc2 + ' jugadores listos' + (rc >= tc2 ? ' ✅ ¡Todos listos!' : ' — esperando...');
+                        lobbyStatus.style.color = rc >= tc2 ? 'var(--neon)' : '#666';
+                    }
                     break;
 
                 case 'EMOJI_WILDCARD':
