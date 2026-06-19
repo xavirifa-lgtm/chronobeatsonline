@@ -1570,6 +1570,31 @@
             transform: scale(1.03);
         }
 
+        /* ── TOAST NOTIFICACIÓN IMPORTANTE ── */
+        @keyframes toast-pop {
+            0%   { transform: translateX(-50%) scale(0.7); opacity: 0; }
+            60%  { transform: translateX(-50%) scale(1.08); opacity: 1; }
+            100% { transform: translateX(-50%) scale(1); opacity: 1; }
+        }
+        .big-toast {
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9900;
+            background: rgba(2,8,16,0.95);
+            border-radius: 16px;
+            padding: 14px 24px;
+            text-align: center;
+            pointer-events: none;
+            animation: toast-pop 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+            max-width: 90vw;
+        }
+        .big-toast .bt-icon  { font-size: 2em; display: block; }
+        .big-toast .bt-title { font-family: 'Bungee'; font-size: 0.9em; letter-spacing: 2px; display: block; margin-top: 4px; }
+        .big-toast .bt-desc  { font-family: 'Montserrat'; font-size: 0.65em; color: #888; display: block; margin-top: 3px; }
+
         </style>
 </head>
 
@@ -1608,101 +1633,89 @@
             <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">🕹️ MODOS DE JUEGO</h3>
             <ul style="padding-left:15px; margin-top:8px;">
                 <li style="margin-bottom:8px;"><strong style="color:var(--neon);">CLÁSICO:</strong> Primero en llegar a 10 cartas gana.</li>
-                <li style="margin-bottom:8px;"><strong style="color:var(--gold);">MODO REY:</strong> Al llegar a 10, el turno pasa al siguiente jugador. Cuando vuelva a tocarte, tus rivales eligen una canción y tienes que adivinar el año con ±2 de margen. Si aciertas, ganas. Si fallas, <strong>te quedas en 10</strong> y en tu próximo turno vuelves a estar en modo rey — los rivales pueden seguir desafiándote hasta que aciertes. Puedes saltar el vídeo si el enlace no funciona (⏭️ VIDEO NO VÁLIDO) y se elegirá una carta nueva.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#ff4444;">SUPERVIVENCIA:</strong> Cada jugador tiene 3 vidas (💿). Cada fallo quita una vida. El último en pie gana.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#4488ff;">EQUIPOS:</strong> Rojo vs Azul asignados al azar. Turno por equipo: suena una canción y <strong>todos los miembros del equipo votan</strong> un hueco. Gana el hueco con más votos. Si hay empate, gana el que se votó más rápido. El equipo que llega a 10 cartas gana.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#888;">🏆 MODO COMPETITIVO:</strong> Sin sabotajes, sin fichas, sin especiales. Solo cronología pura. Actívalo en el lobby antes de empezar. Para los que quieren demostrar quién sabe más de verdad.</li>
+                <li style="margin-bottom:8px;"><strong style="color:var(--gold);">MODO REY:</strong> Al llegar a 10, los rivales eligen una canción y tienes que adivinar el año con ±2 de margen. Si aciertas, ganas. Si fallas, te quedas en 10 e intentas de nuevo en tu siguiente turno.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#ff4444;">SUPERVIVENCIA:</strong> Cada jugador tiene 3 vidas 💿. Cada fallo quita una vida. El último en pie gana.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#4488ff;">EQUIPOS:</strong> Rojo vs Azul asignados al azar. Todo el equipo vota el hueco; gana el más votado (empate → el más rápido). El equipo que llega a 10 cartas gana.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#888;">🏆 MODO COMPETITIVO:</strong> Sin sabotajes, sin fichas, sin especiales. Solo cronología pura. Se activa en el lobby.</li>
             </ul>
 
-            <!-- BONUS DE RACHA -->
-            <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">🔥 BONUS DE RACHA</h3>
-            <p>Si llevas <strong>3 o más aciertos seguidos</strong>, cada carta adicional vale <strong>2 puntos</strong> en lugar de 1. El contador de racha es visible en tu móvil y en la pantalla del host.</p>
-
-            <!-- CAMINO DEL GUERRERO -->
-            <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">⚔️ EL CAMINO DEL GUERRERO</h3>
-            <p>Si fallas <strong>3 veces seguidas</strong>, la siguiente carta que aciertes vale <strong>2 puntos</strong> automáticamente. Sin coste, sin activación manual. Un empujón para remontar cuando la partida se pone cuesta arriba.</p>
-
-            <!-- DOBLE O NADA -->
-            <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">🎲 DOBLE O NADA</h3>
-            <p>Cuando es tu turno, puedes activar <strong>Doble o Nada</strong> antes de colocar la carta:</p>
-            <ul style="padding-left:15px; margin-top:6px;">
-                <li style="margin-bottom:6px;">Si <strong>aciertas</strong> → ganas <strong>2 cartas</strong> en lugar de 1.</li>
-                <li style="margin-bottom:6px;">Si <strong>fallas</strong> → pierdes <strong>1 carta</strong> ya colocada.</li>
-            </ul>
-            <p style="font-size:0.85em; color:#888; margin-top:4px;">Solo se puede activar <strong>antes de pulsar PLAY</strong> (cuesta 4🔵).</p>
-
-            <!-- TURNO DEL FAROLERO -->
-            <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">🃏 TURNO DEL FAROLERO</h3>
-            <p>Antes de que empiece a sonar la canción, puedes declarar que la conoces pulsando <strong>FAROLEAR</strong>:</p>
-            <ul style="padding-left:15px; margin-top:6px;">
-                <li style="margin-bottom:6px;">Si <strong>aciertas</strong> el hueco → ganas <strong>3 cartas</strong> en total.</li>
-                <li style="margin-bottom:6px;">Si <strong>fallas</strong> → pierdes <strong>2 cartas</strong> ya colocadas.</li>
-            </ul>
-            <p style="font-size:0.85em; color:#888; margin-top:4px;">Cuesta <strong>4🔵</strong>. Solo disponible antes de pulsar PLAY.</p>
-
-            <!-- FICHAS Y APUESTAS -->
-            <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">🔵 FICHAS Y APUESTAS</h3>
+            <!-- MECÁNICAS DE CARTA -->
+            <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">⚡ MECÁNICAS AUTOMÁTICAS</h3>
             <ul style="padding-left:15px; margin-top:8px;">
-                <li style="margin-bottom:8px;"><strong style="color:var(--accent);">¡NI DE COÑA! (1🔵):</strong> Apuesta a que el jugador activo falla. Si acierta el hueco real → te llevas la carta y +2🔵. Si él acierta → pierdes la ficha.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#00ff88;">¡CONMIGO! (1🔵):</strong> Apuesta a que el jugador activo acierta. Si acierta → ganas +2🔵. Si falla → pierdes la ficha.</li>
-                <li style="margin-bottom:8px;"><strong style="color:var(--gold);">AUTO-GANAR (3🔵):</strong> Si conoces el año exacto, gasta 3 fichas para colocarte la carta directamente.</li>
+                <li style="margin-bottom:8px;"><strong style="color:var(--gold);">🔥 BONUS DE RACHA:</strong> 3 o más aciertos seguidos → cada carta extra vale <strong>2 puntos</strong>.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#ff4444;">⚔️ CAMINO DEL GUERRERO:</strong> 3 fallos seguidos → tu siguiente acierto vale automáticamente <strong>2 puntos</strong>.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#4488ff;">🔵 AUTO-RECARGA:</strong> Si llegas a 0 fichas durante 2 turnos seguidos, recibes 1 ficha automáticamente.</li>
+            </ul>
+
+            <!-- OPCIONES ANTES DE PLAY -->
+            <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">🎯 ANTES DE PULSAR PLAY <span style="color:#444; font-size:0.7em;">(solo el jugador activo)</span></h3>
+            <ul style="padding-left:15px; margin-top:8px;">
+                <li style="margin-bottom:8px;"><strong style="color:#ffaa00;">🎲 DOBLE O NADA (3🔵):</strong> Acierto → +2 cartas. Fallo → pierdes 1 carta ya colocada.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#cc88ff;">🃏 FAROLEAR (4🔵):</strong> Declaras que conoces la canción antes de escucharla. Acierto → +3 cartas en total. Fallo → pierdes 2 cartas ya colocadas.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#88bbff;">🛡️ SEGURO DE FALLO (2🔵):</strong> Si fallas este turno, no sufres penalizaciones extra (ni jinx, ni vida, ni coste del Doble o Nada).</li>
+            </ul>
+
+            <!-- APUESTAS -->
+            <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">🎰 APUESTAS <span style="color:#444; font-size:0.7em;">(cualquiera, mientras suena)</span></h3>
+            <ul style="padding-left:15px; margin-top:8px;">
+                <li style="margin-bottom:8px;"><strong style="color:var(--accent);">❌ NI DE COÑA (1🔵):</strong> Apuesta a que el activo falla. Si falla → te llevas su carta y +2🔵. Si acierta → pierdes la ficha.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#00ff88;">✅ CONMIGO (1🔵):</strong> Apuesta a que el activo acierta. Si acierta → +2🔵. Si falla → pierdes la ficha.</li>
+                <li style="margin-bottom:8px;"><strong style="color:var(--gold);">🏆 AUTO-GANAR (3🔵):</strong> Solo el jugador activo. Ganas la carta automáticamente sin escuchar.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#ff8888;">⚔️ DUELO (2🔵):</strong> Retas a otro jugador. Ambos intentáis adivinar el año. El que más se acerque (y más rápido en caso de empate) gana la carta.</li>
             </ul>
 
             <!-- MERCADO -->
-            <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">🏪 MERCADO</h3>
+            <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">🏪 MERCADO <span style="color:#444; font-size:0.7em;">(cualquiera, en tu turno)</span></h3>
             <ul style="padding-left:15px; margin-top:8px;">
-                <li style="margin-bottom:8px;"><strong style="color:#00ff88;">ESCUDO (3🔵):</strong> Bloquea el próximo sabotaje que recibas. El sabotaje rebota y el atacante pierde la ficha.</li>
-                <li style="margin-bottom:8px;"><strong style="color:var(--gold);">PISTA ARTISTA (comodín):</strong> Revela el nombre del artista de la canción actual. 3 usos por partida.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#88bbff;">SEGURO DE FALLO (2🔵):</strong> Actívalo <strong>antes de pulsar PLAY</strong>. Si fallas, no se aplican penalizaciones extra: ni jinx, ni pérdida de vida en Supervivencia, ni el coste del Doble o Nada. Solo cuenta como fallo normal.</li>
-                <li style="margin-bottom:8px;"><strong style="color:var(--gold);">ELEGIR CATEGORÍA (4🔵):</strong> Una vez por partida, elige que la siguiente canción sea de una categoría concreta: Anime 🎌, Películas 🎬 o Videojuegos 🎮. Útil si tienes punto fuerte en una categoría.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#00ff88;">🛡️ ESCUDO (3🔵):</strong> Bloquea el próximo sabotaje que recibas. El atacante pierde su ficha.</li>
+                <li style="margin-bottom:8px;"><strong style="color:var(--gold);">🎵 PISTA ARTISTA (gratis · 3 usos):</strong> Revela el nombre del artista. Solo disponible para el jugador activo.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#aaaaff;">📅 PISTA DÉCADA (1🔵):</strong> Revela la década de la canción (ej: "años 90s").</li>
+                <li style="margin-bottom:8px;"><strong style="color:var(--gold);">🎯 ELEGIR CATEGORÍA (2🔵):</strong> La siguiente canción será de la categoría que elijas: Anime 🎌, Películas 🎬 o Videojuegos 🎮.</li>
             </ul>
 
             <!-- ESPECIALES -->
             <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">✨ ESPECIALES</h3>
             <ul style="padding-left:15px; margin-top:8px;">
-                <li style="margin-bottom:8px;"><strong style="color:var(--gold);">🎵 ¡TODOS JUEGAN!:</strong> Cada 5 turnos, cualquier jugador puede ganar la carta. El primero que acierte el hueco se la lleva (cuesta 1🔵 para los no-activos). El jugador activo no paga ficha.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#aaaaaa;">🗓️ FILTRO DE DÉCADAS:</strong> El host puede limitar las canciones a una época concreta (80s, 90s, 2000s…) antes de empezar la partida.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#4488ff;">🔵 AUTO-RECARGA:</strong> Si llegas a 0 fichas durante 2 turnos seguidos, recibes 1 ficha automáticamente. Para que nadie quede bloqueado para siempre.</li>
+                <li style="margin-bottom:8px;"><strong style="color:var(--gold);">🎵 ¡TODOS JUEGAN!:</strong> Cada ciertos turnos, cualquiera puede ganar la carta. El primero que acierte se la lleva. Los no-activos pagan 1🔵.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#aaaaaa;">🗓️ FILTRO DE DÉCADAS:</strong> El host puede limitar las canciones a una época concreta antes de empezar.</li>
             </ul>
 
             <!-- SABOTAJES TROLL -->
-            <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">💀 SABOTAJES — TROLL</h3>
+            <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">😈 SABOTAJES TROLL <span style="color:#444; font-size:0.7em;">(contra el jugador activo)</span></h3>
             <ul style="padding-left:15px; margin-top:8px;">
-                <li style="margin-bottom:8px;"><strong style="color:#00bdff;">MUTEAR (1🔵):</strong> Quita el sonido 15 segundos.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#00ff88;">¡ZUMBIDO! (1🔵):</strong> Suena un ruido molesto para despistar.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#ff8800;">VETO (1🔵):</strong> El activo no puede cambiar de canción esta ronda.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#ff4444;">PÁNICO (2🔵):</strong> El activo solo tiene 10 segundos para decidir.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#aaaaaa;">NIEBLA (2🔵):</strong> Oculta los años de su cronología durante ese turno.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#ff00cc;">RULETA RUSA (2🔵):</strong> El activo hace girar la ruleta. Puede ganar o perder cartas/fichas al azar.</li>
+                <li style="margin-bottom:6px;"><strong style="color:#00bdff;">🔇 MUTEAR (1🔵):</strong> Silencia la canción 15 segundos.</li>
+                <li style="margin-bottom:6px;"><strong style="color:#00ff88;">🔔 ZUMBIDO (1🔵):</strong> Añade un ruido molesto sobre la música.</li>
+                <li style="margin-bottom:6px;"><strong style="color:#ff8800;">🚫 VETAR (1🔵):</strong> Fuerza al activo a cambiar su respuesta.</li>
+                <li style="margin-bottom:6px;"><strong style="color:#ff4444;">😱 PÁNICO (2🔵):</strong> El activo solo tiene 10 segundos para decidir.</li>
+                <li style="margin-bottom:6px;"><strong style="color:#aaaaaa;">🌫️ NIEBLA (2🔵):</strong> Oculta los años de su cronología ese turno.</li>
+                <li style="margin-bottom:6px;"><strong style="color:#ff00cc;">🎰 RULETA RUSA (2🔵):</strong> El activo gira la ruleta. Puede ganar o perder cartas/fichas al azar.</li>
+                <li style="margin-bottom:6px;"><strong style="color:#ffff88;">⏭️ SALTAR CANCIÓN (1🔵):</strong> Fuerza a cambiar la canción actual por otra.</li>
             </ul>
 
             <!-- SABOTAJES SUPERMAN -->
-            <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">💀 SABOTAJES — SUPERMAN</h3>
+            <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">💪 SABOTAJES SUPERMAN <span style="color:#444; font-size:0.7em;">(más destructivos)</span></h3>
             <ul style="padding-left:15px; margin-top:8px;">
-                <li style="margin-bottom:8px;"><strong style="color:#ffff00;">ROBAR FICHA (4🔵):</strong> Le quitas 1 ficha a un rival al azar.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#ff00ff;">ROBAR TURNO (4🔵):</strong> Robas el turno al jugador activo. ⚠️ La víctima tiene <strong>5 segundos para RESISTIR</strong> gastando 2🔵 — si lo hace, el robo falla y recuperas tus fichas.</li>
-                <li style="margin-bottom:8px;"><strong style="color:var(--gold);">🃏 ROBO INTELIGENTE (4🔵):</strong> Elige qué carta robarle al líder: la más antigua, la más reciente o la más extrema.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#bf00ff;">AGUJERO NEGRO (5🔵):</strong> Destruye una carta aleatoria de la cronología de un rival.</li>
+                <li style="margin-bottom:6px;"><strong style="color:#ffff00;">💰 ROBAR FICHA (4🔵):</strong> Le quitas 1 ficha a un rival al azar.</li>
+                <li style="margin-bottom:6px;"><strong style="color:#ff00ff;">⏩ ROBAR TURNO (2🔵):</strong> Robas el turno al activo. ⚠️ La víctima tiene 5 segundos para <strong>RESISTIR</strong> gastando 2🔵.</li>
+                <li style="margin-bottom:6px;"><strong style="color:var(--gold);">🧠 ROBO INTELIGENTE (3🔵):</strong> Elige qué carta robarle al líder: la más antigua, la más reciente o la del extremo.</li>
+                <li style="margin-bottom:6px;"><strong style="color:#bf00ff;">⚫ AGUJERO NEGRO (3🔵):</strong> Destruye una carta aleatoria de la cronología de un rival.</li>
+                <li style="margin-bottom:6px;"><strong style="color:#ff8800;">⚡ ROBAR RACHA (2🔵):</strong> Roba la racha de×3 o más al jugador que más lleva.</li>
             </ul>
-
-            <!-- DUELO -->
-            <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">⚔️ DUELO (3🔵)</h3>
-            <p>Reta a otro jugador. Ambos intentáis adivinar el año de la canción actual. El que más se acerque (y más rápido en caso de empate) gana la carta.</p>
 
             <!-- EMOJIS -->
             <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">😂 EMOJIS</h3>
-            <p style="color:#888; font-size:0.9em; margin-bottom:8px;">Los emojis tienen dos usos: efectos colectivos (gratis) y comodines de un solo uso (1🔵).</p>
-            <p><strong style="color:var(--gold);">Efectos colectivos (gratis):</strong> Si 3 o más jugadores mandan el mismo emoji en menos de 5 segundos:</p>
+            <p style="color:#888; font-size:0.9em; margin-bottom:8px;">Dos tipos: efectos colectivos (gratis) y comodines de un solo uso (1🔵).</p>
+            <p><strong style="color:var(--gold);">Colectivos (gratis):</strong> Si 3+ jugadores mandan el mismo emoji en &lt;5 segundos:</p>
             <ul style="padding-left:15px; margin-top:6px;">
-                <li style="margin-bottom:6px;">3x😂 → <strong>DISTRACCIÓN</strong>: el jugador activo ve un overlay de risas 3 segundos.</li>
-                <li style="margin-bottom:6px;">3x🔥 (justo tras un acierto) → <strong>HOMENAJE</strong>: el activo gana +1🔵.</li>
-                <li style="margin-bottom:6px;">3x💀 → <strong>JINX</strong>: si el activo falla ese turno, pierde 2 cartas en lugar de 1.</li>
+                <li style="margin-bottom:6px;">3x😂 → <strong>DISTRACCIÓN</strong>: overlay de risas 3 segundos sobre la pantalla del activo.</li>
+                <li style="margin-bottom:6px;">3x🔥 (tras un acierto) → <strong>HOMENAJE</strong>: el activo gana +1🔵.</li>
+                <li style="margin-bottom:6px;">3x💀 → <strong>JINX</strong>: si el activo falla, pierde 2 cartas en lugar de 1.</li>
             </ul>
-            <p style="margin-top:10px;"><strong style="color:var(--gold);">Comodines (1🔵 · 1 uso por partida):</strong> Botones especiales en la interfaz:</p>
+            <p style="margin-top:10px;"><strong style="color:var(--gold);">Comodines (1🔵 · 1 uso por partida):</strong></p>
             <ul style="padding-left:15px; margin-top:6px;">
-                <li style="margin-bottom:6px;">🔥 → Tu próximo acierto vale <strong>2 cartas</strong> en lugar de 1.</li>
-                <li style="margin-bottom:6px;">😂 → El jugador activo no puede ver los años de su cronología durante <strong>5 segundos</strong>.</li>
-                <li style="margin-bottom:6px;">💀 → <strong>Maldición silenciosa</strong>: si el activo falla, ganas <strong>+2🔵</strong>. Si acierta, solo pierdes la ficha que pagaste.</li>
+                <li style="margin-bottom:6px;">🔥 → Tu próximo acierto vale <strong>2 cartas</strong>.</li>
+                <li style="margin-bottom:6px;">😂 → El activo no ve los años de su cronología durante <strong>5 segundos</strong>.</li>
+                <li style="margin-bottom:6px;">💀 → <strong>Maldición silenciosa</strong>: si el activo falla, ganas <strong>+2🔵</strong> (nadie lo sabe).</li>
             </ul>
 
         </div>
@@ -1925,7 +1938,7 @@
                 <button class="reaction-btn" onclick="sendReaction('🎯')">🎯</button>
             </div>
 
-            <div id="cheat-indicator" style="display:none; position: fixed; top: 80px; left: 50%; transform: translateX(-50%); background: var(--accent); color: #fff; padding: 5px 15px; border-radius: 20px; font-family: 'Bungee'; font-size: 0.8em; z-index: 10000; box-shadow: 0 0 15px var(--accent);">TRUCOS OFF</div>
+            
             
             <div class="chip-display" id="my-tokens-ui">MIS FICHAS: <span class="neon-chip"></span><span class="neon-chip"></span></div>
 
@@ -2393,8 +2406,7 @@
                     document.getElementById('login-screen').style.display = 'none';
                     document.getElementById('waiting-screen').style.display = 'flex';
                     document.getElementById('game-screen').style.display = 'none';
-                    initCheatSystem();
-                });
+                    });
 
                 conn.on('data', handle);
 
@@ -2424,14 +2436,7 @@
             const modeLabel = document.getElementById('card-mode-label');
             if (modeLabel) modeLabel.innerText = label;
             let metaTheme = document.querySelector('meta[name="theme-color"]');
-            if (metaTheme) metaTheme.setAttribute('content', color);
             
-            // Actualizar el indicador de trucos si es necesario
-            const indicator = document.getElementById('cheat-indicator');
-            if (indicator && indicator.style.display !== 'none') {
-                indicator.style.boxShadow = '0 0 15px ' + color;
-            }
-
             // Fondo dinámico por categoría
             document.body.classList.remove('theme-orig','theme-anime','theme-movies','theme-videojuegos');
             if (type && type !== 'mix') document.body.classList.add('theme-' + type);
@@ -2706,6 +2711,36 @@
         // ── READY CHECK ──
         var alreadySentReady = false;
         // ── CUENTA ATRÁS ──
+        function showBigToast(icon, title, desc, color, duration) {
+            var el = document.createElement('div');
+            el.className = 'big-toast';
+            el.style.border = '2px solid ' + (color || 'var(--neon)');
+            el.innerHTML = '<span class="bt-icon">' + icon + '</span>' +
+                '<span class="bt-title" style="color:' + (color || 'var(--neon)') + ';">' + title + '</span>' +
+                (desc ? '<span class="bt-desc">' + desc + '</span>' : '');
+            document.body.appendChild(el);
+            vibrate([100, 50, 100]);
+            setTimeout(function(){ el.remove(); }, duration || 3500);
+        }
+
+        // ── SONIDO DE NOTIFICACIÓN IMPORTANTE ──
+        function soundNotify(type) {
+            if (!audioCtx) { try { audioCtx = new (window.AudioContext||window.webkitAudioContext)(); } catch(e){ return; } }
+            var freqs = { bonus: [523,659,784], shared: [440,554,659,784], king: [392,494,587] };
+            var seq = freqs[type] || freqs.bonus;
+            seq.forEach(function(freq, i) {
+                var osc = audioCtx.createOscillator();
+                var gain = audioCtx.createGain();
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                osc.frequency.value = freq;
+                osc.type = 'sine';
+                var t = audioCtx.currentTime + i * 0.12;
+                gain.gain.setValueAtTime(0.25, t);
+                gain.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
+                osc.start(t); osc.stop(t + 0.18);
+            });
+        }
+
         function showCountdown(n) {
             var overlay = document.getElementById('countdown-overlay');
             var numEl   = document.getElementById('countdown-number');
@@ -3160,6 +3195,14 @@
                 soundToken();
                 showDangerAlert('⚔️ ¡CAMINO DEL GUERRERO! ' + data.name + ' remonta con carta extra', false);
                 return;
+            } else if (data.type === 'BONUS_CARD_ACTIVE') {
+                showBigToast('⭐', '¡CARTA ESPECIAL!', 'Esta carta vale 2 puntos', 'var(--gold)', 4000);
+                soundNotify('bonus');
+                return;
+            } else if (data.type === 'TODOS_JUEGAN_ACTIVE') {
+                showBigToast('🎵', '¡TODOS JUEGAN!', 'El primero que acierte gana la carta', 'var(--neon)', 4000);
+                soundNotify('shared');
+                return;
             } else if (data.type === 'BRAG_ACTIVE') {
                 soundBet();
                 showDangerAlert('🃏 ¡TURNO DEL FAROLERO! ' + data.name + ' se juega todo', false);
@@ -3213,14 +3256,7 @@
 
             // Retroalimentación de trucos para Xavi
             if (data.type === 'STATE_UPDATE' && lastState && playerName.toLowerCase() === 'xavi') {
-                if (data.cheatsEnabled !== lastState.cheatsEnabled) {
-                    const indicator = document.getElementById('cheat-indicator');
-                    indicator.innerText = data.cheatsEnabled ? "TRUCOS ON" : "TRUCOS OFF";
-                    indicator.style.background = data.cheatsEnabled ? "var(--neon)" : "var(--accent)";
-                    indicator.style.display = "block";
-                    setTimeout(() => { indicator.style.display = "none"; }, 2000);
-                }
-            }
+                            }
 
             lastState = data;
             if (data.type === 'STATE_UPDATE') {
@@ -3662,7 +3698,7 @@
                     } else {
                         donBtn.className = '';
                         donBtn.disabled = false;
-                        donBtn.innerText = '🎲 DOBLE O NADA (4🔵)';
+                        donBtn.innerText = '🎲 DOBLE O NADA (3🔵)';
                     }
                 }
                 // Banner ¡Todos Juegan!
@@ -3725,8 +3761,8 @@
                     if (document.getElementById('btn-sabotage-panic')) { document.getElementById('btn-sabotage-panic').style.display = disp2; document.getElementById('btn-sabotage-panic').disabled = (data.myTokens < 2); }
                     if (document.getElementById('btn-sabotage-fog')) { document.getElementById('btn-sabotage-fog').style.display = disp2; document.getElementById('btn-sabotage-fog').disabled = (data.myTokens < 2); }
                     if (document.getElementById('btn-sabotage-steal-token')) { document.getElementById('btn-sabotage-steal-token').style.display = disp2; document.getElementById('btn-sabotage-steal-token').disabled = (data.myTokens < 4); }
-                    if (document.getElementById('btn-sabotage-steal-turn')) { document.getElementById('btn-sabotage-steal-turn').style.display = disp2; document.getElementById('btn-sabotage-steal-turn').disabled = (data.myTokens < 4); }
-                    if (document.getElementById('btn-sabotage-blackhole')) { document.getElementById('btn-sabotage-blackhole').style.display = disp2; document.getElementById('btn-sabotage-blackhole').disabled = (data.myTokens < 5); }
+                    if (document.getElementById('btn-sabotage-steal-turn')) { document.getElementById('btn-sabotage-steal-turn').style.display = disp2; document.getElementById('btn-sabotage-steal-turn').disabled = (data.myTokens < 2); }
+                    if (document.getElementById('btn-sabotage-blackhole')) { document.getElementById('btn-sabotage-blackhole').style.display = disp2; document.getElementById('btn-sabotage-blackhole').disabled = (data.myTokens < 3); }
                     if (document.getElementById('btn-smart-steal')) {
                         // Solo visible si hay rivales con cartas y no es tu turno
                         var hasTargets = data.players && data.players.some(function(pl) { return pl.id !== myId && pl.cards && pl.cards.length > 0; });
@@ -3899,7 +3935,7 @@
                     if (btnStealToken) btnStealToken.disabled = (data.myTokens < 4 || isActionLocked);
 
                     var btnStealTurn = document.getElementById('btn-sabotage-steal-turn');
-                    if (btnStealTurn) btnStealTurn.disabled = (data.myTokens < 4 || isActionLocked);
+                    if (btnStealTurn) btnStealTurn.disabled = (data.myTokens < 2 || isActionLocked);
 
                     // Panic Overlay Check
                     var isMyTurn = (data.activePlayer && data.activePlayer.id === myId);
@@ -4025,67 +4061,7 @@
             }
         }
 
-        // CHEAT SYSTEM
-        function initCheatSystem() {
-            var auth = ['xavi', 'mimi', 'sonia'];
-            var pName = playerName.toLowerCase();
-            if (!auth.includes(pName)) return;
-
-            console.log("Cheat System Initialized for", pName);
-
-            // Mechanic 1: Peek at the card (Hold)
-            var card = document.getElementById('card');
-
-            function isMyTurn() {
-                return lastState && lastState.activePlayer && lastState.activePlayer.id === myId;
-            }
-
-            function startPeek(e) {
-                // Peek allowed if cheats are enabled, it's not our turn (or king mode), and we have track data
-                if (lastState && lastState.cheatsEnabled !== false && (!isMyTurn() || (lastState.turnPhase && lastState.turnPhase !== 'NORMAL')) && lastState.currentTrack) {
-                    if (e && e.preventDefault) e.preventDefault(); // Prevent text selection
-                    document.getElementById('card').classList.add('flipped');
-                    document.getElementById('c-artist').innerText = lastState.currentTrack.artist || "";
-                    document.getElementById('c-song').innerText = lastState.currentTrack.song || "";
-                    document.getElementById('c-year').innerText = lastState.currentTrack.year || "";
-                }
-            }
-
-            function stopPeek(e) {
-                if (lastState && !lastState.revealed && !lastState.turnPhase?.includes('GUESS_RESULT')) {
-                    document.getElementById('card').classList.remove('flipped');
-                }
-            }
-
-            // Touch events for mobile, mouse events for desktop
-            card.addEventListener('touchstart', startPeek, { passive: false });
-            card.addEventListener('touchend', stopPeek);
-            card.addEventListener('touchcancel', stopPeek);
-            card.addEventListener('mousedown', startPeek);
-            card.addEventListener('mouseup', stopPeek);
-            card.addEventListener('mouseleave', stopPeek);
-
-            // Mechanic 2: Toggle Master Cheat (Xavi Only via Timeline tap)
-            if (pName === 'xavi') {
-                var container = document.getElementById('my-cards-list');
-                // Use event delegation for tapping the first timeline year
-                container.addEventListener('click', function (e) {
-                    var targetRow = e.target.closest('.card-row');
-                    // Si ha pulsado el texto de un año en la cronología rival
-                    if (targetRow) {
-                        var rows = container.querySelectorAll('.card-row');
-                        // Verificamos que sea la primera carta (index 0) y que no sea el turno de xavi
-                        if (rows.length > 0 && targetRow === rows[0] && !isMyTurn) {
-                            console.log("Xavi toggling master cheat via timeline tap");
-                            targetRow.style.color = (lastState && lastState.cheatsEnabled) ? 'red' : 'green';
-                            setTimeout(() => { targetRow.style.color = '#888'; }, 500);
-                            send('TOGGLE_CHEAT');
-                        }
-                    }
-                });
-            }
-        }
-
+        
         document.addEventListener('DOMContentLoaded', function () {
             var msgs = {
                 'btn-sabotage-buzzer': '¡Zumbido enviado al DJ!',

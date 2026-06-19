@@ -1,5 +1,5 @@
 // ── ChronoBeats Online — Service Worker v3 ──
-const CACHE_NAME = 'chronobeats-v26';
+const CACHE_NAME = 'chronobeats-v33';
 
 // Recursos propios a pre-cachear en la instalación (pequeños, sin riesgo)
 const PRECACHE_URLS = [
@@ -113,6 +113,8 @@ self.addEventListener('fetch', event => {
 
     // Recursos propios (HTML, imágenes, etc.) → network-first con fallback a caché
     // Así siempre se sirve la versión más reciente si hay red
+    // Para navegaciones HTML: no redirigir a index.html si falla — dejar que falle limpio
+    const isNavigation = event.request.mode === 'navigate';
     event.respondWith(
         fetch(event.request)
             .then(response => {
@@ -124,9 +126,12 @@ self.addEventListener('fetch', event => {
                 return response;
             })
             .catch(() =>
-                caches.match(event.request).then(cached =>
-                    cached || caches.match('./index.html')
-                )
+                caches.match(event.request).then(cached => {
+                    if (cached) return cached;
+                    // Solo fallback a index.html si NO es una navegación a otro HTML
+                    if (!isNavigation) return caches.match('./index.html');
+                    return null; // navegación HTML fallida: no redirigir
+                })
             )
     );
 });

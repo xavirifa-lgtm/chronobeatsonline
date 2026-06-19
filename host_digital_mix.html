@@ -999,6 +999,10 @@
                 <option value="90s2000s">90s Y 2000s (1990-2009)</option>
             </select>
             <div id="song-counter" style="font-family:'Montserrat'; font-size:0.65em; color:#444; text-align:center; margin-top:6px;"></div>
+            <div style="margin-top:10px; display:flex; align-items:center; gap:8px; padding:8px; background:rgba(255,255,255,0.02); border:1px solid #1a1a1a; border-radius:8px;">
+                <input type="checkbox" id="competitive-mode-check" style="width:16px;height:16px;accent-color:var(--neon);cursor:pointer;">
+                <label for="competitive-mode-check" style="font-family:'Montserrat';font-size:0.7em;color:#555;cursor:pointer;user-select:none;">🏆 Modo Competitivo <span style="color:#333;">(sin sabotajes · sin fichas · solo cronología)</span></label>
+            </div>
             
         </div>
 
@@ -1279,7 +1283,6 @@
         }
         var turnPhase = 'NORMAL'; // 'NORMAL', 'KING_SELECTION', 'KING_GUESS', 'KING_GUESS_RESULT'
         var kingOptions = []; // Array de opciones para los retadores
-        var cheatsEnabled = true;
         var gameStarted = false;
 
         // Seguimiento de tiempo para skips manuales
@@ -1778,7 +1781,7 @@
             silentCurses = [];
             stats.consecutiveFails = {};
             stats.reactionTimes = {};
-            competitiveMode = false;
+            competitiveMode = !!(document.getElementById('competitive-mode-check') && document.getElementById('competitive-mode-check').checked);
             requestedCategory = null;
             reactionStartTime = 0;
             tokenStarvationTurns = {};
@@ -1913,12 +1916,42 @@
             // Cada 5 turnos → ¡Todos Juegan!
             // ¡TODOS JUEGAN! aleatorio — no siempre cae al mismo jugador
             isSharedSong = (turnCounter === nextSharedSongTurn && players.length >= 2);
-            if (isSharedSong) nextSharedSongTurn = turnCounter + 4 + Math.floor(Math.random() * 4);
+            if (isSharedSong) {
+                nextSharedSongTurn = turnCounter + 4 + Math.floor(Math.random() * 4);
+                // Broadcast a todos los móviles
+                for (var _sid in connections) {
+                    try { connections[_sid].send({ type: 'TODOS_JUEGAN_ACTIVE' }); } catch(e) {}
+                }
+                // Voz: anunciar todos juegan
+                if (voiceEnabled && 'speechSynthesis' in window) {
+                    setTimeout(function() {
+                        window.speechSynthesis.cancel();
+                        var _su = new SpeechSynthesisUtterance('¡Todos juegan! El primero que acierte gana la carta');
+                        _su.lang = 'es-ES'; _su.rate = 0.9; _su.pitch = 1.1;
+                        window.speechSynthesis.speak(_su);
+                    }, 300);
+                }
+            }
             var banner = document.getElementById('shared-song-banner');
             if (banner) banner.style.display = isSharedSong ? 'block' : 'none';
             // CARTA BONIFICACIÓN aleatoria
             isBonusCard = (turnCounter === nextBonusTurn);
-            if (isBonusCard) nextBonusTurn = turnCounter + 7 + Math.floor(Math.random() * 4);
+            if (isBonusCard) {
+                nextBonusTurn = turnCounter + 7 + Math.floor(Math.random() * 4);
+                // Broadcast a todos los móviles
+                for (var _bid in connections) {
+                    try { connections[_bid].send({ type: 'BONUS_CARD_ACTIVE' }); } catch(e) {}
+                }
+                // Voz: anunciar carta especial
+                if (voiceEnabled && 'speechSynthesis' in window) {
+                    setTimeout(function() {
+                        window.speechSynthesis.cancel();
+                        var _bu = new SpeechSynthesisUtterance('¡Carta especial! Esta carta vale doble punto');
+                        _bu.lang = 'es-ES'; _bu.rate = 0.9; _bu.pitch = 1.2;
+                        window.speechSynthesis.speak(_bu);
+                    }, 500);
+                }
+            }
             currentSongIdx++; if(songs[currentSongIdx] && songs[currentSongIdx].id) { var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]'); if(!_pl.includes(songs[currentSongIdx].id)){ _pl.push(songs[currentSongIdx].id); localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl)); } } isRevealed = false;
             segundosAcumulados = 0;
             momentoDeInicio = 0;
@@ -2312,10 +2345,6 @@
                         syncState();
                     }
                     break;
-                case 'TOGGLE_CHEAT':
-                    cheatsEnabled = !cheatsEnabled;
-                    syncState();
-                    break;
                 case 'SKIP':
                     if (peerId !== activeP.id) return;
                     if (player && player.getCurrentTime) {
@@ -2446,7 +2475,11 @@
                         hasShield[activeP.id] = false;
                         notifyVictim(players[activePlayerIdx].id, p.name, 'PÁNICO', '😱');
                         syncState();
-                        break;
+                        break} else {
+                    var _pp = players.find(function(pl){return pl.id===peerId;});
+                    if (!_pp || _pp.tokens < 2) break;
+                    updateTokens(_pp, -2);
+;
                     }
                     var p = players.find(function (pl) { return pl.id === peerId; });
                     if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 2 && !panicActive && isPlaying && !isRevealed && (!turnPhase || turnPhase === 'NORMAL')) {
@@ -2511,7 +2544,11 @@
                         hasShield[activeP.id] = false;
                         notifyVictim(players[activePlayerIdx].id, p.name, 'NIEBLA', '🌫');
                         syncState();
-                        break;
+                        break} else {
+                    var _fp = players.find(function(pl){return pl.id===peerId;});
+                    if (!_fp || _fp.tokens < 2) break;
+                    updateTokens(_fp, -2);
+;
                     }
                     var p = players.find(function (pl) { return pl.id === peerId; });
                     if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 2 && !isFogActive && (!turnPhase || turnPhase === 'NORMAL')) {
@@ -2547,8 +2584,8 @@
                         break;
                     }
                     var p = players.find(function (pl) { return pl.id === peerId; });
-                    if (p && p.tokens >= 3 && activeGuess === null && isPlaying && !isRevealed && (!turnPhase || turnPhase === 'NORMAL')) {
-                        updateTokens(p, -3);
+                    if (p && p.tokens >= 1 && activeGuess === null && isPlaying && !isRevealed && (!turnPhase || turnPhase === 'NORMAL')) {
+                        updateTokens(p, -1);
                         refundBets();
                         isPlaying = false;
                         if (player && player.stopVideo) player.stopVideo();
@@ -2591,8 +2628,8 @@
                 case 'SABOTAGE_DUEL':
                     if (turnPhase === 'DUEL' || duelTriggered) return;
                     var p = players.find(x => x.id === peerId);
-                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 3 && (!turnPhase || turnPhase === 'NORMAL') && !currentDuel && !isRevealed) {
-                        updateTokens(p, -3);
+                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 2 && (!turnPhase || turnPhase === 'NORMAL') && !currentDuel && !isRevealed) {
+                        updateTokens(p, -2);
                         duelTriggered = true;
                         var target = players[activePlayerIdx];
                         
@@ -2675,7 +2712,11 @@
                         hasShield[activeP.id] = false;
                         notifyVictim(players[activePlayerIdx].id, p.name, 'VETO', '🚫');
                         syncState();
-                        break;
+                        break} else {
+                    var _vp = players.find(function(pl){return pl.id===peerId;});
+                    if (!_vp || _vp.tokens < 1) break;
+                    updateTokens(_vp, -1);
+;
                     }
                     var p = players.find(function (pl) { return pl.id === peerId; });
                     if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 1 && players[activePlayerIdx].canReload && (!turnPhase || turnPhase === 'NORMAL')) {
@@ -2692,8 +2733,8 @@
                     break;
                 case 'SABOTAGE_STEAL_TURN':
                     var p = players.find(function (pl) { return pl.id === peerId; });
-                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 4 && isPlaying && !isRevealed && !pendingSteal) {
-                        updateTokens(p, -4);
+                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 2 && isPlaying && !isRevealed && !pendingSteal) {
+                        updateTokens(p, -2);
                         var victim = players[activePlayerIdx];
                         pendingSteal = { thief: p, victim: victim };
 
@@ -2748,10 +2789,10 @@
                     break;
                 case 'SABOTAGE_BLACKHOLE':
                     var p = players.find(function (pl) { return pl.id === peerId; });
-                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 5 && (!turnPhase || turnPhase === 'NORMAL')) {
+                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 3 && (!turnPhase || turnPhase === 'NORMAL')) {
                         var validTargets = players.filter(function (t) { return t.id !== p.id && t.score > 1 && t.cards.length > 0; });
                         if (validTargets.length > 0) {
-                            updateTokens(p, -5);
+                            updateTokens(p, -3);
                             var target = validTargets[Math.floor(Math.random() * validTargets.length)];
                             target.score = Math.max(0, target.score - 1);
                             var cardIdx = Math.floor(Math.random() * target.cards.length);
@@ -2772,7 +2813,7 @@
                     // value = 'first' | 'last' | 'extreme'
                     var p = players.find(function(pl) { return pl.id === peerId; });
                     var validTargets = players.filter(function(t) { return t.id !== peerId && t.cards && t.cards.length > 0; });
-                    if (p && p.tokens >= 4 && gameStarted && (!turnPhase || turnPhase === 'NORMAL') && validTargets.length > 0) {
+                    if (p && p.tokens >= 3 && gameStarted && (!turnPhase || turnPhase === 'NORMAL') && validTargets.length > 0) {
                         // Elegir víctima: el jugador con más cartas
                         var target = validTargets.sort(function(a,b) { return b.cards.length - a.cards.length; })[0];
                         var stolenCard = null;
@@ -2791,7 +2832,7 @@
                             target.cards.sort(function(a,b){return a-b;});
                             p.cards.push(parseInt(stolenCard));
                             p.cards.sort(function(a,b){return a-b;});
-                            updateTokens(p, -4);
+                            updateTokens(p, -3);
                             var typeLabel = value==='first'?'MÁS ANTIGUA':value==='last'?'MÁS RECIENTE':'MÁS EXTREMA';
                             addEvent('<span class="ev-name">' + p.name + '</span> <span class="ev-info">robó carta ' + typeLabel + ' (' + stolenCard + ') a ' + target.name + ' 🃏</span>');
                             trackSabotage(p.id, target.id);
@@ -3087,8 +3128,8 @@
 
                 case 'REQUEST_CATEGORY':
                     var p = players.find(function(pl){ return pl.id === peerId; });
-                    if (p && p.tokens >= 4 && !requestedCategory && gameStarted) {
-                        updateTokens(p, -4);
+                    if (p && p.tokens >= 2 && !requestedCategory && gameStarted) {
+                        updateTokens(p, -2);
                         requestedCategory = value; // 'orig', 'peliculas', 'videojuegos'
                         var catNames = { orig: 'Anime 🎌', peliculas: 'Películas 🎬', videojuegos: 'Videojuegos 🎮' };
                         addEvent('<span class="ev-info">🎯 ' + p.name + ' pidió categoría: ' + (catNames[value]||value) + '</span>');
@@ -3181,8 +3222,8 @@
                 case 'DOUBLE_OR_NOTHING':
                     // Solo el jugador activo puede activar doble o nada (coste 4🔵, antes de reproducir)
                     var _donP = players.find(function(pl){ return pl.id === peerId; });
-                    if (players[activePlayerIdx] && peerId === players[activePlayerIdx].id && !isPlaying && !isRevealed && !isDoubleOrNothing && _donP && _donP.tokens >= 4) {
-                        updateTokens(_donP, -4);
+                    if (players[activePlayerIdx] && peerId === players[activePlayerIdx].id && !isPlaying && !isRevealed && !isDoubleOrNothing && _donP && _donP.tokens >= 3) {
+                        updateTokens(_donP, -3);
                         isDoubleOrNothing = true;
                         addEvent('<span class="ev-info">🎲 ' + players[activePlayerIdx].name + ' activa DOBLE O NADA</span>');
                         document.getElementById('host-instructions').innerHTML = "<span style='color:#ff8800;font-family:Bungee;font-size:1.2em;'>🎲 ¡DOBLE O NADA ACTIVADO!</span>";
@@ -3335,7 +3376,8 @@
             // Síntesis de voz opcional al revelar
             if (voiceEnabled && s && 'speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
-                var utter = new SpeechSynthesisUtterance(s.artist + ' ... ' + s.year);
+                var voiceText = (s.song ? s.song + ' ... de ... ' : '') + s.artist + ' ... año ' + s.year;
+                var utter = new SpeechSynthesisUtterance(voiceText);
                 utter.lang = 'es-ES'; utter.rate = 0.85; utter.pitch = 1.1;
                 window.speechSynthesis.speak(utter);
             }
@@ -3933,12 +3975,27 @@ if (typeof confetti === 'function') {
 
             // V26.3: Integración de IDs Verificados por el Usuario
             var isXavi = name.toLowerCase().includes('xavi');
+            var isSonia = name.toLowerCase().includes('sonia');
             var songId = "";
             var songTitle = "";
 
             if (isXavi) {
                 songId = '04854XqcfCY'; // Queen - We Are The Champions
                 songTitle = "Queen - We Are The Champions";
+            } else if (isSonia) {
+                var celinePool = [
+                    { id: 'Siz-xBfIqpg', t: "Céline Dion - My Heart Will Go On" },
+                    { id: 'B5RRGN43g58', t: "Céline Dion - The Power of Love" },
+                    { id: 'lpEK2bFDAW0', t: "Céline Dion - Because You Loved Me" },
+                    { id: 'JsWG2Gry1fw', t: "Céline Dion - It's All Coming Back to Me Now" },
+                    { id: '4jeCvAccUMk', t: "Céline Dion - That's the Way It Is" },
+                    { id: 'uy8d_IwuIvY', t: "Céline Dion - Pour que tu m'aimes encore" },
+                    { id: 'Y8HOfcYWZoo', t: "Céline Dion - The Power of Love (HD)" },
+                    { id: 'zmbw8OycJrE', t: "Céline Dion - My Heart Will Go On" }
+                ];
+                var celPicked = celinePool[Math.floor(Math.random() * celinePool.length)];
+                songId = celPicked.id;
+                songTitle = celPicked.t;
             } else {
                 // El "Pool de la Frikada" (V26.3 - IDs proporcionados por el usuario)
                 var frikiPool = [
@@ -4102,7 +4159,7 @@ if (typeof confetti === 'function') {
             };
             var colors = confettiColors[domCat] || confettiColors.mix;
 
-            if (isXavi) {
+            if (isXavi || isSonia) {
                 window.victoryInterval = setInterval(function () {
                     confetti(Object.assign({}, confettiDefaults, { particleCount: 40, colors: colors, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
                     confetti(Object.assign({}, confettiDefaults, { particleCount: 40, colors: colors, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
@@ -4168,6 +4225,7 @@ if (typeof confetti === 'function') {
                     failSafeActive: failSafeActive,
                     isBragging: isBragging,
                     competitiveMode: competitiveMode,
+                    requestedCategory: requestedCategory,
                     readyPlayers: readyPlayers,
                     predictions: predictions,
                     playerNames: players.map(function(pl){ return pl.name; }),
@@ -4186,7 +4244,6 @@ if (typeof confetti === 'function') {
                     currentDuel: currentDuel,
                     duelResult: duelResult,
                     kingOptions: kingOptions,
-                    cheatsEnabled: cheatsEnabled,
                     turnPhase: turnPhase,
                     currentType: songs[currentSongIdx] ? songs[currentSongIdx].type : 'mix',
                     hasShield: hasShield,
