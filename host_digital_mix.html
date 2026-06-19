@@ -624,10 +624,14 @@
             line-height: 1.3;
             font-family: 'Montserrat', sans-serif;
         }
+        .event-entry { border-left: 2px solid transparent; padding-left: 6px; margin-bottom: 2px; transition: background 0.2s; }
+        .event-entry:hover { background: rgba(255,255,255,0.02); }
         .event-entry .ev-name { color: var(--neon); font-weight: bold; }
         .event-entry .ev-good { color: #00ff88; }
-        .event-entry .ev-bad  { color: #ff4444; }
+        .event-entry .ev-bad  { color: #ff5555; }
         .event-entry .ev-info { color: var(--gold); }
+        .event-entry .ev-sab  { color: #ff44aa; }
+        .event-entry .ev-mec  { color: #88aaff; }
 
         /* Pantalla Ganador */
         #winner-screen {
@@ -1175,6 +1179,7 @@
         var reactionStartTime = 0;      // cuándo empezó a sonar la canción
         var tokenStarvationTurns = {};  // {playerId: N} — turnos consecutivos sin fichas
         var readyPlayers = {};      // {playerId: true} — ready check
+        var playerCardTypes = {};   // {playerId: {year: type}} — tipo de canción por carta
         var predictions = {};       // {playerId: nombrePredicho} — predicciones
         var failSafeActive = false;
         var isBragging = false;     // turno del farolero activo // seguro de fallo activo este turno
@@ -1690,6 +1695,26 @@
 
 
 
+        // Sonido de notificación para eventos importantes del host
+        function playHostNotifySound(type) {
+            try {
+                var ctx = new (window.AudioContext || window.webkitAudioContext)();
+                var freqs = { bonus: [523,659,784,1047], shared: [440,523,659,784], warn: [330,415,494] };
+                var seq = freqs[type] || freqs.bonus;
+                seq.forEach(function(freq, i) {
+                    var osc = ctx.createOscillator();
+                    var gain = ctx.createGain();
+                    osc.connect(gain); gain.connect(ctx.destination);
+                    osc.frequency.value = freq;
+                    osc.type = 'sine';
+                    var t = ctx.currentTime + i * 0.13;
+                    gain.gain.setValueAtTime(0.3, t);
+                    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+                    osc.start(t); osc.stop(t + 0.2);
+                });
+            } catch(e) {}
+        }
+
         function toggleLiveStats() {
             var panel = document.getElementById('live-stats-panel');
             if (panel) panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
@@ -1774,6 +1799,7 @@
             songHistory = [];
             readyPlayers = {};
             predictions = {};
+            playerCardTypes = {};
             requestedCategory = null;
             justSucceeded = false;
             emojiWildcardBonus = {};
@@ -1922,6 +1948,8 @@
                 for (var _sid in connections) {
                     try { connections[_sid].send({ type: 'TODOS_JUEGAN_ACTIVE' }); } catch(e) {}
                 }
+                // Sonido de notificación inmediato
+                playHostNotifySound('shared');
                 // Voz: anunciar todos juegan
                 if (voiceEnabled && 'speechSynthesis' in window) {
                     setTimeout(function() {
@@ -1942,6 +1970,8 @@
                 for (var _bid in connections) {
                     try { connections[_bid].send({ type: 'BONUS_CARD_ACTIVE' }); } catch(e) {}
                 }
+                // Sonido de notificación inmediato
+                playHostNotifySound('bonus');
                 // Voz: anunciar carta especial
                 if (voiceEnabled && 'speechSynthesis' in window) {
                     setTimeout(function() {
@@ -3415,7 +3445,9 @@
         }
 
         function validateResult(isCardOk, isTokenOk) {
-            if (turnPhase === 'DUEL') return; // No se valida nada en modo duelo manualmente de esta forma
+            if (turnPhase === 'DUEL') return;
+            // Cancelar voz si está leyendo
+            if ('speechSynthesis' in window) window.speechSynthesis.cancel(); // No se valida nada en modo duelo manualmente de esta forma
             
             if (isTokenOk) {
                 updateTokens(players[activePlayerIdx], 1);
@@ -3557,6 +3589,9 @@
                 }
                 // ── HISTORIAL: marcar acierto ──
                 if (songHistory.length > 0) songHistory[songHistory.length-1].correct = true;
+                // ── TRACKING TIPO DE CARTA ──
+                if (!playerCardTypes[players[activePlayerIdx].id]) playerCardTypes[players[activePlayerIdx].id] = {};
+                playerCardTypes[players[activePlayerIdx].id][parseInt(songs[currentSongIdx].year)] = songs[currentSongIdx].type || 'orig';
                 // ── EL CAMINO DEL GUERRERO: 3 fallos seguidos → carta extra ──
                 if ((stats.consecutiveFails[players[activePlayerIdx].id] || 0) >= 3) {
                     players[activePlayerIdx].score++;
@@ -4228,6 +4263,7 @@ if (typeof confetti === 'function') {
                     requestedCategory: requestedCategory,
                     readyPlayers: readyPlayers,
                     predictions: predictions,
+                    playerCardTypes: playerCardTypes,
                     playerNames: players.map(function(pl){ return pl.name; }),
                     isBonusCard: isBonusCard,
                     nextSharedSongTurn: nextSharedSongTurn,

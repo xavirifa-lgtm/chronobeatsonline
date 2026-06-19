@@ -1595,11 +1595,47 @@
         .big-toast .bt-title { font-family: 'Bungee'; font-size: 0.9em; letter-spacing: 2px; display: block; margin-top: 4px; }
         .big-toast .bt-desc  { font-family: 'Montserrat'; font-size: 0.65em; color: #888; display: block; margin-top: 3px; }
 
+        /* ══ CARTAS POR CATEGORÍA ══ */
+        .card-row { transition: border-color 0.3s, box-shadow 0.3s; }
+        .card-cat-orig        { border-left: 3px solid #00f2ff !important; background: rgba(0,242,255,0.07) !important; color: #00f2ff !important; }
+        .card-cat-anime       { border-left: 3px solid #ff00cc !important; background: rgba(255,0,204,0.07) !important; color: #ff99ee !important; }
+        .card-cat-videojuegos { border-left: 3px solid #bf00ff !important; background: rgba(191,0,255,0.07) !important; color: #cc88ff !important; }
+        .card-cat-movies      { border-left: 3px solid #ffaa00 !important; background: rgba(255,170,0,0.07) !important; color: #ffdd88 !important; }
+
+        /* ══ RIVAL A 9 PULSANTE ══ */
+        @keyframes danger-pulse {
+            0%,100% { box-shadow: 0 0 0 0 rgba(255,50,50,0.5); border-color: rgba(255,50,50,0.5); }
+            50%      { box-shadow: 0 0 12px 4px rgba(255,50,50,0.25); border-color: #ff3333; }
+        }
+        .rank-pill.danger { animation: danger-pulse 0.9s ease-in-out infinite; }
+
+        /* ══ FLASH DE PANTALLA AL REVELAR ══ */
+        #screen-flash {
+            position: fixed; inset: 0; z-index: 9998;
+            pointer-events: none; opacity: 0;
+            transition: opacity 0.08s ease-out;
+        }
+        #screen-flash.flash-on { opacity: 0.18; }
+
+        /* ══ JUGADOR ACTIVO BANNER ══ */
+        #active-player-bar {
+            display: none; width: 100%; text-align: center;
+            padding: 5px 10px; font-family: 'Montserrat'; font-size: 0.62em;
+            letter-spacing: 1px; color: #555; border-bottom: 1px solid #111;
+            background: rgba(255,255,255,0.02);
+        }
+        #active-player-bar strong { color: #888; }
+
         </style>
 </head>
 
 <body>
     <div class="bg-grid"></div>
+    <script>
+        // Desbloquear AudioContext en el primer gesto
+        document.addEventListener('touchstart', function() { if(typeof ensureAudioCtx==='function') ensureAudioCtx(); }, { once: true, passive: true });
+        document.addEventListener('click', function() { if(typeof ensureAudioCtx==='function') ensureAudioCtx(); }, { once: true });
+    </script>
     <div class="orb orb-1"></div>
     <div class="orb orb-2"></div>
     <div class="orb orb-3"></div>
@@ -1878,6 +1914,8 @@
                 <div class="sab-attacker" id="sab-attacker"></div>
                 <div class="sab-name" id="sab-name"></div>
             </div>
+            <div id="screen-flash"></div>
+            <div id="active-player-bar"></div>
             <div id="countdown-overlay">
                 <div id="countdown-svg-wrap">
                     <svg viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
@@ -2725,7 +2763,8 @@
 
         // ── SONIDO DE NOTIFICACIÓN IMPORTANTE ──
         function soundNotify(type) {
-            if (!audioCtx) { try { audioCtx = new (window.AudioContext||window.webkitAudioContext)(); } catch(e){ return; } }
+            ensureAudioCtx();
+            if (!audioCtx) return;
             var freqs = { bonus: [523,659,784], shared: [440,554,659,784], king: [392,494,587] };
             var seq = freqs[type] || freqs.bonus;
             seq.forEach(function(freq, i) {
@@ -2838,7 +2877,10 @@
                 var color = isMe ? 'var(--neon)' : isLeader ? 'var(--gold)' : 'var(--text-dim)';
                 var pct = Math.round((pl.score / 10) * 100);
                 var medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i+1)+'º';
-                return '<div class="rank-pill' + (isMe ? ' me' : '') + '" style="border-color:' + (isMe ? 'var(--neon)' : isLeader ? 'var(--gold)' : '#222') + ';min-width:70px;">' +
+                var isDanger = pl.score >= 9 && !isMe;
+                var borderCol = isDanger ? '#ff3333' : (isMe ? 'var(--neon)' : isLeader ? 'var(--gold)' : '#222');
+                var dangerCls = isDanger ? ' danger' : '';
+                return '<div class="rank-pill' + (isMe ? ' me' : '') + dangerCls + '" style="border-color:' + borderCol + ';min-width:70px;">' +
                     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">' +
                         '<span style="font-size:0.9em;">' + medal + '</span>' +
                         '<strong style="color:' + color + ';font-size:0.85em;">' + pl.score + '<span style="color:#333;font-weight:400;">/10</span></strong>' +
@@ -2859,6 +2901,16 @@
 
         // ── TAB BLINK ──
         var _tabBlinkInterval = null;
+        // AudioContext — se inicializa al primer toque para evitar bloqueo del navegador
+        var audioCtx = null;
+        function ensureAudioCtx() {
+            if (!audioCtx) {
+                try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
         var _origTitle = document.title;
         function startTabBlink() {
             if (_tabBlinkInterval) return;
@@ -3208,6 +3260,13 @@
                 showDangerAlert('🃏 ¡TURNO DEL FAROLERO! ' + data.name + ' se juega todo', false);
                 return;
             } else if (data.type === 'YEAR_FLASH') {
+                // Flash de pantalla antes del toast
+                var flashEl = document.getElementById('screen-flash');
+                if (flashEl) {
+                    flashEl.style.background = '#00ff88';
+                    flashEl.classList.add('flash-on');
+                    setTimeout(function(){ flashEl.classList.remove('flash-on'); }, 120);
+                }
                 showYearFlash(data.year, data.artist, data.player);
                 // Animar la última carta añadida al timeline
                 setTimeout(function() {
@@ -3244,6 +3303,13 @@
                 showDangerAlert('🔥 ¡HOMENAJE! ' + (data.name || '') + ' recibe +1🔵', false);
                 return;
             } else if (data.type === 'SABOTAGE_RECEIVED') {
+                // Flash rojo al ser saboteado
+                var _sf = document.getElementById('screen-flash');
+                if (_sf) {
+                    _sf.style.background = '#ff2244';
+                    _sf.classList.add('flash-on');
+                    setTimeout(function(){ _sf.classList.remove('flash-on'); }, 180);
+                }
                 showSabotageReceived(data.attacker, data.sabotage, data.icon);
                 return;
             } else if (data.type === 'SABOTAGE_BROADCAST') {
@@ -3362,7 +3428,9 @@
                         if (isSingle) tcHtml += '<div style="font-size:0.8em;color:var(--neon);text-align:center;font-family:Bungee;margin-bottom:5px;">↑ ANTES ↑</div>';
                         tcHtml += renderBetSlot(0, {}, null, true);
                         tc.forEach(function(yr, idx) {
-                            tcHtml += '<div class="card-row">' + yr + '</div>';
+                            var _ct = data.playerCardTypes && data.playerCardTypes[myId] && data.playerCardTypes[myId][yr];
+                            var _catCls = _ct ? ' card-cat-' + _ct : '';
+                            tcHtml += '<div class="card-row' + _catCls + '">' + yr + '</div>';
                             tcHtml += renderBetSlot(idx + 1, {}, null, true);
                         });
                         if (isSingle) tcHtml += '<div style="font-size:0.8em;color:var(--neon);text-align:center;font-family:Bungee;margin-top:5px;">↓ DESPUÉS ↓</div>';
@@ -3558,6 +3626,18 @@
                 }
                 // Mini ranking
                 updateMiniRanking(data.players, myId);
+
+                // Banner jugador activo (cuando NO es mi turno)
+                var activePl = data.players && data.players[data.activePlayerIdx];
+                var activeBar = document.getElementById('active-player-bar');
+                if (activeBar && data.gameStarted) {
+                    if (!isMyTurn && activePl) {
+                        activeBar.style.display = 'block';
+                        activeBar.innerHTML = '🎵 Turno de <strong>' + activePl.name + '</strong>';
+                    } else {
+                        activeBar.style.display = 'none';
+                    }
+                }
 
                 // Banner ES TU TURNO
                 var turnBanner = document.getElementById('my-turn-banner');
@@ -4017,6 +4097,8 @@
         }
 
         function interactuarSlot(idx, amIActive, isGuess, isTakenByOther) {
+            // Cancelar voz al colocar carta
+            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
             if (isTakenByOther) {
                 showCustomAlert("¡Este hueco ya lo ha pillado otro jugador!");
                 return;
