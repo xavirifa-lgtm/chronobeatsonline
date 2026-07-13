@@ -165,7 +165,7 @@
             100% { transform: translateY(-100%); opacity: 0; }
         }
 
-        /* ── CUENTA ATRÁS CIRCULAR ── */
+        /* ── CUENTA ATRÁS DE INICIO ── */
         #countdown-overlay {
             display: none;
             position: fixed;
@@ -176,42 +176,17 @@
             justify-content: center;
             flex-direction: column;
         }
-        #countdown-svg-wrap {
-            position: relative;
-            width: 160px;
-            height: 160px;
-        }
-        #countdown-svg-wrap svg {
-            position: absolute;
-            inset: 0;
-            transform: rotate(-90deg);
-        }
-        #cd-circle {
-            fill: none;
-            stroke: var(--neon);
-            stroke-width: 5;
-            stroke-linecap: round;
-            stroke-dasharray: 440;
-            stroke-dashoffset: 0;
-            filter: drop-shadow(0 0 8px var(--neon));
-            transition: stroke-dashoffset 0.9s linear, stroke 0.3s;
-        }
         #countdown-number {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             font-family: 'Bungee';
-            font-size: 4em;
+            font-size: 6em;
             color: var(--neon);
-            text-shadow: 0 0 30px var(--neon);
+            text-shadow: 0 0 40px var(--neon);
             animation: cd-pulse 0.85s ease-out;
         }
         @keyframes cd-pulse {
-            0%   { transform: scale(1.5); opacity: 0; }
-            60%  { transform: scale(1);   opacity: 1; }
-            100% { transform: scale(0.95); opacity: 1; }
+            0% { transform: scale(1.8); opacity: 0; }
+            60% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(0.9); opacity: 0.8; }
         }
 
         /* ── MINI RANKING ── */
@@ -292,6 +267,20 @@
         }
 
         /* ── REACCIONES RÁPIDAS ── */
+        .cat-req-btn {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid #222;
+            border-radius: 20px;
+            padding: 6px 12px;
+            font-size: 0.6em;
+            color: #666;
+            cursor: pointer;
+            font-family: Montserrat;
+            transition: 0.2s;
+        }
+        .cat-req-btn:active { transform: scale(0.94); }
+        .cat-req-btn:disabled { opacity: 0.25; cursor: not-allowed; }
+
         .quick-react-bar {
             display: none;
             flex-wrap: wrap;
@@ -300,20 +289,17 @@
             margin: 6px 0;
         }
         .qr-btn {
-            background: rgba(255,255,255,0.06);
-            border: 1px solid #333;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid #222;
             border-radius: 20px;
-            padding: 6px 12px;
-            font-size: 0.62em;
-            color: #999;
+            padding: 5px 10px;
+            font-size: 0.6em;
+            color: #666;
             cursor: pointer;
             font-family: 'Montserrat';
-            font-weight: 700;
             transition: all 0.2s;
-            letter-spacing: 0.3px;
         }
-        .qr-btn:hover { background: rgba(255,255,255,0.1); border-color: #555; color: #ccc; }
-        .qr-btn:active { background: rgba(0,242,255,0.1); border-color: var(--neon); color: var(--neon); transform: scale(0.96); }
+        .qr-btn:active { background: rgba(255,255,255,0.1); border-color: var(--neon); color: var(--neon); }
 
         /* ── TOAST REACCIÓN RÁPIDA ── */
         .qr-toast {
@@ -451,9 +437,10 @@
         #session-stats strong { color: #666; }
 
         /* ── DOBLE O NADA ── */
-        /* ── JERARQUÍA BOTONES PRE-PLAY ── */
-        .btn-preplay {
+        #btn-double-or-nothing {
             display: none;
+            background: linear-gradient(90deg, #ff6600, #ffaa00);
+            color: #000;
             border: none;
             font-family: 'Bungee';
             font-size: 0.85em;
@@ -462,15 +449,8 @@
             cursor: pointer;
             width: 100%;
             max-width: 340px;
-            margin: 4px 0;
+            margin: 6px 0;
             letter-spacing: 1px;
-            transition: transform 0.15s, box-shadow 0.15s;
-        }
-        .btn-preplay:active { transform: scale(0.97); }
-        #btn-double-or-nothing {
-            background: linear-gradient(90deg, #ff6600, #ffaa00);
-            color: #000;
-            box-shadow: 0 0 12px rgba(255,110,0,0.3);
         }
         #btn-double-or-nothing.active {
             box-shadow: 0 0 20px rgba(255,170,0,0.8);
@@ -478,29 +458,6 @@
         }
 
         /* ── RACHA DE ACIERTOS ── */
-        /* ── MI SCORE DESTACADO ── */
-        #my-score-display {
-            font-family: 'Bungee';
-            font-size: 1.1em;
-            color: var(--neon);
-            text-align: center;
-            letter-spacing: 2px;
-            padding: 4px 8px;
-            text-shadow: 0 0 18px rgba(0,242,255,0.8), 0 0 40px rgba(0,242,255,0.3);
-            background: rgba(0,242,255,0.04);
-            border: 1px solid rgba(0,242,255,0.15);
-            border-radius: 8px;
-            margin-bottom: 4px;
-        }
-        #my-score-display .score-num {
-            font-size: 1.8em;
-            line-height: 1;
-        }
-        #my-score-display .score-total {
-            color: var(--text-muted);
-            font-size: 0.7em;
-        }
-
         #streak-counter {
             display: none;
             font-family: 'Bungee';
@@ -565,23 +522,6 @@
             background: #333;
         }
         .vote-pip.done { background: var(--neon); box-shadow: 0 0 6px var(--neon); }
-
-        /* ── ANIMACIÓN CARTA NUEVA ── */
-        @keyframes card-appear {
-            0%   { transform: scale(0) rotate(-8deg); opacity: 0; }
-            60%  { transform: scale(1.12) rotate(2deg); opacity: 1; }
-            80%  { transform: scale(0.96) rotate(-1deg); }
-            100% { transform: scale(1) rotate(0); }
-        }
-        @keyframes card-glow {
-            0%   { box-shadow: 0 0 0 0 rgba(0,242,255,0.8); }
-            50%  { box-shadow: 0 0 24px 8px rgba(0,242,255,0.4); }
-            100% { box-shadow: 0 0 0 0 rgba(0,242,255,0); }
-        }
-        .card-row.new-card {
-            animation: card-appear 0.5s cubic-bezier(0.34,1.56,0.64,1) both,
-                       card-glow 1.2s ease 0.3s;
-        }
 
         /* ── EQUIPOS EN PLAYER ── */
         #my-team-badge {
@@ -852,7 +792,6 @@
 
         #game-screen {
             display: none;
-            transition: opacity 0.3s ease;
             flex: 1;
             min-height: 0;
             flex-direction: column;
@@ -1490,156 +1429,10 @@
                 transform: rotate(360deg);
             }
         }
-    
-        /* ══ 1. GRID ANIMADO ══ */
-        .bg-grid {
-            position: fixed; inset: 0; z-index: 0; pointer-events: none;
-            background-image:
-                linear-gradient(rgba(0,242,255,0.02) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0,242,255,0.02) 1px, transparent 1px);
-            background-size: 55px 55px;
-            animation: grid-drift 28s linear infinite;
-        }
-        @keyframes grid-drift {
-            from { transform: translate(0,0); }
-            to   { transform: translate(55px,55px); }
-        }
-        /* ══ 2. ORBS ══ */
-        .orb { position: fixed; border-radius: 50%; filter: blur(90px); opacity: 0.13; z-index: 0; pointer-events: none; }
-        .orb-1 { width: 360px; height: 360px; background: #00f2ff; top: -100px; left: -100px; }
-        .orb-2 { width: 300px; height: 300px; background: #ff00cc; bottom: -60px; right: -60px; }
-        .orb-3 { width: 200px; height: 200px; background: #bf00ff; top: 40%; left: 50%; }
-        /* ══ 3. SCANLINES ══ */
-        .scanlines {
-            position: fixed; inset: 0; z-index: 1; pointer-events: none;
-            background: repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.04) 3px,rgba(0,0,0,0.04) 4px);
-        }
-        /* ══ 7. SLOTS PULSANTES ══ */
-        @keyframes slot-pulse {
-            0%,100% { box-shadow: 0 0 0 0 rgba(0,242,255,0.4); border-color: rgba(0,242,255,0.35); }
-            50%      { box-shadow: 0 0 10px 3px rgba(0,242,255,0.2); border-color: #00f2ff; }
-        }
-        .slot-active-pulse { animation: slot-pulse 1.4s ease-in-out infinite; }
-        /* ══ 8. SABOTAJES HOVER GLOW ══ */
-        .sab-troll:not([disabled]):hover {
-            background: rgba(255,0,80,0.12) !important; border-color: #ff0055 !important;
-            box-shadow: 0 0 14px rgba(255,0,80,0.35) !important; transform: scale(1.03);
-        }
-        .sab-super:not([disabled]):hover {
-            background: rgba(0,100,255,0.12) !important; border-color: #0066ff !important;
-            box-shadow: 0 0 14px rgba(0,100,255,0.35) !important; transform: scale(1.03);
-        }
-        /* ══ 9. BANNER SLIDE ══ */
-        @keyframes banner-slide-in {
-            from { transform: translateY(-110%); opacity: 0; }
-            to   { transform: translateY(0); opacity: 1; }
-        }
-        .banner-animated { animation: banner-slide-in 0.4s cubic-bezier(0.34,1.56,0.64,1) both; }
-
-        
-        /* Sabotajes troll por defecto */
-        button[id^="btn-sabotage-mute"],button[id^="btn-sabotage-buzzer"],
-        button[id^="btn-sabotage-veto"],button[id^="btn-sabotage-panic"],
-        button[id^="btn-sabotage-fog"],button[id^="btn-sabotage-russian"] {
-            transition: background 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.15s;
-        }
-        button[id^="btn-sabotage-mute"]:not([disabled]):hover,
-        button[id^="btn-sabotage-buzzer"]:not([disabled]):hover,
-        button[id^="btn-sabotage-veto"]:not([disabled]):hover,
-        button[id^="btn-sabotage-panic"]:not([disabled]):hover,
-        button[id^="btn-sabotage-fog"]:not([disabled]):hover,
-        button[id^="btn-sabotage-russian"]:not([disabled]):hover {
-            background: rgba(255,0,80,0.12) !important;
-            border-color: #ff0055 !important;
-            box-shadow: 0 0 14px rgba(255,0,80,0.35) !important;
-            transform: scale(1.03);
-        }
-        button[id^="btn-sabotage-steal"],
-        button[id^="btn-sabotage-smart"],
-        button[id^="btn-sabotage-blackhole"],
-        button[id^="btn-sabotage-streak"] {
-            transition: background 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.15s;
-        }
-        button[id^="btn-sabotage-steal"]:not([disabled]):hover,
-        button[id^="btn-sabotage-smart"]:not([disabled]):hover,
-        button[id^="btn-sabotage-blackhole"]:not([disabled]):hover,
-        button[id^="btn-sabotage-streak"]:not([disabled]):hover {
-            background: rgba(0,100,255,0.12) !important;
-            border-color: #0066ff !important;
-            box-shadow: 0 0 14px rgba(0,100,255,0.35) !important;
-            transform: scale(1.03);
-        }
-
-        /* ── TOAST NOTIFICACIÓN IMPORTANTE ── */
-        @keyframes toast-pop {
-            0%   { transform: translateX(-50%) scale(0.7); opacity: 0; }
-            60%  { transform: translateX(-50%) scale(1.08); opacity: 1; }
-            100% { transform: translateX(-50%) scale(1); opacity: 1; }
-        }
-        .big-toast {
-            position: fixed;
-            top: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 9900;
-            background: rgba(2,8,16,0.95);
-            border-radius: 16px;
-            padding: 14px 24px;
-            text-align: center;
-            pointer-events: none;
-            animation: toast-pop 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
-            box-shadow: 0 0 30px rgba(0,0,0,0.5);
-            max-width: 90vw;
-        }
-        .big-toast .bt-icon  { font-size: 2em; display: block; }
-        .big-toast .bt-title { font-family: 'Bungee'; font-size: 0.9em; letter-spacing: 2px; display: block; margin-top: 4px; }
-        .big-toast .bt-desc  { font-family: 'Montserrat'; font-size: 0.65em; color: #888; display: block; margin-top: 3px; }
-
-        /* ══ CARTAS POR CATEGORÍA ══ */
-        .card-row { transition: border-color 0.3s, box-shadow 0.3s; }
-        .card-cat-orig        { border-left: 3px solid #00f2ff !important; background: rgba(0,242,255,0.07) !important; color: #00f2ff !important; }
-        .card-cat-anime       { border-left: 3px solid #ff00cc !important; background: rgba(255,0,204,0.07) !important; color: #ff99ee !important; }
-        .card-cat-videojuegos { border-left: 3px solid #bf00ff !important; background: rgba(191,0,255,0.07) !important; color: #cc88ff !important; }
-        .card-cat-movies      { border-left: 3px solid #ffaa00 !important; background: rgba(255,170,0,0.07) !important; color: #ffdd88 !important; }
-
-        /* ══ RIVAL A 9 PULSANTE ══ */
-        @keyframes danger-pulse {
-            0%,100% { box-shadow: 0 0 0 0 rgba(255,50,50,0.5); border-color: rgba(255,50,50,0.5); }
-            50%      { box-shadow: 0 0 12px 4px rgba(255,50,50,0.25); border-color: #ff3333; }
-        }
-        .rank-pill.danger { animation: danger-pulse 0.9s ease-in-out infinite; }
-
-        /* ══ FLASH DE PANTALLA AL REVELAR ══ */
-        #screen-flash {
-            position: fixed; inset: 0; z-index: 9998;
-            pointer-events: none; opacity: 0;
-            transition: opacity 0.08s ease-out;
-        }
-        #screen-flash.flash-on { opacity: 0.18; }
-
-        /* ══ JUGADOR ACTIVO BANNER ══ */
-        #active-player-bar {
-            display: none; width: 100%; text-align: center;
-            padding: 5px 10px; font-family: 'Montserrat'; font-size: 0.62em;
-            letter-spacing: 1px; color: #555; border-bottom: 1px solid #111;
-            background: rgba(255,255,255,0.02);
-        }
-        #active-player-bar strong { color: #888; }
-
-        </style>
+    </style>
 </head>
 
 <body>
-    <div class="bg-grid"></div>
-    <script>
-        // Desbloquear AudioContext en el primer gesto
-        document.addEventListener('touchstart', function() { if(typeof ensureAudioCtx==='function') ensureAudioCtx(); }, { once: true, passive: true });
-        document.addEventListener('click', function() { if(typeof ensureAudioCtx==='function') ensureAudioCtx(); }, { once: true });
-    </script>
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
-    <div class="orb orb-3"></div>
-    <div class="scanlines"></div>
     <!-- FAB REGLAMENTO -->
     <div id="fab-rules" onclick="toggleRules()"
         style="display:flex; position:fixed; top:80px; left:20px; width:50px; height:50px; background:#111; border:2px solid var(--neon); border-radius:50%; z-index:9000; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 0 10px rgba(0,242,255,0.5); font-size:1.5em; transition:0.3s; color:var(--neon); font-family:'Bungee';">
@@ -1669,89 +1462,130 @@
             <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">🕹️ MODOS DE JUEGO</h3>
             <ul style="padding-left:15px; margin-top:8px;">
                 <li style="margin-bottom:8px;"><strong style="color:var(--neon);">CLÁSICO:</strong> Primero en llegar a 10 cartas gana.</li>
-                <li style="margin-bottom:8px;"><strong style="color:var(--gold);">MODO REY:</strong> Al llegar a 10, los rivales eligen una canción y tienes que adivinar el año con ±2 de margen. Si aciertas, ganas. Si fallas, te quedas en 10 e intentas de nuevo en tu siguiente turno.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#ff4444;">SUPERVIVENCIA:</strong> Cada jugador tiene 3 vidas 💿. Cada fallo quita una vida. El último en pie gana.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#4488ff;">EQUIPOS:</strong> Rojo vs Azul asignados al azar. Todo el equipo vota el hueco; gana el más votado (empate → el más rápido). El equipo que llega a 10 cartas gana.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#888;">🏆 MODO COMPETITIVO:</strong> Sin sabotajes, sin fichas, sin especiales. Solo cronología pura. Se activa en el lobby.</li>
+                <li style="margin-bottom:8px;"><strong style="color:var(--gold);">MODO REY:</strong> Al llegar a 10, el turno pasa al siguiente jugador. Cuando vuelva a tocarte, tus rivales eligen una canción y tienes que adivinar el año con ±2 de margen. Si aciertas, ganas. Si fallas, <strong>te quedas en 10</strong> y en tu próximo turno vuelves a estar en modo rey — los rivales pueden seguir desafiándote hasta que aciertes. Puedes saltar el vídeo si el enlace no funciona (⏭️ VIDEO NO VÁLIDO) y se elegirá una carta nueva.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#ff4444;">SUPERVIVENCIA:</strong> Cada jugador tiene 3 vidas (💿). Cada fallo quita una vida. Al quedarte sin vidas quedas eliminado y <strong>dejas de tener turno</strong>. Se gana de dos formas: siendo el último en pie, o llegando a 10 cartas antes que nadie.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#4488ff;">EQUIPOS:</strong> Rojo vs Azul asignados al azar. Turno por equipo: suena una canción y <strong>todos los miembros del equipo votan</strong> un hueco. Gana el hueco con más votos. Si hay empate, gana el que se votó más rápido. El equipo que llega a 10 cartas gana.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#888;">🏆 MODO COMPETITIVO:</strong> Se combina con cualquier modo. Desaparecen <strong>todas</strong> las fichas, sabotajes, apuestas, comodines, mercado, duelos y especiales — las pestañas SABOTAJE y MERCADO ni siquiera aparecen. Solo cronología pura. Se activa en el lobby, antes de empezar.</li>
             </ul>
 
-            <!-- MECÁNICAS DE CARTA -->
-            <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">⚡ MECÁNICAS AUTOMÁTICAS</h3>
-            <ul style="padding-left:15px; margin-top:8px;">
-                <li style="margin-bottom:8px;"><strong style="color:var(--gold);">🔥 BONUS DE RACHA:</strong> 3 o más aciertos seguidos → cada carta extra vale <strong>2 puntos</strong>.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#ff4444;">⚔️ CAMINO DEL GUERRERO:</strong> 3 fallos seguidos → tu siguiente acierto vale automáticamente <strong>2 puntos</strong>.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#4488ff;">🔵 AUTO-RECARGA:</strong> Si llegas a 0 fichas durante 2 turnos seguidos, recibes 1 ficha automáticamente.</li>
-            </ul>
+            <!-- BONUS DE RACHA -->
+            <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">🔥 BONUS DE RACHA</h3>
+            <p>A partir del <strong>3.er acierto seguido</strong> (y en cada acierto posterior de la racha), te llevas <strong>1 carta extra</strong> además de la que ganas. Fallar rompe la racha. Un rival puede robártela con el sabotaje ROBAR RACHA (2🔵). El contador es visible en tu móvil y en la pantalla del host.</p>
 
-            <!-- OPCIONES ANTES DE PLAY -->
-            <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">🎯 ANTES DE PULSAR PLAY <span style="color:#444; font-size:0.7em;">(solo el jugador activo)</span></h3>
-            <ul style="padding-left:15px; margin-top:8px;">
-                <li style="margin-bottom:8px;"><strong style="color:#ffaa00;">🎲 DOBLE O NADA (3🔵):</strong> Acierto → +2 cartas. Fallo → pierdes 1 carta ya colocada.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#cc88ff;">🃏 FAROLEAR (4🔵):</strong> Declaras que conoces la canción antes de escucharla. Acierto → +3 cartas en total. Fallo → pierdes 2 cartas ya colocadas.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#88bbff;">🛡️ SEGURO DE FALLO (2🔵):</strong> Si fallas este turno, no sufres penalizaciones extra (ni jinx, ni vida, ni coste del Doble o Nada).</li>
-            </ul>
+            <!-- CAMINO DEL GUERRERO -->
+            <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">⚔️ EL CAMINO DEL GUERRERO</h3>
+            <p>Si fallas <strong>3 veces seguidas</strong>, la siguiente carta que aciertes vale <strong>2 puntos</strong> automáticamente. Sin coste, sin activación manual. Un empujón para remontar cuando la partida se pone cuesta arriba.</p>
 
-            <!-- APUESTAS -->
-            <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">🎰 APUESTAS <span style="color:#444; font-size:0.7em;">(cualquiera, mientras suena)</span></h3>
+            <!-- DOBLE O NADA -->
+            <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">🎲 DOBLE O NADA</h3>
+            <p>Cuando es tu turno, puedes activar <strong>Doble o Nada</strong> antes de colocar la carta:</p>
+            <ul style="padding-left:15px; margin-top:6px;">
+                <li style="margin-bottom:6px;">Si <strong>aciertas</strong> → ganas <strong>2 cartas</strong> en lugar de 1.</li>
+                <li style="margin-bottom:6px;">Si <strong>fallas</strong> → pierdes <strong>1 carta</strong> ya colocada.</li>
+            </ul>
+            <p style="font-size:0.85em; color:#888; margin-top:4px;">Solo se puede activar <strong>antes de pulsar PLAY</strong> (cuesta 4🔵).</p>
+
+            <!-- TURNO DEL FAROLERO -->
+            <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">🃏 TURNO DEL FAROLERO</h3>
+            <p>Antes de que empiece a sonar la canción, puedes declarar que la conoces pulsando <strong>FAROLEAR</strong>:</p>
+            <ul style="padding-left:15px; margin-top:6px;">
+                <li style="margin-bottom:6px;">Si <strong>aciertas</strong> el hueco → ganas <strong>3 cartas</strong> en total.</li>
+                <li style="margin-bottom:6px;">Si <strong>fallas</strong> → pierdes <strong>2 cartas</strong> ya colocadas.</li>
+            </ul>
+            <p style="font-size:0.85em; color:#888; margin-top:4px;">Cuesta <strong>4🔵</strong>. Solo disponible antes de pulsar PLAY.</p>
+
+            <!-- FICHAS Y APUESTAS -->
+            <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">🔵 FICHAS Y APUESTAS</h3>
             <ul style="padding-left:15px; margin-top:8px;">
-                <li style="margin-bottom:8px;"><strong style="color:var(--accent);">❌ NI DE COÑA (1🔵):</strong> Apuesta a que el activo falla. Si falla → te llevas su carta y +2🔵. Si acierta → pierdes la ficha.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#00ff88;">✅ CONMIGO (1🔵):</strong> Apuesta a que el activo acierta. Si acierta → +2🔵. Si falla → pierdes la ficha.</li>
-                <li style="margin-bottom:8px;"><strong style="color:var(--gold);">🏆 AUTO-GANAR (3🔵):</strong> Solo el jugador activo. Ganas la carta automáticamente sin escuchar.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#ff8888;">⚔️ DUELO (2🔵):</strong> Retas a otro jugador. Ambos intentáis adivinar el año. El que más se acerque (y más rápido en caso de empate) gana la carta.</li>
+                <li style="margin-bottom:8px;"><strong style="color:var(--accent);">¡NI DE COÑA! (1🔵):</strong> Apuesta a que el jugador activo falla. Si acierta el hueco real → te llevas la carta y +2🔵. Si él acierta → pierdes la ficha.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#00ff88;">¡CONMIGO! (1🔵):</strong> Apuesta a que el jugador activo acierta. Si acierta → ganas +2🔵. Si falla → pierdes la ficha.</li>
+                <li style="margin-bottom:8px;"><strong style="color:var(--gold);">AUTO-GANAR (3🔵):</strong> Si conoces el año exacto, gasta 3 fichas para colocarte la carta directamente.</li>
             </ul>
 
             <!-- MERCADO -->
-            <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">🏪 MERCADO <span style="color:#444; font-size:0.7em;">(cualquiera, en tu turno)</span></h3>
+            <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">🏪 MERCADO</h3>
             <ul style="padding-left:15px; margin-top:8px;">
-                <li style="margin-bottom:8px;"><strong style="color:#00ff88;">🛡️ ESCUDO (3🔵):</strong> Bloquea el próximo sabotaje que recibas. El atacante pierde su ficha.</li>
-                <li style="margin-bottom:8px;"><strong style="color:var(--gold);">🎵 PISTA ARTISTA (gratis · 3 usos):</strong> Revela el nombre del artista. Solo disponible para el jugador activo.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#aaaaff;">📅 PISTA DÉCADA (1🔵):</strong> Revela la década de la canción (ej: "años 90s").</li>
-                <li style="margin-bottom:8px;"><strong style="color:var(--gold);">🎯 ELEGIR CATEGORÍA (2🔵):</strong> La siguiente canción será de la categoría que elijas: Anime 🎌, Películas 🎬 o Videojuegos 🎮.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#00ff88;">ESCUDO (3🔵):</strong> Bloquea el próximo sabotaje que recibas, sea cual sea. El sabotaje rebota: no te afecta y el atacante <strong>pierde igualmente las fichas que le costaba</strong>. Se gasta al rebotar uno.</li>
+                <li style="margin-bottom:8px;"><strong style="color:var(--gold);">COMODÍN ARTISTA / CANCIÓN (1 🃏):</strong> Solo el jugador activo. Revela el artista o el título <strong>en la pantalla grande</strong> — lo ven todos, así que lo pagas y también ayudas a los rivales. Tienes 3 comodines por partida y <strong>no cuestan fichas</strong>.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#88bbff;">SEGURO DE FALLO (2🔵):</strong> Actívalo <strong>antes de pulsar PLAY</strong>. Si fallas, no se aplican penalizaciones extra: ni jinx, ni pérdida de vida en Supervivencia, ni el castigo del Doble o Nada. Solo cuenta como fallo normal.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#88bbff;">PISTA DÉCADA (1🔵):</strong> Solo el jugador activo. Te revela la década de la canción (ej. "Años 90"). Se puede usar las veces que quieras mientras te queden fichas.</li>
+                <li style="margin-bottom:8px;"><strong style="color:var(--gold);">ELEGIR CATEGORÍA (4🔵):</strong> Una vez por partida, fuerza que la siguiente canción sea de una categoría concreta: 🎵 Original, 🎬 Pelis &amp; TV, ⛩️ Anime o 🎮 Gamer. Solo se ofrecen las categorías que aún queden en el mazo.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#aaaaaa;">CAMBIAR CANCIÓN (1🔵):</strong> Solo el jugador activo, y solo una vez por turno. Descarta la canción actual y saca otra. No funciona si te han echado un VETO.</li>
             </ul>
 
             <!-- ESPECIALES -->
             <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">✨ ESPECIALES</h3>
             <ul style="padding-left:15px; margin-top:8px;">
-                <li style="margin-bottom:8px;"><strong style="color:var(--gold);">🎵 ¡TODOS JUEGAN!:</strong> Cada ciertos turnos, cualquiera puede ganar la carta. El primero que acierte se la lleva. Los no-activos pagan 1🔵.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#aaaaaa;">🗓️ FILTRO DE DÉCADAS:</strong> El host puede limitar las canciones a una época concreta antes de empezar.</li>
+                <li style="margin-bottom:8px;"><strong style="color:var(--gold);">🎵 ¡JUGAMOS TODOS!:</strong> Cae cada 4–7 turnos, al azar. Ese turno cualquier jugador puede llevarse la carta: el que acierte el hueco se la lleva (cuesta 1🔵 a los no-activos; el activo no paga). <strong>Al jugador al que le tocaba se le devuelve el turno después</strong>, así que no pierde su tirada.</li>
+                <li style="margin-bottom:8px;"><strong style="color:var(--gold);">⭐ CARTA BONIFICACIÓN:</strong> Cada 7–10 turnos, al azar, la canción vale <strong>2 cartas en vez de 1</strong>. El host lo avisa antes de empezar el turno.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#ffff00;">⚡ MODO RELÁMPAGO:</strong> El host puede activarlo mientras suena una canción: el activo pasa a tener solo <strong>5 segundos</strong> para colocar la carta.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#aaaaaa;">🗓️ FILTRO DE DÉCADAS:</strong> El host puede limitar las canciones a una época concreta (80s, 90s, 2000s…) antes de empezar la partida.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#4488ff;">🔵 AUTO-RECARGA:</strong> Si llegas a 0 fichas durante 2 turnos seguidos, recibes 1 ficha automáticamente. Para que nadie quede bloqueado para siempre.</li>
             </ul>
 
-            <!-- SABOTAJES TROLL -->
-            <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">😈 SABOTAJES TROLL <span style="color:#444; font-size:0.7em;">(contra el jugador activo)</span></h3>
+            <!-- SABOTAJES -->
+            <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">💀 SABOTAJES — BARATOS</h3>
+            <p style="color:#666; font-size:0.8em; margin:4px 0 8px;">Todos los sabotajes están disponibles desde el principio. Solo el <strong>Modo Competitivo</strong> los desactiva por completo. Si la víctima tiene ESCUDO, el sabotaje rebota y pierdes las fichas.</p>
             <ul style="padding-left:15px; margin-top:8px;">
-                <li style="margin-bottom:6px;"><strong style="color:#00bdff;">🔇 MUTEAR (1🔵):</strong> Silencia la canción 15 segundos.</li>
-                <li style="margin-bottom:6px;"><strong style="color:#00ff88;">🔔 ZUMBIDO (1🔵):</strong> Añade un ruido molesto sobre la música.</li>
-                <li style="margin-bottom:6px;"><strong style="color:#ff8800;">🚫 VETAR (1🔵):</strong> Fuerza al activo a cambiar su respuesta.</li>
-                <li style="margin-bottom:6px;"><strong style="color:#ff4444;">😱 PÁNICO (2🔵):</strong> El activo solo tiene 10 segundos para decidir.</li>
-                <li style="margin-bottom:6px;"><strong style="color:#aaaaaa;">🌫️ NIEBLA (2🔵):</strong> Oculta los años de su cronología ese turno.</li>
-                <li style="margin-bottom:6px;"><strong style="color:#ff00cc;">🎰 RULETA RUSA (2🔵):</strong> El activo gira la ruleta. Puede ganar o perder cartas/fichas al azar.</li>
-                <li style="margin-bottom:6px;"><strong style="color:#ffff88;">⏭️ SALTAR CANCIÓN (1🔵):</strong> Fuerza a cambiar la canción actual por otra.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#00bdff;">MUTEAR (1🔵):</strong> Quita el sonido 15 segundos.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#00ff88;">¡ZUMBIDO! (1🔵):</strong> Suena un ruido molesto para despistar.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#ff8800;">VETO (1🔵):</strong> El activo no puede cambiar de canción esta ronda.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#ff4444;">PÁNICO (2🔵):</strong> El activo solo tiene 10 segundos para decidir.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#aaaaaa;">NIEBLA (2🔵):</strong> Oculta los años de su cronología durante ese turno.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#ff00cc;">RULETA RUSA (2🔵):</strong> Botón del jugador activo. Haces girar la ruleta: puedes robar una carta a un rival, ganar fichas… o perderlas tú. Todo al azar.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#ffaa00;">ROBAR RACHA (2🔵):</strong> Le quitas la racha de aciertos al rival que la tenga más alta. Se queda a 0 y pierde el bonus.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#ff00ff;">FORZAR SALTO (3🔵):</strong> Descarta la canción que está sonando. Solo antes de que el activo coloque la carta.</li>
             </ul>
 
             <!-- SABOTAJES SUPERMAN -->
-            <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">💪 SABOTAJES SUPERMAN <span style="color:#444; font-size:0.7em;">(más destructivos)</span></h3>
+            <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">💀 SABOTAJES — CAROS</h3>
             <ul style="padding-left:15px; margin-top:8px;">
-                <li style="margin-bottom:6px;"><strong style="color:#ffff00;">💰 ROBAR FICHA (4🔵):</strong> Le quitas 1 ficha a un rival al azar.</li>
-                <li style="margin-bottom:6px;"><strong style="color:#ff00ff;">⏩ ROBAR TURNO (2🔵):</strong> Robas el turno al activo. ⚠️ La víctima tiene 5 segundos para <strong>RESISTIR</strong> gastando 2🔵.</li>
-                <li style="margin-bottom:6px;"><strong style="color:var(--gold);">🧠 ROBO INTELIGENTE (3🔵):</strong> Elige qué carta robarle al líder: la más antigua, la más reciente o la del extremo.</li>
-                <li style="margin-bottom:6px;"><strong style="color:#bf00ff;">⚫ AGUJERO NEGRO (3🔵):</strong> Destruye una carta aleatoria de la cronología de un rival.</li>
-                <li style="margin-bottom:6px;"><strong style="color:#ff8800;">⚡ ROBAR RACHA (2🔵):</strong> Roba la racha de×3 o más al jugador que más lleva.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#ffff00;">ROBAR FICHA (4🔵):</strong> Le quitas 1 ficha a un rival elegido al azar entre los que tengan fichas.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#ff00ff;">ROBAR TURNO (4🔵):</strong> Robas el turno al jugador activo. ⚠️ La víctima tiene <strong>5 segundos para RESISTIR</strong> gastando 2🔵 — si lo hace, el robo falla y recuperas tus fichas.</li>
+                <li style="margin-bottom:8px;"><strong style="color:var(--gold);">🃏 ROBO INTELIGENTE (4🔵):</strong> Elige qué carta robarle al líder: la más antigua, la más reciente o la más extrema.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#bf00ff;">AGUJERO NEGRO (5🔵):</strong> Destruye una carta aleatoria de la cronología de un rival.</li>
             </ul>
+
+            <!-- DUELO -->
+            <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">⚔️ DUELO (3🔵)</h3>
+            <p>Reta al jugador activo. Ambos escribís el año exacto de la canción. Gana el que más se acerque; si empatáis en distancia, gana el que respondió antes. El ganador se lleva la carta. Las 3🔵 se pagan al retar y no se devuelven.</p>
 
             <!-- EMOJIS -->
             <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">😂 EMOJIS</h3>
-            <p style="color:#888; font-size:0.9em; margin-bottom:8px;">Dos tipos: efectos colectivos (gratis) y comodines de un solo uso (1🔵).</p>
-            <p><strong style="color:var(--gold);">Colectivos (gratis):</strong> Si 3+ jugadores mandan el mismo emoji en &lt;5 segundos:</p>
+            <p style="color:#888; font-size:0.9em; margin-bottom:8px;">Los emojis tienen dos usos: efectos colectivos (gratis) y comodines de un solo uso (1🔵).</p>
+            <p><strong style="color:var(--gold);">Efectos colectivos (gratis):</strong> Si 3 o más jugadores mandan el mismo emoji en menos de 5 segundos:</p>
             <ul style="padding-left:15px; margin-top:6px;">
-                <li style="margin-bottom:6px;">3x😂 → <strong>DISTRACCIÓN</strong>: overlay de risas 3 segundos sobre la pantalla del activo.</li>
-                <li style="margin-bottom:6px;">3x🔥 (tras un acierto) → <strong>HOMENAJE</strong>: el activo gana +1🔵.</li>
-                <li style="margin-bottom:6px;">3x💀 → <strong>JINX</strong>: si el activo falla, pierde 2 cartas en lugar de 1.</li>
+                <li style="margin-bottom:6px;">3x😂 → <strong>DISTRACCIÓN</strong>: el jugador activo ve un overlay de risas 3 segundos.</li>
+                <li style="margin-bottom:6px;">3x🔥 (justo tras un acierto) → <strong>HOMENAJE</strong>: el activo gana +1🔵.</li>
+                <li style="margin-bottom:6px;">3x💀 → <strong>JINX</strong>: si el activo falla ese turno, pierde 2 cartas en lugar de 1.</li>
             </ul>
-            <p style="margin-top:10px;"><strong style="color:var(--gold);">Comodines (1🔵 · 1 uso por partida):</strong></p>
+            <p style="margin-top:10px;"><strong style="color:var(--gold);">Comodines (1🔵 · 1 uso por partida):</strong> Botones especiales en la interfaz:</p>
             <ul style="padding-left:15px; margin-top:6px;">
-                <li style="margin-bottom:6px;">🔥 → Tu próximo acierto vale <strong>2 cartas</strong>.</li>
-                <li style="margin-bottom:6px;">😂 → El activo no ve los años de su cronología durante <strong>5 segundos</strong>.</li>
-                <li style="margin-bottom:6px;">💀 → <strong>Maldición silenciosa</strong>: si el activo falla, ganas <strong>+2🔵</strong> (nadie lo sabe).</li>
+                <li style="margin-bottom:6px;">🔥 → Tu próximo acierto vale <strong>2 cartas</strong> en lugar de 1.</li>
+                <li style="margin-bottom:6px;">😂 → El jugador activo no puede ver los años de su cronología durante <strong>5 segundos</strong>.</li>
+                <li style="margin-bottom:6px;">💀 → <strong>Maldición silenciosa</strong>: si el activo falla, ganas <strong>+2🔵</strong>. Si acierta, solo pierdes la ficha que pagaste.</li>
+            </ul>
+            <p style="margin-top:10px;"><strong style="color:var(--gold);">Reacciones rápidas (gratis):</strong> Frases hechas para picar al de turno. No tienen efecto en el juego, solo aparecen en la pantalla de todos. Úsalas con maldad.</p>
+
+
+            <!-- VÍDEO ROTO -->
+            <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">🔗 VÍDEO QUE NO FUNCIONA</h3>
+            <p>Si el vídeo de YouTube no carga o está bloqueado, el jugador activo tiene el botón <strong>"VÍDEO NO VÁLIDO"</strong>. Descarta esa canción sin coste, la registra como enlace roto y pasa a la siguiente. En la fase del Rey aparece el mismo botón para pedir otra carta.</p>
+
+            <!-- LEYENDA DE ICONOS -->
+            <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">🔎 LEYENDA DE ICONOS</h3>
+            <ul style="padding-left:15px; margin-top:8px; font-size:0.92em;">
+                <li style="margin-bottom:5px;"><strong>🔵</strong> Ficha. Moneda del juego: paga sabotajes, apuestas, pistas y especiales. Máximo 10.</li>
+                <li style="margin-bottom:5px;"><strong>🃏</strong> Comodín de pista. Revela el artista. 3 por partida, no se compran.</li>
+                <li style="margin-bottom:5px;"><strong>👑</strong> Modo Rey / jugador que ya ha llegado a 10 cartas y tiene el desafío pendiente.</li>
+                <li style="margin-bottom:5px;"><strong>⭐</strong> Carta bonificación: este turno la canción vale doble.</li>
+                <li style="margin-bottom:5px;"><strong>⚡</strong> Modo relámpago (5s) o robo de turno en curso.</li>
+                <li style="margin-bottom:5px;"><strong>🔥</strong> Racha de aciertos activa. A partir de 3 seguidos, carta extra.</li>
+                <li style="margin-bottom:5px;"><strong>🛡️</strong> Escudo activo: el próximo sabotaje que te lancen rebotará.</li>
+                <li style="margin-bottom:5px;"><strong>💀</strong> Jinx o maldición: si fallas este turno, la penalización es doble.</li>
+                <li style="margin-bottom:5px;"><strong>🎯</strong> Categoría solicitada para la próxima canción.</li>
+                <li style="margin-bottom:5px;"><strong>💿</strong> Vidas (solo en Supervivencia). A 0 vidas quedas eliminado: dejas de tener turno.</li>
+                <li style="margin-bottom:5px;"><strong>🎵🎬⛩️🎮</strong> Categoría de la canción: Original · Pelis &amp; TV · Anime · Gamer.</li>
             </ul>
 
         </div>
@@ -1883,11 +1717,6 @@
         <div id="waiting-players-list" style="display:flex; flex-direction:column; gap:6px; align-items:center; max-height:200px; overflow-y:auto;"></div>
         <div style="font-size:0.6em; color:#333; font-family:'Montserrat';">La partida empezará cuando el host pulse INICIAR</div>
         <button id="btn-ready" onclick="sendReady()" style="background:linear-gradient(90deg,#003300,#006600);color:#00ff88;border:1px solid #00aa44;font-family:'Bungee';font-size:0.85em;padding:14px 28px;border-radius:12px;cursor:pointer;margin-top:10px;letter-spacing:1px;">✅ ESTOY LISTO</button>
-        <div id="prediction-section" style="display:none; margin-top:12px; text-align:center; width:100%; max-width:320px;">
-            <div style="font-family:'Bungee'; font-size:0.6em; color:#444; letter-spacing:2px; margin-bottom:8px;">🔮 ¿QUIÉN GANARÁ?</div>
-            <div id="prediction-buttons" style="display:flex; flex-wrap:wrap; gap:6px; justify-content:center;"></div>
-            <div id="prediction-done" style="display:none; font-family:'Montserrat'; font-size:0.65em; color:#555; margin-top:6px;">Predicción enviada ✓</div>
-        </div>
         <div id="session-stats"></div>
     </div>
 
@@ -1905,33 +1734,16 @@
             <div id="distraction-overlay">😂😂😂<br><span style="font-size:0.4em;font-family:'Bungee';color:#ff8800;margin-top:10px;">¡DISTRACCIÓN!</span></div>
             <div id="jinx-banner">💀 JINX activo — si fallas este turno, perderás 2 cartas</div>
             <div class="emoji-wildcard-bar" id="emoji-wildcard-bar">
-                <button class="emoji-wildcard-btn" id="ewc-fire" onclick="sendEmojiWildcard('🔥')" title="Tu próximo acierto vale 2 cartas">🔥<span class="cost">1🔵 · 1 uso</span></button>
-                <button class="emoji-wildcard-btn" id="ewc-laugh" onclick="sendEmojiWildcard('😂')" title="Oculta los años del jugador activo 5s">😂<span class="cost">1🔵 · 1 uso</span></button>
-                <button class="emoji-wildcard-btn" id="ewc-skull" onclick="sendEmojiWildcard('💀')" title="Si el activo falla, ganas 2🔵 (nadie lo sabe)">💀<span class="cost">1🔵 · 1 uso</span></button>
+                <button class="emoji-wildcard-btn" id="ewc-fire" onclick="sendEmojiWildcard('🔥')" title="Próximo acierto vale 2 cartas">🔥<span class="cost">1🔵 · 1 uso</span></button>
+                <button class="emoji-wildcard-btn" id="ewc-laugh" onclick="sendEmojiWildcard('😂')" title="Oculta la cronología del activo 5s">😂<span class="cost">1🔵 · 1 uso</span></button>
+                <button class="emoji-wildcard-btn" id="ewc-skull" onclick="sendEmojiWildcard('💀')" title="Si falla, ganas 2 fichas">💀<span class="cost">1🔵 · 1 uso</span></button>
             </div>
             <div id="sabotage-received-banner">
                 <span class="sab-icon" id="sab-icon"></span>
                 <div class="sab-attacker" id="sab-attacker"></div>
                 <div class="sab-name" id="sab-name"></div>
             </div>
-            <div id="screen-flash"></div>
-            <div id="active-player-bar"></div>
-            <div id="countdown-overlay">
-                <div id="countdown-svg-wrap">
-                    <svg viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
-                        <circle cx="80" cy="80" r="70" fill="none" stroke="#111" stroke-width="5"/>
-                        <circle id="cd-circle" cx="80" cy="80" r="70"/>
-                    </svg>
-                    <div id="countdown-number">3</div>
-                </div>
-            </div>
-            <div style="display:flex; align-items:center; justify-content:center; padding:6px 0 2px; width:100%; gap:6px; opacity:0.5;">
-                <span style="font-family:'Bungee'; font-size:0.65em; letter-spacing:3px; background:linear-gradient(90deg,#00f2ff,#ff00cc); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">CHRONOBEATS</span>
-                <span style="font-family:'Montserrat'; font-size:0.45em; letter-spacing:6px; color:#333;">ONLINE</span>
-            </div>
-            <div id="my-turn-banner" style="display:none; width:100%; text-align:center; padding:7px; background:linear-gradient(90deg,rgba(0,242,255,0.12),rgba(255,0,204,0.12)); border-bottom:1px solid rgba(0,242,255,0.2); font-family:'Bungee'; font-size:0.75em; letter-spacing:3px;">
-                🎵 ¡ES TU TURNO!
-            </div>
+            <div id="countdown-overlay"><div id="countdown-number">3</div></div>
             <div id="mini-ranking"></div>
             <div id="team-vote-banner"></div>
             <button id="resist-steal-btn" onclick="send('RESIST_STEAL')">
@@ -1942,18 +1754,21 @@
             <div id="turn-status">TURNO DE: <span id="cur-player">---</span></div>
             <div id="team-timeline"></div>
             <div id="shared-song-player-banner">🎵 ¡¡TODOS JUEGAN!! PRIMER SLOT CORRECTO GANA 🎵</div>
-            <div id="my-score-display"></div>
             <div id="streak-counter"></div>
-            <button id="btn-double-or-nothing" class="btn-preplay" onclick="activateDoubleOrNothing()">🎲 DOBLE O NADA</button>
-            <button id="btn-brag" class="btn-preplay" onclick="activateBrag()">🃏 FAROLEAR — +3 si acierto / −2 si fallo</button>
-            <button id="btn-fail-safe" class="btn-preplay" onclick="activateFailSafe()">🛡️ SEGURO DE FALLO (2🔵)</button>
+            <button id="btn-double-or-nothing" onclick="activateDoubleOrNothing()">🎲 DOBLE O NADA</button>
+            <button id="btn-brag" onclick="activateBrag()">🃏 FAROLEAR — +3 si acierto / −2 si fallo</button>
+            <button id="btn-fail-safe" onclick="activateFailSafe()">🛡️ SEGURO DE FALLO (2🔵)</button>
             <button id="btn-steal-streak" onclick="stealStreak()">🔥 ROBAR RACHA (2🔵)</button>
             <div id="turn-counter-display"></div>
             <div id="my-lives-bar" class="my-lives" style="display:none;"></div>
 
             <!-- BOTÓN CATEGORÍA -->
-            <div id="request-cat-bar" style="display:none; justify-content:center; margin:4px 0;">
-                <button onclick="requestCategory()" style="background:rgba(255,255,255,0.04);border:1px solid #222;border-radius:20px;padding:6px 14px;font-size:0.65em;color:#555;cursor:pointer;font-family:Montserrat;">🎯 Pedir categoría (4🔵)</button>
+            <div id="request-cat-bar" style="display:none; flex-wrap:wrap; justify-content:center; gap:4px; margin:4px 0;">
+                <span style="width:100%;text-align:center;font-size:0.55em;color:#555;font-family:Montserrat;letter-spacing:1px;">🎯 PEDIR CATEGORÍA (4🔵 · 1 uso)</span>
+                <button class="cat-req-btn" data-cat="orig"        onclick="requestCategory('orig')">🎵 Original</button>
+                <button class="cat-req-btn" data-cat="movies"      onclick="requestCategory('movies')">🎬 Pelis &amp; TV</button>
+                <button class="cat-req-btn" data-cat="anime"       onclick="requestCategory('anime')">⛩️ Anime</button>
+                <button class="cat-req-btn" data-cat="videojuegos" onclick="requestCategory('videojuegos')">🎮 Gamer</button>
             </div>
             <!-- REACCIONES RÁPIDAS -->
             <div class="quick-react-bar" id="quick-react-bar">
@@ -1976,7 +1791,7 @@
                 <button class="reaction-btn" onclick="sendReaction('🎯')">🎯</button>
             </div>
 
-            
+            <div id="cheat-indicator" style="display:none; position: fixed; top: 80px; left: 50%; transform: translateX(-50%); background: var(--accent); color: #fff; padding: 5px 15px; border-radius: 20px; font-family: 'Bungee'; font-size: 0.8em; z-index: 10000; box-shadow: 0 0 15px var(--accent);">TRUCOS OFF</div>
             
             <div class="chip-display" id="my-tokens-ui">MIS FICHAS: <span class="neon-chip"></span><span class="neon-chip"></span></div>
 
@@ -2049,6 +1864,7 @@
                 <button class="spec-btn" id="btn-autowin" onclick="send('AUTO_WIN')">COMPRAR CARTA (3 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
                 <button class="spec-btn btn-error-track" id="btn-error-track" onclick="send('SYSTEM_ERROR_TRACK')" style="display:none;">ERROR VIDEO</button>
                 <button class="spec-btn" id="btn-reload" onclick="send('RELOAD_SONG')">CAMBIAR CANCIÓN (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
+                <button class="spec-btn" id="btn-roulette" style="background:var(--bg); border-color:#ff00cc; color:#ff00cc;" onclick="send('SABOTAGE_RUSSIAN_ROULETTE')">🎰 RULETA RUSA (2 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
             </div>
             
             <!-- Rey (Global dentro de sabotaje por ahora o oculto) -->
@@ -2076,7 +1892,7 @@
                 <div id="sabotage-grid">
                     <button class="spec-btn" id="btn-sabotage-mute" style="background:var(--bg); border-color:#ff0055; color:#ff0055;" onclick="soundMute();send('SABOTAGE_MUTE')">MUTE 15s (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
                     <button class="spec-btn" id="btn-sabotage-buzzer" style="background:var(--bg); border-color:#00ff00; color:#00ff00;" onclick="send('SABOTAGE_BUZZER')">¡ZUMBIDO! (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
-                    <button class="spec-btn" id="btn-sabotage-duel" style="background:var(--bg); border:2px dashed var(--gold); color:var(--gold);" onclick="if(lastState && lastState.myTokens >= 3) { send('SABOTAGE_DUEL'); } else { showCustomAlert('Necesitas al menos 3 fichas para retar a duelo (1 de coste + 2 de garantía).'); }">🔫 DUELO 🔫 (1 <span class="neon-chip" style="width:10px;height:10px; background:var(--gold);"></span>)</button>
+                    <button class="spec-btn" id="btn-sabotage-duel" style="background:var(--bg); border:2px dashed var(--gold); color:var(--gold);" onclick="if(lastState && lastState.myTokens >= 3) { send('SABOTAGE_DUEL'); } else { showCustomAlert('Necesitas 3 fichas para retar a duelo.'); }">🔫 DUELO 🔫 (1 <span class="neon-chip" style="width:10px;height:10px; background:var(--gold);"></span>)</button>
                     <button class="spec-btn" id="btn-sabotage-veto" style="background:var(--bg); border-color:#ff8800; color:#ff8800;" onclick="send('SABOTAGE_VETO')">VETO CAMBIAR (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
                     <button class="spec-btn" id="btn-sabotage-skip" style="background:var(--bg); border-color:#ff00ff; color:#ff00ff;" onclick="soundSkip();send('SABOTAGE_FORCE_SKIP')">FORZAR SALTO (3 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
                     <button class="spec-btn" id="btn-sabotage-panic" style="background:var(--bg); border-color:#ff0000; color:#ff0000;" onclick="soundPanic();send('SABOTAGE_PANIC')">PÁNICO 10s (2 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
@@ -2103,11 +1919,11 @@
                 <span style="font-size:1.4em">🎸</span>
                 <span>JUEGO</span>
             </div>
-            <div class="tab-btn" onclick="switchTab('tab-sabotage', this)">
+            <div class="tab-btn" id="tab-btn-sabotage" onclick="switchTab('tab-sabotage', this)">
                 <span style="font-size:1.4em">💀</span>
                 <span>SABOTAJE</span>
             </div>
-            <div class="tab-btn" onclick="switchTab('tab-market', this)">
+            <div class="tab-btn" id="tab-btn-market" onclick="switchTab('tab-market', this)">
                 <span style="font-size:1.4em">💰</span>
                 <span>MERCADO</span>
             </div>
@@ -2444,7 +2260,8 @@
                     document.getElementById('login-screen').style.display = 'none';
                     document.getElementById('waiting-screen').style.display = 'flex';
                     document.getElementById('game-screen').style.display = 'none';
-                    });
+                    initCheatSystem();
+                });
 
                 conn.on('data', handle);
 
@@ -2474,7 +2291,14 @@
             const modeLabel = document.getElementById('card-mode-label');
             if (modeLabel) modeLabel.innerText = label;
             let metaTheme = document.querySelector('meta[name="theme-color"]');
+            if (metaTheme) metaTheme.setAttribute('content', color);
             
+            // Actualizar el indicador de trucos si es necesario
+            const indicator = document.getElementById('cheat-indicator');
+            if (indicator && indicator.style.display !== 'none') {
+                indicator.style.boxShadow = '0 0 15px ' + color;
+            }
+
             // Fondo dinámico por categoría
             document.body.classList.remove('theme-orig','theme-anime','theme-movies','theme-videojuegos');
             if (type && type !== 'mix') document.body.classList.add('theme-' + type);
@@ -2749,86 +2573,37 @@
         // ── READY CHECK ──
         var alreadySentReady = false;
         // ── CUENTA ATRÁS ──
-        function showBigToast(icon, title, desc, color, duration) {
-            var el = document.createElement('div');
-            el.className = 'big-toast';
-            el.style.border = '2px solid ' + (color || 'var(--neon)');
-            el.innerHTML = '<span class="bt-icon">' + icon + '</span>' +
-                '<span class="bt-title" style="color:' + (color || 'var(--neon)') + ';">' + title + '</span>' +
-                (desc ? '<span class="bt-desc">' + desc + '</span>' : '');
-            document.body.appendChild(el);
-            vibrate([100, 50, 100]);
-            setTimeout(function(){ el.remove(); }, duration || 3500);
-        }
-
-        // ── SONIDO DE NOTIFICACIÓN IMPORTANTE ──
-        function soundNotify(type) {
-            ensureAudioCtx();
-            if (!audioCtx) return;
-            var freqs = { bonus: [523,659,784], shared: [440,554,659,784], king: [392,494,587] };
-            var seq = freqs[type] || freqs.bonus;
-            seq.forEach(function(freq, i) {
-                var osc = audioCtx.createOscillator();
-                var gain = audioCtx.createGain();
-                osc.connect(gain); gain.connect(audioCtx.destination);
-                osc.frequency.value = freq;
-                osc.type = 'sine';
-                var t = audioCtx.currentTime + i * 0.12;
-                gain.gain.setValueAtTime(0.25, t);
-                gain.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
-                osc.start(t); osc.stop(t + 0.18);
-            });
-        }
-
         function showCountdown(n) {
             var overlay = document.getElementById('countdown-overlay');
-            var numEl   = document.getElementById('countdown-number');
-            var circle  = document.getElementById('cd-circle');
+            var numEl = document.getElementById('countdown-number');
             if (!overlay || !numEl) return;
             overlay.style.display = 'flex';
-            // Número
             numEl.style.animation = 'none';
+            numEl.textContent = n > 0 ? n : '¡YA!';
+            numEl.style.color = n > 0 ? 'var(--neon)' : 'var(--gold)';
+            // Forzar reflow para reiniciar animación
             void numEl.offsetWidth;
             numEl.style.animation = 'cd-pulse 0.85s ease-out';
-            if (n > 0) {
-                numEl.textContent = n;
-                numEl.style.color = 'var(--neon)';
-                if (circle) {
-                    circle.style.stroke = 'var(--neon)';
-                    // Arco: 440 = circunferencia completa; cada número ocupa 1/3
-                    var offset = 440 * (1 - n / 3);
-                    circle.style.strokeDashoffset = offset;
-                }
-            } else {
-                numEl.textContent = '¡YA!';
-                numEl.style.color = 'var(--gold)';
-                if (circle) { circle.style.stroke = 'var(--gold)'; circle.style.strokeDashoffset = 0; }
-                setTimeout(function() { overlay.style.display = 'none'; }, 900);
-            }
             vibrate(n > 0 ? 80 : 300);
+            if (n === 0) setTimeout(function() { overlay.style.display = 'none'; }, 900);
         }
 
         // ── SOLICITAR CATEGORÍA ──
-        function requestCategory() {
-            showCustomConfirm('🎯 Elige la categoría de la próxima canción (cuesta 4🔵, 1 uso por partida):<br><br>' +
-                '<button onclick="document.getElementById(\'cat-choice\').value=\'orig\'" style="margin:4px;padding:6px 10px;background:#222;color:#fff;border:1px solid #444;border-radius:6px;cursor:pointer;">🎌 Anime</button>' +
-                '<button onclick="document.getElementById(\'cat-choice\').value=\'peliculas\'" style="margin:4px;padding:6px 10px;background:#222;color:#fff;border:1px solid #444;border-radius:6px;cursor:pointer;">🎬 Películas</button>' +
-                '<button onclick="document.getElementById(\'cat-choice\').value=\'videojuegos\'" style="margin:4px;padding:6px 10px;background:#222;color:#fff;border:1px solid #444;border-radius:6px;cursor:pointer;">🎮 Videojuegos</button>' +
-                '<input type="hidden" id="cat-choice" value="">',
-                function(ok) {
-                    var choice = document.getElementById('cat-choice');
-                    if (ok && choice && choice.value) send('REQUEST_CATEGORY', choice.value);
-                }
-            );
-        }
-
-        var predictionSent = false;
-        function sendPrediction(name) {
-            if (predictionSent) return;
-            predictionSent = true;
-            send('PREDICT_WINNER', name);
-            document.getElementById('prediction-done').style.display = 'block';
-            document.querySelectorAll('.pred-btn').forEach(function(b) { b.disabled = true; b.style.opacity = b.innerText.includes(name) ? '1' : '0.3'; });
+        // Antes se metía HTML (<br>, <button>, <input>) dentro de showCustomConfirm, que
+        // pinta con innerText → salían las etiquetas literales en pantalla. Además la
+        // opción 'orig' estaba etiquetada como "Anime" y 'peliculas' no es un tipo real
+        // (el correcto es 'movies'), así que esa opción no hacía nada tras cobrar 4 fichas.
+        var NOMBRES_CAT = {
+            orig: '🎵 Original',
+            movies: '🎬 Pelis & TV',
+            anime: '⛩️ Anime',
+            videojuegos: '🎮 Gamer'
+        };
+        function requestCategory(cat) {
+            if (!NOMBRES_CAT[cat]) return;
+            showCustomConfirm('🎯 ¿Pedir que la próxima canción sea de ' + NOMBRES_CAT[cat] + '?\n\nCuesta 4🔵 y solo se puede usar una vez por partida.', function (ok) {
+                if (ok) send('REQUEST_CATEGORY', cat);
+            });
         }
 
         function sendReady() {
@@ -2870,26 +2645,11 @@
             var el = document.getElementById('mini-ranking');
             if (!el || !players) return;
             var sorted = players.slice().sort(function(a,b){ return b.score - a.score; });
-            var maxScore = Math.max(10, sorted[0] ? sorted[0].score : 1);
+            var maxScore = sorted[0] ? sorted[0].score : 1;
             el.innerHTML = sorted.map(function(pl, i) {
-                var isMe = pl.id === myId;
-                var isLeader = i === 0;
-                var color = isMe ? 'var(--neon)' : isLeader ? 'var(--gold)' : 'var(--text-dim)';
-                var pct = Math.round((pl.score / 10) * 100);
-                var medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i+1)+'º';
-                var isDanger = pl.score >= 9 && !isMe;
-                var borderCol = isDanger ? '#ff3333' : (isMe ? 'var(--neon)' : isLeader ? 'var(--gold)' : '#222');
-                var dangerCls = isDanger ? ' danger' : '';
-                return '<div class="rank-pill' + (isMe ? ' me' : '') + dangerCls + '" style="border-color:' + borderCol + ';min-width:70px;">' +
-                    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">' +
-                        '<span style="font-size:0.9em;">' + medal + '</span>' +
-                        '<strong style="color:' + color + ';font-size:0.85em;">' + pl.score + '<span style="color:#333;font-weight:400;">/10</span></strong>' +
-                    '</div>' +
-                    '<div style="font-size:0.75em;color:' + color + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:64px;margin-bottom:3px;">' + pl.name + '</div>' +
-                    '<div style="background:#111;border-radius:4px;height:3px;overflow:hidden;">' +
-                        '<div style="height:100%;width:' + pct + '%;background:' + color + ';border-radius:4px;transition:width 0.4s;"></div>' +
-                    '</div>' +
-                '</div>';
+                var cls = pl.id === myId ? 'me' : (i === 0 ? 'leader' : '');
+                var medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '';
+                return '<div class="rank-pill ' + cls + '">' + medal + '<span class="rname">' + pl.name + '</span><strong>' + pl.score + '</strong>🃏</div>';
             }).join('');
             el.style.display = 'flex';
         }
@@ -2901,16 +2661,6 @@
 
         // ── TAB BLINK ──
         var _tabBlinkInterval = null;
-        // AudioContext — se inicializa al primer toque para evitar bloqueo del navegador
-        var audioCtx = null;
-        function ensureAudioCtx() {
-            if (!audioCtx) {
-                try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
-            }
-            if (audioCtx && audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
-        }
         var _origTitle = document.title;
         function startTabBlink() {
             if (_tabBlinkInterval) return;
@@ -2935,27 +2685,13 @@
                         var name = key.replace('CB_Stats_', '').replace(/_/g,' ');
                         var s = JSON.parse(localStorage.getItem(key) || '{}');
                         var total = (s.correct||0)+(s.fails||0);
-                        entries.push({ name: name, games: s.games||0, pct: total>0?Math.round(s.correct/total*100):0, wins: s.wins||0 });
+                        entries.push({ name: name, games: s.games||0, pct: total>0?Math.round(s.correct/total*100):0, bestStreak: s.bestStreak||0 });
                     }
                 }
                 if (entries.length === 0) return;
-                // Ordenar por victorias
-                var byWins = entries.slice().sort(function(a,b){ return b.wins - a.wins; }).filter(function(e){ return e.wins > 0; });
-                var html = '';
-                if (byWins.length > 0) {
-                    html += '<div style="font-family:Bungee;font-size:0.75em;color:#444;letter-spacing:2px;margin-bottom:4px;">🏆 VICTORIAS</div>';
-                    byWins.slice(0,6).forEach(function(e,i) {
-                        var medal = i===0?'🥇':i===1?'🥈':i===2?'🥉':'  ';
-                        html += '<div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid #111;">';
-                        html += '<span>' + medal + ' <strong style="color:#666;">' + e.name + '</strong></span>';
-                        html += '<span style="color:#444;">' + e.wins + (e.wins===1?' victoria':' victorias') + '</span></div>';
-                    });
-                    html += '<div style="margin-top:6px;"></div>';
-                }
-                // Ordenar por % acierto
                 entries.sort(function(a,b){ return b.pct - a.pct; });
-                html += '<div style="font-family:Bungee;font-size:0.75em;color:#444;letter-spacing:2px;margin-bottom:4px;">🎯 ACIERTO</div>';
-                entries.slice(0,6).forEach(function(e,i) {
+                var html = '<div style="font-family:Bungee;font-size:0.8em;color:#444;letter-spacing:2px;margin-bottom:6px;">🏆 LEADERBOARD</div>';
+                entries.slice(0,8).forEach(function(e,i) {
                     var medal = i===0?'🥇':i===1?'🥈':i===2?'🥉':'  ';
                     html += '<div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid #111;">';
                     html += '<span>' + medal + ' <strong style="color:#666;">' + e.name + '</strong></span>';
@@ -2975,14 +2711,14 @@
 
         // \u2014 ESTAD\u00EDSTICAS ENTRE SESIONES \u2014
         function loadSessionStats(name) {
-            var key = 'CB_Stats_' + name.toLowerCase().replace(/ /g,'_');
+            var key = 'CB_Stats_' + String(name || 'anon').toLowerCase().replace(/ /g,'_');
             try {
                 var raw = localStorage.getItem(key);
                 return raw ? JSON.parse(raw) : { games: 0, correct: 0, fails: 0, bestStreak: 0 };
             } catch(e) { return { games: 0, correct: 0, fails: 0, bestStreak: 0 }; }
         }
         function saveSessionStats(name, data) {
-            var key = 'CB_Stats_' + name.toLowerCase().replace(/ /g,'_');
+            var key = 'CB_Stats_' + String(name || 'anon').toLowerCase().replace(/ /g,'_');
             try { localStorage.setItem(key, JSON.stringify(data)); } catch(e) {}
         }
         function showSessionStats() {
@@ -3011,14 +2747,8 @@
             if (navigator.vibrate) try { navigator.vibrate(pattern || 200); } catch(e) {}
         }
 
-                var emojiWildcardDesc = {
-            '🔥': '🔥 RACHA DE FUEGO — Tu próximo acierto vale 2 cartas en lugar de 1. Solo afecta al siguiente turno.',
-            '😂': '😂 CARA DE RISA — Oculta los años de la cronología del jugador activo durante 5 segundos.',
-            '💀': '💀 MALDICIÓN SILENCIOSA — Si el jugador activo falla este turno, tú ganas 2 fichas. Nadie sabe que la has activado.'
-        };
-        function sendEmojiWildcard(emoji) {
-            var desc = emojiWildcardDesc[emoji] || ('Comodín ' + emoji);
-            showCustomConfirm(desc + '<br><br><span style="color:#555;font-size:0.85em;">Cuesta 1🔵 · 1 uso por partida</span>', function(ok) {
+                function sendEmojiWildcard(emoji) {
+            showCustomConfirm('Activar comodín ' + emoji + ' (cuesta 1🔵, 1 uso por partida). ¿Continuar?', function(ok) {
                 if (ok) send('EMOJI_WILDCARD', emoji);
             });
         }
@@ -3173,14 +2903,17 @@
 
             let html = "";
 
-            // COMODÍN ARTISTA (1🔘)
-            html += `<button class="market-btn" ${(!isMyTurn || myTokens < 1) ? 'disabled' : ''} onclick="send('MARKET_WILDCARD', 'artist')">
-                        COMODÍN ARTISTA (1 <span class="neon-chip"></span>)
+            // COMODÍN ARTISTA / CANCIÓN — cuestan COMODÍN (🃏), no fichas.
+            // Antes el botón se deshabilitaba por falta de fichas (que no gasta) y
+            // seguía activo con 0 comodines (que sí gasta).
+            const myPlWc = state.players && state.players.find(pl => pl.id === myId);
+            const misComodines = myPlWc && myPlWc.wildcards !== undefined ? myPlWc.wildcards : 3;
+            html += `<button class="market-btn" ${(!isMyTurn || misComodines < 1) ? 'disabled' : ''} onclick="send('MARKET_WILDCARD', 'artist')">
+                        COMODÍN ARTISTA (1 🃏 · te quedan ${misComodines})
                      </button>`;
 
-            // COMODÍN CANCIÓN (1🔘)
-            html += `<button class="market-btn" ${(!isMyTurn || myTokens < 1) ? 'disabled' : ''} onclick="send('MARKET_WILDCARD', 'song')">
-                        COMODÍN CANCIÓN (1 <span class="neon-chip"></span>)
+            html += `<button class="market-btn" ${(!isMyTurn || misComodines < 1) ? 'disabled' : ''} onclick="send('MARKET_WILDCARD', 'song')">
+                        COMODÍN CANCIÓN (1 🃏 · te quedan ${misComodines})
                      </button>`;
 
             // PISTA DÉCADA (1🔘)
@@ -3220,14 +2953,16 @@
                 showCustomAlert('🔄 ¡REVANCHA! Nueva partida comenzando...');
                 // Resetear estado local del player
                 prevState = null;
-                myId = myId; // mantener ID
                 return;
             } else if (data.type === 'STEAL_INCOMING') {
                 showStealIncoming(data.thiefName, data.canResist);
                 return;
             } else if (data.type === 'LIGHTNING_MODE') {
                 showLightningMode();
+                return;
             } else if (data.type === 'DANGER_ALERT') {
+                showDangerAlert(data.msg, data.critical);
+                return;
             } else if (data.type === 'STREAK_BONUS') {
                 soundToken();
                 showDangerAlert('🔥 STREAK BONUS ×' + data.streak + ' — ' + data.name + ' +1 carta extra', false);
@@ -3247,37 +2982,12 @@
                 soundToken();
                 showDangerAlert('⚔️ ¡CAMINO DEL GUERRERO! ' + data.name + ' remonta con carta extra', false);
                 return;
-            } else if (data.type === 'BONUS_CARD_ACTIVE') {
-                showBigToast('⭐', '¡CARTA ESPECIAL!', 'Esta carta vale 2 puntos', 'var(--gold)', 4000);
-                soundNotify('bonus');
-                return;
-            } else if (data.type === 'TODOS_JUEGAN_ACTIVE') {
-                showBigToast('🎵', '¡TODOS JUEGAN!', 'El primero que acierte gana la carta', 'var(--neon)', 4000);
-                soundNotify('shared');
-                return;
             } else if (data.type === 'BRAG_ACTIVE') {
                 soundBet();
                 showDangerAlert('🃏 ¡TURNO DEL FAROLERO! ' + data.name + ' se juega todo', false);
                 return;
             } else if (data.type === 'YEAR_FLASH') {
-                // Flash de pantalla antes del toast
-                var flashEl = document.getElementById('screen-flash');
-                if (flashEl) {
-                    flashEl.style.background = '#00ff88';
-                    flashEl.classList.add('flash-on');
-                    setTimeout(function(){ flashEl.classList.remove('flash-on'); }, 120);
-                }
                 showYearFlash(data.year, data.artist, data.player);
-                // Animar la última carta añadida al timeline
-                setTimeout(function() {
-                    var cards = document.querySelectorAll('.card-row');
-                    if (cards.length > 0) {
-                        var last = cards[cards.length - 1];
-                        last.classList.remove('new-card');
-                        void last.offsetWidth;
-                        last.classList.add('new-card');
-                    }
-                }, 200);
                 return;
             } else if (data.type === 'QUICK_REACT') {
                 // Toast de reacción rápida
@@ -3303,26 +3013,24 @@
                 showDangerAlert('🔥 ¡HOMENAJE! ' + (data.name || '') + ' recibe +1🔵', false);
                 return;
             } else if (data.type === 'SABOTAGE_RECEIVED') {
-                // Flash rojo al ser saboteado
-                var _sf = document.getElementById('screen-flash');
-                if (_sf) {
-                    _sf.style.background = '#ff2244';
-                    _sf.classList.add('flash-on');
-                    setTimeout(function(){ _sf.classList.remove('flash-on'); }, 180);
-                }
                 showSabotageReceived(data.attacker, data.sabotage, data.icon);
                 return;
             } else if (data.type === 'SABOTAGE_BROADCAST') {
                 vibrate([50, 30, 50]);
                 showSabotageBroadcast(data.msg);
                 return;
-                showDangerAlert(data.msg, data.critical);
-                return;
             }
 
             // Retroalimentación de trucos para Xavi
-            if (data.type === 'STATE_UPDATE' && lastState && playerName.toLowerCase() === 'xavi') {
-                            }
+            if (data.type === 'STATE_UPDATE' && lastState && (playerName || '').toLowerCase() === 'xavi') {
+                if (data.cheatsEnabled !== lastState.cheatsEnabled) {
+                    const indicator = document.getElementById('cheat-indicator');
+                    indicator.innerText = data.cheatsEnabled ? "TRUCOS ON" : "TRUCOS OFF";
+                    indicator.style.background = data.cheatsEnabled ? "var(--neon)" : "var(--accent)";
+                    indicator.style.display = "block";
+                    setTimeout(() => { indicator.style.display = "none"; }, 2000);
+                }
+            }
 
             lastState = data;
             if (data.type === 'STATE_UPDATE') {
@@ -3339,27 +3047,6 @@
                                 (isReady ? '✅ ' : '⏳ ') + pl.name + '</div>';
                         }).join('');
                     }
-                    // Mostrar predicción cuando haya ≥2 jugadores
-                    var predSection = document.getElementById('prediction-section');
-                    var predBtns = document.getElementById('prediction-buttons');
-                    if (predSection && predBtns && data.players && data.players.length >= 2 && !predictionSent) {
-                        var otherPlayers = data.players.filter(function(pl){ return pl.id !== myId; });
-                        if (otherPlayers.length > 0 && predBtns.children.length === 0) {
-                            predBtns.innerHTML = '';
-                            otherPlayers.forEach(function(pl) {
-                                var btn = document.createElement('button');
-                                btn.className = 'pred-btn';
-                                btn.textContent = pl.name;
-                                btn.onclick = function(){ sendPrediction(pl.name); };
-                                btn.style.cssText = 'background:rgba(255,255,255,0.05);border:1px solid #333;border-radius:20px;padding:6px 12px;font-family:Montserrat;font-size:0.65em;color:#666;cursor:pointer;transition:all 0.2s;';
-                                btn.onmouseover = function(){ this.style.borderColor='var(--neon)'; this.style.color='var(--neon)'; };
-                                btn.onmouseout = function(){ this.style.borderColor='#333'; this.style.color='#666'; };
-                                predBtns.appendChild(btn);
-                            });
-                        }
-                        predSection.style.display = 'block';
-                    }
-
                     // Actualizar botón de listo y conteo
                     var myRp = data.readyPlayers || {};
                     var readyBtn = document.getElementById('btn-ready');
@@ -3428,9 +3115,7 @@
                         if (isSingle) tcHtml += '<div style="font-size:0.8em;color:var(--neon);text-align:center;font-family:Bungee;margin-bottom:5px;">↑ ANTES ↑</div>';
                         tcHtml += renderBetSlot(0, {}, null, true);
                         tc.forEach(function(yr, idx) {
-                            var _ct = data.playerCardTypes && data.playerCardTypes[myId] && data.playerCardTypes[myId][yr];
-                            var _catCls = _ct ? ' card-cat-' + _ct : '';
-                            tcHtml += '<div class="card-row' + _catCls + '">' + yr + '</div>';
+                            tcHtml += '<div class="card-row">' + yr + '</div>';
                             tcHtml += renderBetSlot(idx + 1, {}, null, true);
                         });
                         if (isSingle) tcHtml += '<div style="font-size:0.8em;color:var(--neon);text-align:center;font-family:Bungee;margin-top:5px;">↓ DESPUÉS ↓</div>';
@@ -3477,10 +3162,14 @@
                     if (teamTimeline) teamTimeline.style.display = 'none';
                 }
 
-                // LOGICA DEL MANDO HOST
+                // ── MANDO A DISTANCIA DE LA TABLET (📺) ──
+                // Antes solo aparecía en el móvil del jugador SIGUIENTE al de turno
+                // (data.judgeId === myId). Como mando a distancia eso no tiene sentido:
+                // lo necesita quien está lejos de la tablet, sea quien sea. Ahora lo tienen
+                // todos los jugadores, igual que cualquiera puede levantarse y tocar la tablet.
                 var fab = document.getElementById('fab-remote');
                 var rContainer = document.getElementById('remote-controls-container');
-                if (data.judgeId === 'ALL' || data.judgeId === myId) {
+                {
                     fab.style.display = 'flex';
                     fab.style.filter = 'none';
                     fab.style.opacity = '1';
@@ -3489,15 +3178,27 @@
                     fab.style.boxShadow = '0 0 15px var(--neon)';
 
                     // Render Contextual Buttons
-                    if (data.judgeId === 'ALL') {
-
-                        var mstr = "<h4 style='color:var(--neon); font-family:Bungee; font-size:1em; margin-bottom:5px;'>MODO:</h4>";
-                        mstr += "<div style='display:flex; gap:5px; margin-bottom: 20px;'>";
-                        mstr += "<button class='btn' style='padding:10px; font-size:0.8em; flex:1; " + (data.gameMode === 'normal' ? "background:var(--neon);color:#000;" : "background:#222;color:#888") + "' onclick=\"send('REMOTE_SET_GAME_MODE', 'normal')\">CLÁSICO</button>";
-                        mstr += "<button class='btn' style='padding:10px; font-size:0.8em; flex:1; " + (data.gameMode === 'rey' ? "background:var(--neon);color:#000;" : "background:#222;color:#888") + "' onclick=\"send('REMOTE_SET_GAME_MODE', 'rey')\">MODO REY</button>";
+                    // Antes la condición era (data.judgeId === 'ALL'), que también es cierta
+                    // durante DUEL y KING_GUESS_RESULT → el mando mostraba "INICIAR PARTIDA"
+                    // en plena partida y tapaba los botones del duelo.
+                    if (!data.gameStarted) {
+                        var mstr = "<h4 style='color:var(--neon); font-family:Bungee; font-size:1em; margin-bottom:5px; margin-top:0'>MODO:</h4>";
+                        mstr += "<div style='display:flex; gap:5px; margin-bottom:20px; flex-wrap:wrap;'>";
+                        var modos = [
+                            ['normal', 'CLÁSICO'],
+                            ['rey', 'MODO REY'],
+                            ['supervivencia', 'SUPERVIVENCIA'],
+                            ['equipos', 'EQUIPOS']
+                        ];
+                        modos.forEach(function (m) {
+                            var activo = (data.gameMode === m[0]);
+                            mstr += "<button class='btn' style='padding:10px; font-size:0.75em; flex:1 1 45%; " +
+                                (activo ? "background:var(--neon);color:#000;" : "background:#222;color:#888") +
+                                "' onclick=\"send('REMOTE_SET_GAME_MODE', '" + m[0] + "')\">" + m[1] + "</button>";
+                        });
                         mstr += "</div>";
 
-                        rContainer.innerHTML = jstr + mstr + `<button class="btn" style="background:#ff00ff; color:white; border-color:#ff00ff; padding:20px; font-size:1.2em;" onclick="send('REMOTE_START_GAME'); toggleRemote();">▶ INICIAR PARTIDA</button>`;
+                        rContainer.innerHTML = mstr + `<button class="btn" style="background:#ff00ff; color:white; border-color:#ff00ff; padding:20px; font-size:1.2em;" onclick="send('REMOTE_START_GAME'); toggleRemote();">▶ INICIAR PARTIDA</button>`;
                     } else if (data.turnPhase === 'DUEL' && !data.currentDuel) {
                         rContainer.innerHTML = `<button class="btn" style="background:var(--neon); color:#000; padding:20px; font-size:1.2em;" onclick="send('REMOTE_NEXT_TURN'); toggleRemote();">SIGUIENTE TURNO</button>`;
                     } else if (data.turnPhase === 'DUEL') {
@@ -3507,6 +3208,16 @@
                             rContainer.innerHTML = `<p style="color:#888;">Duelo en curso... Esperando resultados.</p>`;
                         }
                     } else if (data.turnPhase === 'KING_GUESS_RESULT') {
+                        // El Rey ya ha respondido. Solo queda aceptar el resultado que
+                        // ha calculado el host (el móvil no decide si acertó o no).
+                        rContainer.innerHTML = `<button class="btn" style="background:var(--gold); color:#000; padding:20px; font-size:1.1em;" onclick="send('REMOTE_KING_RESOLVE'); toggleRemote();">👑 ACEPTAR RESULTADO DEL REY</button>`;
+                    } else if (data.turnPhase === 'KING_SELECTION' || data.turnPhase === 'KING_GUESS') {
+                        rContainer.innerHTML = `<p style="color:#888;">Desafío del Rey en curso...<br>Se resuelve solo.</p>`;
+                    } else {
+                        // ── TURNO NORMAL ──
+                        // Esta rama NO EXISTÍA: los botones de validar estaban colgados de
+                        // 'KING_GUESS_RESULT', así que en un turno normal (el 95% de la
+                        // partida) el mando salía VACÍO o con los botones de la fase anterior.
                         if (!data.revealed) {
                             rContainer.innerHTML = `<button class="btn" style="background:var(--neon); color:#000; padding:20px; font-size:1.2em;" onclick="send('REMOTE_REVEAL'); toggleRemote();">👀 REVELAR CARTA</button>
                             <button class="btn" style="background:#555; color:white; border-color:#555; margin-top:20px;" onclick="send('REMOTE_SYSTEM_ERROR'); toggleRemote();">ERROR DE SISTEMA (REPETIR)</button>`;
@@ -3521,14 +3232,6 @@
                             `;
                         }
                     }
-                } else {
-                    fab.style.display = 'flex';
-                    fab.style.filter = 'grayscale(100%)';
-                    fab.style.opacity = '0.3';
-                    fab.style.pointerEvents = 'none';
-                    fab.style.borderColor = '#555';
-                    fab.style.boxShadow = 'none';
-                    document.getElementById('remote-overlay').style.display = 'none';
                 }
 
                 if (data.leader) {
@@ -3615,45 +3318,8 @@
                 // Slider de volumen: solo para el jugador activo
                 var volCtrl = document.getElementById('volume-ctrl');
                 if (volCtrl) volCtrl.style.display = (isMyTurn && data.gameStarted) ? 'flex' : 'none';
-                // Mi score destacado
-                var myScoreEl = document.getElementById('my-score-display');
-                if (myScoreEl && data.players) {
-                    var myPlScore = data.players.find(function(pl){ return pl.id === myId; });
-                    if (myPlScore) {
-                        myScoreEl.innerHTML = 'TÚ · <span class="score-num">' + myPlScore.score + '</span><span class="score-total">/10</span>';
-                        myScoreEl.style.display = data.gameStarted ? 'block' : 'none';
-                    }
-                }
                 // Mini ranking
                 updateMiniRanking(data.players, myId);
-
-                // Banner jugador activo (cuando NO es mi turno)
-                var activePl = data.players && data.players[data.activePlayerIdx];
-                var activeBar = document.getElementById('active-player-bar');
-                if (activeBar && data.gameStarted) {
-                    if (!isMyTurn && activePl) {
-                        activeBar.style.display = 'block';
-                        activeBar.innerHTML = '🎵 Turno de <strong>' + activePl.name + '</strong>';
-                    } else {
-                        activeBar.style.display = 'none';
-                    }
-                }
-
-                // Banner ES TU TURNO
-                var turnBanner = document.getElementById('my-turn-banner');
-                if (turnBanner) {
-                    var wasMyTurn = turnBanner.style.display === 'flex';
-                    if (isMyTurn && data.gameStarted && !data.isRevealed) {
-                        if (!wasMyTurn) {
-                            turnBanner.style.display = 'flex';
-                            turnBanner.classList.remove('banner-animated');
-                            void turnBanner.offsetWidth;
-                            turnBanner.classList.add('banner-animated');
-                        }
-                    } else {
-                        turnBanner.style.display = 'none';
-                    }
-                }
 
                 // Tab blink — si es mi turno y la pestaña está oculta
                 var isMyTurnNow = data.players && data.players.find(function(pl){return pl.id===myId;}) &&
@@ -3699,22 +3365,43 @@
                 if (qrBar) qrBar.style.display = (data.gameStarted && !data.competitiveMode) ? 'flex' : 'none';
                 // Botón categoría
                 var catBar = document.getElementById('request-cat-bar');
+                // Deshabilitar las categorías que ya no quedan en el mazo
+                if (catBar && data.availableCategories) {
+                    catBar.querySelectorAll('.cat-req-btn').forEach(function (b) {
+                        b.disabled = (data.availableCategories.indexOf(b.dataset.cat) === -1);
+                    });
+                }
                 if (catBar) {
                     var myPlCat = data.players && data.players.find(function(pl){ return pl.id === myId; });
                     catBar.style.display = (data.gameStarted && !data.competitiveMode && myPlCat && myPlCat.tokens >= 4 && !data.requestedCategory) ? 'flex' : 'none';
                 }
-                // Ocultar sabotajes y fichas en modo competitivo
-                var sabEl = document.getElementById('joputismo-container');
-                if (sabEl) sabEl.style.display = data.competitiveMode ? 'none' : 'block';
+                // ── MODO COMPETITIVO: sin sabotajes, sin fichas, sin mercado ──
+                // Antes: document.getElementById('joputismo-container') → ese ID NO EXISTE,
+                // así que el modo competitivo no ocultaba absolutamente nada en el móvil.
+                var isComp = !!data.competitiveMode;
+                ['tab-btn-sabotage', 'tab-btn-market'].forEach(function (tid) {
+                    var t = document.getElementById(tid);
+                    if (t) t.style.display = isComp ? 'none' : '';
+                });
+                var tokensUi = document.getElementById('my-tokens-ui');
+                if (tokensUi) tokensUi.style.display = isComp ? 'none' : '';
+                if (isComp) {
+                    // Si estábamos en una pestaña oculta, volver a JUEGO
+                    var sabTab = document.getElementById('tab-sabotage');
+                    var mktTab = document.getElementById('tab-market');
+                    if ((sabTab && sabTab.style.display !== 'none' && sabTab.style.display !== '') ||
+                        (mktTab && mktTab.style.display !== 'none' && mktTab.style.display !== '')) {
+                        var gt = document.querySelector('.tab-btn[onclick*="tab-game"]');
+                        if (gt) switchTab('tab-game', gt);
+                    }
+                }
                 var ewBr = document.getElementById('emoji-wildcard-bar');
-                if (ewBr && data.competitiveMode) ewBr.style.display = 'none';
+                if (ewBr && isComp) ewBr.style.display = 'none';
 
                 // Ready check — ocultar botón listo cuando empiece la partida
                 // Ocultar botón listo al empezar la partida
                 var readyBtn2 = document.getElementById('btn-ready');
                 if (readyBtn2 && data.gameStarted) readyBtn2.style.display = 'none';
-                var predSec2 = document.getElementById('prediction-section');
-                if (predSec2 && data.gameStarted) predSec2.style.display = 'none';
 
                 // Contador de turnos
                 var tcDisp = document.getElementById('turn-counter-display');
@@ -3727,10 +3414,11 @@
                         (turnsLeft !== '?' && turnsLeft <= 5 ? ' &nbsp;·&nbsp; ¡Todos Juegan! en <span>' + turnsLeft + '</span>' : '');
                 } else if (tcDisp) { tcDisp.style.display = 'none'; }
 
-                // Botón doble o nada: solo turno activo, canción sonando, no activado ya
                 // Barra comodines emoji
                 var ewBar = document.getElementById('emoji-wildcard-bar');
-                if (ewBar && data.gameStarted) {
+                // OJO: este bloque se ejecuta DESPUÉS del ocultado por modo competitivo,
+                // así que si no se comprueba aquí, la barra vuelve a aparecer.
+                if (ewBar && data.gameStarted && !data.competitiveMode) {
                     ewBar.style.display = 'flex';
                     var myPl2 = data.players && data.players.find(function(pl){ return pl.id === myId; });
                     var used = (myPl2 && myPl2.emojiWildcardUsed) || {};
@@ -3739,8 +3427,12 @@
                         var ids = ['ewc-fire','ewc-laugh','ewc-skull'];
                         var btn = document.getElementById(ids[i]);
                         if (btn) {
-                            btn.disabled = !canAff || !!used[emoji];
+                            // 😂 y 💀 actúan sobre el jugador ACTIVO: en tu propio turno
+                            // te sabotearías a ti mismo (y 💀 te pagaba +2🔵 por fallar).
+                            var contraMi = isMyTurn && (emoji === '😂' || emoji === '💀');
+                            btn.disabled = !canAff || !!used[emoji] || contraMi;
                             btn.title = used[emoji] ? 'Ya usaste este comodín' :
+                                contraMi ? 'No puedes usarlo en tu propio turno' :
                                 emoji === '🔥' ? 'Tu próximo acierto vale 2 cartas (1🔵)' :
                                 emoji === '😂' ? 'Oculta la cronología del activo 5s (1🔵)' :
                                 'Si el activo falla, ganas 2🔵 (1🔵)';
@@ -3778,7 +3470,7 @@
                     } else {
                         donBtn.className = '';
                         donBtn.disabled = false;
-                        donBtn.innerText = '🎲 DOBLE O NADA (3🔵)';
+                        donBtn.innerText = '🎲 DOBLE O NADA (4🔵)';
                     }
                 }
                 // Banner ¡Todos Juegan!
@@ -3808,9 +3500,14 @@
                     if (betBtnsHide) betBtnsHide.style.display = 'none';
                     if (sabotageStatusMsg) sabotageStatusMsg.style.display = 'block';
                     
-                    document.getElementById('btn-autowin').style.display = (!data.isPlaying) ? 'block' : 'none';
+                    document.getElementById('btn-autowin').style.display = (!data.isPlaying && !data.competitiveMode) ? 'block' : 'none';
                     document.getElementById('btn-error-track').style.display = (data.isPlaying) ? 'block' : 'none';
-                    document.getElementById('btn-reload').style.display = (data.isPlaying && data.canReload) ? 'block' : 'none';
+                    document.getElementById('btn-reload').style.display = (data.isPlaying && data.canReload && !data.competitiveMode) ? 'block' : 'none';
+                    var btnRoul = document.getElementById('btn-roulette');
+                    if (btnRoul) {
+                        btnRoul.style.display = (!data.revealed && !data.competitiveMode) ? 'block' : 'none';
+                        btnRoul.disabled = (data.myTokens < 2);
+                    }
                 } else {
                     specialCtrl.style.display = 'none';
                     var isSabotageVisible = (!isMyTurn && data.isPlaying && (!data.turnPhase || data.turnPhase === 'NORMAL') && !data.revealed);
@@ -3830,19 +3527,27 @@
                         if (bbf) { bbf.innerHTML = '¡CONMIGO! (1 <span class="neon-chip" style="width:10px;height:10px;background:#00ff88;"></span>)'; bbf.disabled=false; bbf.style.opacity='1'; }
                     }
 
-                    let disp1 = 'flex';
-                    if (document.getElementById('btn-sabotage-buzzer')) { document.getElementById('btn-sabotage-buzzer').style.display = disp1; document.getElementById('btn-sabotage-buzzer').disabled = (data.myTokens < 1); }
-                    if (document.getElementById('btn-sabotage-veto')) { document.getElementById('btn-sabotage-veto').style.display = disp1; document.getElementById('btn-sabotage-veto').disabled = (data.myTokens < 1); }
-                    if (document.getElementById('btn-sabotage-panic')) { document.getElementById('btn-sabotage-panic').style.display = disp1; document.getElementById('btn-sabotage-panic').disabled = (data.myTokens < 2); }
-                    if (document.getElementById('btn-sabotage-fog')) { document.getElementById('btn-sabotage-fog').style.display = disp1; document.getElementById('btn-sabotage-fog').disabled = (data.myTokens < 2); }
+                    // ── SABOTAJES: todos disponibles siempre ──
+                    // Antes estaban condicionados al "nivel de joputismo" (jLevel >= 1 / >= 2),
+                    // que por defecto valía 0 → solo se veía MUTEAR. El único interruptor
+                    // que oculta sabotajes ahora es el Modo Competitivo (lo hace el contenedor).
+                    var sabotageCosts = {
+                        'btn-sabotage-buzzer': 1,
+                        'btn-sabotage-veto': 1,
+                        'btn-sabotage-panic': 2,
+                        'btn-sabotage-fog': 2,
+                        'btn-sabotage-skip': 3,
+                        'btn-sabotage-steal-token': 4,
+                        'btn-sabotage-steal-turn': 4,
+                        'btn-sabotage-blackhole': 5
+                    };
+                    Object.keys(sabotageCosts).forEach(function (bid) {
+                        var b = document.getElementById(bid);
+                        if (!b) return;
+                        b.style.display = 'flex';
+                        b.disabled = (data.myTokens < sabotageCosts[bid]);
+                    });
 
-                    let disp2 = 'flex';
-                    if (document.getElementById('btn-sabotage-skip')) { document.getElementById('btn-sabotage-skip').style.display = disp2; document.getElementById('btn-sabotage-skip').disabled = (data.myTokens < 3); }
-                    if (document.getElementById('btn-sabotage-panic')) { document.getElementById('btn-sabotage-panic').style.display = disp2; document.getElementById('btn-sabotage-panic').disabled = (data.myTokens < 2); }
-                    if (document.getElementById('btn-sabotage-fog')) { document.getElementById('btn-sabotage-fog').style.display = disp2; document.getElementById('btn-sabotage-fog').disabled = (data.myTokens < 2); }
-                    if (document.getElementById('btn-sabotage-steal-token')) { document.getElementById('btn-sabotage-steal-token').style.display = disp2; document.getElementById('btn-sabotage-steal-token').disabled = (data.myTokens < 4); }
-                    if (document.getElementById('btn-sabotage-steal-turn')) { document.getElementById('btn-sabotage-steal-turn').style.display = disp2; document.getElementById('btn-sabotage-steal-turn').disabled = (data.myTokens < 2); }
-                    if (document.getElementById('btn-sabotage-blackhole')) { document.getElementById('btn-sabotage-blackhole').style.display = disp2; document.getElementById('btn-sabotage-blackhole').disabled = (data.myTokens < 3); }
                     if (document.getElementById('btn-smart-steal')) {
                         // Solo visible si hay rivales con cartas y no es tu turno
                         var hasTargets = data.players && data.players.some(function(pl) { return pl.id !== myId && pl.cards && pl.cards.length > 0; });
@@ -4015,7 +3720,7 @@
                     if (btnStealToken) btnStealToken.disabled = (data.myTokens < 4 || isActionLocked);
 
                     var btnStealTurn = document.getElementById('btn-sabotage-steal-turn');
-                    if (btnStealTurn) btnStealTurn.disabled = (data.myTokens < 2 || isActionLocked);
+                    if (btnStealTurn) btnStealTurn.disabled = (data.myTokens < 4 || isActionLocked);
 
                     // Panic Overlay Check
                     var isMyTurn = (data.activePlayer && data.activePlayer.id === myId);
@@ -4076,8 +3781,6 @@
             if (isGuess) cls += " active-guess";
             if (occupants.length > 0) cls += " occupied";
             if (imIn) cls += " my-bet";
-            // Pulsar si es mi turno y el slot está libre
-            if (amIActive && occupants.length === 0 && !isGuess) cls += " slot-active-pulse";
 
             // Bloqueo: si el hueco está pillado por el activo (y no soy yo) o por otro desafiante
             var blockedForMe = false;
@@ -4097,8 +3800,6 @@
         }
 
         function interactuarSlot(idx, amIActive, isGuess, isTakenByOther) {
-            // Cancelar voz al colocar carta
-            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
             if (isTakenByOther) {
                 showCustomAlert("¡Este hueco ya lo ha pillado otro jugador!");
                 return;
@@ -4143,7 +3844,67 @@
             }
         }
 
-        
+        // CHEAT SYSTEM
+        function initCheatSystem() {
+            var auth = ['xavi', 'mimi', 'sonia'];
+            var pName = (playerName || '').toLowerCase();
+            if (!auth.includes(pName)) return;
+
+            console.log("Cheat System Initialized for", pName);
+
+            // Mechanic 1: Peek at the card (Hold)
+            var card = document.getElementById('card');
+
+            function isMyTurn() {
+                return lastState && lastState.activePlayer && lastState.activePlayer.id === myId;
+            }
+
+            function startPeek(e) {
+                // Peek allowed if cheats are enabled, it's not our turn (or king mode), and we have track data
+                if (lastState && lastState.cheatsEnabled !== false && (!isMyTurn() || (lastState.turnPhase && lastState.turnPhase !== 'NORMAL')) && lastState.currentTrack) {
+                    if (e && e.preventDefault) e.preventDefault(); // Prevent text selection
+                    document.getElementById('card').classList.add('flipped');
+                    document.getElementById('c-artist').innerText = lastState.currentTrack.artist || "";
+                    document.getElementById('c-song').innerText = lastState.currentTrack.song || "";
+                    document.getElementById('c-year').innerText = lastState.currentTrack.year || "";
+                }
+            }
+
+            function stopPeek(e) {
+                if (lastState && !lastState.revealed && !lastState.turnPhase?.includes('GUESS_RESULT')) {
+                    document.getElementById('card').classList.remove('flipped');
+                }
+            }
+
+            // Touch events for mobile, mouse events for desktop
+            card.addEventListener('touchstart', startPeek, { passive: false });
+            card.addEventListener('touchend', stopPeek);
+            card.addEventListener('touchcancel', stopPeek);
+            card.addEventListener('mousedown', startPeek);
+            card.addEventListener('mouseup', stopPeek);
+            card.addEventListener('mouseleave', stopPeek);
+
+            // Mechanic 2: Toggle Master Cheat (Xavi Only via Timeline tap)
+            if (pName === 'xavi') {
+                var container = document.getElementById('my-cards-list');
+                // Use event delegation for tapping the first timeline year
+                container.addEventListener('click', function (e) {
+                    var targetRow = e.target.closest('.card-row');
+                    // Si ha pulsado el texto de un año en la cronología rival
+                    if (targetRow) {
+                        var rows = container.querySelectorAll('.card-row');
+                        // Verificamos que sea la primera carta (index 0) y que no sea el turno de xavi
+                        if (rows.length > 0 && targetRow === rows[0] && !isMyTurn) {
+                            console.log("Xavi toggling master cheat via timeline tap");
+                            targetRow.style.color = (lastState && lastState.cheatsEnabled) ? 'red' : 'green';
+                            setTimeout(() => { targetRow.style.color = '#888'; }, 500);
+                            send('TOGGLE_CHEAT');
+                        }
+                    }
+                });
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
             var msgs = {
                 'btn-sabotage-buzzer': '¡Zumbido enviado al DJ!',
@@ -4151,7 +3912,7 @@
                 'btn-sabotage-panic': '¡Ataque de Pánico enviado!',
                 'btn-sabotage-fog': '¡Niebla Temporal enviada!',
                 'btn-sabotage-steal-token': '¡Has robado una ficha (al azar)!',
-                'btn-sabotage-steal-turn': '¡Has robado el turno!',
+                'btn-sabotage-steal-turn': '⚡ Intentando robar el turno... (puede resistirse con 2 🔵)',
                 'btn-sabotage-blackhole': '¡Agujero Negro lanzado!'
             };
             for (var id in msgs) {

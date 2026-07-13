@@ -1,5 +1,5 @@
-// ── ChronoBeats Online — Service Worker v3 ──
-const CACHE_NAME = 'chronobeats-v35';
+// ── ChronoBeats Online — Service Worker v14 ──
+const CACHE_NAME = 'chronobeats-v14';
 
 // Recursos propios a pre-cachear en la instalación (pequeños, sin riesgo)
 const PRECACHE_URLS = [
@@ -111,10 +111,7 @@ self.addEventListener('fetch', event => {
         return;
     }
 
-    // Recursos propios (HTML, imágenes, etc.) → network-first con fallback a caché
-    // Así siempre se sirve la versión más reciente si hay red
-    // Para navegaciones HTML: no redirigir a index.html si falla — dejar que falle limpio
-    const isNavigation = event.request.mode === 'navigate';
+    // Recursos propios (HTML, imágenes, .txt, etc.) → network-first con fallback a caché
     event.respondWith(
         fetch(event.request)
             .then(response => {
@@ -128,9 +125,14 @@ self.addEventListener('fetch', event => {
             .catch(() =>
                 caches.match(event.request).then(cached => {
                     if (cached) return cached;
-                    // Solo fallback a index.html si NO es una navegación a otro HTML
-                    if (!isNavigation) return caches.match('./index.html');
-                    return null; // navegación HTML fallida: no redirigir
+                    // BUG ANTERIOR: se devolvía './index.html' para CUALQUIER petición fallida.
+                    // Eso significa que si fallaba lista_final.txt, el juego recibía el HTML
+                    // del menú como si fuera la lista de canciones → mazo vacío o corrupto.
+                    // El fallback a index.html solo tiene sentido para navegaciones.
+                    if (event.request.mode === 'navigate') {
+                        return caches.match('./index.html');
+                    }
+                    return Response.error();
                 })
             )
     );

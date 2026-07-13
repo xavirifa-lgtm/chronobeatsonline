@@ -624,14 +624,10 @@
             line-height: 1.3;
             font-family: 'Montserrat', sans-serif;
         }
-        .event-entry { border-left: 2px solid transparent; padding-left: 6px; margin-bottom: 2px; transition: background 0.2s; }
-        .event-entry:hover { background: rgba(255,255,255,0.02); }
         .event-entry .ev-name { color: var(--neon); font-weight: bold; }
         .event-entry .ev-good { color: #00ff88; }
-        .event-entry .ev-bad  { color: #ff5555; }
+        .event-entry .ev-bad  { color: #ff4444; }
         .event-entry .ev-info { color: var(--gold); }
-        .event-entry .ev-sab  { color: #ff44aa; }
-        .event-entry .ev-mec  { color: #88aaff; }
 
         /* Pantalla Ganador */
         #winner-screen {
@@ -668,7 +664,7 @@
         .award-icon { font-size: 2em; margin-bottom: 4px; }
         .award-title {
             font-family: 'Bungee';
-            font-size: 0.6em;
+            font-size: 0.55em;
             color: var(--gold);
             letter-spacing: 1px;
             margin-bottom: 4px;
@@ -680,9 +676,8 @@
         }
         .award-sub {
             font-size: 0.6em;
-            color: #777;
-            margin-top: 3px;
-            line-height: 1.4;
+            color: #666;
+            margin-top: 2px;
         }
 
         #winner-stats {
@@ -852,124 +847,36 @@
         .animate-flash {
             animation: gunshot-flash 0.4s ease-out forwards;
         }
-    
-        /* ══ GRID + ORBS + SCANLINES ══ */
-        .bg-grid {
-            position: fixed; inset: 0; z-index: 0; pointer-events: none;
-            background-image:
-                linear-gradient(rgba(0,242,255,0.015) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0,242,255,0.015) 1px, transparent 1px);
-            background-size: 55px 55px;
-            animation: grid-drift 30s linear infinite;
-        }
-        @keyframes grid-drift { from { transform:translate(0,0); } to { transform:translate(55px,55px); } }
-        .orb { position:fixed; border-radius:50%; filter:blur(100px); opacity:0.1; z-index:0; pointer-events:none; }
-        .orb-1 { width:500px; height:500px; background:#00f2ff; top:-150px; left:-150px; }
-        .orb-2 { width:400px; height:400px; background:#ff00cc; bottom:-100px; right:-100px; }
-        .orb-3 { width:280px; height:280px; background:#bf00ff; top:35%; left:55%; }
-        .scanlines {
-            position:fixed; inset:0; z-index:1; pointer-events:none;
-            background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.04) 3px,rgba(0,0,0,0.04) 4px);
-        }
-        /* ══ GLOW EN CONTENEDORES CLAVE ══ */
-        #ui-card-box {
-            border: 1px solid rgba(0,242,255,0.2) !important;
-            box-shadow: 0 0 20px rgba(0,242,255,0.06), inset 0 0 20px rgba(0,0,0,0.2) !important;
-        }
-        #host-instructions {
-            text-shadow: 0 0 10px rgba(0,242,255,0.4);
-        }
-        /* ══ GRADIENTE EN TÍTULOS PRINCIPALES HOST ══ */
-        .host-gradient-title {
-            background: linear-gradient(90deg,#00f2ff,#ff00cc);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        /* ══ RANKING CARDS CON BRILLO ══ */
-        .rank-card {
-            border: 1px solid rgba(255,255,255,0.06) !important;
-            box-shadow: 0 0 8px rgba(0,0,0,0.4) !important;
-            background: rgba(255,255,255,0.03) !important;
-        }
-
-
-        /* ── PANEL STATS EN VIVO ── */
-        #live-stats-toggle {
-            position: fixed; bottom: 20px; right: 20px; z-index: 9000;
-            background: var(--bg); border: 1px solid #333; color: #555;
-            font-family: 'Bungee'; font-size: 0.55em; letter-spacing: 2px;
-            padding: 8px 12px; border-radius: 20px; cursor: pointer;
-            transition: border-color 0.2s, color 0.2s;
-        }
-        #live-stats-toggle:hover { border-color: var(--neon); color: var(--neon); }
-        #live-stats-panel {
-            display: none; position: fixed; bottom: 60px; right: 20px; z-index: 8999;
-            background: rgba(2,8,16,0.95); border: 1px solid #1a1a1a;
-            border-radius: 12px; padding: 14px; min-width: 200px; max-width: 260px;
-            font-family: 'Montserrat'; font-size: 0.65em; color: #555;
-            box-shadow: 0 0 20px rgba(0,0,0,0.6);
-        }
-        .ls-row { display:flex; justify-content:space-between; align-items:center; padding:4px 0; border-bottom:1px solid #0d0d0d; }
-        .ls-label { color: #333; font-size:0.85em; }
-        .ls-val { color: var(--neon); font-family:'Bungee'; font-size:0.9em; }
     </style>
 </head>
 
 <body>
-    <div class="bg-grid"></div>
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
-    <div class="orb orb-3"></div>
-    <div class="scanlines"></div>
     <a href="index.html" class="btn-hub" title="Volver al Hub">H</a>
     <div id="flash-overlay"></div>
-    <div id="winner-screen" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(2,8,16,0.97); z-index:1000; flex-direction:row; align-items:stretch; overflow:hidden;">
-        <!-- Columna izquierda: foto + nombre + stats -->
-        <div id="winner-left" style="width:260px; min-width:220px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:28px 16px; border-right:1px solid #1a1a1a; background:rgba(0,242,255,0.02); flex-shrink:0;">
-            <div style="font-family:'Bungee'; font-size:0.65em; color:var(--gold); letter-spacing:4px; margin-bottom:14px;">🏆 GANADOR</div>
-            <div id="winner-avatar-img" style="margin-bottom:14px;"></div>
-            <h2 id="winner-name" style="font-family:'Bungee'; font-size:1.4em; color:var(--neon); text-align:center; text-shadow:0 0 20px var(--neon); margin-bottom:10px; word-break:break-word;">---</h2>
-            <div id="winner-stats" style="width:100%; font-size:0.8em; text-align:center;"></div>
-            <div style="display:flex; flex-direction:column; gap:8px; width:100%; margin-top:20px;">
-                <button class="btn-start" onclick="rematch()" style="background:linear-gradient(90deg,var(--neon),var(--pink)); font-size:0.72em; padding:10px;">🔄 REVANCHA</button>
-                <button class="btn-start" onclick="location.reload()" style="background:#1a1a1a; color:#555; box-shadow:none; font-size:0.72em; padding:10px;">🏠 MENÚ</button>
-            </div>
-        </div>
-        <!-- Columna derecha: medallas y contenido scrollable -->
-        <div id="winner-right" style="flex:1; overflow-y:auto; padding:20px 16px; display:flex; flex-direction:column; align-items:center; gap:8px;">
-            <div id="winner-ranking" style="width:100%; max-width:800px;"></div>
-            <div id="winner-replay" style="display:none; width:100%; max-width:700px;"></div>
-            <div id="winner-history" style="display:none; width:100%; max-width:700px;"></div>
+    <div id="winner-screen">
+        <h1 style="font-size:2.5em; margin-bottom:5px;">🏆 ¡GANADOR!</h1>
+        <div id="winner-avatar-img" style="margin: 15px 0;"></div>
+        <h2 id="winner-name" style="font-size:2.5em; margin-bottom:5px;">---</h2>
+        <div id="winner-stats" style="margin:15px 0; width:100%; max-width:600px;"></div>
+        <div id="winner-ranking" style="margin:10px 0; width:100%; max-width:600px; display:flex; flex-wrap:wrap; gap:10px; justify-content:center;"></div>
+        <div id="winner-replay" style="display:none; width:100%; max-width:600px; margin:12px 0;"></div>
+        <div id="winner-history" style="display:none; width:100%; max-width:700px; margin:12px 0;"></div>
+        <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin-top:20px;">
+            <button class="btn-start" onclick="rematch()" style="background:linear-gradient(90deg,var(--neon),var(--pink));">🔄 REVANCHA</button>
+            <button class="btn-start" onclick="location.reload()" style="background:#333; color:#fff; box-shadow:none;">🏠 MENÚ PRINCIPAL</button>
         </div>
     </div>
     <div class="logo">CHRONOBEATS</div>
-    <button id="live-stats-toggle" style="display:none;" onclick="toggleLiveStats()">📊 STATS</button>
-    <div id="live-stats-panel">
-        <div style="font-family:'Bungee';font-size:0.7em;color:#444;letter-spacing:2px;margin-bottom:8px;">📊 STATS EN VIVO</div>
-        <div class="ls-row"><span class="ls-label">Turno</span><span class="ls-val" id="ls-turn">—</span></div>
-        <div class="ls-row"><span class="ls-label">Racha más larga</span><span class="ls-val" id="ls-streak">—</span></div>
-        <div class="ls-row"><span class="ls-label">Reacción más rápida</span><span class="ls-val" id="ls-reaction">—</span></div>
-        <div class="ls-row"><span class="ls-label">Más saboteado</span><span class="ls-val" id="ls-sabbed">—</span></div>
-        <div class="ls-row"><span class="ls-label">Más saboteador</span><span class="ls-val" id="ls-saber">—</span></div>
-        <div class="ls-row" style="border:none;"><span class="ls-label">Canciones jugadas</span><span class="ls-val" id="ls-songs">—</span></div>
-    </div>
     <div id="live-room-code"
-        style="display:none; position:fixed; top:20px; right:20px; background:var(--bg); border:1px solid var(--neon); color:var(--neon); padding:10px 14px; border-radius:12px; font-family:'Bungee'; font-size:1.2em; z-index:10000; box-shadow:0 0 12px rgba(0,242,255,0.3); cursor:pointer; user-select:none;"
-        onclick="toggleLiveQR()" title="Pulsa para ver el QR">
-        <span id="live-code-text">CODE</span>
-        <div id="live-qr-mini" style="display:none; margin-top:8px; text-align:center;">
-            <div id="live-qr-canvas" style="background:#fff; padding:4px; border-radius:6px; display:inline-block;"></div>
-            <div style="font-size:0.45em; color:#555; margin-top:4px; letter-spacing:1px;">ESCANEAR PARA UNIRSE</div>
-        </div>
-    </div>
+        style="display:none; position:fixed; top:20px; right:20px; background:var(--bg); border:1px solid var(--neon); color:var(--neon); padding:8px 15px; border-radius:10px; font-family:'Bungee'; font-size:1.2em; z-index:10000; box-shadow:0 0 10px rgba(0,242,255,0.3);">
+        CODE</div>
     <div id="lobby">
         <div class="room-code" id="join-code">------</div>
         <button onclick="resetRoomCode()" style="font-family:'Bungee'; font-size:0.55em; color:#444; background:transparent; border:1px solid #333; border-radius:6px; padding:4px 10px; cursor:pointer; margin-top:-8px; margin-bottom:8px;">↺ Nueva sala</button>
         <div id="qr-container" style="margin: 10px auto 20px; display:flex; flex-direction:column; align-items:center; gap:8px;">
             <div id="qr-code" style="background:#fff; padding:12px; border-radius:12px; display:inline-block;"></div>
             <div style="font-family:'Bungee'; font-size:0.55em; color:#666; letter-spacing:2px;">ESCANEA PARA UNIRTE</div>
-            
+            <a id="player-link" href="#" style="display:none; font-family:'Bungee'; font-size:0.55em; color:var(--neon); text-decoration:none; border:1px solid var(--neon); padding:6px 12px; border-radius:8px;" onclick="copyPlayerLink(event)">🔗 Copiar enlace jugador</a>
         </div>
         <div class="player-list" id="lobby-players" style="margin-bottom: 20px;"></div>
 
@@ -991,7 +898,7 @@
             <label style="font-family:'Bungee'; color:var(--gold); font-size:0.7em; display:block; margin-bottom:8px; letter-spacing:2px;">🗓️ FILTRO DE DÉCADAS</label>
             <select id="decade-filter-select"
                 style="padding:10px; font-family:'Montserrat'; font-size:1em; border-radius:8px; background:#222; color:var(--gold); border:1px solid var(--gold); width:100%;"
-                onchange="decadeFilter=this.value; updateSongCounter();">
+                onchange="applyDecadeFilter(this.value);">
                 <option value="all">TODAS LAS ÉPOCAS</option>
                 <option value="pre80s">ANTES DE LOS 80s (→1979)</option>
                 <option value="80s">LOS 80s (1980-1989)</option>
@@ -1003,20 +910,25 @@
                 <option value="90s2000s">90s Y 2000s (1990-2009)</option>
             </select>
             <div id="song-counter" style="font-family:'Montserrat'; font-size:0.65em; color:#444; text-align:center; margin-top:6px;"></div>
-            <div style="margin-top:10px; display:flex; align-items:center; gap:8px; padding:8px; background:rgba(255,255,255,0.02); border:1px solid #1a1a1a; border-radius:8px;">
-                <input type="checkbox" id="competitive-mode-check" style="width:16px;height:16px;accent-color:var(--neon);cursor:pointer;">
-                <label for="competitive-mode-check" style="font-family:'Montserrat';font-size:0.7em;color:#555;cursor:pointer;user-select:none;">🏆 Modo Competitivo <span style="color:#333;">(sin sabotajes · sin fichas · solo cronología)</span></label>
+            <button onclick="resetPlayedSongs()" id="btn-reset-deck"
+                style="margin-top:8px; width:100%; padding:9px; font-family:'Bungee'; font-size:0.6em; letter-spacing:1px; border-radius:8px; cursor:pointer; background:transparent; color:var(--gold); border:1px solid var(--gold);">
+                🔄 REBARAJAR MAZO (recupera las canciones ya jugadas)
+            </button>
+            <div style="margin-top:10px; display:flex; align-items:center; gap:8px;">
+                <input type="checkbox" id="competitive-mode-check" style="width:16px;height:16px;accent-color:var(--neon);">
+                <label for="competitive-mode-check" style="font-family:'Montserrat';font-size:0.7em;color:#666;cursor:pointer;">🏆 Modo Competitivo (sin sabotajes, sin fichas, solo cronología)</label>
             </div>
-            
         </div>
 
-        
+        <!-- Selector de NIVEL DE JOPUTISMO eliminado: todos los sabotajes están activos
+             por defecto. El único interruptor es el check de Modo Competitivo. -->
 
         <div id="lobby-ready-status" style="font-family:'Montserrat'; font-size:0.7em; color:#444; text-align:center; margin-top:8px; min-height:1.2em;"></div>
         <button class="btn-start" onclick="checkReadyAndStart()" style="display:none; margin-top: 8px;" id="start-btn">▶ EMPEZAR PARTIDA</button>
     </div>
 
-
+    <!-- AUDIO JOPUTISMO YOUTUBE -->
+    <div id="joputismo-audio-player" style="display:none;"></div>
     <div id="audio-player-container" style="display:none;"></div>
 
     <div id="dashboard">
@@ -1035,11 +947,12 @@
             </div>
             <div style="text-align:center; margin-bottom:10px;">
                 <p style="font-size: 0.7em; color: #888;">TURNO DE:</p>
+                <div id="ui-game-mode-badge" style="display:none; font-family:'Bungee'; font-size:0.55em; letter-spacing:2px; color:var(--gold); border:1px solid var(--gold); border-radius:20px; padding:3px 12px; margin:0 auto 6px; width:fit-content;"></div>
                 <div class="active-player-name" id="ui-current-player">---</div>
                 <div id="active-player-mini-stats" style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-top:6px; font-size:0.6em; color:#666;"></div>
             </div>
 
-            
+            <!-- Selector de joputismo en partida eliminado -->
             <div id="leaderboard-list"></div>
 
             <div id="event-log">
@@ -1171,6 +1084,10 @@
         var isDoubleOrNothing = false;
         var replayLog = [];
         var nextSharedSongTurn = 4 + Math.floor(Math.random() * 4); // ¡Todos Juegan! aleatorio (4-7)
+        var sharedSongOwnerId = null; // dueño del turno "¡JUGAMOS TODOS!" — repetirá turno después
+        var currentJudgeId = 'ALL';   // informativo para el móvil
+        var kingLastResult = false;   // ¿el rey acertó? (para aceptar el resultado en remoto)
+        var ultimoInformeListas = { malas: [], duplicadas: 0 };  // salud de los .txt
         var nextBonusTurn = 7 + Math.floor(Math.random() * 4);      // carta bonificación (7-10)
         var isBonusCard = false;   // este turno la carta vale 2 puntos
         var voiceEnabled = false;
@@ -1179,8 +1096,6 @@
         var reactionStartTime = 0;      // cuándo empezó a sonar la canción
         var tokenStarvationTurns = {};  // {playerId: N} — turnos consecutivos sin fichas
         var readyPlayers = {};      // {playerId: true} — ready check
-        var playerCardTypes = {};   // {playerId: {year: type}} — tipo de canción por carta
-        var predictions = {};       // {playerId: nombrePredicho} — predicciones
         var failSafeActive = false;
         var isBragging = false;     // turno del farolero activo // seguro de fallo activo este turno
         var songHistory = [];       // historial de canciones jugadas
@@ -1288,6 +1203,7 @@
         }
         var turnPhase = 'NORMAL'; // 'NORMAL', 'KING_SELECTION', 'KING_GUESS', 'KING_GUESS_RESULT'
         var kingOptions = []; // Array de opciones para los retadores
+        var cheatsEnabled = true;
         var gameStarted = false;
 
         // Seguimiento de tiempo para skips manuales
@@ -1300,6 +1216,7 @@
         var panicTimer = 0;
         var panicActive = false;
         var panicInterval = null;
+        var joputismoLevel = 0; // 0: LOSER, 1: HE-MAN, 2: SUPERMAN
         var isFogActive = false;
         var hasShield = {}; // playerId -> boolean
 
@@ -1312,33 +1229,55 @@
 
         // Generar QR con el código de sala
         var qrGenerated = false;
+        function copyPlayerLink(e) {
+            e.preventDefault();
+            var link = document.getElementById('player-link');
+            if (link && navigator.clipboard) {
+                navigator.clipboard.writeText(link.href).then(function() {
+                    var old = link.innerText;
+                    link.innerText = '✅ ¡Copiado!';
+                    setTimeout(function() { link.innerText = old; }, 2000);
+                });
+            } else if (link) {
+                // Fallback para iOS Safari
+                var ta = document.createElement('textarea');
+                ta.value = link.href;
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+                var old = link.innerText;
+                link.innerText = '✅ ¡Copiado!';
+                setTimeout(function() { link.innerText = old; }, 2000);
+            }
+        }
 
         function generateQR() {
             if (qrGenerated) return;
             var qrEl = document.getElementById('qr-code');
-            var baseUrl = window.location.href.replace('host_digital_mix.html', 'player_digital_mix.html').split('?')[0];
-            var playerUrl = baseUrl + '?sala=' + roomCode;
             if (qrEl && typeof QRCode !== 'undefined') {
                 qrEl.innerHTML = '';
-                new QRCode(qrEl, { text: playerUrl, width: 160, height: 160,
-                    colorDark: '#000000', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
+                // Generar URL directa al player con el código ya incluido
+                var baseUrl = window.location.href.replace('host_digital_mix.html', 'player_digital_mix.html');
+                baseUrl = baseUrl.split('?')[0]; // quitar parámetros del host
+                var playerUrl = baseUrl + '?sala=' + roomCode;
+                new QRCode(qrEl, {
+                    text: playerUrl,
+                    width: 160,
+                    height: 160,
+                    colorDark: '#000000',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.M
+                });
                 qrGenerated = true;
+                // Mostrar también el enlace copiable
+                var linkEl = document.getElementById('player-link');
+                if (linkEl) {
+                    linkEl.href = playerUrl;
+                    linkEl.innerText = '🔗 Copiar enlace jugador';
+                    linkEl.style.display = 'block';
+                }
             }
-            // Generar también el mini QR del live-room-code
-            var miniEl = document.getElementById('live-qr-canvas');
-            if (miniEl && typeof QRCode !== 'undefined') {
-                miniEl.innerHTML = '';
-                new QRCode(miniEl, { text: playerUrl, width: 100, height: 100,
-                    colorDark: '#000000', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
-            }
-        }
-
-        function toggleLiveQR() {
-            var qrMini = document.getElementById('live-qr-mini');
-            if (!qrMini) return;
-            var visible = qrMini.style.display === 'block';
-            qrMini.style.display = visible ? 'none' : 'block';
-            if (!visible) generateQR(); // asegurar que está generado
         }
         // Intentar generar al cargar y también cuando el peer esté listo
         window.addEventListener('load', function() { setTimeout(generateQR, 500); });
@@ -1496,7 +1435,7 @@
             });
             peer.on('open', function (id) {
                 console.log("Host Peer Abierto:", id);
-                document.getElementById('live-code-text').innerText = roomCode;
+                document.getElementById('live-room-code').innerText = roomCode;
                 document.getElementById('live-room-code').style.display = 'block';
                 generateQR(); // Asegurar que el QR está generado
             });
@@ -1511,11 +1450,14 @@
                         // PROTECCIÓN DUPLICADOS: Buscar si el nombre ya existe
                         var existing = players.find(function (p) { return p.name.toLowerCase() === data.name.toLowerCase(); });
                         if (existing) {
-                            console.log("Reconexión de jugador:", data.name);
-                            delete connections[existing.id];
+                            console.log("Reconexión de jugador:", data.name, existing.id, '→', conn.peer);
+                            var _idViejo = existing.id;
+                            delete connections[_idViejo];
                             existing.id = conn.peer;
                             existing.avatar = data.avatar || existing.avatar; // Actualizar avatar si cambió
                             connections[conn.peer] = conn;
+                            migrarIdJugador(_idViejo, conn.peer);   // conservar escudo, racha, apuestas, duelo...
+                            addEvent('<span class="ev-info">🔌 ' + existing.name + ' se ha reconectado</span>');
                             syncState(); // Force state sync to reconnecting player
                         } else {
                             players.push({ id: conn.peer, name: data.name, avatar: data.avatar || null, score: 1, cards: [], tokens: 3, canReload: true, wildcards: 3 });
@@ -1570,33 +1512,22 @@
 
         var cachedTxts = [];
 
-        // Cuenta el total real disponible (sin cap por categoría) para el lobby
-        function countAllSongs(ignorePlayedIds) {
-            if (!cachedTxts || cachedTxts.length === 0) return { total: 0, available: 0 };
-            var uniqueIds = new Set();
-            var playedIds = ignorePlayedIds ? [] : JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]');
-            var total = 0, available = 0;
-            cachedTxts.forEach(function(res) {
-                var lines = (res.text||'').split('\n').map(function(l){return l.replace(/\r/,'');});
-                lines.forEach(function(l) {
-                    var p = l.split('|');
-                    var m = p[3] ? p[3].match(/[?&]v=([^&#]+)|youtu\.be\/([^?&#]+)/) : null;
-                    if (m) {
-                        var id = m[1] || m[2];
-                        if (!uniqueIds.has(id)) {
-                            uniqueIds.add(id);
-                            total++;
-                            if (!playedIds.includes(id)) available++;
-                        }
-                    }
-                });
-            });
-            return { total: total, available: available };
+        // Barajado Fisher-Yates. El anterior (sort con Math.random()-0.5) NO es un
+        // barajado uniforme: el comparador es inconsistente y sesga el resultado,
+        // así que unas canciones entraban en el mazo mucho más que otras.
+        function shuffleInPlace(arr) {
+            for (var i = arr.length - 1; i > 0; i--) {
+                var j = Math.floor(Math.random() * (i + 1));
+                var t = arr[i]; arr[i] = arr[j]; arr[j] = t;
+            }
+            return arr;
         }
 
         function buildSongsFromCache(ignorePlayedIds) {
             var rawSongs = [];
             var uniqueIds = new Set();
+            var lineasMalas = [];
+            var duplicadas = 0;
             var playedIds = ignorePlayedIds ? [] : JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]');
             cachedTxts.forEach(function (res) {
                 var categorySongs = [];
@@ -1606,10 +1537,18 @@
                     var m = p[3] ? p[3].match(/[?&]v=([^&#]+)|youtu\.be\/([^?&#]+)/) : null;
                     if (m) {
                         var currentId = (m[1] || m[2]);
-                        if (!uniqueIds.has(currentId) && !playedIds.includes(currentId)) {
+                        // El año NO se validaba: una línea con el año mal escrito entraba
+                        // en el mazo con año NaN y era IMPOSIBLE de acertar (isSlotCorrect
+                        // devuelve false para cualquier hueco). Ahora se descarta y se avisa.
+                        var songYear = parseInt(String(p[2]).trim(), 10);
+                        if (isNaN(songYear) || songYear < 1900 || songYear > 2100) {
+                            lineasMalas.push((res.type || '?') + ' línea ' + (index + 1) + ': año "' + p[2] + '" → ' + (p[0] || '?') + ' - ' + (p[1] || '?'));
+                            return;
+                        }
+                        if (uniqueIds.has(currentId)) { duplicadas++; return; }
+                        if (!playedIds.includes(currentId)) {
                             uniqueIds.add(currentId);
                             // Filtro de décadas
-                            var songYear = parseInt(p[2]);
                             var passFilter = true;
                             if (decadeFilter !== 'all') {
                                 if (decadeFilter === 'pre80s')   passFilter = songYear < 1980;
@@ -1631,10 +1570,16 @@
                         }
                     }
                 });
-                categorySongs.sort(function() { return Math.random() - 0.5; });
+                shuffleInPlace(categorySongs);
                 rawSongs = rawSongs.concat(categorySongs.slice(0, 60));
             });
-            rawSongs.sort(function() { return Math.random() - 0.5; });
+            shuffleInPlace(rawSongs);
+            if (lineasMalas.length) {
+                console.warn('[HOST] ' + lineasMalas.length + ' canciones DESCARTADAS por año inválido:');
+                lineasMalas.forEach(function (x) { console.warn('   ' + x); });
+            }
+            if (duplicadas) console.warn('[HOST] ' + duplicadas + ' URLs duplicadas ignoradas en las listas.');
+            ultimoInformeListas = { malas: lineasMalas, duplicadas: duplicadas };
             return rawSongs;
         }
 
@@ -1693,86 +1638,54 @@
             if (players.length >= 1) document.getElementById('start-btn').style.display = 'inline-block';
         }
 
+        var joputismoAudioTimeout = null;
 
+        function setJoputismo(level) {
+            joputismoLevel = parseInt(level);
 
-        // Sonido de notificación para eventos importantes del host
-        function playHostNotifySound(type) {
-            try {
-                var ctx = new (window.AudioContext || window.webkitAudioContext)();
-                var freqs = { bonus: [523,659,784,1047], shared: [440,523,659,784], warn: [330,415,494] };
-                var seq = freqs[type] || freqs.bonus;
-                seq.forEach(function(freq, i) {
-                    var osc = ctx.createOscillator();
-                    var gain = ctx.createGain();
-                    osc.connect(gain); gain.connect(ctx.destination);
-                    osc.frequency.value = freq;
-                    osc.type = 'sine';
-                    var t = ctx.currentTime + i * 0.13;
-                    gain.gain.setValueAtTime(0.3, t);
-                    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
-                    osc.start(t); osc.stop(t + 0.2);
-                });
-            } catch(e) {}
-        }
+            var themeContainer = document.getElementById('joputismo-audio-player');
+            if (themeContainer) {
+                if (joputismoAudioTimeout) {
+                    clearTimeout(joputismoAudioTimeout);
+                    joputismoAudioTimeout = null;
+                }
 
-        function toggleLiveStats() {
-            var panel = document.getElementById('live-stats-panel');
-            if (panel) panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-        }
-
-        function updateLiveStats() {
-            if (!gameStarted) return;
-            var toggle = document.getElementById('live-stats-toggle');
-            if (toggle) toggle.style.display = 'block';
-            // Turno
-            var lsTurn = document.getElementById('ls-turn');
-            if (lsTurn) lsTurn.textContent = turnCounter || '—';
-            // Racha más larga activa
-            var lsStreak = document.getElementById('ls-streak');
-            if (lsStreak && stats.maxStreaks) {
-                var bestStreakPl = null, bestVal = 0;
-                players.forEach(function(pl) {
-                    var v = stats.maxStreaks[pl.id] || 0;
-                    if (v > bestVal) { bestVal = v; bestStreakPl = pl.name; }
-                });
-                lsStreak.textContent = bestStreakPl ? bestStreakPl + ' ×' + bestVal : '—';
-            }
-            // Reacción más rápida
-            var lsReact = document.getElementById('ls-reaction');
-            if (lsReact && stats.reactionTimes) {
-                var fastPl = null, fastAvg = Infinity;
-                players.forEach(function(pl) {
-                    var rts = stats.reactionTimes[pl.id] || [];
-                    if (rts.length >= 2) {
-                        var avg = rts.reduce(function(a,b){return a+b;},0)/rts.length;
-                        if (avg < fastAvg) { fastAvg = avg; fastPl = pl.name; }
+                if (document.getElementById('lobby').style.display !== 'none') {
+                    if (joputismoLevel === 1) {
+                        // Trololo meme
+                        themeContainer.innerHTML = '<iframe width="1" height="1" src="https://www.youtube-nocookie.com/embed/oavMtUWDBTM?autoplay=1&start=16" allow="autoplay" style="display:none;"></iframe>';
+                    } else if (joputismoLevel === 2) {
+                        // Superman theme - desde el principio
+                        themeContainer.innerHTML = '<iframe width="1" height="1" src="https://www.youtube-nocookie.com/embed/e9vrfEoc8_g?autoplay=1" allow="autoplay" style="display:none;"></iframe>';
+                    } else {
+                        themeContainer.innerHTML = '';
                     }
-                });
-                lsReact.textContent = fastPl ? fastPl + ' ' + fastAvg.toFixed(1) + 's' : '—';
+                } else {
+                    themeContainer.innerHTML = '';
+                }
             }
-            // Más saboteado
-            var lsSabbed = document.getElementById('ls-sabbed');
-            if (lsSabbed && stats.playerSabotaged) {
-                var topSabbed = null, topSabbedV = 0;
-                players.forEach(function(pl) {
-                    var v = stats.playerSabotaged[pl.id] || 0;
-                    if (v > topSabbedV) { topSabbedV = v; topSabbed = pl.name; }
-                });
-                lsSabbed.textContent = topSabbed ? topSabbed + ' (' + topSabbedV + ')' : '—';
-            }
-            // Más saboteador
-            var lsSaber = document.getElementById('ls-saber');
-            if (lsSaber && stats.playerSabotages) {
-                var topSaber = null, topSaberV = 0;
-                players.forEach(function(pl) {
-                    var v = stats.playerSabotages[pl.id] || 0;
-                    if (v > topSaberV) { topSaberV = v; topSaber = pl.name; }
-                });
-                lsSaber.textContent = topSaber ? topSaber + ' (' + topSaberV + ')' : '—';
-            }
-            // Canciones jugadas
-            var lsSongs = document.getElementById('ls-songs');
-            if (lsSongs) lsSongs.textContent = (turnCounter || 0);
+            syncState();
+        }
+
+        // El host no tenía showCustomAlert (solo existía en el player) → checkReadyAndStart
+        // lanzaba ReferenceError y el botón EMPEZAR no hacía nada ni avisaba.
+        // No usamos alert(): es modal y bloquearía la tablet si lo dispara un móvil.
+        function showCustomAlert(msg) {
+            console.warn('[HOST]', msg);
+            var inLobby = document.getElementById('lobby') &&
+                          document.getElementById('lobby').style.display !== 'none';
+            var el = document.getElementById(inLobby ? 'lobby-ready-status' : 'host-instructions');
+            if (!el) el = document.getElementById('host-instructions');
+            if (!el) return;
+            var prev = el.innerHTML;
+            var prevColor = el.style.color;
+            el.innerHTML = "<span style='color:#ff8800; font-family:Bungee;'>⚠️ " + msg + "</span>";
+            setTimeout(function () {
+                if (el.innerHTML.indexOf(msg) !== -1) {
+                    el.innerHTML = prev;
+                    el.style.color = prevColor;
+                }
+            }, 4000);
         }
 
         function checkReadyAndStart() {
@@ -1786,10 +1699,22 @@
         }
 
         function startGame() {
-            requestWakeLock();;
+            requestWakeLock();
+            var tc = document.getElementById('joputismo-audio-player');
+            if (tc) tc.innerHTML = '';
+
+            gameMode = document.getElementById('game-mode-select').value;
+            // Bloquear el selector: una vez arrancada, cambiarlo no hace nada y confunde
+            var _modeSel = document.getElementById('game-mode-select');
+            if (_modeSel) { _modeSel.disabled = true; _modeSel.style.opacity = '0.5'; }
+            competitiveMode = !!(document.getElementById('competitive-mode-check') && document.getElementById('competitive-mode-check').checked);
+            console.log('[HOST] Partida iniciada | modo:', gameMode, '| competitivo:', competitiveMode);
+            addEvent('<span class="ev-info">▶ Partida iniciada — MODO: ' + gameMode.toUpperCase() + (competitiveMode ? ' · COMPETITIVO' : '') + '</span>');
+            hasShield = {};
             initStats();
             turnCounter = 0;
             isSharedSong = false;
+            sharedSongOwnerId = null;
             isLightningSong = false;
             isDoubleOrNothing = false;
             isBonusCard = false;
@@ -1798,8 +1723,6 @@
             isBragging = false;
             songHistory = [];
             readyPlayers = {};
-            predictions = {};
-            playerCardTypes = {};
             requestedCategory = null;
             justSucceeded = false;
             emojiWildcardBonus = {};
@@ -1807,7 +1730,6 @@
             silentCurses = [];
             stats.consecutiveFails = {};
             stats.reactionTimes = {};
-            competitiveMode = !!(document.getElementById('competitive-mode-check') && document.getElementById('competitive-mode-check').checked);
             requestedCategory = null;
             reactionStartTime = 0;
             tokenStarvationTurns = {};
@@ -1839,7 +1761,7 @@
                 teamTurn = 'red';
                 teamVotes = {};
                 teamVoteResolved = false;
-                var shuffled = players.slice().sort(function() { return Math.random() - 0.5; });
+                var shuffled = shuffleInPlace(players.slice());
                 shuffled.forEach(function(pl, i) {
                     var rp = players.find(function(p) { return p.id === pl.id; });
                     rp.team = i % 2 === 0 ? 'red' : 'blue';
@@ -1876,9 +1798,42 @@
             })(3);
         }
 
+        // ── CATEGORÍA SOLICITADA ──
+        // Antes esta búsqueda SOLO existía en la rama de equipos: en modo normal/rey/
+        // supervivencia se cobraban 4 fichas y la canción no cambiaba nunca.
+        var CATEGORIAS = {
+            orig:        '🎵 Original',
+            anime:       '⛩️ Anime',
+            movies:      '🎬 Pelis & TV',
+            videojuegos: '🎮 Gamer'
+        };
+        function aplicarCategoriaSolicitada() {
+            if (!requestedCategory) return;
+            var encontrada = false;
+            for (var _ci = currentSongIdx; _ci < songs.length; _ci++) {
+                if (songs[_ci] && songs[_ci].type === requestedCategory) {
+                    if (_ci !== currentSongIdx) {
+                        var _tmp = songs[currentSongIdx];
+                        songs[currentSongIdx] = songs[_ci];
+                        songs[_ci] = _tmp;
+                    }
+                    encontrada = true;
+                    break;
+                }
+            }
+            if (!encontrada) {
+                addEvent('<span class="ev-bad">🎯 No quedan canciones de ' + (CATEGORIAS[requestedCategory] || requestedCategory) + ' en el mazo</span>');
+            }
+            requestedCategory = null;
+        }
+
         function nextTurn() {
             stopCountdown();
             resetLightning();
+            // ── ¿El turno que acaba de terminar era "¡JUGAMOS TODOS!"? ──
+            // Si lo era, su dueño repite turno (le "robaron" su canción todos los rivales)
+            var _repeatOwnerId = (isSharedSong && sharedSongOwnerId) ? sharedSongOwnerId : null;
+            sharedSongOwnerId = null;
             isSharedSong = false;
             isDoubleOrNothing = false;
             jinxActive = false;
@@ -1904,16 +1859,7 @@
                 }
                 turnCounter++;
                 currentSongIdx++;
-                // Categoría solicitada: buscar la siguiente canción de ese tipo
-                if (requestedCategory) {
-                    for (var _ci = currentSongIdx; _ci < songs.length; _ci++) {
-                        if (songs[_ci] && songs[_ci].type === requestedCategory) {
-                            if (_ci !== currentSongIdx) { var _tmp = songs[currentSongIdx]; songs[currentSongIdx] = songs[_ci]; songs[_ci] = _tmp; }
-                            break;
-                        }
-                    }
-                    requestedCategory = null;
-                }
+                aplicarCategoriaSolicitada();
                 if (songs[currentSongIdx] && songs[currentSongIdx].id) {
                     var _plT = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]');
                     if (!_plT.includes(songs[currentSongIdx].id)) {
@@ -1938,55 +1884,78 @@
             currentDuel = null;
             duelResult = null;
             duelTriggered = false;
+
+            // ── REPETICIÓN DE TURNO TRAS "¡JUGAMOS TODOS!" ──
+            // El jugador al que le tocó la canción compartida recupera su turno normal.
+            if (_repeatOwnerId) {
+                var _ownerIdx = -1;
+                for (var _oi = 0; _oi < players.length; _oi++) {
+                    if (players[_oi].id === _repeatOwnerId) { _ownerIdx = _oi; break; }
+                }
+                var _ownerAlive = (_ownerIdx !== -1) &&
+                    !(gameMode === 'supervivencia' && players[_ownerIdx].lives !== undefined && players[_ownerIdx].lives <= 0);
+                if (_ownerAlive) {
+                    activePlayerIdx = _ownerIdx;
+                    players[activePlayerIdx].canReload = true;
+                    addEvent('<span class="ev-name">' + players[_ownerIdx].name + '</span> <span class="ev-good">repite turno tras el ¡JUGAMOS TODOS! 🎤</span>', '🎤');
+                    for (var _rc in connections) {
+                        try { connections[_rc].send({ type: 'DANGER_ALERT', msg: '🎤 ' + players[_ownerIdx].name + ' repite turno (le tocó el ¡JUGAMOS TODOS!)', critical: false }); } catch(e) {}
+                    }
+                }
+            }
+
+            // ── SUPERVIVENCIA: saltar el turno de los eliminados ──
+            // Antes no se saltaban: un jugador con 0 vidas seguía jugando y ganando cartas.
+            // La "eliminación" era puramente cosmética (opacidad en el marcador).
+            if (gameMode === 'supervivencia') {
+                var _skipGuard = 0;
+                while (players[activePlayerIdx] &&
+                       players[activePlayerIdx].lives !== undefined &&
+                       players[activePlayerIdx].lives <= 0 &&
+                       _skipGuard < players.length) {
+                    activePlayerIdx = (activePlayerIdx + 1) % players.length;
+                    _skipGuard++;
+                }
+                if (players[activePlayerIdx]) players[activePlayerIdx].canReload = true;
+            }
+
             turnCounter++;
-            // Cada 5 turnos → ¡Todos Juegan!
+
+            // ¿Este turno va a convertirse en la fase de REY? (la comprobación real está más abajo)
+            // Si es así, no tiene sentido activar "¡JUGAMOS TODOS!" ni la carta bonificación:
+            // en la fase de rey solo juega el rey. Antes se activaban igual, y los rivales
+            // podían gastar fichas apostando en un turno que nunca iban a jugar.
+            var _kingTurnComing = (gameMode === 'rey' && players.length >= 2 &&
+                                   players[activePlayerIdx] && players[activePlayerIdx].score >= 10);
+
             // ¡TODOS JUEGAN! aleatorio — no siempre cae al mismo jugador
-            isSharedSong = (turnCounter === nextSharedSongTurn && players.length >= 2);
+            // Nunca dos compartidas seguidas: si acabamos de devolver el turno, este es normal.
+            isSharedSong = (!_repeatOwnerId && !_kingTurnComing && turnCounter === nextSharedSongTurn && players.length >= 2);
             if (isSharedSong) {
                 nextSharedSongTurn = turnCounter + 4 + Math.floor(Math.random() * 4);
-                // Broadcast a todos los móviles
-                for (var _sid in connections) {
-                    try { connections[_sid].send({ type: 'TODOS_JUEGAN_ACTIVE' }); } catch(e) {}
-                }
-                // Sonido de notificación inmediato
-                playHostNotifySound('shared');
-                // Voz: anunciar todos juegan
-                if (voiceEnabled && 'speechSynthesis' in window) {
-                    setTimeout(function() {
-                        window.speechSynthesis.cancel();
-                        var _su = new SpeechSynthesisUtterance('¡Todos juegan! El primero que acierte gana la carta');
-                        _su.lang = 'es-ES'; _su.rate = 0.9; _su.pitch = 1.1;
-                        window.speechSynthesis.speak(_su);
-                    }, 300);
-                }
+                sharedSongOwnerId = players[activePlayerIdx] ? players[activePlayerIdx].id : null;
+            } else if ((_repeatOwnerId || _kingTurnComing) && turnCounter === nextSharedSongTurn) {
+                // Caía justo en un turno repetido o en la fase de rey: se pospone
+                nextSharedSongTurn = turnCounter + 1;
             }
             var banner = document.getElementById('shared-song-banner');
             if (banner) banner.style.display = isSharedSong ? 'block' : 'none';
             // CARTA BONIFICACIÓN aleatoria
-            isBonusCard = (turnCounter === nextBonusTurn);
-            if (isBonusCard) {
-                nextBonusTurn = turnCounter + 7 + Math.floor(Math.random() * 4);
-                // Broadcast a todos los móviles
-                for (var _bid in connections) {
-                    try { connections[_bid].send({ type: 'BONUS_CARD_ACTIVE' }); } catch(e) {}
-                }
-                // Sonido de notificación inmediato
-                playHostNotifySound('bonus');
-                // Voz: anunciar carta especial
-                if (voiceEnabled && 'speechSynthesis' in window) {
-                    setTimeout(function() {
-                        window.speechSynthesis.cancel();
-                        var _bu = new SpeechSynthesisUtterance('¡Carta especial! Esta carta vale doble punto');
-                        _bu.lang = 'es-ES'; _bu.rate = 0.9; _bu.pitch = 1.2;
-                        window.speechSynthesis.speak(_bu);
-                    }, 500);
-                }
+            isBonusCard = (!_kingTurnComing && turnCounter === nextBonusTurn);
+            if (isBonusCard) nextBonusTurn = turnCounter + 7 + Math.floor(Math.random() * 4);
+            else if (_kingTurnComing && turnCounter === nextBonusTurn) nextBonusTurn = turnCounter + 1;
+            currentSongIdx++;
+            if (!songs[currentSongIdx]) { reloadSongsMidGame(); currentSongIdx++; }
+            aplicarCategoriaSolicitada();   // ← faltaba en modo normal/rey/supervivencia
+            if (songs[currentSongIdx] && songs[currentSongIdx].id) {
+                var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]');
+                if (!_pl.includes(songs[currentSongIdx].id)) { _pl.push(songs[currentSongIdx].id); localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl)); }
             }
-            currentSongIdx++; if(songs[currentSongIdx] && songs[currentSongIdx].id) { var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]'); if(!_pl.includes(songs[currentSongIdx].id)){ _pl.push(songs[currentSongIdx].id); localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl)); } } isRevealed = false;
+            isRevealed = false;
             segundosAcumulados = 0;
             momentoDeInicio = 0;
             isPlaying = false;
-            currentBets = {}; var rb=document.getElementById('btn-report-error'); if(rb) rb.style.display='block'; // al cambiar de turno
+            currentBets = {}; // al cambiar de turno
             activeGuess = null; // Limpiar adivinanza
             bettingAgainst = []; // Limpiar apuestas de "ni de coña"
             bettingFor = []; // Limpiar apuestas a favor
@@ -1996,6 +1965,8 @@
             if (muteIntervalTimer) { clearInterval(muteIntervalTimer); muteIntervalTimer = null; }
 
             // Parar música de duelo
+            var audioContainer = document.getElementById('joputismo-audio-player');
+            if (audioContainer) audioContainer.innerHTML = '';
 
             panicActive = false;
             panicTimer = 0;
@@ -2057,6 +2028,13 @@
             document.getElementById('validation-buttons').style.display = 'none';
             document.getElementById('challenger-validation').style.display = 'none';
             document.getElementById('ui-current-player').innerText = players[activePlayerIdx].name;
+            // Badge de modo de juego (para ver de un vistazo si REY está realmente activo)
+            var modeBadge = document.getElementById('ui-game-mode-badge');
+            if (modeBadge) {
+                var modeLabels = { normal: '🎵 CLÁSICO', rey: '👑 MODO REY', supervivencia: '💿 SUPERVIVENCIA', equipos: '🔴🔵 EQUIPOS' };
+                modeBadge.innerText = modeLabels[gameMode] || gameMode.toUpperCase();
+                modeBadge.style.display = 'block';
+            }
             // Botón relámpago: visible cuando está sonando y no está ya activado
             var lbtn = document.getElementById('lightning-btn');
             if (lbtn) lbtn.style.display = (isPlaying && !isRevealed && !isLightningSong && gameMode !== 'equipos') ? 'inline-block' : 'none';
@@ -2104,7 +2082,6 @@
                     } else { tokenStarvationTurns[pl.id] = 0; }
                 });
             }
-            updateLiveStats();
             syncState();
         }
 
@@ -2116,6 +2093,11 @@
         }
 
         function playDuelMusic() {
+            var tc = document.getElementById('joputismo-audio-player');
+            if (tc) {
+                // El bueno, el feo y el malo - Climax - Limitado a 45s
+                tc.innerHTML = '<iframe id="duel-iframe" width="1" height="1" src="https://www.youtube-nocookie.com/embed/AFa1-kciCb4?autoplay=1&end=45" allow="autoplay" style="display:none;"></iframe>';
+            }
         }
 
         function playGunshot() {
@@ -2183,7 +2165,7 @@
                 winner.cards.sort(function(a, b){return a - b});
                 // Comprobar victoria tras ganar carta en duelo
                 if (winner.score >= 10) {
-                    if (gameMode === 'normal') {
+                    if (gameMode === 'normal' || gameMode === 'supervivencia') {
                         showWinner(winner.name);
                         return;
                     } else if (gameMode === 'rey') {
@@ -2207,7 +2189,8 @@
         }
 
         function advanceAndNextTurn() {
-            isSharedSong = false;
+            // NO reseteamos isSharedSong/sharedSongOwnerId aquí: nextTurn() los lee para
+            // devolver el turno al dueño del "¡JUGAMOS TODOS!" y luego los limpia.
             activePlayerIdx = (activePlayerIdx + 1) % players.length;
             players[activePlayerIdx].canReload = true;
             nextTurn();
@@ -2221,18 +2204,66 @@
             nextTurn();
         }
 
+        // ── RECONEXIÓN: migrar todo el estado indexado por peerId ──
+        // Al reconectar (se le cae el wifi al móvil y vuelve), PeerJS le da un peerId NUEVO.
+        // Antes solo se cambiaba players[].id y connections: todo lo demás seguía apuntando
+        // al id viejo, así que el jugador perdía escudo, racha, estadísticas, apuestas,
+        // votos de equipo... y si estaba en un duelo, el duelo se quedaba roto.
+        function migrarIdJugador(idViejo, idNuevo) {
+            if (!idViejo || idViejo === idNuevo) return;
+
+            var mapas = [hasShield, readyPlayers, emojiWildcardBonus, currentBets, teamVotes];
+            Object.keys(stats).forEach(function (k) {
+                if (stats[k] && typeof stats[k] === 'object' && !Array.isArray(stats[k])) mapas.push(stats[k]);
+            });
+            mapas.forEach(function (m) {
+                if (m && Object.prototype.hasOwnProperty.call(m, idViejo)) {
+                    m[idNuevo] = m[idViejo];
+                    delete m[idViejo];
+                }
+            });
+
+            [bettingAgainst, bettingFor].forEach(function (arr) {
+                if (!arr) return;
+                for (var i = 0; i < arr.length; i++) if (arr[i] === idViejo) arr[i] = idNuevo;
+            });
+
+            if (Array.isArray(silentCurses)) {
+                silentCurses.forEach(function (c) { if (c && c.playerId === idViejo) c.playerId = idNuevo; });
+            }
+            if (sharedSongOwnerId === idViejo) sharedSongOwnerId = idNuevo;
+            if (currentJudgeId === idViejo) currentJudgeId = idNuevo;
+            if (currentDuel) {
+                if (currentDuel.challenger === idViejo) currentDuel.challenger = idNuevo;
+                if (currentDuel.target === idViejo) currentDuel.target = idNuevo;
+            }
+            if (Array.isArray(kingOptions)) {
+                kingOptions.forEach(function (o) { if (o && o.playerId === idViejo) o.playerId = idNuevo; });
+            }
+            console.log('[HOST] Estado migrado en la reconexión:', idViejo, '→', idNuevo);
+        }
+
         function handlePlayerCommand(peerId, action, value) {
             var activeP = players[activePlayerIdx];
             var s = songs[currentSongIdx];
             var container = document.getElementById('player-container');
 
-            // Modo competitivo: bloquear sabotajes, fichas y especiales
+            // Modo competitivo: bloquear sabotajes, fichas y especiales.
+            // OJO: la lista anterior usaba nombres que el player NUNCA envía
+            // ('DUEL' en vez de 'SABOTAGE_DUEL', 'BET' sin las variantes...) y dejaba
+            // fuera RELOAD_SONG y el mercado, que en competitivo salían GRATIS
+            // porque updateTokens() no descuenta fichas en este modo.
             if (competitiveMode) {
-                var _blocked = ['SABOTAGE_MUTE','SABOTAGE_BUZZER','SABOTAGE_VETO','SABOTAGE_PANIC',
-                    'SABOTAGE_FOG','SABOTAGE_RUSSIAN_ROULETTE','SABOTAGE_STEAL_TOKEN',
-                    'SABOTAGE_STEAL_TURN','SABOTAGE_SMART_STEAL','SABOTAGE_BLACKHOLE',
-                    'SABOTAGE_STEAL_STREAK','BET','DUEL','AUTO_WIN','DOUBLE_OR_NOTHING',
-                    'FAIL_SAFE','BRAG','EMOJI_WILDCARD','REQUEST_CATEGORY'];
+                var _blocked = [
+                    'SABOTAGE_MUTE', 'SABOTAGE_BUZZER', 'SABOTAGE_VETO', 'SABOTAGE_PANIC',
+                    'SABOTAGE_FOG', 'SABOTAGE_RUSSIAN_ROULETTE', 'SABOTAGE_STEAL_TOKEN',
+                    'SABOTAGE_STEAL_TURN', 'SABOTAGE_SMART_STEAL', 'SABOTAGE_BLACKHOLE',
+                    'SABOTAGE_STEAL_STREAK', 'SABOTAGE_DUEL', 'SABOTAGE_FORCE_SKIP',
+                    'BET', 'BET_AGAINST_ACTIVE', 'BET_FOR_ACTIVE', 'RESIST_STEAL',
+                    'AUTO_WIN', 'DOUBLE_OR_NOTHING', 'FAIL_SAFE', 'BRAG',
+                    'EMOJI_WILDCARD', 'REQUEST_CATEGORY', 'QUICK_REACT',
+                    'RELOAD_SONG', 'MARKET_WILDCARD', 'MARKET_DECADE', 'MARKET_SHIELD'
+                ];
                 if (_blocked.indexOf(action) !== -1) return;
             }
 
@@ -2295,11 +2326,12 @@
                         var msgT = "";
                         
                         if (result === 0) { // Robar 1 carta
-                            if (target && target.cards && target.cards.length > 0) {
+                            if (target && target.cards && target.cards.length > 1) {
                                 var card = target.cards.pop();
                                 p.cards.push(parseInt(card));
                                 p.cards.sort(function(a,b){return a-b;});
                                 target.cards.sort(function(a,b){return a-b;});
+                                resyncScores();
                                 msgP = "¡ZAS! Le has mangado una carta a " + target.name + ". ¡Vaya suerte de forajido!";
                                 msgT = "¡MALAS NOTICIAS! " + p.name + " te ha levantado una carta en la Ruleta Rusa. ¡Es un mangante!";
                             } else {
@@ -2330,6 +2362,7 @@
                         
                         document.getElementById('host-instructions').innerHTML = "<span style='color:#ff0055; font-size:1.5em; font-family:Bungee;'>¡" + p.name + " JUGÓ A LA RULETA RUSA!</span>";
                         notifyVictim(players[activePlayerIdx].id, p.name, 'RULETA RUSA', '🎰');
+                        if (checkScoreVictory(p)) return;
                         syncState();
                     }
                     break;
@@ -2337,7 +2370,9 @@
                     if (hasShield[activeP.id]) {
                         var p = players.find(function (pl) { return pl.id === peerId; });
                         if (p) {
-                            try { if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "¡ZASCA! El Escudo de " + activeP.name + " ha rebotado tu sabotaje y lo has perdido todo jajaja" }); } catch (e) { }
+                            var _perdidas = cobrarSabotajeRebotado(p, action);
+                            try { if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "¡ZASCA! El Escudo de " + activeP.name + " ha rebotado tu sabotaje. Pierdes " + _perdidas + "🔵 jajaja" }); } catch (e) { }
+                            addEvent('<span class="ev-good">🛡️ El escudo de ' + activeP.name + ' rebotó el sabotaje de ' + p.name + ' (−' + _perdidas + '🔵)</span>', '🛡️');
                         }
                         hasShield[activeP.id] = false;
                         notifyVictim(players[activePlayerIdx].id, p.name, 'MUTEAR', '🔇');
@@ -2374,6 +2409,10 @@
                         }
                         syncState();
                     }
+                    break;
+                case 'TOGGLE_CHEAT':
+                    cheatsEnabled = !cheatsEnabled;
+                    syncState();
                     break;
                 case 'SKIP':
                     if (peerId !== activeP.id) return;
@@ -2413,6 +2452,7 @@
                 case 'SYSTEM_ERROR_TRACK':
                     var p = players.find(function (pl) { return pl.id === peerId; });
                     if (p && isPlaying) {
+                        reportBrokenLink();   // deja constancia del enlace roto para poder arreglar la lista
                         refundBets();
                         isPlaying = false;
                         if (player && player.stopVideo) player.stopVideo();
@@ -2447,15 +2487,17 @@
                 case 'BET':
                     console.log("[BET] de", peerId, "en slot", value);
                     var p = players.find(function (pl) { return pl.id === peerId; });
+                    if (!p) break;                      // antes se usaba p.id sin comprobar p → TypeError
+                    if (!players[activePlayerIdx]) break;
                     var valNum = parseInt(value);
                     if (isNaN(valNum)) break;
 
                     var slotOccupied = (activeGuess == valNum);
                     for (var pid in currentBets) { if (currentBets[pid] == valNum) slotOccupied = true; }
 
-                    var maxSlot = players[activePlayerIdx] ? players[activePlayerIdx].cards.length : 0;
+                    var maxSlot = players[activePlayerIdx].cards.length;
                     var canBetShared = isSharedSong && p.id === players[activePlayerIdx].id && activeGuess === null;
-                    if (p && (p.id !== players[activePlayerIdx].id || canBetShared) && p.tokens >= 1 && currentBets[peerId] === undefined && !slotOccupied && (activeGuess !== null || isSharedSong) && valNum >= 0 && valNum <= maxSlot) {
+                    if ((p.id !== players[activePlayerIdx].id || canBetShared) && p.tokens >= 1 && currentBets[peerId] === undefined && !slotOccupied && (activeGuess !== null || isSharedSong) && valNum >= 0 && valNum <= maxSlot) {
                         console.log("[OK] Apuesta (Duelo) aceptada para", p.name);
                         updateTokens(p, -1);
                         currentBets[peerId] = valNum;
@@ -2500,16 +2542,14 @@
                     if (hasShield[activeP.id]) {
                         var p = players.find(function (pl) { return pl.id === peerId; });
                         if (p) {
-                            try { if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "¡ZASCA! El Escudo de " + activeP.name + " ha rebotado tu sabotaje y lo has perdido todo jajaja" }); } catch (e) { }
+                            var _perdidas = cobrarSabotajeRebotado(p, action);
+                            try { if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "¡ZASCA! El Escudo de " + activeP.name + " ha rebotado tu sabotaje. Pierdes " + _perdidas + "🔵 jajaja" }); } catch (e) { }
+                            addEvent('<span class="ev-good">🛡️ El escudo de ' + activeP.name + ' rebotó el sabotaje de ' + p.name + ' (−' + _perdidas + '🔵)</span>', '🛡️');
                         }
                         hasShield[activeP.id] = false;
                         notifyVictim(players[activePlayerIdx].id, p.name, 'PÁNICO', '😱');
                         syncState();
-                        break} else {
-                    var _pp = players.find(function(pl){return pl.id===peerId;});
-                    if (!_pp || _pp.tokens < 2) break;
-                    updateTokens(_pp, -2);
-;
+                        break;
                     }
                     var p = players.find(function (pl) { return pl.id === peerId; });
                     if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 2 && !panicActive && isPlaying && !isRevealed && (!turnPhase || turnPhase === 'NORMAL')) {
@@ -2557,6 +2597,7 @@
                     }
                     break;
                 case 'SABOTAGE_BUZZER':
+                    if (escudoBloquea(activeP, players.find(function(pl){ return pl.id === peerId; }), action)) break;
                     var p = players.find(function (pl) { return pl.id === peerId; });
                     if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 1 && isPlaying && !isRevealed && (!turnPhase || turnPhase === 'NORMAL')) {
                         updateTokens(p, -1);
@@ -2569,16 +2610,14 @@
                     if (hasShield[activeP.id]) {
                         var p = players.find(function (pl) { return pl.id === peerId; });
                         if (p) {
-                            try { if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "¡ZASCA! El Escudo de " + activeP.name + " ha rebotado tu sabotaje y lo has perdido todo jajaja" }); } catch (e) { }
+                            var _perdidas = cobrarSabotajeRebotado(p, action);
+                            try { if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "¡ZASCA! El Escudo de " + activeP.name + " ha rebotado tu sabotaje. Pierdes " + _perdidas + "🔵 jajaja" }); } catch (e) { }
+                            addEvent('<span class="ev-good">🛡️ El escudo de ' + activeP.name + ' rebotó el sabotaje de ' + p.name + ' (−' + _perdidas + '🔵)</span>', '🛡️');
                         }
                         hasShield[activeP.id] = false;
                         notifyVictim(players[activePlayerIdx].id, p.name, 'NIEBLA', '🌫');
                         syncState();
-                        break} else {
-                    var _fp = players.find(function(pl){return pl.id===peerId;});
-                    if (!_fp || _fp.tokens < 2) break;
-                    updateTokens(_fp, -2);
-;
+                        break;
                     }
                     var p = players.find(function (pl) { return pl.id === peerId; });
                     if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 2 && !isFogActive && (!turnPhase || turnPhase === 'NORMAL')) {
@@ -2607,15 +2646,17 @@
                     if (hasShield[activeP.id]) {
                         var p = players.find(function (pl) { return pl.id === peerId; });
                         if (p) {
-                            try { if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "¡ZASCA! El Escudo de " + activeP.name + " ha rebotado tu sabotaje y lo has perdido todo jajaja" }); } catch (e) { }
+                            var _perdidas = cobrarSabotajeRebotado(p, action);
+                            try { if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "¡ZASCA! El Escudo de " + activeP.name + " ha rebotado tu sabotaje. Pierdes " + _perdidas + "🔵 jajaja" }); } catch (e) { }
+                            addEvent('<span class="ev-good">🛡️ El escudo de ' + activeP.name + ' rebotó el sabotaje de ' + p.name + ' (−' + _perdidas + '🔵)</span>', '🛡️');
                         }
                         hasShield[activeP.id] = false;
                         syncState();
                         break;
                     }
                     var p = players.find(function (pl) { return pl.id === peerId; });
-                    if (p && p.tokens >= 1 && activeGuess === null && isPlaying && !isRevealed && (!turnPhase || turnPhase === 'NORMAL')) {
-                        updateTokens(p, -1);
+                    if (p && p.tokens >= 3 && activeGuess === null && isPlaying && !isRevealed && (!turnPhase || turnPhase === 'NORMAL')) {
+                        updateTokens(p, -3);
                         refundBets();
                         isPlaying = false;
                         if (player && player.stopVideo) player.stopVideo();
@@ -2658,8 +2699,8 @@
                 case 'SABOTAGE_DUEL':
                     if (turnPhase === 'DUEL' || duelTriggered) return;
                     var p = players.find(x => x.id === peerId);
-                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 2 && (!turnPhase || turnPhase === 'NORMAL') && !currentDuel && !isRevealed) {
-                        updateTokens(p, -2);
+                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 3 && (!turnPhase || turnPhase === 'NORMAL') && !currentDuel && !isRevealed) {
+                        updateTokens(p, -3);
                         duelTriggered = true;
                         var target = players[activePlayerIdx];
                         
@@ -2737,16 +2778,14 @@
                     if (hasShield[activeP.id]) {
                         var p = players.find(function (pl) { return pl.id === peerId; });
                         if (p) {
-                            try { if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "¡ZASCA! El Escudo de " + activeP.name + " ha rebotado tu sabotaje y lo has perdido todo jajaja" }); } catch (e) { }
+                            var _perdidas = cobrarSabotajeRebotado(p, action);
+                            try { if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "¡ZASCA! El Escudo de " + activeP.name + " ha rebotado tu sabotaje. Pierdes " + _perdidas + "🔵 jajaja" }); } catch (e) { }
+                            addEvent('<span class="ev-good">🛡️ El escudo de ' + activeP.name + ' rebotó el sabotaje de ' + p.name + ' (−' + _perdidas + '🔵)</span>', '🛡️');
                         }
                         hasShield[activeP.id] = false;
                         notifyVictim(players[activePlayerIdx].id, p.name, 'VETO', '🚫');
                         syncState();
-                        break} else {
-                    var _vp = players.find(function(pl){return pl.id===peerId;});
-                    if (!_vp || _vp.tokens < 1) break;
-                    updateTokens(_vp, -1);
-;
+                        break;
                     }
                     var p = players.find(function (pl) { return pl.id === peerId; });
                     if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 1 && players[activePlayerIdx].canReload && (!turnPhase || turnPhase === 'NORMAL')) {
@@ -2762,9 +2801,10 @@
                     }
                     break;
                 case 'SABOTAGE_STEAL_TURN':
+                    if (escudoBloquea(activeP, players.find(function(pl){ return pl.id === peerId; }), action)) break;
                     var p = players.find(function (pl) { return pl.id === peerId; });
-                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 2 && isPlaying && !isRevealed && !pendingSteal) {
-                        updateTokens(p, -2);
+                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 4 && isPlaying && !isRevealed && !pendingSteal) {
+                        updateTokens(p, -4);
                         var victim = players[activePlayerIdx];
                         pendingSteal = { thief: p, victim: victim };
 
@@ -2776,7 +2816,7 @@
                                 canResist: victim.tokens >= 2
                             }); } catch(e) {}
                         }
-                            broadcastSabotage(p.name, target.name, 'ROBAR FICHA', '💸');
+                        broadcastSabotage(p.name, victim.name, 'ROBAR TURNO', '⚡');
 
                         // Banner en el host
                         var bannerEl = document.getElementById('steal-resistance-banner');
@@ -2786,10 +2826,11 @@
                         }
                         addEvent('<span class="ev-name">' + p.name + '</span> <span class="ev-info">intenta robar turno a ' + victim.name + ' ⚡</span>');
 
-                        // Si la víctima no resiste en 5s, ejecutar el robo
+                        // Si la víctima puede resistir le damos 5s; si no tiene fichas, el robo es casi inmediato
+                        var _stealWait = (victim.tokens >= 2) ? 5000 : 1500;
                         pendingSteal.timeout = setTimeout(function() {
                             if (pendingSteal) executeStealtTurn(false);
-                        }, 5000);
+                        }, _stealWait);
 
                         syncState();
                     }
@@ -2819,11 +2860,12 @@
                     break;
                 case 'SABOTAGE_BLACKHOLE':
                     var p = players.find(function (pl) { return pl.id === peerId; });
-                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 3 && (!turnPhase || turnPhase === 'NORMAL')) {
+                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 5 && (!turnPhase || turnPhase === 'NORMAL')) {
                         var validTargets = players.filter(function (t) { return t.id !== p.id && t.score > 1 && t.cards.length > 0; });
                         if (validTargets.length > 0) {
-                            updateTokens(p, -3);
                             var target = validTargets[Math.floor(Math.random() * validTargets.length)];
+                            if (escudoBloquea(target, p, action)) break;   // el escudo de la víctima rebota
+                            updateTokens(p, -5);
                             target.score = Math.max(0, target.score - 1);
                             var cardIdx = Math.floor(Math.random() * target.cards.length);
                             target.cards.splice(cardIdx, 1);
@@ -2841,11 +2883,14 @@
                 case 'SABOTAGE_SMART_STEAL':
                     // Robo inteligente: el jugador elige qué carta robar
                     // value = 'first' | 'last' | 'extreme'
+                    // Antes cualquier valor desconocido caía en silencio en 'extreme'.
                     var p = players.find(function(pl) { return pl.id === peerId; });
+                    if (['first', 'last', 'extreme'].indexOf(value) === -1) break;
                     var validTargets = players.filter(function(t) { return t.id !== peerId && t.cards && t.cards.length > 0; });
-                    if (p && p.tokens >= 3 && gameStarted && (!turnPhase || turnPhase === 'NORMAL') && validTargets.length > 0) {
+                    if (p && p.tokens >= 4 && gameStarted && (!turnPhase || turnPhase === 'NORMAL') && validTargets.length > 0) {
                         // Elegir víctima: el jugador con más cartas
                         var target = validTargets.sort(function(a,b) { return b.cards.length - a.cards.length; })[0];
+                        if (escudoBloquea(target, p, action)) break;   // el escudo de la víctima rebota
                         var stolenCard = null;
                         if (value === 'first') {
                             stolenCard = target.cards.shift(); // carta más antigua (menor año)
@@ -2862,12 +2907,14 @@
                             target.cards.sort(function(a,b){return a-b;});
                             p.cards.push(parseInt(stolenCard));
                             p.cards.sort(function(a,b){return a-b;});
-                            updateTokens(p, -3);
+                            resyncScores();
+                            updateTokens(p, -4);
                             var typeLabel = value==='first'?'MÁS ANTIGUA':value==='last'?'MÁS RECIENTE':'MÁS EXTREMA';
                             addEvent('<span class="ev-name">' + p.name + '</span> <span class="ev-info">robó carta ' + typeLabel + ' (' + stolenCard + ') a ' + target.name + ' 🃏</span>');
                             trackSabotage(p.id, target.id);
                             if (connections[p.id]) try { connections[p.id].send({ type: 'BET_RESULT', msg: '🃏 Robaste el año ' + stolenCard + ' a ' + target.name + '!' }); } catch(e){}
                             if (connections[target.id]) try { connections[target.id].send({ type: 'BET_RESULT', msg: '🎯 ' + p.name + ' te robó la carta del ' + stolenCard + '!' }); } catch(e){}
+                            if (checkScoreVictory(p)) return;
                             syncState();
                         }
                     }
@@ -2877,8 +2924,9 @@
                     if (p && p.tokens >= 4 && gameStarted && (!turnPhase || turnPhase === 'NORMAL')) {
                         var possibleTargets = players.filter(function (pt) { return pt.id !== peerId && pt.tokens > 0; });
                         if (possibleTargets.length > 0) {
-                            updateTokens(p, -4); // Pay the cost
                             var target = possibleTargets[Math.floor(Math.random() * possibleTargets.length)];
+                            if (escudoBloquea(target, p, action)) break;   // el escudo de la víctima rebota
+                            updateTokens(p, -4); // Pay the cost
                             updateTokens(target, -1);
                             updateTokens(p, 1);
 
@@ -2933,7 +2981,8 @@
 
                     var maxSlotGuess = players[activePlayerIdx] ? players[activePlayerIdx].cards.length : 0;
                     // Canción compartida: no-activos se registran como BET
-                    if (isSharedSong && p && p.id !== players[activePlayerIdx].id && !currentBets[peerId] && valNum >= 0 && valNum <= maxSlotGuess) {
+                    // (solo en turno NORMAL: antes podía cobrar fichas en fase de rey/duelo)
+                    if (isSharedSong && (!turnPhase || turnPhase === 'NORMAL') && p && p.id !== players[activePlayerIdx].id && !currentBets[peerId] && p.tokens >= 1 && valNum >= 0 && valNum <= maxSlotGuess) {
                         currentBets[peerId] = valNum; updateTokens(p, -1); syncState(); break;
                     }
                     if (p && p.id === players[activePlayerIdx].id && !slotOccupiedByBet && activeGuess === null && valNum >= 0 && valNum <= maxSlotGuess) {
@@ -2999,8 +3048,6 @@
                         if (songs[currentSongIdx]) kingOptions.push(songs[currentSongIdx]);
                     }
                     if (player && player.stopVideo) player.stopVideo();
-                    isPlaying = false;
-                    stopCountdown();
                     var pcSkip = document.getElementById('player-container');
                     if (pcSkip) pcSkip.style.display = 'none';
                     document.getElementById('host-instructions').innerText = 'VIDEO INVÁLIDO — LOS JUGADORES ELIGEN NUEVA CARTA...';
@@ -3034,46 +3081,93 @@
                         document.getElementById('host-instructions').innerHTML = resultHtml;
                         document.getElementById('host-instructions').style.pointerEvents = 'auto'; // Permitir click en el div global si está bloqueado
 
+                        kingLastResult = won;   // para que el mando remoto pueda aceptarlo
                         turnPhase = 'KING_GUESS_RESULT';
                         syncState();
                     }
                     break;
                 case 'REMOTE_START_GAME':
+                    // Antes llamaba a startGame() directamente: cualquier jugador podía
+                    // arrancar la partida saltándose el check de "listos" y congelando
+                    // el modo de juego con el valor por defecto del selector.
                     if (!gameStarted) {
-                        startGame();
+                        var _rc = Object.keys(readyPlayers).length;
+                        if (players.length < 2 || _rc < players.length) {
+                            try { if (connections[peerId]) connections[peerId].send({ type: 'BET_RESULT', msg: '⏳ Aún no. Faltan jugadores por marcar LISTO (' + _rc + '/' + players.length + ').' }); } catch(e) {}
+                        }
+                        checkReadyAndStart();
                     }
                     break;
+                case 'REMOTE_JOPUTISMO':
+                    setJoputismo(parseInt(value));
+                    syncState();
+                    break;
+                // ── VALIDACIÓN REMOTA ──
+                // Antes NINGUNO de estos comandos comprobaba quién los enviaba: cualquier
+                // jugador podía validar, incluido el propio jugador activo, que podía
+                // autoconcederse la carta desde su móvil.
                 case 'REMOTE_REVEAL':
+                    if (!puedeUsarMando(peerId)) break;
                     if (turnPhase !== 'LOBBY' && !isRevealed) {
                         revealData();
                     }
                     break;
                 case 'REMOTE_CORRECT':
+                    // Solo tras revelar (que es cuando el mando enseña estos botones).
+                    // Esto además descarta las pulsaciones repetidas: en cuanto se valida
+                    // se pasa de turno e isRevealed vuelve a false.
+                    if (!puedeUsarMando(peerId) || !isRevealed) break;
                     validateResult(true, false);
                     break;
                 case 'REMOTE_CORRECT_TOKEN':
+                    // Solo tras revelar (que es cuando el mando enseña estos botones).
+                    // Esto además descarta las pulsaciones repetidas: en cuanto se valida
+                    // se pasa de turno e isRevealed vuelve a false.
+                    if (!puedeUsarMando(peerId) || !isRevealed) break;
                     validateResult(true, true);
                     break;
                 case 'REMOTE_INCORRECT':
+                    // Solo tras revelar (que es cuando el mando enseña estos botones).
+                    // Esto además descarta las pulsaciones repetidas: en cuanto se valida
+                    // se pasa de turno e isRevealed vuelve a false.
+                    if (!puedeUsarMando(peerId) || !isRevealed) break;
                     validateResult(false, false);
                     break;
                 case 'REMOTE_INCORRECT_TOKEN':
+                    // Solo tras revelar (que es cuando el mando enseña estos botones).
+                    // Esto además descarta las pulsaciones repetidas: en cuanto se valida
+                    // se pasa de turno e isRevealed vuelve a false.
+                    if (!puedeUsarMando(peerId) || !isRevealed) break;
                     validateResult(false, true);
                     break;
                 case 'REMOTE_SYSTEM_ERROR':
+                    if (!puedeUsarMando(peerId)) break;
                     reportSystemError();
                     break;
                 case 'REMOTE_SET_GAME_MODE':
-                    if (turnPhase === 'LOBBY') {
-                        gameMode = value;
-                        document.getElementById('game-mode-select').value = value;
-                        syncState();
+                    // Solo en el lobby (antes de empezar). turnPhase NUNCA vale 'LOBBY',
+                    // por eso este comando se ignoraba siempre y la partida arrancaba en CLÁSICO.
+                    if (!gameStarted) {
+                        var _sel = document.getElementById('game-mode-select');
+                        var _valid = ['normal', 'rey', 'supervivencia', 'equipos'];
+                        if (_valid.indexOf(value) !== -1) {
+                            gameMode = value;
+                            if (_sel) _sel.value = value;
+                            addEvent('<span class="ev-info">Modo de juego: ' + value.toUpperCase() + '</span>');
+                            syncState();
+                        }
                     }
                     break;
                 case 'REMOTE_KING_RESOLVE':
-                    resolveKingMode(value === 'true' || value === true);
+                    // Aceptar el resultado del Rey desde el mando. El resultado lo calcula
+                    // el host (kingLastResult), no el móvil: así nadie puede "decidir" que
+                    // el rey acertó. Sin guarda de fase esto cerraba la partida desde cualquier estado.
+                    if (puedeUsarMando(peerId) && turnPhase === 'KING_GUESS_RESULT') {
+                        resolveKingMode(kingLastResult);
+                    }
                     break;
                 case 'REMOTE_NEXT_TURN':
+                    if (!puedeUsarMando(peerId)) break;
                     if (turnPhase === 'DUEL' && !currentDuel) {
                         advanceAndNextTurn();
                     } else if (isRevealed) {
@@ -3081,19 +3175,26 @@
                     }
                     break;
                 case 'REMOTE_DUEL_FINISH':
+                    if (!puedeUsarMando(peerId)) break;
                     finishDuel();
                     break;
                 case 'MARKET_WILDCARD':
                     var p = players.find(function (pl) { return pl.id === peerId; });
+                    // Un valor desconocido caía en silencio en 'song'. Se valida.
+                    if (value !== 'artist' && value !== 'song') break;
                     if (p && p.id === activeP.id && (p.wildcards === undefined || p.wildcards > 0)) {
                         if (p.wildcards === undefined) p.wildcards = 3;
                         p.wildcards--;
                         if (value === 'artist') {
                             document.getElementById('ui-card-artist').innerText = s.artist;
                             document.getElementById('ui-card-artist').style.color = "var(--gold)";
+                            try { connections[peerId].send({ type: 'BET_RESULT', msg: '🃏 Artista revelado en la pantalla grande: ' + s.artist + ' (te quedan ' + p.wildcards + ' comodines)' }); } catch(e) {}
+                            addEvent('<span class="ev-info">🃏 ' + p.name + ' gastó un comodín: artista revelado</span>');
                         } else {
                             document.getElementById('ui-card-song').innerText = s.song;
                             document.getElementById('ui-card-song').style.color = "var(--gold)";
+                            try { connections[peerId].send({ type: 'BET_RESULT', msg: '🃏 Canción revelada en la pantalla grande: ' + s.song + ' (te quedan ' + p.wildcards + ' comodines)' }); } catch(e) {}
+                            addEvent('<span class="ev-info">🃏 ' + p.name + ' gastó un comodín: canción revelada</span>');
                         }
                         syncState();
                     }
@@ -3158,21 +3259,23 @@
 
                 case 'REQUEST_CATEGORY':
                     var p = players.find(function(pl){ return pl.id === peerId; });
-                    if (p && p.tokens >= 2 && !requestedCategory && gameStarted) {
-                        updateTokens(p, -2);
-                        requestedCategory = value; // 'orig', 'peliculas', 'videojuegos'
-                        var catNames = { orig: 'Anime 🎌', peliculas: 'Películas 🎬', videojuegos: 'Videojuegos 🎮' };
-                        addEvent('<span class="ev-info">🎯 ' + p.name + ' pidió categoría: ' + (catNames[value]||value) + '</span>');
-                        document.getElementById('host-instructions').innerHTML += ' <span style="color:var(--gold)">🎯 Próxima: ' + (catNames[value]||value) + '</span>';
-                        try { connections[peerId].send({ type: 'BET_RESULT', msg: '🎯 Categoría solicitada: ' + (catNames[value]||value) + '. Aplicada en el próximo turno.' }); } catch(e) {}
-                        syncState();
-                    }
-                    break;
-
-                case 'PREDICT_WINNER':
-                    if (typeof value === 'string' && value.length > 0) {
-                        predictions[peerId] = value;
-                        addEvent('<span class="ev-info">🔮 ' + (players.find(function(pl){return pl.id===peerId;})||{name:'?'}).name + ' ha hecho su predicción</span>');
+                    // El player enviaba 'peliculas', que NO es un tipo válido (el real es 'movies'):
+                    // se cobraban 4 fichas y la categoría nunca se aplicaba. Ahora se valida.
+                    if (p && p.tokens >= 4 && !requestedCategory && gameStarted) {
+                        if (!CATEGORIAS[value]) {
+                            try { connections[peerId].send({ type: 'BET_RESULT', msg: '❌ Categoría no válida. No se te ha cobrado nada.' }); } catch(e) {}
+                            break;
+                        }
+                        var hayEnMazo = songs.some(function (sg, i) { return i >= currentSongIdx && sg && sg.type === value; });
+                        if (!hayEnMazo) {
+                            try { connections[peerId].send({ type: 'BET_RESULT', msg: '❌ No quedan canciones de ' + CATEGORIAS[value] + ' en el mazo. No se te ha cobrado nada.' }); } catch(e) {}
+                            break;
+                        }
+                        updateTokens(p, -4);
+                        requestedCategory = value;
+                        addEvent('<span class="ev-info">🎯 ' + p.name + ' pidió categoría: ' + CATEGORIAS[value] + '</span>');
+                        document.getElementById('host-instructions').innerHTML += ' <span style="color:var(--gold)">🎯 Próxima: ' + CATEGORIAS[value] + '</span>';
+                        try { connections[peerId].send({ type: 'BET_RESULT', msg: '🎯 Categoría solicitada: ' + CATEGORIAS[value] + '. Se aplicará en el próximo turno.' }); } catch(e) {}
                         syncState();
                     }
                     break;
@@ -3209,6 +3312,12 @@
 
                 case 'EMOJI_WILDCARD':
                     var p = players.find(function(pl) { return pl.id === peerId; });
+                    // 😂 y 💀 actúan sobre el jugador activo: usarlos en tu propio turno
+                    // era sabotearte a ti mismo, y con 💀 cobrabas +2🔵 por fallar tú (exploit).
+                    if (p && (value === '😂' || value === '💀') && players[activePlayerIdx] && players[activePlayerIdx].id === peerId) {
+                        try { connections[peerId].send({ type: 'BET_RESULT', msg: 'Ese comodín no se puede usar en tu propio turno. No se te ha cobrado.' }); } catch(e) {}
+                        break;
+                    }
                     if (p && p.tokens >= 1 && gameStarted) {
                         if (!p.emojiWildcardUsed) p.emojiWildcardUsed = {};
                         if (p.emojiWildcardUsed[value]) {
@@ -3252,8 +3361,8 @@
                 case 'DOUBLE_OR_NOTHING':
                     // Solo el jugador activo puede activar doble o nada (coste 4🔵, antes de reproducir)
                     var _donP = players.find(function(pl){ return pl.id === peerId; });
-                    if (players[activePlayerIdx] && peerId === players[activePlayerIdx].id && !isPlaying && !isRevealed && !isDoubleOrNothing && _donP && _donP.tokens >= 3) {
-                        updateTokens(_donP, -3);
+                    if (players[activePlayerIdx] && peerId === players[activePlayerIdx].id && !isPlaying && !isRevealed && !isDoubleOrNothing && _donP && _donP.tokens >= 4) {
+                        updateTokens(_donP, -4);
                         isDoubleOrNothing = true;
                         addEvent('<span class="ev-info">🎲 ' + players[activePlayerIdx].name + ' activa DOBLE O NADA</span>');
                         document.getElementById('host-instructions').innerHTML = "<span style='color:#ff8800;font-family:Bungee;font-size:1.2em;'>🎲 ¡DOBLE O NADA ACTIVADO!</span>";
@@ -3406,8 +3515,7 @@
             // Síntesis de voz opcional al revelar
             if (voiceEnabled && s && 'speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
-                var voiceText = (s.song ? s.song + ' ... de ... ' : '') + s.artist + ' ... año ' + s.year;
-                var utter = new SpeechSynthesisUtterance(voiceText);
+                var utter = new SpeechSynthesisUtterance(s.artist + ' ... ' + s.year);
                 utter.lang = 'es-ES'; utter.rate = 0.85; utter.pitch = 1.1;
                 window.speechSynthesis.speak(utter);
             }
@@ -3444,11 +3552,25 @@
             syncState();
         }
 
+        // ── MANDO A DISTANCIA ──
+        // El mando del móvil (📺) es la tablet en remoto: sirve para manejarla cuando
+        // estás lejos. Como cualquiera puede coger la tablet, cualquiera puede usar el
+        // mando. No hay rol de "juez": solo hace falta ser un jugador de la partida.
+        function puedeUsarMando(peerId) {
+            return players.some(function (pl) { return pl.id === peerId; });
+        }
+
         function validateResult(isCardOk, isTokenOk) {
-            if (turnPhase === 'DUEL') return;
-            // Cancelar voz si está leyendo
-            if ('speechSynthesis' in window) window.speechSynthesis.cancel(); // No se valida nada en modo duelo manualmente de esta forma
-            
+            if (turnPhase === 'DUEL') return; // No se valida nada en modo duelo manualmente de esta forma
+
+            // Guarda: si no hay jugador activo o se agotó la canción, no reventar a media validación
+            if (!players[activePlayerIdx] || !songs[currentSongIdx]) {
+                console.warn('[HOST] validateResult sin jugador activo o sin canción — se pasa turno');
+                addEvent('<span class="ev-bad">⚠️ Estado inconsistente — se pasa turno</span>');
+                nextTurn();
+                return;
+            }
+
             if (isTokenOk) {
                 updateTokens(players[activePlayerIdx], 1);
             }
@@ -3556,7 +3678,10 @@
                 players[activePlayerIdx].cards.push(parseInt(songs[currentSongIdx].year));
                 players[activePlayerIdx].cards.sort(function(a,b){return a-b;});
                 // ── STREAK BONUS: racha ≥ 3 → carta extra (trackCorrect se llama después) ──
-                var streakNow = stats.streaks[players[activePlayerIdx].id] || 0;
+                // trackCorrect() (que incrementa la racha) se llamaba DESPUÉS de esta
+                // comprobación, así que hacía falta el 4º acierto seguido para que
+                // saltara el bonus "x3". Sumamos el acierto en curso.
+                var streakNow = (stats.streaks[players[activePlayerIdx].id] || 0) + 1;
                 if (streakNow >= 3) {
                     players[activePlayerIdx].score++;
                     players[activePlayerIdx].cards.push(parseInt(songs[currentSongIdx].year));
@@ -3589,9 +3714,6 @@
                 }
                 // ── HISTORIAL: marcar acierto ──
                 if (songHistory.length > 0) songHistory[songHistory.length-1].correct = true;
-                // ── TRACKING TIPO DE CARTA ──
-                if (!playerCardTypes[players[activePlayerIdx].id]) playerCardTypes[players[activePlayerIdx].id] = {};
-                playerCardTypes[players[activePlayerIdx].id][parseInt(songs[currentSongIdx].year)] = songs[currentSongIdx].type || 'orig';
                 // ── EL CAMINO DEL GUERRERO: 3 fallos seguidos → carta extra ──
                 if ((stats.consecutiveFails[players[activePlayerIdx].id] || 0) >= 3) {
                     players[activePlayerIdx].score++;
@@ -3652,14 +3774,24 @@
                 flyCard(songs[currentSongIdx].year, players[activePlayerIdx].name);
                 trackCorrect(players[activePlayerIdx].id, songs[currentSongIdx].id);
                 if (players[activePlayerIdx].score >= 10) {
-                    if (gameMode === 'normal') {
+                    // supervivencia también gana a las 10 cartas (antes NO: se llegaba a 40+
+                    // cartas y la partida no acababa nunca salvo por eliminación)
+                    if (gameMode === 'normal' || gameMode === 'supervivencia') {
                         showWinner(players[activePlayerIdx].name);
                         return;
                     } else if (gameMode === 'rey') {
                         // Avanzar al siguiente jugador primero — cuando vuelva al rey, nextTurn activará KING_SELECTION
+                        var _kingName = players[activePlayerIdx].name;
+                        addEvent('<span class="ev-name">' + _kingName + '</span> <span class="ev-good">👑 llega a 10 — se enfrentará al DESAFÍO DEL REY en su próximo turno</span>', '👑');
+                        document.getElementById('host-instructions').innerHTML =
+                            "<span style='color:var(--gold); font-size:1.4em; font-family:Bungee;'>👑 " + _kingName + " ES EL REY</span><br>" +
+                            "<span style='font-size:0.8em;'>Debe superar el DESAFÍO FINAL en su próximo turno para ganar</span>";
+                        for (var _kc in connections) {
+                            try { connections[_kc].send({ type: 'DANGER_ALERT', msg: '👑 ' + _kingName + ' ha llegado a 10. Deberá superar el DESAFÍO DEL REY para ganar.', critical: true }); } catch(e) {}
+                        }
                         activePlayerIdx = (activePlayerIdx + 1) % players.length;
                         players[activePlayerIdx].canReload = true;
-                        nextTurn();
+                        setTimeout(function () { nextTurn(); }, 3500);
                         return;
                     }
                 }
@@ -3681,6 +3813,7 @@
                     isBragging = false;
                 }
                 // ── SEGURO DE FALLO: bypass de penalizaciones ──
+                var _seguroActivo = failSafeActive;
                 if (failSafeActive) {
                     jinxActive = false;
                     isDoubleOrNothing = false;
@@ -3704,8 +3837,10 @@
                     }
                 });
                 silentCurses = [];
-                // Modo supervivencia: perder vida al fallar
-                if (gameMode === 'supervivencia') {
+                // Modo supervivencia: perder vida al fallar.
+                // El SEGURO DE FALLO protege también de esto (antes no lo hacía,
+                // pese a que las reglas lo prometían explícitamente).
+                if (gameMode === 'supervivencia' && !_seguroActivo) {
                     loseLife(players[activePlayerIdx], null);
                 }
                 // Si no hay carta para el activo, ver si hay robos
@@ -3757,7 +3892,7 @@
                     if (teamScore[p.team] >= 10) { showWinner(p.team === 'red' ? '🔴 EQUIPO ROJO' : '🔵 EQUIPO AZUL'); return; }
                 }
                 if (p.score >= 10) {
-                    if (gameMode === 'normal') {
+                    if (gameMode === 'normal' || gameMode === 'supervivencia') {
                         showWinner(p.name);
                         return;
                     } else if (gameMode === 'rey') {
@@ -3773,38 +3908,25 @@
         }
 
         function showWinner(name) {
-            console.log("Celebrando victoria de:", name);
+            // TRAZA: si la victoria vuelve a saltar cuando no debe, aquí queda registrado
+            // el modo activo y la línea exacta que la disparó.
+            console.warn('[HOST] === VICTORIA ===', name, '| modo:', gameMode, '| turnPhase:', turnPhase);
+            console.warn('[HOST] disparada desde:\n' + (new Error().stack || 'sin stack'));
+            addEvent('<span class="ev-info">🏆 Victoria declarada (modo: ' + gameMode.toUpperCase() + ')</span>');
             document.getElementById('winner-name').innerText = name;
 
             // Mostrar avatar del ganador
             var winner = players.find(p => p.name === name);
             var avatarHtml = '';
             if (winner && winner.avatar) {
-                avatarHtml = '<img src="' + winner.avatar + '" style="width:150px; height:150px; border-radius:50%; border: 4px solid var(--neon); box-shadow: 0 0 30px var(--neon); object-fit: cover;">';
+                avatarHtml = '<img src="' + winner.avatar + '" style="width:200px; height:200px; border-radius:50%; border: 5px solid var(--neon); box-shadow: 0 0 30px var(--neon); object-fit: cover;">';
             } else {
                 var initial = name.charAt(0).toUpperCase();
-                avatarHtml = '<div style="width:140px; height:140px; border-radius:50%; background:#0a1520; border:4px solid var(--neon); color:var(--neon); display:flex; align-items:center; justify-content:center; font-family:Bungee,sans-serif; font-size:3.5em; box-shadow:0 0 30px var(--neon);">' + initial + '</div>';
+                avatarHtml = '<div style="width:150px; height:150px; border-radius:50%; background:#222; border:5px solid var(--neon); color:var(--neon); display:inline-flex; align-items:center; justify-content:center; font-family:Bungee,sans-serif; font-size:4em; box-shadow: 0 0 30px var(--neon);">' + initial + '</div>';
             }
             document.getElementById('winner-avatar-img').innerHTML = avatarHtml;
 
-            // ── GUARDAR VICTORIA en localStorage ──
-            var _wKey = 'CB_Stats_' + name.replace(/\s+/g, '_');
-            var _wData = JSON.parse(localStorage.getItem(_wKey) || '{}');
-            _wData.wins = (_wData.wins || 0) + 1;
-            localStorage.setItem(_wKey, JSON.stringify(_wData));
-
             document.getElementById('winner-screen').style.display = 'flex';
-            // Confeti espectacular al mostrar el ganador
-if (typeof confetti === 'function') {
-                var _cc = ['#00f2ff','#ff00cc','#ffaa00','#ffffff','#bf00ff'];
-                var _cz = { zIndex: 2000 };
-                setTimeout(function() {
-                    confetti(Object.assign({}, _cz, { particleCount: 120, spread: 80, origin: { y: 0.4 }, colors: _cc }));
-                    setTimeout(function(){ confetti(Object.assign({}, _cz, { particleCount: 80, spread: 120, origin: { y: 0.3, x: 0.2 }, colors: _cc })); }, 400);
-                    setTimeout(function(){ confetti(Object.assign({}, _cz, { particleCount: 80, spread: 120, origin: { y: 0.3, x: 0.8 }, colors: _cc })); }, 700);
-                    setTimeout(function(){ confetti(Object.assign({}, _cz, { particleCount: 60, spread: 60,  origin: { y: 0.5  }, colors: ['#ffaa00','#ffffff'] })); }, 1200);
-                }, 300);
-            }
 
             // ── ESTADÍSTICAS RICAS ──
             var sorted = players.slice().sort(function(a,b) { return b.score - a.score; });
@@ -3899,7 +4021,7 @@ if (typeof confetti === 'function') {
                 if (worstAcc) {
                     jokeHtml += '<div class="award-card" style="border-color:#555;">' +
                         '<div class="award-icon">🎖️</div>' +
-                        '<div class="award-title" style="color:#cccccc;">EL OÍDO DE PALO</div>' +
+                        '<div class="award-title" style="color:#aaa;">EL OÍDO DE PALO</div>' +
                         '<div class="award-val" style="color:#ccc;">' + worstAcc.name + '</div>' +
                         '<div class="award-sub">La música le emociona. Adivinar el año, no tanto</div>' +
                         '</div>';
@@ -3912,7 +4034,7 @@ if (typeof confetti === 'function') {
                 if (mostSab && (stats.playerSabotaged[mostSab.id]||0) > 0) {
                     jokeHtml += '<div class="award-card" style="border-color:#555;">' +
                         '<div class="award-icon">🎖️</div>' +
-                        '<div class="award-title" style="color:#cccccc;">EL PARARRAYOS</div>' +
+                        '<div class="award-title" style="color:#aaa;">EL PARARRAYOS</div>' +
                         '<div class="award-val" style="color:#ccc;">' + mostSab.name + '</div>' +
                         '<div class="award-sub">Consiguió despertar lo peor de sus amigos. Eso también es un talento</div>' +
                         '</div>';
@@ -3923,7 +4045,7 @@ if (typeof confetti === 'function') {
                 if (lastPlace && lastPlace.name !== name) {
                     jokeHtml += '<div class="award-card" style="border-color:#555;">' +
                         '<div class="award-icon">🎖️</div>' +
-                        '<div class="award-title" style="color:#cccccc;">EL GRAN TURISTA</div>' +
+                        '<div class="award-title" style="color:#aaa;">EL GRAN TURISTA</div>' +
                         '<div class="award-val" style="color:#ccc;">' + lastPlace.name + '</div>' +
                         '<div class="award-sub">Vino, escuchó, y disfrutó del paisaje. El ranking es lo de menos</div>' +
                         '</div>';
@@ -3936,7 +4058,7 @@ if (typeof confetti === 'function') {
                 if (mostFails && (stats.playerFails[mostFails.id]||0) >= 3 && (!worstAcc || mostFails.id !== worstAcc.id)) {
                     jokeHtml += '<div class="award-card" style="border-color:#555;">' +
                         '<div class="award-icon">🎖️</div>' +
-                        '<div class="award-title" style="color:#cccccc;">EL PALEONTÓLOGO</div>' +
+                        '<div class="award-title" style="color:#aaa;">EL PALEONTÓLOGO</div>' +
                         '<div class="award-val" style="color:#ccc;">' + mostFails.name + '</div>' +
                         '<div class="award-sub">Para él/ella, las canciones de los 2000 suenan muy modernas</div>' +
                         '</div>';
@@ -3947,7 +4069,7 @@ if (typeof confetti === 'function') {
                 if (monkPlayer) {
                     jokeHtml += '<div class="award-card" style="border-color:#555;">' +
                         '<div class="award-icon">🎖️</div>' +
-                        '<div class="award-title" style="color:#cccccc;">EL MONJE SHAOLÍN</div>' +
+                        '<div class="award-title" style="color:#aaa;">EL MONJE SHAOLÍN</div>' +
                         '<div class="award-val" style="color:#ccc;">' + monkPlayer.name + '</div>' +
                         '<div class="award-sub">Podría haberte fastidiado. Decidió no hacerlo. Respétale</div>' +
                         '</div>';
@@ -3964,7 +4086,7 @@ if (typeof confetti === 'function') {
                     if (totalAct <= 4) {
                         jokeHtml += '<div class="award-card" style="border-color:#555;">' +
                             '<div class="award-icon">🎖️</div>' +
-                            '<div class="award-title" style="color:#cccccc;">EL ESPECTADOR PRIVILEGIADO</div>' +
+                            '<div class="award-title" style="color:#aaa;">EL ESPECTADOR PRIVILEGIADO</div>' +
                             '<div class="award-val" style="color:#ccc;">' + leastActive.name + '</div>' +
                             '<div class="award-sub">Lo de participar lo veía más como una sugerencia</div>' +
                             '</div>';
@@ -4010,27 +4132,12 @@ if (typeof confetti === 'function') {
 
             // V26.3: Integración de IDs Verificados por el Usuario
             var isXavi = name.toLowerCase().includes('xavi');
-            var isSonia = name.toLowerCase().includes('sonia');
             var songId = "";
             var songTitle = "";
 
             if (isXavi) {
                 songId = '04854XqcfCY'; // Queen - We Are The Champions
                 songTitle = "Queen - We Are The Champions";
-            } else if (isSonia) {
-                var celinePool = [
-                    { id: 'Siz-xBfIqpg', t: "Céline Dion - My Heart Will Go On" },
-                    { id: 'B5RRGN43g58', t: "Céline Dion - The Power of Love" },
-                    { id: 'lpEK2bFDAW0', t: "Céline Dion - Because You Loved Me" },
-                    { id: 'JsWG2Gry1fw', t: "Céline Dion - It's All Coming Back to Me Now" },
-                    { id: '4jeCvAccUMk', t: "Céline Dion - That's the Way It Is" },
-                    { id: 'uy8d_IwuIvY', t: "Céline Dion - Pour que tu m'aimes encore" },
-                    { id: 'Y8HOfcYWZoo', t: "Céline Dion - The Power of Love (HD)" },
-                    { id: 'zmbw8OycJrE', t: "Céline Dion - My Heart Will Go On" }
-                ];
-                var celPicked = celinePool[Math.floor(Math.random() * celinePool.length)];
-                songId = celPicked.id;
-                songTitle = celPicked.t;
             } else {
                 // El "Pool de la Frikada" (V26.3 - IDs proporcionados por el usuario)
                 var frikiPool = [
@@ -4050,29 +4157,6 @@ if (typeof confetti === 'function') {
             }
 
             console.log("Ganador:", name, "| Sonando:", songTitle);
-
-            // ── PREDICCIONES ──
-            var predHtml = '';
-            var predWinners = [];
-            Object.keys(predictions).forEach(function(pid) {
-                var predictor = players.find(function(pl){ return pl.id === pid; });
-                if (!predictor) return;
-                var correct = predictions[pid] === name;
-                if (correct) {
-                    predWinners.push(predictor.name);
-                    // +1 ficha en siguiente partida via localStorage
-                    var _pKey = 'CB_PredictionBonus_' + predictor.name.replace(/\s+/g,'_');
-                    localStorage.setItem(_pKey, '1');
-                }
-                predHtml += '<div style="font-size:0.65em;color:' + (correct?'var(--neon)':'#555') + ';font-family:Montserrat;padding:3px 0;">' +
-                    (correct ? '✅ ' : '❌ ') + predictor.name + ' predijo: <strong>' + predictions[pid] + '</strong>' +
-                    (correct ? ' 🎯 +1🔵 próxima partida' : '') + '</div>';
-            });
-            if (predHtml) {
-                awardsHtml += '<div style="width:100%;max-width:700px;margin:10px 0;border-top:1px solid #1a1a1a;padding-top:10px;">' +
-                    '<div style="font-family:Bungee;font-size:0.55em;color:#333;letter-spacing:3px;margin-bottom:8px;">🔮 PREDICCIONES</div>' +
-                    predHtml + '</div>';
-            }
 
             // ── LOGROS ──
             var achData = calculateAchievements(players, stats);
@@ -4194,7 +4278,7 @@ if (typeof confetti === 'function') {
             };
             var colors = confettiColors[domCat] || confettiColors.mix;
 
-            if (isXavi || isSonia) {
+            if (isXavi) {
                 window.victoryInterval = setInterval(function () {
                     confetti(Object.assign({}, confettiDefaults, { particleCount: 40, colors: colors, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
                     confetti(Object.assign({}, confettiDefaults, { particleCount: 40, colors: colors, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
@@ -4220,7 +4304,8 @@ if (typeof confetti === 'function') {
                 leaderScore = leader.score;
             }
 
-            var currentJudgeId = 'ALL';
+            currentJudgeId = 'ALL';   // GLOBAL: antes era local de syncState y por eso
+                                      // handlePlayerCommand no podía verificar al juez
             if (document.getElementById('lobby').style.display === 'none' && players.length > 0) {
                 // El usuario prefiere que el mando pase al SIGUIENTE jugador para validar (como tradicionalmente)
                 if (turnPhase === 'NORMAL' || turnPhase === 'KING_GUESS' || turnPhase === 'KING_SELECTION') {
@@ -4241,6 +4326,17 @@ if (typeof confetti === 'function') {
                     leader: { name: leaderName, score: leaderScore },
                     currentTrack: songs[currentSongIdx] || null,
                     revealed: isRevealed,
+                    isRevealed: isRevealed,          // alias: el player lo usaba y llegaba undefined
+                    activePlayerIdx: activePlayerIdx, // el player lo usaba y llegaba undefined
+                    turnCounter: turnCounter,         // contador de turnos del player
+                    requestedCategory: requestedCategory,
+                    availableCategories: (function () {
+                        var set = {};
+                        for (var i = Math.max(0, currentSongIdx); i < songs.length; i++) {
+                            if (songs[i] && songs[i].type) set[songs[i].type] = true;
+                        }
+                        return Object.keys(set);
+                    })(),
                     isPlaying: isPlaying,
                     isMuted: isMuted,
                     muteTimeRemaining: muteTimeRemaining,
@@ -4260,13 +4356,10 @@ if (typeof confetti === 'function') {
                     failSafeActive: failSafeActive,
                     isBragging: isBragging,
                     competitiveMode: competitiveMode,
-                    requestedCategory: requestedCategory,
                     readyPlayers: readyPlayers,
-                    predictions: predictions,
-                    playerCardTypes: playerCardTypes,
-                    playerNames: players.map(function(pl){ return pl.name; }),
                     isBonusCard: isBonusCard,
                     nextSharedSongTurn: nextSharedSongTurn,
+                    joputismoLevel: joputismoLevel,
                     bettingAgainst: bettingAgainst,
                     bettingFor: bettingFor,
                     myCards: p ? p.cards : [],
@@ -4280,6 +4373,7 @@ if (typeof confetti === 'function') {
                     currentDuel: currentDuel,
                     duelResult: duelResult,
                     kingOptions: kingOptions,
+                    cheatsEnabled: cheatsEnabled,
                     turnPhase: turnPhase,
                     currentType: songs[currentSongIdx] ? songs[currentSongIdx].type : 'mix',
                     hasShield: hasShield,
@@ -4368,19 +4462,69 @@ if (typeof confetti === 'function') {
         function resetRoomCode() {
             if (!confirm('¿Generar un nuevo código de sala? Los jugadores actuales perderán la conexión.')) return;
             localStorage.removeItem('CB_RoomCode');
-            localStorage.removeItem('CB_PlayedSongs');
             location.reload();
         }
 
         // ── CONTADOR DE CANCIONES ──
+        // ── FILTRO DE DÉCADAS ──
+        // Antes el onchange solo hacía "decadeFilter = valor; updateSongCounter();"
+        // → el contador cambiaba pero el array `songs` seguía siendo el del arranque.
+        // El filtro era puramente decorativo: se jugaba con el mazo sin filtrar.
+        function applyDecadeFilter(value) {
+            if (gameStarted) {
+                showCustomAlert('No se puede cambiar el filtro con la partida en marcha.');
+                var sel = document.getElementById('decade-filter-select');
+                if (sel) sel.value = decadeFilter;
+                return;
+            }
+            decadeFilter = value;
+            songs = buildSongsFromCache(false);
+            currentSongIdx = -1;
+            updateSongCounter();
+            console.log('[HOST] Filtro aplicado:', decadeFilter, '| Mazo:', songs.length, 'canciones');
+        }
+
+        // ── REBARAJAR MAZO: olvidar canciones jugadas y reconstruir ──
+        function resetPlayedSongs() {
+            if (gameStarted) {
+                showCustomAlert('No se puede rebarajar con la partida en marcha.');
+                return;
+            }
+            var jugadas = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]').length;
+            localStorage.removeItem('CB_PlayedSongs');
+            songs = buildSongsFromCache(true);
+            currentSongIdx = -1;
+            updateSongCounter();
+            var btn = document.getElementById('btn-reset-deck');
+            if (btn) {
+                var prev = btn.innerHTML;
+                btn.innerHTML = '✅ MAZO REBARAJADO — ' + jugadas + ' canciones recuperadas';
+                btn.style.background = 'rgba(255,170,0,0.15)';
+                setTimeout(function () { btn.innerHTML = prev; btn.style.background = 'transparent'; }, 3000);
+            }
+            console.log('[HOST] Mazo rebarajado. Canciones olvidadas:', jugadas, '| Mazo nuevo:', songs.length);
+        }
+
         function updateSongCounter() {
             var counter = document.getElementById('song-counter');
             if (!counter || !cachedTxts || cachedTxts.length === 0) return;
-            var counts = countAllSongs(false);
-            var played = counts.total - counts.available;
-            counter.innerHTML = counts.available + ' canciones disponibles' +
-                (played > 0 ? ' <span style="color:#333">(' + played + ' ya jugadas)</span>' : '') +
-                (decadeFilter !== 'all' ? ' · <span style="color:var(--gold)">filtro de década activo</span>' : '');
+            var total = buildSongsFromCache(true).length;
+            var deck = buildSongsFromCache(false);
+            var available = deck.length;
+
+            // Desglose real por categoría del mazo que se va a jugar
+            var byType = {};
+            deck.forEach(function (s) { byType[s.type] = (byType[s.type] || 0) + 1; });
+            var labels = { orig: '🎵', movies: '🎬', anime: '⛩️', videojuegos: '🎮' };
+            var parts = [];
+            Object.keys(byType).forEach(function (t) {
+                parts.push((labels[t] || t) + ' ' + byType[t]);
+            });
+
+            counter.innerHTML = available + ' canciones en el mazo' +
+                (total !== available ? ' <span style="color:#333">(' + (total - available) + ' ya jugadas)</span>' : '') +
+                (decadeFilter !== 'all' ? ' <span style="color:var(--gold)">con filtro activo</span>' : '') +
+                (parts.length ? '<br><span style="color:#666; font-size:0.9em;">' + parts.join(' · ') + '</span>' : '');
         }
 
         // ── LOGROS ──
@@ -4529,7 +4673,64 @@ if (typeof confetti === 'function') {
             } catch(e) {}
         }
 
+        // ── Mantener el invariante score === cards.length ──
+        // Los robos de carta (ROBO INTELIGENTE, RULETA RUSA) movían cartas sin tocar score,
+        // así que el marcador X/10 se desincronizaba de la cronología real.
+        function resyncScores() {
+            players.forEach(function (pl) {
+                if (pl.cards) pl.score = pl.cards.length;
+            });
+        }
+
+        // Comprueba victoria por puntuación respetando el modo de juego.
+        // Devuelve true SOLO si la partida ha terminado (modo clásico).
+        // En modo REY no cortamos el turno en curso: la fase de rey se dispara sola
+        // en nextTurn() cuando le vuelva a tocar al jugador con 10 cartas.
+        function checkScoreVictory(p) {
+            if (!p || p.score < 10) return false;
+            if (gameMode === 'normal' || gameMode === 'supervivencia') {
+                showWinner(p.name);
+                return true;
+            }
+            return false;
+        }
+
         // ── BROADCAST DE SABOTAJES ──
+        // Coste de cada sabotaje. Se usa para cobrar al atacante cuando el ESCUDO
+        // rebota su ataque: antes no se le cobraba nada, pese a que el mensaje decía
+        // "lo has perdido todo" y las reglas prometían que perdía las fichas.
+        var COSTE_SABOTAJE = {
+            SABOTAGE_MUTE: 1, SABOTAGE_BUZZER: 1, SABOTAGE_VETO: 1,
+            SABOTAGE_PANIC: 2, SABOTAGE_FOG: 2, SABOTAGE_FORCE_SKIP: 3,
+            SABOTAGE_STEAL_TOKEN: 4, SABOTAGE_STEAL_TURN: 4,
+            SABOTAGE_SMART_STEAL: 4, SABOTAGE_BLACKHOLE: 5
+        };
+        // El escudo protege a QUIEN LO TIENE, no solo al jugador activo.
+        // Antes solo lo comprobaban MUTE/VETO/PÁNICO/NIEBLA/FORZAR SALTO: ROBAR FICHA,
+        // ROBAR TURNO, ROBO INTELIGENTE, AGUJERO NEGRO, ZUMBIDO y la RULETA lo ignoraban
+        // por completo, que son precisamente de los que uno querría protegerse.
+        function escudoBloquea(victima, atacante, accion) {
+            if (!victima || !hasShield[victima.id]) return false;
+            hasShield[victima.id] = false;
+            var perdidas = cobrarSabotajeRebotado(atacante, accion);
+            if (atacante && connections[atacante.id]) {
+                try { connections[atacante.id].send({ type: 'BET_RESULT', msg: '🛡️ ¡ZASCA! El Escudo de ' + victima.name + ' ha rebotado tu sabotaje. Pierdes ' + perdidas + '🔵' }); } catch(e) {}
+            }
+            if (connections[victima.id]) {
+                try { connections[victima.id].send({ type: 'BET_RESULT', msg: '🛡️ Tu Escudo ha bloqueado el sabotaje de ' + (atacante ? atacante.name : '?') + '.' }); } catch(e) {}
+            }
+            addEvent('<span class="ev-good">🛡️ El escudo de ' + victima.name + ' rebotó el sabotaje de ' + (atacante ? atacante.name : '?') + ' (−' + perdidas + '🔵)</span>', '🛡️');
+            syncState();
+            return true;
+        }
+
+        function cobrarSabotajeRebotado(atacante, accion) {
+            var coste = COSTE_SABOTAJE[accion] || 1;
+            if (!atacante || atacante.tokens < coste) return 0;
+            updateTokens(atacante, -coste);
+            return coste;
+        }
+
         function broadcastSabotage(attackerName, victimName, sabotageName, icon) {
             var msg = icon + ' ' + attackerName + ' saboteó a ' + victimName + ': ' + sabotageName;
             for (var _bs in connections) {
@@ -4607,18 +4808,24 @@ if (typeof confetti === 'function') {
             // Ejecutar robo
             var newIdx = players.indexOf(thief);
             if (newIdx === -1) return;
+            refundBets();
             activePlayerIdx = newIdx;
+            thief.canReload = true;
             currentBets = {};
             activeGuess = null;
             bettingAgainst = [];
             bettingFor = [];
+
+            // Avisar a ambos
+            try { if (connections[thief.id]) connections[thief.id].send({ type: 'BET_RESULT', msg: '⚡ ¡TURNO ROBADO! Ahora te toca a ti: coloca el año.' }); } catch(e) {}
+            try { if (connections[victim.id]) connections[victim.id].send({ type: 'BET_RESULT', msg: '⚡ ' + thief.name + ' te ha robado el turno. Esta canción ya no es tuya.' }); } catch(e) {}
+            addEvent('<span class="ev-name">' + thief.name + '</span> <span class="ev-bad">ROBÓ EL TURNO a ' + victim.name + ' ⚡</span>');
 
             document.getElementById('host-instructions').innerHTML = "<span style='color:#00f2fe; font-size:1.5em; font-family:Bungee;'>¡" + thief.name + " HA ROBADO EL TURNO A " + victim.name + "!</span>";
             setTimeout(function() {
                 if (!isRevealed && !panicActive) document.getElementById('host-instructions').innerText = (isMuted ? "REPRODUCIENDO (MUTE)" : "REPRODUCIENDO");
             }, 3000);
             trackSabotage(thief.id, victim.id);
-            updateLiveStats();
             syncState();
         }
 
@@ -4729,6 +4936,7 @@ if (typeof confetti === 'function') {
             isMuted = false;
             isFogActive = false;
             isSharedSong = false;
+            sharedSongOwnerId = null;
             isLightningSong = false;
             isDoubleOrNothing = false;
             isBonusCard = false;
@@ -4739,7 +4947,6 @@ if (typeof confetti === 'function') {
             failSafeActive = false;
             songHistory = [];
             readyPlayers = {};
-            predictions = {};
             emojiWildcardBonus = {};
             nextSharedSongTurn = 4 + Math.floor(Math.random() * 4);
             nextBonusTurn = 7 + Math.floor(Math.random() * 4);
@@ -4791,6 +4998,7 @@ if (typeof confetti === 'function') {
             pendingSteal = null;
             isLightningSong = false;
             isSharedSong = false;
+            sharedSongOwnerId = null;
             isDoubleOrNothing = false;
             turnCounter = 0;
             teams = { red: [], blue: [] };
@@ -5015,24 +5223,25 @@ if (typeof confetti === 'function') {
             addEvent('<span class="ev-name">' + playerName + '</span> reaccionó ' + emoji);
         }
 
+        // reportBrokenLink(): apuntaba a 'reporte_error.php'. En GitHub Pages no hay PHP,
+        // así que el fetch siempre fallaba y el catch mentía con "Aviso guardado".
+        // Además el botón que la llamaba (btn-report-error) no existe en el HTML.
+        // Ahora deja el registro en localStorage y lo vuelca por consola: sin servidor,
+        // pero sin mentir. Para reportar de verdad ya está reportSystemError() (mailto).
         function reportBrokenLink() {
             var s = songs[currentSongIdx];
             if (!s || !s.id) return;
-            var url = 'https://www.youtube.com/watch?v=' + s.id;
-            var listType = s.type ? s.type : 'General';
-            
-            fetch('reporte_error.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ url: url, tipo: listType })
-            }).then(function(r){ return r.json()}).then(function(data){
-                alert('URL reportada como rota. Gasta un Token de Recarga si tienes para saltarla.');
-                var btn = document.getElementById('btn-report-error');
-                if(btn) btn.style.display = 'none';
-            }).catch(function(e){
-                console.error(e);
-                alert('Aviso guardado.');
+            var registro = JSON.parse(localStorage.getItem('CB_BrokenLinks') || '[]');
+            registro.push({
+                url: 'https://www.youtube.com/watch?v=' + s.id,
+                tipo: s.type || 'General',
+                artista: s.artist, cancion: s.song, linea: s.line,
+                fecha: new Date().toISOString()
             });
+            localStorage.setItem('CB_BrokenLinks', JSON.stringify(registro));
+            console.warn('[HOST] Enlace roto registrado:', s.artist, '-', s.song, '(fila ' + s.line + ')');
+            console.warn('[HOST] Enlaces rotos acumulados:', registro.length, registro);
+            addEvent('<span class="ev-bad">🔗 Enlace roto registrado: ' + s.artist + ' — ' + s.song + '</span>');
         }
     </script>
     <script>
