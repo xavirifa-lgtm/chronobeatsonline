@@ -1585,61 +1585,83 @@
             <button onclick="openRuleTopic('tokens')">🔵 FICHAS</button>
         </div>
 
-        <!-- MAQUETA VISUAL INTERACTIVA -->
+        <!-- MAQUETA VISUAL INTERACTIVA (RÉPLICA PANTALLA MÓVIL) -->
         <div class="rules-blueprint-mockup">
             
-            <!-- SECCIÓN 1: MODOS Y MARCADOR -->
-            <div class="blueprint-section" onclick="openRuleTopic('modes')" title="Ver Modos de Juego">
-                <span class="hotspot-badge">🕹️ MODOS DE JUEGO & SALDO</span>
-                <div class="mock-header">
-                    <span style="color:var(--neon);">CLÁSICO / REY / SUPERVIVENCIA</span>
-                    <span style="color:var(--gold);">🔵 3 FICHAS</span>
+            <!-- SECCIÓN 1: BARRA SUPERIOR Y FICHAS -->
+            <div class="blueprint-section" onclick="openRuleTopic('tokens')" title="Fichas y Economía">
+                <span class="hotspot-badge">🔵 MARCADOR & FICHAS DEL JUGADOR</span>
+                <div style="display:flex; justify-content:space-between; align-items:center; background:#111; padding:8px 12px; border-radius:10px; font-family:'Bungee'; font-size:0.7em;">
+                    <span style="color:#fff;">👤 TU NOMBRE</span>
+                    <span style="color:var(--neon); font-size:1.1em;">🔵 3 FICHAS</span>
+                    <span style="color:var(--gold);">🔥 RACHA ×2</span>
+                    <span style="background:#222; border:1px solid #555; padding:3px 6px; border-radius:6px; font-size:0.8em; color:var(--neon);">📺 MANDO</span>
                 </div>
             </div>
 
             <!-- SECCIÓN 2: CARTA Y CRONOLOGÍA -->
-            <div class="blueprint-section" onclick="openRuleTopic('cards')" title="Ver Reglas de Carta y Cronología">
-                <span class="hotspot-badge">🎯 CARTA & CRONOLOGÍA</span>
-                <div class="mock-card">
-                    <div style="font-size:0.7em; color:#888;">REPRODUCIENDO CANCIÓN...</div>
-                    <div style="font-size:1.3em; color:var(--neon); font-weight:bold; margin:4px 0; font-family:'Bungee';">???? - ????</div>
-                    <div style="font-size:0.65em; color:var(--gold); font-family:'Bungee';">🔥 RACHA ×3  |  🎲 DOBLE O NADA</div>
-                </div>
-                <div class="mock-timeline">
-                    <span class="mock-year">1985</span>
-                    <span class="mock-slot">⬇️ PONER AQUÍ ⬇️</span>
-                    <span class="mock-year">2004</span>
+            <div class="blueprint-section" onclick="openRuleTopic('cards')" title="Carta y Cronología">
+                <span class="hotspot-badge">🎯 CARTA DE CANCIÓN & CRONOLOGÍA</span>
+                <div style="background:#111; border:1px solid var(--neon); border-radius:12px; padding:12px; text-align:center;">
+                    <div style="font-family:'Bungee'; font-size:0.7em; color:#888;">REPRODUCIENDO CANCIÓN...</div>
+                    <div style="font-family:'Bungee'; font-size:1.3em; color:var(--neon); margin:4px 0;">???? — ????</div>
+                    <div style="display:flex; gap:6px; justify-content:center; margin-top:6px;">
+                        <span style="background:rgba(255,0,85,0.2); border:1px solid var(--accent); color:var(--accent); font-family:'Bungee'; font-size:0.55em; padding:3px 6px; border-radius:4px;">⚡ RELÁMPAGO (5s)</span>
+                        <span style="background:rgba(255,215,0,0.2); border:1px solid var(--gold); color:var(--gold); font-family:'Bungee'; font-size:0.55em; padding:3px 6px; border-radius:4px;">🎲 DOBLE O NADA</span>
+                        <span style="background:rgba(0,255,136,0.2); border:1px solid #00ff88; color:#00ff88; font-family:'Bungee'; font-size:0.55em; padding:3px 6px; border-radius:4px;">🛡️ SEGURO</span>
+                    </div>
+                    <div style="display:flex; gap:6px; justify-content:center; align-items:center; margin-top:10px; font-family:'Bungee'; font-size:0.65em;">
+                        <span style="background:#222; border:1px solid var(--neon); color:var(--neon); padding:4px 8px; border-radius:6px;">1985</span>
+                        <span style="background:rgba(255,215,0,0.2); border:1px dashed var(--gold); color:var(--gold); padding:4px 8px; border-radius:6px;">⬇️ PONER AQUÍ ⬇️</span>
+                        <span style="background:#222; border:1px solid var(--neon); color:var(--neon); padding:4px 8px; border-radius:6px;">2004</span>
+                    </div>
                 </div>
             </div>
 
-            <!-- SECCIÓN 3: APUESTAS Y DUELOS -->
-            <div class="blueprint-section" onclick="openRuleTopic('bets')" title="Ver Apuestas y Duelos">
-                <span class="hotspot-badge">🎲 APUESTAS & DUELOS</span>
-                <div class="mock-row">
-                    <span class="mock-btn-bet">⚡ ¡NI DE COÑA!</span>
-                    <span class="mock-btn-bet">✨ ¡CONMIGO!</span>
-                    <span class="mock-btn-bet gold">⚔️ DUELO (2🔵)</span>
+            <!-- SECCIÓN 3: ACCIONES ESPECIALES Y APUESTAS -->
+            <div class="blueprint-section" onclick="openRuleTopic('bets')" title="Acciones Especiales y Apuestas">
+                <span class="hotspot-badge">🎲 ACCIONES ESPECIALES & APUESTAS</span>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; font-family:'Bungee'; font-size:0.6em;">
+                    <div style="background:#151520; border:1px solid var(--gold); color:var(--gold); padding:8px; border-radius:8px; text-align:center;">🎲 DOBLE O NADA (4🔵)</div>
+                    <div style="background:#151520; border:1px solid #00ff88; color:#00ff88; padding:8px; border-radius:8px; text-align:center;">🛡️ SEGURO FALLO (2🔵)</div>
+                    <div style="background:#151520; border:1px solid var(--pink); color:var(--pink); padding:8px; border-radius:8px; text-align:center;">🃏 FAROLERO (4🔵)</div>
+                    <div style="background:#151520; border:1px solid var(--neon); color:var(--neon); padding:8px; border-radius:8px; text-align:center;">⚔️ RETAR DUELO (2🔵)</div>
                 </div>
             </div>
 
             <!-- SECCIÓN 4: SABOTAJES Y MERCADO -->
-            <div class="blueprint-section" onclick="openRuleTopic('sabotages')" title="Ver Sabotajes y Mercado">
-                <span class="hotspot-badge">💀 SABOTAJES & MERCADO</span>
-                <div class="mock-grid">
-                    <span class="mock-sab">MUTE 15s</span>
-                    <span class="mock-sab">PÁNICO 10s</span>
-                    <span class="mock-sab purple">AGUJERO NEGRO</span>
-                    <span class="mock-sab green">🛡️ ESCUDO</span>
+            <div class="blueprint-section" onclick="openRuleTopic('sabotages')" title="Sabotajes y Mercado">
+                <span class="hotspot-badge">💀 SABOTAJES & MERCADO DE COMODINES</span>
+                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; font-family:'Bungee'; font-size:0.55em; text-align:center;">
+                    <div style="background:#181824; border:1px solid #ff4444; color:#ff4444; padding:6px; border-radius:6px;">🔇 MUTE</div>
+                    <div style="background:#181824; border:1px solid #ffaa00; color:#ffaa00; padding:6px; border-radius:6px;">⏰ PÁNICO</div>
+                    <div style="background:#181824; border:1px solid #bf00ff; color:#bf00ff; padding:6px; border-radius:6px;">🌌 AGUJERO</div>
+                    <div style="background:#181824; border:1px solid #00ff88; color:#00ff88; padding:6px; border-radius:6px;">🛡️ ESCUDO</div>
+                    <div style="background:#181824; border:1px solid var(--neon); color:var(--neon); padding:6px; border-radius:6px;">🃏 ARTISTA</div>
+                    <div style="background:#181824; border:1px solid var(--neon); color:var(--neon); padding:6px; border-radius:6px;">🃏 CANCIÓN</div>
                 </div>
             </div>
 
-            <!-- SECCIÓN 5: EMOJIS -->
-            <div class="blueprint-section" onclick="openRuleTopic('emojis')" title="Ver Emojis y Comodines">
-                <span class="hotspot-badge">😂 EMOJIS & COMODINES</span>
-                <div class="mock-row">
-                    <span class="mock-emoji">😂 DISTRACCIÓN</span>
-                    <span class="mock-emoji">🔥 RACHA DOBLE</span>
-                    <span class="mock-emoji">💀 MALDICIÓN</span>
+            <!-- SECCIÓN 5: EMOJIS, FRASES Y DISTRACCIONES -->
+            <div class="blueprint-section" onclick="openRuleTopic('emojis')" title="Emojis, Frases y Distracciones">
+                <span class="hotspot-badge">💬 EMOJIS, FRASES & DISTRACCIONES</span>
+                <div style="background:#111; border:1px solid var(--pink); border-radius:10px; padding:8px; text-align:center;">
+                    <div style="display:flex; justify-content:center; gap:8px; font-size:1.2em; margin-bottom:6px;">😂 🔥 💩 🤡 🎉 😱</div>
+                    <div style="display:flex; gap:4px; justify-content:center; font-family:'Bungee'; font-size:0.55em; color:var(--pink);">
+                        <span style="background:#222; border:1px solid var(--pink); padding:3px 6px; border-radius:4px;">💬 "¡Vas a fallar!"</span>
+                        <span style="background:#222; border:1px solid var(--pink); padding:3px 6px; border-radius:4px;">🔊 Bocina Rival</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECCIÓN 6: MODOS DE JUEGO Y REMOTO TV -->
+            <div class="blueprint-section" onclick="openRuleTopic('modes')" title="Modos de Juego y Mando TV">
+                <span class="hotspot-badge">🕹️ MODOS DE JUEGO & MANDO TV (📺)</span>
+                <div style="display:flex; justify-content:space-around; font-family:'Bungee'; font-size:0.6em; color:var(--neon);">
+                    <span>🎵 CLÁSICO</span>
+                    <span>👑 REY</span>
+                    <span>💿 SUPERVIVENCIA</span>
+                    <span>👥 EQUIPOS</span>
                 </div>
             </div>
 
@@ -1726,11 +1748,12 @@
                 <p><strong>• Rescate:</strong> Si te quedas a 0 fichas durante 2 turnos seguidos, recibes +1🔵 automáticamente.</p>
             `,
             emojis: `
-                <h3 style="color:var(--pink); font-family:'Bungee'; margin-top:0; font-size:1.3em;">😂 EMOJIS Y COMODINES</h3>
-                <p><strong>• 3x😂 Distracción:</strong> Muestra risas en la pantalla del activo 3 segundos.</p>
-                <p><strong>• 3x🔥 Homenaje:</strong> Regala +1🔵 al jugador activo tras un acierto.</p>
-                <p><strong>• 3x💀 Jinx:</strong> Si el activo falla este turno, pierde 2 cartas.</p>
-                <p><strong>• Comodines (🃏):</strong> Tienes 3 gratis para revelar el artista o la canción en la TV.</p>
+                <h3 style="color:var(--pink); font-family:'Bungee'; margin-top:0; font-size:1.3em;">💬 EMOJIS, FRASES Y DISTRACCIONES</h3>
+                <p><strong>• 😂 Reacciones Rápidas:</strong> Pulsa los emojis (😂, 🔥, 💩, 🤡, 🎉, 😱) para lanzarlos a la pantalla del jugador activo en tiempo real.</p>
+                <p><strong>• 💬 Frases Picantes:</strong> Envía mensajes como <em>"¡Vas a fallar!"</em> o <em>"¡Sabelotodo!"</em> que aparecen gigantes en el móvil del rival.</p>
+                <p><strong>• 🔊 Distracciones Sonoras:</strong> Haz sonar la <em>Bocina</em> o la <em>Risa Malévola</em> durante 3 segundos en el móvil del jugador activo para despistarle mientras escucha la canción.</p>
+                <p><strong>• 🃏 Comodines de Canción (3 de uso libre):</strong> Pulsa para revelar en la pantalla grande de la TV el Artista o el Título de la canción.</p>
+                <p><strong>• 📺 Mando TV:</strong> En cualquier momento puedes pulsar el botón flotante 📺 arriba a la derecha para ver en tu móvil los mismos botones que hay activos en la televisión (Pausa/Play, Acierto/Fallo, Revancha, etc.).</p>
             `
         };
 
