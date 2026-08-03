@@ -844,8 +844,214 @@
             10% { opacity: 0.9; }
             100% { opacity: 0; }
         }
-        .animate-flash {
-            animation: gunshot-flash 0.4s ease-out forwards;
+        /* ── PODIO OLÍMPICO DE VICTORIA (ANIMADO) ── */
+        #olympic-podium {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 15px;
+            margin: 20px auto 25px;
+            width: 100%;
+            max-width: 650px;
+            height: 310px;
+            position: relative;
+        }
+
+        .podium-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            position: relative;
+            animation: podiumRise 0.9s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        .podium-step.first { order: 2; width: 190px; animation-delay: 0.2s; }
+        .podium-step.second { order: 1; width: 155px; animation-delay: 0.1s; }
+        .podium-step.third { order: 3; width: 145px; animation-delay: 0.3s; }
+
+        .podium-block {
+            width: 100%;
+            border-radius: 14px 14px 0 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding-top: 10px;
+            font-family: 'Bungee', sans-serif;
+            position: relative;
+            border: 2px solid rgba(255,255,255,0.25);
+        }
+
+        .podium-step.first .podium-block {
+            height: 150px;
+            background: linear-gradient(180deg, #ffd700, #b39200);
+            color: #000;
+            border-color: #ffe600;
+            box-shadow: 0 0 35px rgba(255, 215, 0, 0.6);
+        }
+
+        .podium-step.second .podium-block {
+            height: 110px;
+            background: linear-gradient(180deg, #e0e0e0, #777777);
+            color: #000;
+            border-color: #ffffff;
+            box-shadow: 0 0 25px rgba(224, 224, 224, 0.4);
+        }
+
+        .podium-step.third .podium-block {
+            height: 80px;
+            background: linear-gradient(180deg, #cd7f32, #68390b);
+            color: #fff;
+            border-color: #ffa54f;
+            box-shadow: 0 0 25px rgba(205, 127, 50, 0.4);
+        }
+
+        .podium-num {
+            font-size: 2.8em;
+            font-weight: bold;
+            line-height: 1;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        }
+
+        .podium-score {
+            font-size: 0.85em;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: bold;
+            margin-top: 4px;
+            background: rgba(0,0,0,0.25);
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        .podium-figure {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: -5px;
+            z-index: 2;
+        }
+
+        .podium-head-wrap {
+            position: relative;
+            animation: headFloat 2.4s ease-in-out infinite alternate;
+        }
+
+        .podium-head {
+            width: 85px;
+            height: 85px;
+            border-radius: 50%;
+            border: 4px solid var(--neon);
+            box-shadow: 0 0 20px var(--neon);
+            object-fit: cover;
+            background: #222;
+        }
+
+        .podium-step.first .podium-head {
+            width: 110px;
+            height: 110px;
+            border-color: #ffd700;
+            box-shadow: 0 0 30px #ffd700;
+        }
+
+        .podium-initial-head {
+            width: 85px;
+            height: 85px;
+            border-radius: 50%;
+            border: 4px solid var(--neon);
+            background: #222;
+            color: var(--neon);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Bungee';
+            font-size: 2.5em;
+            box-shadow: 0 0 20px var(--neon);
+        }
+
+        .podium-step.first .podium-initial-head {
+            width: 110px;
+            height: 110px;
+            border-color: #ffd700;
+            color: #ffd700;
+            font-size: 3.2em;
+            box-shadow: 0 0 30px #ffd700;
+        }
+
+        .podium-body-svg {
+            width: 70px;
+            height: 65px;
+            margin-top: -12px;
+        }
+
+        .podium-step.first .podium-body-svg {
+            width: 85px;
+            height: 75px;
+            margin-top: -15px;
+        }
+
+        .podium-name {
+            font-family: 'Bungee', sans-serif;
+            font-size: 0.9em;
+            color: #fff;
+            margin-top: 4px;
+            text-align: center;
+            text-shadow: 0 0 8px rgba(0,0,0,0.9);
+            max-width: 130px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        @keyframes headFloat {
+            0% { transform: translateY(0px) rotate(-3deg); }
+            50% { transform: translateY(-8px) rotate(3deg); }
+            100% { transform: translateY(0px) rotate(-3deg); }
+        }
+
+        /* ── MODAL QR EMERGENTE EN PARTIDA ── */
+        #live-qr-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(5, 5, 12, 0.88);
+            backdrop-filter: blur(10px);
+            z-index: 99999;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.25s ease-out;
+        }
+
+        .live-qr-card {
+            background: rgba(20, 20, 30, 0.95);
+            border: 2px solid var(--neon);
+            border-radius: 20px;
+            padding: 30px 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+            box-shadow: 0 0 45px rgba(0, 242, 255, 0.5);
+            position: relative;
+            max-width: 90vw;
+            width: 380px;
+            text-align: center;
+        }
+
+        .live-qr-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-family: 'Bungee', sans-serif;
+            font-size: 1.4em;
+            color: #888;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .live-qr-close:hover {
+            color: var(--pink);
+            transform: scale(1.2);
         }
     </style>
 </head>
@@ -854,11 +1060,11 @@
     <a href="index.html" class="btn-hub" title="Volver al Hub">H</a>
     <div id="flash-overlay"></div>
     <div id="winner-screen">
-        <h1 style="font-size:2.5em; margin-bottom:5px;">🏆 ¡GANADOR!</h1>
-        <div id="winner-avatar-img" style="margin: 15px 0;"></div>
-        <h2 id="winner-name" style="font-size:2.5em; margin-bottom:5px;">---</h2>
-        <div id="winner-stats" style="margin:15px 0; width:100%; max-width:600px;"></div>
-        <div id="winner-ranking" style="margin:10px 0; width:100%; max-width:600px; display:flex; flex-wrap:wrap; gap:10px; justify-content:center;"></div>
+        <h1 style="font-size:2.2em; margin-bottom:5px; font-family:'Bungee'; background: linear-gradient(90deg, var(--neon), var(--gold), var(--pink)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 15px rgba(0,242,255,0.4));">🏆 ¡PODIO OLÍMPICO DE CAMPEONES!</h1>
+        <h2 id="winner-name" style="display:none;">---</h2>
+        <div id="olympic-podium-container" style="width:100%;"></div>
+        <div id="winner-stats" style="margin:15px 0; width:100%; max-width:650px;"></div>
+        <div id="winner-ranking" style="margin:10px 0; width:100%; max-width:650px; display:flex; flex-wrap:wrap; gap:10px; justify-content:center;"></div>
         <div id="winner-replay" style="display:none; width:100%; max-width:600px; margin:12px 0;"></div>
         <div id="winner-history" style="display:none; width:100%; max-width:700px; margin:12px 0;"></div>
         <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin-top:20px;">
@@ -867,9 +1073,22 @@
         </div>
     </div>
     <div class="logo">CHRONOBEATS</div>
-    <div id="live-room-code"
-        style="display:none; position:fixed; top:20px; right:20px; background:var(--bg); border:1px solid var(--neon); color:var(--neon); padding:8px 15px; border-radius:10px; font-family:'Bungee'; font-size:1.2em; z-index:10000; box-shadow:0 0 10px rgba(0,242,255,0.3);">
-        CODE</div>
+    <!-- BADGE SUPERIOR CON CÓDIGO Y QR ACCESIBLE EN PARTIDA -->
+    <div id="live-room-code" onclick="toggleLiveQR()" title="Pulsa para mostrar el Código QR"
+        style="display:none; position:fixed; top:20px; right:20px; background:var(--bg); border:2px solid var(--neon); color:var(--neon); padding:8px 16px; border-radius:12px; font-family:'Bungee'; font-size:1.1em; z-index:10000; box-shadow:0 0 15px rgba(0,242,255,0.4); cursor:pointer; transition:0.3s; user-select:none;">
+        📱 <span id="live-code-text">CODE</span> 🔍</div>
+
+    <!-- MODAL EMERGENTE DE CÓDIGO QR -->
+    <div id="live-qr-modal" onclick="closeLiveQRBg(event)">
+        <div class="live-qr-card">
+            <div class="live-qr-close" onclick="toggleLiveQR()">✕</div>
+            <div style="font-family:'Bungee'; font-size:1.1em; color:var(--neon); letter-spacing:2px;">📱 RECONECTAR A LA PARTIDA</div>
+            <div id="live-qr-canvas-container" style="background:#fff; padding:15px; border-radius:16px; box-shadow:0 0 25px rgba(255,255,255,0.25);"></div>
+            <div style="font-family:'Bungee'; font-size:1.6em; color:var(--gold); letter-spacing:4px;" id="live-modal-room-code">------</div>
+            <div style="font-family:'Montserrat'; font-size:0.75em; color:#aaa; font-weight:600;">ESCANEA CON LA CÁMARA DEL MÓVIL</div>
+            <button onclick="copyPlayerLink(event)" style="background:linear-gradient(90deg,var(--neon),var(--pink)); color:#000; font-family:'Bungee'; font-size:0.75em; padding:10px 20px; border-radius:10px; border:none; cursor:pointer; box-shadow:0 0 15px rgba(0,242,255,0.4);">🔗 COPIAR ENLACE DE ENTRADA</button>
+        </div>
+    </div>
     <div id="lobby">
         <div class="room-code" id="join-code">------</div>
         <button onclick="resetRoomCode()" style="font-family:'Bungee'; font-size:0.55em; color:#444; background:transparent; border:1px solid #333; border-radius:6px; padding:4px 10px; cursor:pointer; margin-top:-8px; margin-bottom:8px;">↺ Nueva sala</button>
@@ -1327,8 +1546,75 @@
 
         function onPlayerError(event) {
             console.warn("YouTube Error:", event.data);
-            // Si el video está bloqueado o da error, podemos disparar SYSTEM_ERROR_TRACK
-            handlePlayerCommand('SYSTEM', 'SYSTEM_ERROR_TRACK', null);
+            if (!window.brokenVideoHandling) {
+                window.brokenVideoHandling = true;
+                triggerBrokenVideoAutoSkip();
+            }
+        }
+
+        function triggerBrokenVideoAutoSkip() {
+            if (typeof reportBrokenLink === 'function') reportBrokenLink();
+            refundBets();
+            if (isPlaying) {
+                isPlaying = false;
+                if (player && player.stopVideo) player.stopVideo();
+            }
+
+            var countdownNum = 8;
+            var hostInstructions = document.getElementById('host-instructions');
+            if (hostInstructions) {
+                hostInstructions.innerHTML = "<div style='color:#ff0055; font-family:Bungee; font-size:1.6em; animation: pulse 0.8s infinite alternate;'>⚠️ CANCIÓN NO ENCONTRADA ⚠️</div>" +
+                    "<div style='font-family:Bungee; color:var(--gold); font-size:1.1em; margin-top:6px;'>SALTANDO A LA SIGUIENTE CANCIÓN EN <span id='broken-skip-timer'>8</span>s...</div>";
+            }
+
+            var ringFill = document.getElementById('ring-fill');
+            var numEl = document.getElementById('countdown-num');
+            if (numEl) numEl.innerText = '⚠️';
+            if (ringFill) ringFill.style.stroke = '#ff0055';
+
+            // Notificar a todos los móviles conectados
+            for (var id in connections) {
+                try {
+                    connections[id].send({
+                        type: 'BET_RESULT',
+                        msg: '⚠️ VÍDEO NO DISPONIBLE EN YOUTUBE.\nSaltando automáticamente a la siguiente canción...'
+                    });
+                } catch(e){}
+            }
+
+            var brokenTimer = setInterval(function() {
+                countdownNum--;
+                var timerSpan = document.getElementById('broken-skip-timer');
+                if (timerSpan) timerSpan.innerText = countdownNum;
+                if (countdownNum <= 0) {
+                    clearInterval(brokenTimer);
+                    window.brokenVideoHandling = false;
+                    currentSongIdx++;
+                    if (!songs[currentSongIdx]) { reloadSongsMidGame(); }
+                    if (songs[currentSongIdx] && songs[currentSongIdx].id) {
+                        var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]');
+                        if (!_pl.includes(songs[currentSongIdx].id)) {
+                            _pl.push(songs[currentSongIdx].id);
+                            localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl));
+                        }
+                    }
+                    if (songs[currentSongIdx]) applyTheme(songs[currentSongIdx].type);
+                    segundosAcumulados = 0;
+                    momentoDeInicio = 0;
+                    isRevealed = false;
+                    document.getElementById('ui-card-artist').innerText = "????";
+                    document.getElementById('ui-card-song').innerText = "????";
+                    document.getElementById('ui-card-year').innerText = "????";
+                    document.getElementById('btn-reveal-host').style.display = 'block';
+                    document.getElementById('val-card-ui').style.display = 'block';
+                    document.getElementById('validation-buttons').style.display = 'none';
+                    if (songs[currentSongIdx] && player && player.cueVideoById) {
+                        player.cueVideoById({ videoId: songs[currentSongIdx].id, startSeconds: 0 });
+                    }
+                    if (hostInstructions) hostInstructions.innerText = "NUEVA CANCIÓN CARGADA — DALE A PLAY";
+                    syncState();
+                }
+            }, 1000);
         }
 
         function handleSongEnd() {
@@ -1352,6 +1638,7 @@
                 // ── HISTORIAL: marcar fallo ──
                 if (songHistory.length > 0) { songHistory[songHistory.length-1].correct = false; songHistory[songHistory.length-1].fails++; }
                 // ── SEGURO DE FALLO: bypass de efectos negativos ──
+                var _seguroActivoAuto = failSafeActive;
                 if (failSafeActive) {
                     jinxActive = false;
                     // isDoubleOrNothing fallo no aplica
@@ -1360,8 +1647,6 @@
                     addEvent('<span class="ev-info">🛡️ SEGURO — ' + players[activePlayerIdx].name + ' no sufre penalizaciones</span>');
                 }
                 failSafeActive = false;
-                // ── SEGURO DE FALLO ──
-                if (failSafeActive) { jinxActive = false; isDoubleOrNothing = false; failSafeActive = false; }
                 // ── JINX COLECTIVO: fallo con jinx activo = pierde carta extra ──
                 if (jinxActive && players[activePlayerIdx].cards.length > 1) {
                     players[activePlayerIdx].cards.pop();
@@ -1389,12 +1674,19 @@
                     }
                     isDoubleOrNothing = false;
                 }
-                if (gameMode === 'supervivencia') loseLife(players[activePlayerIdx], null);
+                if (gameMode === 'supervivencia' && !_seguroActivoAuto) loseLife(players[activePlayerIdx], null);
                 refundBets();
                 stopCountdown();
                 syncState();
                 setTimeout(function() {
                     activePlayerIdx = (activePlayerIdx + 1) % players.length;
+                    if (gameMode === 'supervivencia') {
+                        var _safety = 0;
+                        while (players[activePlayerIdx] && players[activePlayerIdx].lives <= 0 && _safety < players.length) {
+                            activePlayerIdx = (activePlayerIdx + 1) % players.length;
+                            _safety++;
+                        }
+                    }
                     players[activePlayerIdx].canReload = true;
                     nextTurn();
                 }, 4000);
@@ -1425,24 +1717,62 @@
                     'iceServers': [
                         { urls: 'stun:stun.l.google.com:19302' },
                         { urls: 'stun:stun1.l.google.com:19302' },
+                        { urls: 'stun:stun2.l.google.com:19302' },
+                        { urls: 'stun:stun3.l.google.com:19302' },
                         { urls: 'stun:stun.cloudflare.com:3478' },
-                        { urls: 'stun:freestun.net:3478' },
-                        { urls: 'turn:freestun.net:3478',  username: 'free', credential: 'free' },
-                        { urls: 'turn:freestun.net:5349',  username: 'free', credential: 'free' },
-                        { urls: 'turns:freestun.net:5349', username: 'free', credential: 'free' }
-                    ]
+                        { urls: 'turn:openrelay.metered.ca:80', username: 'openrelay', credential: 'openrelay' },
+                        { urls: 'turn:openrelay.metered.ca:443', username: 'openrelay', credential: 'openrelay' },
+                        { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelay', credential: 'openrelay' },
+                        { urls: 'turns:openrelay.metered.ca:443?transport=tcp', username: 'openrelay', credential: 'openrelay' }
+                    ],
+                    'iceCandidatePoolSize': 10
                 }
             });
             peer.on('open', function (id) {
                 console.log("Host Peer Abierto:", id);
-                document.getElementById('live-room-code').innerText = roomCode;
+                if (document.getElementById('live-code-text')) document.getElementById('live-code-text').innerText = roomCode;
                 document.getElementById('live-room-code').style.display = 'block';
                 generateQR(); // Asegurar que el QR está generado
             });
+
+        function toggleLiveQR() {
+            var modal = document.getElementById('live-qr-modal');
+            if (!modal) return;
+            if (modal.style.display === 'none' || !modal.style.display) {
+                var liveQrEl = document.getElementById('live-qr-canvas-container');
+                if (liveQrEl && typeof QRCode !== 'undefined' && liveQrEl.children.length === 0) {
+                    var baseUrl = window.location.href.replace('host_digital_mix.html', 'player_digital_mix.html');
+                    baseUrl = baseUrl.split('?')[0];
+                    var playerUrl = baseUrl + '?sala=' + roomCode;
+                    new QRCode(liveQrEl, {
+                        text: playerUrl,
+                        width: 190,
+                        height: 190,
+                        colorDark: '#000000',
+                        colorLight: '#ffffff',
+                        correctLevel: QRCode.CorrectLevel.H
+                    });
+                }
+                if (document.getElementById('live-modal-room-code')) {
+                    document.getElementById('live-modal-room-code').innerText = roomCode;
+                }
+                modal.style.display = 'flex';
+            } else {
+                modal.style.display = 'none';
+            }
+        }
+
+        function closeLiveQRBg(e) {
+            if (e && e.target && e.target.id === 'live-qr-modal') {
+                toggleLiveQR();
+            }
+        }
             peer.on('connection', function (conn) {
                 console.log("Nueva conexión entrante:", conn.peer);
                 conn.on('open', function () {
                     console.log("Conexión con el player abierta");
+                    var p = players.find(function (x) { return x.id === conn.peer; });
+                    if (p) p.connected = true;
                 });
                 conn.on('data', function (data) {
                     console.log("Comando recibido en host:", data);
@@ -1454,13 +1784,14 @@
                             var _idViejo = existing.id;
                             delete connections[_idViejo];
                             existing.id = conn.peer;
+                            existing.connected = true;
                             existing.avatar = data.avatar || existing.avatar; // Actualizar avatar si cambió
                             connections[conn.peer] = conn;
                             migrarIdJugador(_idViejo, conn.peer);   // conservar escudo, racha, apuestas, duelo...
                             addEvent('<span class="ev-info">🔌 ' + existing.name + ' se ha reconectado</span>');
                             syncState(); // Force state sync to reconnecting player
                         } else {
-                            players.push({ id: conn.peer, name: data.name, avatar: data.avatar || null, score: 1, cards: [], tokens: 3, canReload: true, wildcards: 3 });
+                            players.push({ id: conn.peer, name: data.name, avatar: data.avatar || null, score: 1, cards: [], tokens: 3, canReload: true, wildcards: 3, connected: true });
                             connections[conn.peer] = conn;
                         }
                         updateLobby();
@@ -1472,6 +1803,16 @@
                         }
                     } else if (data.type === 'COMMAND') {
                         handlePlayerCommand(conn.peer, data.action, data.value);
+                    }
+                });
+                conn.on('close', function () {
+                    console.log("Conexión cerrada con peer:", conn.peer);
+                    var p = players.find(function (x) { return x.id === conn.peer; });
+                    if (p) {
+                        p.connected = false;
+                        addEvent('<span class="ev-info">🔌 ' + p.name + ' se ha desconectado</span>');
+                        updateLobby();
+                        syncState();
                     }
                 });
                 conn.on('error', function (err) {
@@ -2422,6 +2763,16 @@
                         syncState();
                     }
                     break;
+                case 'CELEBRATE_VICTORY':
+                    var pWin = players.find(function(pl){ return pl.id === peerId; });
+                    var pWinName = pWin ? pWin.name : 'Ganador';
+                    if (typeof confetti === 'function') {
+                        confetti({ particleCount: 100, spread: 100, origin: { y: 0.6 } });
+                        confetti({ particleCount: 70, angle: 60, spread: 60, origin: { x: 0, y: 0.7 } });
+                        confetti({ particleCount: 70, angle: 120, spread: 60, origin: { x: 1, y: 0.7 } });
+                    }
+                    addEvent('<span class="ev-good">🎉 ¡' + pWinName + ' LANZÓ CONFETI! 🎉</span>', '🎉');
+                    break;
                 case 'RELOAD_SONG':
                     var p = players.find(function (pl) { return pl.id === peerId; });
                     if (p && p.tokens >= 1 && p.canReload) {
@@ -2699,20 +3050,30 @@
                 case 'SABOTAGE_DUEL':
                     if (turnPhase === 'DUEL' || duelTriggered) return;
                     var p = players.find(x => x.id === peerId);
-                    if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 3 && (!turnPhase || turnPhase === 'NORMAL') && !currentDuel && !isRevealed) {
-                        updateTokens(p, -3);
-                        duelTriggered = true;
-                        var target = players[activePlayerIdx];
-                        
-                        // ACTIVACIÓN INMEDIATA
-                        currentDuel = { 
-                            challenger: p.id, 
-                            target: target.id,
-                            challengerYear: null, targetYear: null,
-                            challengerTime: null, targetTime: null
-                        };
-                        duelResult = null;
-                        turnPhase = 'DUEL';
+                    var activeP = players[activePlayerIdx];
+                    if (p && activeP) {
+                        if (p.id === activeP.id) {
+                            if (connections[p.id]) try { connections[p.id].send({ type: 'BET_RESULT', msg: "⚠️ El Duelo solo se puede lanzar contra el jugador activo." }); } catch(e){}
+                            return;
+                        }
+                        if (p.tokens < 2) {
+                            if (connections[p.id]) try { connections[p.id].send({ type: 'BET_RESULT', msg: "⚠️ Necesitas 2 fichas para lanzar un Duelo." }); } catch(e){}
+                            return;
+                        }
+                        if ((!turnPhase || turnPhase === 'NORMAL') && !currentDuel && !isRevealed) {
+                            updateTokens(p, -2);
+                            duelTriggered = true;
+                            var target = activeP;
+                            
+                            // ACTIVACIÓN INMEDIATA
+                            currentDuel = { 
+                                challenger: p.id, 
+                                target: target.id,
+                                challengerYear: null, targetYear: null,
+                                challengerTime: null, targetTime: null
+                            };
+                            duelResult = null;
+                            turnPhase = 'DUEL';
                         
                         // Parar musica actual
                         if (isPlaying) {
@@ -3177,6 +3538,38 @@
                 case 'REMOTE_DUEL_FINISH':
                     if (!puedeUsarMando(peerId)) break;
                     finishDuel();
+                    break;
+                case 'REMOTE_TOGGLE_PLAY':
+                    if (!puedeUsarMando(peerId)) break;
+                    if (isPlaying) {
+                        if (player && player.pauseVideo) player.pauseVideo();
+                        isPlaying = false;
+                    } else {
+                        if (player && player.playVideo) player.playVideo();
+                        isPlaying = true;
+                    }
+                    syncState();
+                    break;
+                case 'REMOTE_REPORT_INVALID':
+                    if (!puedeUsarMando(peerId)) break;
+                    reportInvalidVideo();
+                    break;
+                case 'REMOTE_TOGGLE_LIGHTNING':
+                    if (!puedeUsarMando(peerId)) break;
+                    toggleLightning();
+                    break;
+                case 'REMOTE_SHARED_SONG':
+                    if (!puedeUsarMando(peerId)) break;
+                    triggerSharedSong();
+                    break;
+                case 'REMOTE_REMATCH':
+                    rematch();
+                    break;
+                case 'REMOTE_MAIN_MENU':
+                    location.reload();
+                    break;
+                case 'REMOTE_NEW_ROOM':
+                    resetRoomCode();
                     break;
                 case 'MARKET_WILDCARD':
                     var p = players.find(function (pl) { return pl.id === peerId; });
@@ -3869,6 +4262,13 @@
                     document.getElementById('challenger-buttons').innerHTML = h;
                 } else {
                     activePlayerIdx = (activePlayerIdx + 1) % players.length;
+                    if (gameMode === 'supervivencia') {
+                        var _safety = 0;
+                        while (players[activePlayerIdx] && players[activePlayerIdx].lives <= 0 && _safety < players.length) {
+                            activePlayerIdx = (activePlayerIdx + 1) % players.length;
+                            _safety++;
+                        }
+                    }
                     players[activePlayerIdx].canReload = true; // Resetear permiso de recarga
                     nextTurn();
                 }
@@ -3913,23 +4313,58 @@
             console.warn('[HOST] === VICTORIA ===', name, '| modo:', gameMode, '| turnPhase:', turnPhase);
             console.warn('[HOST] disparada desde:\n' + (new Error().stack || 'sin stack'));
             addEvent('<span class="ev-info">🏆 Victoria declarada (modo: ' + gameMode.toUpperCase() + ')</span>');
-            document.getElementById('winner-name').innerText = name;
-
-            // Mostrar avatar del ganador
-            var winner = players.find(p => p.name === name);
-            var avatarHtml = '';
-            if (winner && winner.avatar) {
-                avatarHtml = '<img src="' + winner.avatar + '" style="width:200px; height:200px; border-radius:50%; border: 5px solid var(--neon); box-shadow: 0 0 30px var(--neon); object-fit: cover;">';
-            } else {
-                var initial = name.charAt(0).toUpperCase();
-                avatarHtml = '<div style="width:150px; height:150px; border-radius:50%; background:#222; border:5px solid var(--neon); color:var(--neon); display:inline-flex; align-items:center; justify-content:center; font-family:Bungee,sans-serif; font-size:4em; box-shadow: 0 0 30px var(--neon);">' + initial + '</div>';
-            }
-            document.getElementById('winner-avatar-img').innerHTML = avatarHtml;
 
             document.getElementById('winner-screen').style.display = 'flex';
+            if (document.getElementById('winner-name')) document.getElementById('winner-name').innerText = name;
+
+            var sorted = players.slice().sort(function(a,b) { return b.score - a.score; });
+            var top3 = sorted.slice(0, 3);
+
+            // ── RENDERIZAR PODIO OLÍMPICO ANIMADO CON CABEZONES ──
+            var podiumContainer = document.getElementById('olympic-podium-container');
+            if (podiumContainer) {
+                var podiumHtml = '<div id="olympic-podium">';
+                var podiumOrder = [
+                    { p: top3[1], pos: 'second', num: '2', medal: '🥈', color: '#e0e0e0', bodyCol: '#00d2ff', armCol: '#0099cc' },
+                    { p: top3[0], pos: 'first', num: '1', medal: '🥇', color: '#ffd700', bodyCol: '#ff00cc', armCol: '#cc00a3' },
+                    { p: top3[2], pos: 'third', num: '3', medal: '🥉', color: '#cd7f32', bodyCol: '#ffaa00', armCol: '#cc7700' }
+                ];
+
+                podiumOrder.forEach(function(item) {
+                    if (!item.p) return;
+                    var p = item.p;
+                    var headHtml = '';
+                    if (p.avatar) {
+                        headHtml = '<img src="' + p.avatar + '" class="podium-head">';
+                    } else {
+                        var initial = p.name.charAt(0).toUpperCase();
+                        headHtml = '<div class="podium-initial-head">' + initial + '</div>';
+                    }
+                    var bodySvg = '<svg class="podium-body-svg" viewBox="0 0 100 90">' +
+                        '<path d="M30,35 Q50,45 70,35 L65,75 Q50,80 35,75 Z" fill="' + item.bodyCol + '"/>' +
+                        '<path d="M30,35 Q10,15 5,5 Q15,0 35,25 Z" fill="' + item.armCol + '"/>' +
+                        '<path d="M70,35 Q90,15 95,5 Q85,0 65,25 Z" fill="' + item.armCol + '"/>' +
+                        '<path d="M42,35 L50,55 L58,35" stroke="' + item.color + '" stroke-width="4" fill="none"/>' +
+                        '<circle cx="50" cy="57" r="6" fill="' + item.color + '"/>' +
+                        '</svg>';
+
+                    podiumHtml += '<div class="podium-step ' + item.pos + '">' +
+                        '<div class="podium-figure">' +
+                        '<div class="podium-head-wrap">' + headHtml + '</div>' +
+                        bodySvg +
+                        '<div class="podium-name">' + item.medal + ' ' + p.name + '</div>' +
+                        '</div>' +
+                        '<div class="podium-block">' +
+                        '<div class="podium-num">' + item.num + '</div>' +
+                        '<div class="podium-score">' + p.score + ' cartas</div>' +
+                        '</div>' +
+                        '</div>';
+                });
+                podiumHtml += '</div>';
+                podiumContainer.innerHTML = podiumHtml;
+            }
 
             // ── ESTADÍSTICAS RICAS ──
-            var sorted = players.slice().sort(function(a,b) { return b.score - a.score; });
             var duration = stats.startTime ? Math.round((Date.now() - stats.startTime) / 60000) : '?';
 
             // Calcular premios especiales
@@ -4131,13 +4566,27 @@
             if (window.victoryInterval) clearInterval(window.victoryInterval);
 
             // V26.3: Integración de IDs Verificados por el Usuario
-            var isXavi = name.toLowerCase().includes('xavi');
+            var pNameLower = name.toLowerCase();
+            var isXavi = pNameLower.includes('xavi');
+            var isSonia = pNameLower.includes('sonia') || pNameLower.includes('sonkia');
             var songId = "";
             var songTitle = "";
 
             if (isXavi) {
                 songId = '04854XqcfCY'; // Queen - We Are The Champions
                 songTitle = "Queen - We Are The Champions";
+            } else if (isSonia) {
+                var celinePool = [
+                    { id: 'WNIPqafd4As', t: "Céline Dion - My Heart Will Go On" },
+                    { id: 'P_r8pDti6Q4', t: "Céline Dion - Because You Loved Me" },
+                    { id: 'Y8HOfcYWZoo', t: "Céline Dion - The Power of Love" },
+                    { id: 'j8CctFBr7V8', t: "Céline Dion - It's All Coming Back to Me Now" },
+                    { id: 'NJsa6-y4sTE', t: "Céline Dion - I'm Alive" },
+                    { id: 'NGrLb6W5YOM', t: "Céline Dion - All By Myself" }
+                ];
+                var pickedCeline = celinePool[Math.floor(Math.random() * celinePool.length)];
+                songId = pickedCeline.id;
+                songTitle = pickedCeline.t;
             } else {
                 // El "Pool de la Frikada" (V26.3 - IDs proporcionados por el usuario)
                 var frikiPool = [
@@ -4293,6 +4742,54 @@
             }
         }
 
+        function getDynamicHostButtons() {
+            var btns = [];
+            var lobbyEl = document.getElementById('lobby');
+            var winnerEl = document.getElementById('winner-screen');
+            var isLobbyVisible = (lobbyEl && lobbyEl.style.display !== 'none');
+            var isWinnerVisible = (winnerEl && winnerEl.style.display === 'flex');
+
+            if (isLobbyVisible || !gameStarted) {
+                btns.push({ id: 'start', label: '▶️ INICIAR PARTIDA', action: 'REMOTE_START_GAME', color: 'pink' });
+                btns.push({ id: 'new_room', label: '🔄 NUEVA SALA', action: 'REMOTE_NEW_ROOM', color: 'gray' });
+                return btns;
+            }
+
+            if (isWinnerVisible) {
+                btns.push({ id: 'rematch', label: '🔄 REVANCHA', action: 'REMOTE_REMATCH', color: 'pink' });
+                btns.push({ id: 'main_menu', label: '🏠 MENÚ PRINCIPAL', action: 'REMOTE_MAIN_MENU', color: 'gray' });
+                return btns;
+            }
+
+            if (turnPhase === 'KING_GUESS_RESULT') {
+                btns.push({ id: 'king_res', label: '👑 ACEPTAR RESULTADO DEL REY', action: 'REMOTE_KING_RESOLVE', color: 'gold' });
+                return btns;
+            }
+
+            if (turnPhase === 'DUEL') {
+                if (duelResult) {
+                    btns.push({ id: 'duel_fin', label: '⚔️ ACEPTAR RESULTADO DUELO', action: 'REMOTE_DUEL_FINISH', color: 'neon' });
+                }
+                return btns;
+            }
+
+            if (isRevealed) {
+                btns.push({ id: 'correct', label: '✅ CORRECTO (Acierto + Carta)', action: 'REMOTE_CORRECT', color: 'green' });
+                btns.push({ id: 'incorrect', label: '❌ INCORRECTO (Fallo)', action: 'REMOTE_INCORRECT', color: 'red' });
+                btns.push({ id: 'next_turn', label: '➡️ SIGUIENTE TURNO', action: 'REMOTE_NEXT_TURN', color: 'neon' });
+                return btns;
+            }
+
+            // Mientras la canción está sonando o lista para reproducirse
+            btns.push({ id: 'reveal', label: '👁️ REVELAR AÑO / HUECO', action: 'REMOTE_REVEAL', color: 'neon' });
+            btns.push({ id: 'play_pause', label: isPlaying ? '⏸️ PAUSAR MÚSICA' : '▶️ REPRODUCIR MÚSICA', action: 'REMOTE_TOGGLE_PLAY', color: 'blue' });
+            btns.push({ id: 'invalid_vid', label: '⏭️ VÍDEO NO VÁLIDO', action: 'REMOTE_REPORT_INVALID', color: 'gray' });
+            btns.push({ id: 'lightning', label: '⚡ MODO RELÁMPAGO (5s)', action: 'REMOTE_TOGGLE_LIGHTNING', color: 'yellow' });
+            btns.push({ id: 'shared', label: '🎵 ¡JUGAMOS TODOS!', action: 'REMOTE_SHARED_SONG', color: 'pink' });
+
+            return btns;
+        }
+
         function syncState() {
             var leaderName = "---";
             var leaderScore = 0;
@@ -4316,6 +4813,8 @@
                 }
             }
 
+            var dynamicBtns = getDynamicHostButtons();
+
             for (var id in connections) {
                 var p = players.find(px => px.id.toLowerCase() === id.toLowerCase());
                 var state = {
@@ -4323,6 +4822,7 @@
                     players: players,
                     activePlayer: { id: players[activePlayerIdx] ? players[activePlayerIdx].id : null, name: players[activePlayerIdx] ? players[activePlayerIdx].name : null },
                     judgeId: currentJudgeId,
+                    hostButtons: dynamicBtns,
                     leader: { name: leaderName, score: leaderScore },
                     currentTrack: songs[currentSongIdx] || null,
                     revealed: isRevealed,
@@ -4378,6 +4878,7 @@
                     currentType: songs[currentSongIdx] ? songs[currentSongIdx].type : 'mix',
                     hasShield: hasShield,
                     duelTriggered: duelTriggered,
+                    winner: (document.getElementById('winner-screen') && document.getElementById('winner-screen').style.display !== 'none') ? (document.getElementById('winner-name') ? document.getElementById('winner-name').innerText : null) : null,
                     gameStarted: document.getElementById('lobby').style.display === 'none'
                 };
                 try {
@@ -5156,6 +5657,12 @@
                     }
                     ringFill.style.strokeDashoffset = circumference * (1 - pct);
                 } else {
+                    // Detectar si el vídeo de YouTube está roto/eliminado (sin duración tras 4s)
+                    if (isPlaying && elapsed > 4 && !window.brokenVideoHandling) {
+                        window.brokenVideoHandling = true;
+                        triggerBrokenVideoAutoSkip();
+                        return;
+                    }
                     // Fallback: mostrar tiempo transcurrido
                     var elapsedInt = Math.floor(elapsed);
                     if (numEl) numEl.innerText = elapsedInt + 's';

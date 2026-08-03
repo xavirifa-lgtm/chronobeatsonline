@@ -1,10 +1,12 @@
-// ── ChronoBeats Online — Service Worker v14 ──
-const CACHE_NAME = 'chronobeats-v14';
+// ── ChronoBeats Online — Service Worker v16 ──
+const CACHE_NAME = 'chronobeats-v16';
 
 // Recursos propios a pre-cachear en la instalación (pequeños, sin riesgo)
 const PRECACHE_URLS = [
     './',
     './index.html',
+    './host_digital_mix.html',
+    './player_digital_mix.html',
     './manifest.json',
     './logo_cyberpunk.png',
     './icon-192.png',
@@ -125,12 +127,10 @@ self.addEventListener('fetch', event => {
             .catch(() =>
                 caches.match(event.request).then(cached => {
                     if (cached) return cached;
-                    // BUG ANTERIOR: se devolvía './index.html' para CUALQUIER petición fallida.
-                    // Eso significa que si fallaba lista_final.txt, el juego recibía el HTML
-                    // del menú como si fuera la lista de canciones → mazo vacío o corrupto.
-                    // El fallback a index.html solo tiene sentido para navegaciones.
                     if (event.request.mode === 'navigate') {
-                        return caches.match('./index.html');
+                        return caches.match('./player_digital_mix.html')
+                            .then(res => res || caches.match('./host_digital_mix.html'))
+                            .then(res => res || caches.match('./index.html'));
                     }
                     return Response.error();
                 })
