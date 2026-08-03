@@ -1,12 +1,9 @@
-// ── ChronoBeats Online — Service Worker v33 ──
-const CACHE_NAME = 'chronobeats-v33';
+// ── ChronoBeats Online — Service Worker v35 ──
+const CACHE_NAME = 'chronobeats-v35';
 
 // Recursos propios a pre-cachear en la instalación (pequeños, sin riesgo)
 const PRECACHE_URLS = [
     './',
-    './index.html',
-    './host_digital_mix.html',
-    './player_digital_mix.html',
     './manifest.json',
     './logo_cyberpunk.png',
     './icon-192.png',
