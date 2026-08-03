@@ -1255,6 +1255,18 @@ var QRCode;!function(){function a(a){this.mode=c.MODE_8BIT_BYTE,this.data=a,this
         var savedRoom = localStorage.getItem('CB_RoomCode');
         var peer, roomCode = savedRoom || Math.random().toString(36).substring(2, 8).toUpperCase();
         if (!savedRoom) localStorage.setItem('CB_RoomCode', roomCode);
+
+        // Actualizar UI del código inmediatamente en la carga síncrona
+        try {
+            var joinCodeEl = document.getElementById('join-code');
+            if (joinCodeEl) joinCodeEl.innerText = roomCode;
+            var liveCodeTextEl = document.getElementById('live-code-text');
+            if (liveCodeTextEl) liveCodeTextEl.innerText = roomCode;
+            var liveModalCodeEl = document.getElementById('live-modal-room-code');
+            if (liveModalCodeEl) liveModalCodeEl.innerText = roomCode;
+            var liveBadgeEl = document.getElementById('live-room-code');
+            if (liveBadgeEl) liveBadgeEl.style.display = 'block';
+        } catch(e) {}
         var player; // YouTube Player Instance
         var players = [], connections = {}, songs = [], currentSongIdx = -1, activePlayerIdx = 0, isRevealed = false;
         var currentBets = {}; // playerId -> slotIndex
@@ -1497,7 +1509,7 @@ var QRCode;!function(){function a(a){this.mode=c.MODE_8BIT_BYTE,this.data=a,this
 
         function generateQR() {
             var qrEl = document.getElementById('qr-code');
-            if (!qrEl) return;
+            var modalQrEl = document.getElementById('live-qr-canvas-container');
 
             var cleanUrl = window.location.href.split('?')[0].split('#')[0];
             var playerUrl;
@@ -1517,32 +1529,59 @@ var QRCode;!function(){function a(a){this.mode=c.MODE_8BIT_BYTE,this.data=a,this
                 linkEl.style.display = 'block';
             }
 
-            qrEl.innerHTML = '';
-
-            if (typeof QRCode !== 'undefined') {
-                try {
-                    new QRCode(qrEl, {
-                        text: playerUrl,
-                        width: 160,
-                        height: 160,
-                        colorDark: '#000000',
-                        colorLight: '#ffffff',
-                        correctLevel: QRCode.CorrectLevel.M
-                    });
-                    return;
-                } catch(e) {
-                    console.warn("Error QRCode.js, usando API fallback:", e);
+            // 1. Render Lobby QR
+            if (qrEl) {
+                qrEl.innerHTML = '';
+                if (typeof QRCode !== 'undefined') {
+                    try {
+                        new QRCode(qrEl, {
+                            text: playerUrl,
+                            width: 160,
+                            height: 160,
+                            colorDark: '#000000',
+                            colorLight: '#ffffff',
+                            correctLevel: QRCode.CorrectLevel.M
+                        });
+                    } catch(e) {
+                        var img = document.createElement('img');
+                        img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=' + encodeURIComponent(playerUrl);
+                        img.style.width = '160px'; img.style.height = '160px'; img.style.borderRadius = '8px';
+                        qrEl.appendChild(img);
+                    }
+                } else {
+                    var img = document.createElement('img');
+                    img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=' + encodeURIComponent(playerUrl);
+                    img.style.width = '160px'; img.style.height = '160px'; img.style.borderRadius = '8px';
+                    qrEl.appendChild(img);
                 }
             }
 
-            // Fallback de imagen QR por si la librería JS no ha cargado o falla
-            var img = document.createElement('img');
-            img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=' + encodeURIComponent(playerUrl);
-            img.alt = 'QR Sala ' + roomCode;
-            img.style.width = '160px';
-            img.style.height = '160px';
-            img.style.borderRadius = '8px';
-            qrEl.appendChild(img);
+            // 2. Render Modal Live QR
+            if (modalQrEl) {
+                modalQrEl.innerHTML = '';
+                if (typeof QRCode !== 'undefined') {
+                    try {
+                        new QRCode(modalQrEl, {
+                            text: playerUrl,
+                            width: 180,
+                            height: 180,
+                            colorDark: '#000000',
+                            colorLight: '#ffffff',
+                            correctLevel: QRCode.CorrectLevel.M
+                        });
+                    } catch(e) {
+                        var img2 = document.createElement('img');
+                        img2.src = 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' + encodeURIComponent(playerUrl);
+                        img2.style.width = '180px'; img2.style.height = '180px'; img2.style.borderRadius = '8px';
+                        modalQrEl.appendChild(img2);
+                    }
+                } else {
+                    var img2 = document.createElement('img');
+                    img2.src = 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' + encodeURIComponent(playerUrl);
+                    img2.style.width = '180px'; img2.style.height = '180px'; img2.style.borderRadius = '8px';
+                    modalQrEl.appendChild(img2);
+                }
+            }
         }
 
         // Ejecutar inmediatamente y al cargar
@@ -5824,24 +5863,7 @@ var QRCode;!function(){function a(a){this.mode=c.MODE_8BIT_BYTE,this.data=a,this
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js').then(reg => {
-                    reg.addEventListener('updatefound', () => {
-                        const newWorker = reg.installing;
-                        newWorker.addEventListener('statechange', () => {
-                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                window.location.reload();
-                            }
-                        });
-                    });
-                });
-            });
-
-            let refreshing = false;
-            navigator.serviceWorker.addEventListener('controllerchange', () => {
-                if (!refreshing) {
-                    window.location.reload();
-                    refreshing = true;
-                }
+                navigator.serviceWorker.register('./sw.js').catch(err => console.warn('SW err:', err));
             });
         }
         function triggerFlash() {
