@@ -866,7 +866,7 @@
             <button class="btn-start" onclick="location.reload()" style="background:#333; color:#fff; box-shadow:none;">🏠 MENÚ PRINCIPAL</button>
         </div>
     </div>
-    <div style="position:fixed; bottom:15px; left:20px; font-family:'Bungee'; font-size:0.75em; color:var(--neon); opacity:0.95; z-index:9000; pointer-events:none; background:rgba(0,0,0,0.8); padding:4px 10px; border-radius:6px; border:1px solid var(--neon);">BUILD v3.35</div>
+    <div style="position:fixed; bottom:15px; left:20px; font-family:'Bungee'; font-size:0.75em; color:var(--neon); opacity:0.95; z-index:9000; pointer-events:none; background:rgba(0,0,0,0.8); padding:4px 10px; border-radius:6px; border:1px solid var(--neon);">BUILD v3.37</div>
     <div class="logo">CHRONOBEATS</div>
     <div id="live-room-code"
         style="display:none; position:fixed; top:20px; right:20px; background:var(--bg); border:1px solid var(--neon); color:var(--neon); padding:8px 15px; border-radius:10px; font-family:'Bungee'; font-size:1.2em; z-index:10000; box-shadow:0 0 10px rgba(0,242,255,0.3);">
@@ -1328,8 +1328,74 @@
 
         function onPlayerError(event) {
             console.warn("YouTube Error:", event.data);
-            // Si el video está bloqueado o da error, podemos disparar SYSTEM_ERROR_TRACK
-            handlePlayerCommand('SYSTEM', 'SYSTEM_ERROR_TRACK', null);
+            if (!window.brokenVideoHandling) {
+                window.brokenVideoHandling = true;
+                triggerBrokenVideoAutoSkip();
+            }
+        }
+
+        function triggerBrokenVideoAutoSkip() {
+            if (typeof reportBrokenLink === 'function') reportBrokenLink();
+            refundBets();
+            if (isPlaying) {
+                isPlaying = false;
+                if (player && player.stopVideo) player.stopVideo();
+            }
+
+            var countdownNum = 8;
+            var hostInstructions = document.getElementById('host-instructions');
+            if (hostInstructions) {
+                hostInstructions.innerHTML = "<div style='color:#ff0055; font-family:Bungee; font-size:1.6em; animation: pulse 0.8s infinite alternate;'>⚠️ CANCIÓN NO ENCONTRADA ⚠️</div>" +
+                    "<div style='font-family:Bungee; color:var(--gold); font-size:1.1em; margin-top:6px;'>SALTANDO A LA SIGUIENTE CANCIÓN EN <span id='broken-skip-timer'>8</span>s...</div>";
+            }
+
+            var ringFill = document.getElementById('ring-fill');
+            var numEl = document.getElementById('countdown-num');
+            if (numEl) numEl.innerText = '⚠️';
+            if (ringFill) ringFill.style.stroke = '#ff0055';
+
+            for (var id in connections) {
+                try {
+                    connections[id].send({
+                        type: 'BET_RESULT',
+                        msg: '⚠️ VÍDEO NO DISPONIBLE EN YOUTUBE.\nSaltando automáticamente a la siguiente canción...'
+                    });
+                } catch(e){}
+            }
+
+            var brokenTimer = setInterval(function() {
+                countdownNum--;
+                var timerSpan = document.getElementById('broken-skip-timer');
+                if (timerSpan) timerSpan.innerText = countdownNum;
+                if (countdownNum <= 0) {
+                    clearInterval(brokenTimer);
+                    window.brokenVideoHandling = false;
+                    currentSongIdx++;
+                    if (!songs[currentSongIdx]) { reloadSongsMidGame(); }
+                    if (songs[currentSongIdx] && songs[currentSongIdx].id) {
+                        var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]');
+                        if (!_pl.includes(songs[currentSongIdx].id)) {
+                            _pl.push(songs[currentSongIdx].id);
+                            localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl));
+                        }
+                    }
+                    if (songs[currentSongIdx]) applyTheme(songs[currentSongIdx].type);
+                    segundosAcumulados = 0;
+                    momentoDeInicio = 0;
+                    isRevealed = false;
+                    document.getElementById('ui-card-artist').innerText = "????";
+                    document.getElementById('ui-card-song').innerText = "????";
+                    document.getElementById('ui-card-year').innerText = "????";
+                    if (document.getElementById('btn-reveal-host')) document.getElementById('btn-reveal-host').style.display = 'block';
+                    if (document.getElementById('val-card-ui')) document.getElementById('val-card-ui').style.display = 'block';
+                    if (document.getElementById('validation-buttons')) document.getElementById('validation-buttons').style.display = 'none';
+                    if (songs[currentSongIdx] && player && player.cueVideoById) {
+                        player.cueVideoById({ videoId: songs[currentSongIdx].id, startSeconds: 0 });
+                    }
+                    if (hostInstructions) hostInstructions.innerText = "NUEVA CANCIÓN CARGADA - DALE A PLAY";
+                    syncState();
+                }
+            }, 1000);
         }
 
         function handleSongEnd() {
@@ -2269,6 +2335,64 @@
             }
 
             switch (action) {
+                case 'REMOTE_TOGGLE_PLAY':
+                    if (!isPlaying) {
+                        momentoDeInicio = Date.now();
+                        if (player && player.playVideo) {
+                            player.playVideo();
+                            if (isMuted) player.mute(); else player.unMute();
+                        }
+                        isPlaying = true;
+                        document.getElementById('host-instructions').innerText = "REPRODUCIENDO" + (isMuted ? " (MUTE)" : "");
+                        syncState();
+                        startCountdown();
+                    } else {
+                        if (player && player.pauseVideo) player.pauseVideo();
+                        isPlaying = false;
+                        document.getElementById('host-instructions').innerText = "PAUSADO DESDE EL MANDO";
+                        syncState();
+                    }
+                    break;
+
+                case 'REMOTE_REVEAL':
+                    revealCard();
+                    break;
+
+                case 'REMOTE_CORRECT':
+                    validateGuess(true);
+                    break;
+
+                case 'REMOTE_WRONG':
+                    validateGuess(false);
+                    break;
+
+                case 'REMOTE_NEXT_TURN':
+                    nextTurn();
+                    break;
+
+                case 'REMOTE_REPORT_INVALID':
+                    if (!window.brokenVideoHandling) {
+                        window.brokenVideoHandling = true;
+                        triggerBrokenVideoAutoSkip();
+                    }
+                    break;
+
+                case 'REMOTE_TOGGLE_LIGHTNING':
+                    toggleLightningMode();
+                    break;
+
+                case 'REMOTE_SHARED_SONG':
+                    triggerSharedSong();
+                    break;
+
+                case 'REMOTE_KING_RESOLVE':
+                    if (typeof resolveKingGuess === 'function') resolveKingGuess();
+                    break;
+
+                case 'REMOTE_DUEL_FINISH':
+                    if (typeof finishDuelRound === 'function') finishDuelRound();
+                    break;
+
                 case 'PLAY':
                     reactionStartTime = Date.now();
                     // En modo equipos: cualquier miembro del equipo activo puede controlar la música
@@ -4125,7 +4249,41 @@
             });
 
             // Insertar premios antes del ranking
-            document.getElementById('winner-ranking').innerHTML = awardsHtml + rankHtml;
+            // ── PODIO VISUAL 3 POSICIONES ──
+            var podiumHtml = '<div class="winner-podium" style="display:flex; justify-content:center; align-items:flex-end; gap:15px; width:100%; max-width:650px; margin:20px auto 10px; padding:10px 0;">';
+            var p1 = sorted[0];
+            var p2 = sorted[1];
+            var p3 = sorted[2];
+
+            if (p2) {
+                podiumHtml += '<div class="podium-step step-2" style="display:flex; flex-direction:column; align-items:center; flex:1; max-width:140px;">' +
+                    '<div style="font-size:2.2em;">🥈</div>' +
+                    '<div style="font-family:\'Bungee\'; color:var(--neon); font-size:1em; margin:4px 0; text-shadow:0 0 10px rgba(0,242,255,0.5); text-align:center;">' + p2.name + '</div>' +
+                    '<div style="font-family:\'Bungee\'; color:#aaa; font-size:0.85em; margin-bottom:6px;">' + p2.score + ' cartas</div>' +
+                    '<div style="width:100%; height:90px; background:linear-gradient(180deg, #3a3a4d 0%, #1a1a24 100%); border:2px solid #888; border-radius:10px 10px 0 0; display:flex; align-items:center; justify-content:center; font-family:\'Bungee\'; font-size:1.8em; color:#fff; box-shadow:0 0 15px rgba(255,255,255,0.2);">2</div>' +
+                    '</div>';
+            }
+
+            if (p1) {
+                podiumHtml += '<div class="podium-step step-1" style="display:flex; flex-direction:column; align-items:center; flex:1; max-width:160px; z-index:2;">' +
+                    '<div style="font-size:3em; filter:drop-shadow(0 0 15px var(--gold));">👑</div>' +
+                    '<div style="font-family:\'Bungee\'; color:var(--gold); font-size:1.25em; margin:4px 0; text-shadow:0 0 15px var(--gold); text-align:center;">' + p1.name + '</div>' +
+                    '<div style="font-family:\'Bungee\'; color:var(--neon); font-size:1em; margin-bottom:6px;">' + p1.score + ' cartas</div>' +
+                    '<div style="width:100%; height:130px; background:linear-gradient(180deg, #ffd700 0%, #b8860b 100%); border:2px solid var(--gold); border-radius:12px 12px 0 0; display:flex; align-items:center; justify-content:center; font-family:\'Bungee\'; font-size:2.5em; color:#000; box-shadow:0 0 30px var(--gold);">1</div>' +
+                    '</div>';
+            }
+
+            if (p3) {
+                podiumHtml += '<div class="podium-step step-3" style="display:flex; flex-direction:column; align-items:center; flex:1; max-width:140px;">' +
+                    '<div style="font-size:2em;">🥉</div>' +
+                    '<div style="font-family:\'Bungee\'; color:#cd7f32; font-size:0.95em; margin:4px 0; text-align:center;">' + p3.name + '</div>' +
+                    '<div style="font-family:\'Bungee\'; color:#aaa; font-size:0.8em; margin-bottom:6px;">' + p3.score + ' cartas</div>' +
+                    '<div style="width:100%; height:65px; background:linear-gradient(180deg, #8c6239 0%, #4a3520 100%); border:2px solid #cd7f32; border-radius:10px 10px 0 0; display:flex; align-items:center; justify-content:center; font-family:\'Bungee\'; font-size:1.5em; color:#fff; box-shadow:0 0 10px rgba(205,127,50,0.3);">3</div>' +
+                    '</div>';
+            }
+            podiumHtml += '</div>';
+
+            document.getElementById('winner-ranking').innerHTML = podiumHtml + awardsHtml + '<div style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center; width:100%;">' + rankHtml + '</div>';
             document.getElementById('winner-stats').innerHTML = statsHtml;
 
             // Limpiar confeti previo si existe
@@ -4294,6 +4452,45 @@
             }
         }
 
+        function getDynamicHostButtons() {
+            var btns = [];
+            var isValidationVisible = document.getElementById('validation-buttons') && document.getElementById('validation-buttons').style.display !== 'none';
+
+            if (isValidationVisible) {
+                btns.push({ id: 'correct', label: '✅ CORRECTO (Acierto)', action: 'REMOTE_CORRECT', color: 'green' });
+                btns.push({ id: 'wrong', label: '❌ INCORRECTO (Fallo)', action: 'REMOTE_WRONG', color: 'red' });
+                btns.push({ id: 'next_turn', label: '⏭️ SIGUIENTE TURNO', action: 'REMOTE_NEXT_TURN', color: 'neon' });
+                return btns;
+            }
+
+            if (turnPhase === 'KING_GUESS_RESULT') {
+                btns.push({ id: 'king_res', label: '👑 ACEPTAR RESULTADO REY', action: 'REMOTE_KING_RESOLVE', color: 'gold' });
+                return btns;
+            }
+
+            if (turnPhase === 'DUEL') {
+                if (typeof duelResult !== 'undefined' && duelResult) {
+                    btns.push({ id: 'duel_fin', label: '⚔️ ACEPTAR RESULTADO DUELO', action: 'REMOTE_DUEL_FINISH', color: 'neon' });
+                }
+                return btns;
+            }
+
+            if (isRevealed) {
+                btns.push({ id: 'correct', label: '✅ CORRECTO', action: 'REMOTE_CORRECT', color: 'green' });
+                btns.push({ id: 'wrong', label: '❌ INCORRECTO', action: 'REMOTE_WRONG', color: 'red' });
+                btns.push({ id: 'next_turn', label: '⏭️ SIGUIENTE TURNO', action: 'REMOTE_NEXT_TURN', color: 'neon' });
+                return btns;
+            }
+
+            btns.push({ id: 'reveal', label: '👁️ REVELAR AÑO / HUECO', action: 'REMOTE_REVEAL', color: 'neon' });
+            btns.push({ id: 'play_pause', label: isPlaying ? '⏸️ PAUSAR MÚSICA' : '▶️ REPRODUCIR MÚSICA', action: 'REMOTE_TOGGLE_PLAY', color: 'blue' });
+            btns.push({ id: 'invalid_vid', label: '⏭️ VÍDEO NO VÁLIDO', action: 'REMOTE_REPORT_INVALID', color: 'gray' });
+            btns.push({ id: 'lightning', label: '⚡ MODO RELÁMPAGO (5s)', action: 'REMOTE_TOGGLE_LIGHTNING', color: 'yellow' });
+            btns.push({ id: 'shared', label: '🎵 ¡JUGAMOS TODOS!', action: 'REMOTE_SHARED_SONG', color: 'pink' });
+
+            return btns;
+        }
+
         function syncState() {
             var leaderName = "---";
             var leaderScore = 0;
@@ -4317,6 +4514,8 @@
                 }
             }
 
+            var dynamicBtns = getDynamicHostButtons();
+
             for (var id in connections) {
                 var p = players.find(px => px.id.toLowerCase() === id.toLowerCase());
                 var state = {
@@ -4324,6 +4523,7 @@
                     players: players,
                     activePlayer: { id: players[activePlayerIdx] ? players[activePlayerIdx].id : null, name: players[activePlayerIdx] ? players[activePlayerIdx].name : null },
                     judgeId: currentJudgeId,
+                    hostButtons: dynamicBtns,
                     leader: { name: leaderName, score: leaderScore },
                     currentTrack: songs[currentSongIdx] || null,
                     revealed: isRevealed,

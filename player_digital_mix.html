@@ -304,19 +304,20 @@
         /* ── TOAST REACCIÓN RÁPIDA ── */
         .qr-toast {
             position: fixed;
-            bottom: 100px;
+            bottom: 110px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0,0,0,0.9);
-            border: 1px solid #333;
+            background: rgba(10, 10, 20, 0.95);
+            border: 2px solid var(--neon);
             border-radius: 20px;
-            padding: 8px 16px;
-            font-family: 'Montserrat';
-            font-size: 0.8em;
-            color: #aaa;
-            z-index: 9600;
+            padding: 12px 24px;
+            font-family: 'Bungee', 'Montserrat', sans-serif;
+            font-size: 1.15em;
+            color: #fff;
+            z-index: 9999;
             pointer-events: none;
-            animation: danger-slide 3s ease forwards;
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.5);
+            animation: danger-slide 7.5s ease forwards;
         }
 
         /* ── DISTRACCIÓN EMOJI ── */
@@ -1434,7 +1435,7 @@
 
 <body>
     <!-- BADGE VERSIÓN BUILD -->
-    <div style="position:fixed; bottom:10px; left:15px; font-family:'Bungee'; font-size:0.65em; color:var(--neon); opacity:0.85; z-index:9000; pointer-events:none; background:rgba(0,0,0,0.8); padding:3px 8px; border-radius:4px; border:1px solid var(--neon);">BUILD v3.35</div>
+    <div style="position:fixed; bottom:10px; left:15px; font-family:'Bungee'; font-size:0.65em; color:var(--neon); opacity:0.85; z-index:9000; pointer-events:none; background:rgba(0,0,0,0.8); padding:3px 8px; border-radius:4px; border:1px solid var(--neon);">BUILD v3.37</div>
 
     <!-- FAB REGLAMENTO -->
     <div id="fab-rules" onclick="toggleRules()"
@@ -1545,147 +1546,8 @@
             </div>
         </div>
 
-        <div style="color:#ddd; font-family:'Montserrat'; font-size:0.85em; max-width:420px; width:100%; line-height:1.5; padding-bottom:10px;">
-            <!-- OBJETIVO -->
-            <h3 style="color:var(--neon); font-family:'Bungee'; border-bottom:1px solid #333; padding-bottom:5px;">🎯 OBJETIVO</h3>
-            <p>Coloca las canciones en orden cronológico en tu línea de tiempo. Quien llegue a <strong>10 cartas</strong> gana.</p>
-            <p>Cada jugador empieza con <strong>1 carta</strong> ya colocada y <strong>3 fichas 🔵</strong>.</p>
-            <p>Si la canción termina sin que hayas elegido posición → cuenta como <strong>fallo</strong>.</p>
-
-            <!-- MODOS DE JUEGO -->
-            <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">🕹️ MODOS DE JUEGO</h3>
-            <ul style="padding-left:15px; margin-top:8px;">
-                <li style="margin-bottom:8px;"><strong style="color:var(--neon);">CLÁSICO:</strong> Primero en llegar a 10 cartas gana.</li>
-                <li style="margin-bottom:8px;"><strong style="color:var(--gold);">MODO REY:</strong> Al llegar a 10, el turno pasa al siguiente jugador. Cuando vuelva a tocarte, tus rivales eligen una canción y tienes que adivinar el año con ±2 de margen. Si aciertas, ganas. Si fallas, <strong>te quedas en 10</strong> y en tu próximo turno vuelves a estar en modo rey — los rivales pueden seguir desafiándote hasta que aciertes. Puedes saltar el vídeo si el enlace no funciona (⏭️ VIDEO NO VÁLIDO) y se elegirá una carta nueva.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#ff4444;">SUPERVIVENCIA:</strong> Cada jugador tiene 3 vidas (💿). Cada fallo quita una vida. Al quedarte sin vidas quedas eliminado y <strong>dejas de tener turno</strong>. Se gana de dos formas: siendo el último en pie, o llegando a 10 cartas antes que nadie.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#4488ff;">EQUIPOS:</strong> Rojo vs Azul asignados al azar. Turno por equipo: suena una canción y <strong>todos los miembros del equipo votan</strong> un hueco. Gana el hueco con más votos. Si hay empate, gana el que se votó más rápido. El equipo que llega a 10 cartas gana.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#888;">🏆 MODO COMPETITIVO:</strong> Se combina con cualquier modo. Desaparecen <strong>todas</strong> las fichas, sabotajes, apuestas, comodines, mercado, duelos y especiales — las pestañas SABOTAJE y MERCADO ni siquiera aparecen. Solo cronología pura. Se activa en el lobby, antes de empezar.</li>
-            </ul>
-
-            <!-- BONUS DE RACHA -->
-            <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">🔥 BONUS DE RACHA</h3>
-            <p>A partir del <strong>3.er acierto seguido</strong> (y en cada acierto posterior de la racha), te llevas <strong>1 carta extra</strong> además de la que ganas. Fallar rompe la racha. Un rival puede robártela con el sabotaje ROBAR RACHA (2🔵). El contador es visible en tu móvil y en la pantalla del host.</p>
-
-            <!-- CAMINO DEL GUERRERO -->
-            <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">⚔️ EL CAMINO DEL GUERRERO</h3>
-            <p>Si fallas <strong>3 veces seguidas</strong>, la siguiente carta que aciertes vale <strong>2 puntos</strong> automáticamente. Sin coste, sin activación manual. Un empujón para remontar cuando la partida se pone cuesta arriba.</p>
-
-            <!-- DOBLE O NADA -->
-            <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">🎲 DOBLE O NADA</h3>
-            <p>Cuando es tu turno, puedes activar <strong>Doble o Nada</strong> antes de colocar la carta:</p>
-            <ul style="padding-left:15px; margin-top:6px;">
-                <li style="margin-bottom:6px;">Si <strong>aciertas</strong> → ganas <strong>2 cartas</strong> en lugar de 1.</li>
-                <li style="margin-bottom:6px;">Si <strong>fallas</strong> → pierdes <strong>1 carta</strong> ya colocada.</li>
-            </ul>
-            <p style="font-size:0.85em; color:#888; margin-top:4px;">Solo se puede activar <strong>antes de pulsar PLAY</strong> (cuesta 4🔵).</p>
-
-            <!-- TURNO DEL FAROLERO -->
-            <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">🃏 TURNO DEL FAROLERO</h3>
-            <p>Antes de que empiece a sonar la canción, puedes declarar que la conoces pulsando <strong>FAROLEAR</strong>:</p>
-            <ul style="padding-left:15px; margin-top:6px;">
-                <li style="margin-bottom:6px;">Si <strong>aciertas</strong> el hueco → ganas <strong>3 cartas</strong> en total.</li>
-                <li style="margin-bottom:6px;">Si <strong>fallas</strong> → pierdes <strong>2 cartas</strong> ya colocadas.</li>
-            </ul>
-            <p style="font-size:0.85em; color:#888; margin-top:4px;">Cuesta <strong>4🔵</strong>. Solo disponible antes de pulsar PLAY.</p>
-
-            <!-- FICHAS Y APUESTAS -->
-            <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">🔵 FICHAS Y APUESTAS</h3>
-            <ul style="padding-left:15px; margin-top:8px;">
-                <li style="margin-bottom:8px;"><strong style="color:var(--accent);">¡NI DE COÑA! (1🔵):</strong> Apuesta a que el jugador activo falla. Si acierta el hueco real → te llevas la carta y +2🔵. Si él acierta → pierdes la ficha.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#00ff88;">¡CONMIGO! (1🔵):</strong> Apuesta a que el jugador activo acierta. Si acierta → ganas +2🔵. Si falla → pierdes la ficha.</li>
-                <li style="margin-bottom:8px;"><strong style="color:var(--gold);">AUTO-GANAR (3🔵):</strong> Si conoces el año exacto, gasta 3 fichas para colocarte la carta directamente.</li>
-            </ul>
-
-            <!-- MERCADO -->
-            <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">🏪 MERCADO</h3>
-            <ul style="padding-left:15px; margin-top:8px;">
-                <li style="margin-bottom:8px;"><strong style="color:#00ff88;">ESCUDO (3🔵):</strong> Bloquea el próximo sabotaje que recibas, sea cual sea. El sabotaje rebota: no te afecta y el atacante <strong>pierde igualmente las fichas que le costaba</strong>. Se gasta al rebotar uno.</li>
-                <li style="margin-bottom:8px;"><strong style="color:var(--gold);">COMODÍN ARTISTA / CANCIÓN (1 🃏):</strong> Solo el jugador activo. Revela el artista o el título <strong>en la pantalla grande</strong> — lo ven todos, así que lo pagas y también ayudas a los rivales. Tienes 3 comodines por partida y <strong>no cuestan fichas</strong>.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#88bbff;">SEGURO DE FALLO (2🔵):</strong> Actívalo <strong>antes de pulsar PLAY</strong>. Si fallas, no se aplican penalizaciones extra: ni jinx, ni pérdida de vida en Supervivencia, ni el castigo del Doble o Nada. Solo cuenta como fallo normal.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#88bbff;">PISTA DÉCADA (1🔵):</strong> Solo el jugador activo. Te revela la década de la canción (ej. "Años 90"). Se puede usar las veces que quieras mientras te queden fichas.</li>
-                <li style="margin-bottom:8px;"><strong style="color:var(--gold);">ELEGIR CATEGORÍA (4🔵):</strong> Una vez por partida, fuerza que la siguiente canción sea de una categoría concreta: 🎵 Original, 🎬 Pelis &amp; TV, ⛩️ Anime o 🎮 Gamer. Solo se ofrecen las categorías que aún queden en el mazo.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#aaaaaa;">CAMBIAR CANCIÓN (1🔵):</strong> Solo el jugador activo, y solo una vez por turno. Descarta la canción actual y saca otra. No funciona si te han echado un VETO.</li>
-            </ul>
-
-            <!-- ESPECIALES -->
-            <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">✨ ESPECIALES</h3>
-            <ul style="padding-left:15px; margin-top:8px;">
-                <li style="margin-bottom:8px;"><strong style="color:var(--gold);">🎵 ¡JUGAMOS TODOS!:</strong> Cae cada 4–7 turnos, al azar. Ese turno cualquier jugador puede llevarse la carta: el que acierte el hueco se la lleva (cuesta 1🔵 a los no-activos; el activo no paga). <strong>Al jugador al que le tocaba se le devuelve el turno después</strong>, así que no pierde su tirada.</li>
-                <li style="margin-bottom:8px;"><strong style="color:var(--gold);">⭐ CARTA BONIFICACIÓN:</strong> Cada 7–10 turnos, al azar, la canción vale <strong>2 cartas en vez de 1</strong>. El host lo avisa antes de empezar el turno.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#ffff00;">⚡ MODO RELÁMPAGO:</strong> El host puede activarlo mientras suena una canción: el activo pasa a tener solo <strong>5 segundos</strong> para colocar la carta.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#aaaaaa;">🗓️ FILTRO DE DÉCADAS:</strong> El host puede limitar las canciones a una época concreta (80s, 90s, 2000s…) antes de empezar la partida.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#4488ff;">🔵 AUTO-RECARGA:</strong> Si llegas a 0 fichas durante 2 turnos seguidos, recibes 1 ficha automáticamente. Para que nadie quede bloqueado para siempre.</li>
-            </ul>
-
-            <!-- SABOTAJES -->
-            <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">💀 SABOTAJES — BARATOS</h3>
-            <p style="color:#666; font-size:0.8em; margin:4px 0 8px;">Todos los sabotajes están disponibles desde el principio. Solo el <strong>Modo Competitivo</strong> los desactiva por completo. Si la víctima tiene ESCUDO, el sabotaje rebota y pierdes las fichas.</p>
-            <ul style="padding-left:15px; margin-top:8px;">
-                <li style="margin-bottom:8px;"><strong style="color:#00bdff;">MUTEAR (1🔵):</strong> Quita el sonido 15 segundos.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#00ff88;">¡ZUMBIDO! (1🔵):</strong> Suena un ruido molesto para despistar.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#ff8800;">VETO (1🔵):</strong> El activo no puede cambiar de canción esta ronda.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#ff4444;">PÁNICO (2🔵):</strong> El activo solo tiene 10 segundos para decidir.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#aaaaaa;">NIEBLA (2🔵):</strong> Oculta los años de su cronología durante ese turno.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#ff00cc;">RULETA RUSA (2🔵):</strong> Botón del jugador activo. Haces girar la ruleta: puedes robar una carta a un rival, ganar fichas… o perderlas tú. Todo al azar.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#ffaa00;">ROBAR RACHA (2🔵):</strong> Le quitas la racha de aciertos al rival que la tenga más alta. Se queda a 0 y pierde el bonus.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#ff00ff;">FORZAR SALTO (3🔵):</strong> Descarta la canción que está sonando. Solo antes de que el activo coloque la carta.</li>
-            </ul>
-
-            <!-- SABOTAJES SUPERMAN -->
-            <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">💀 SABOTAJES — CAROS</h3>
-            <ul style="padding-left:15px; margin-top:8px;">
-                <li style="margin-bottom:8px;"><strong style="color:#ffff00;">ROBAR FICHA (4🔵):</strong> Le quitas 1 ficha a un rival elegido al azar entre los que tengan fichas.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#ff00ff;">ROBAR TURNO (4🔵):</strong> Robas el turno al jugador activo. ⚠️ La víctima tiene <strong>5 segundos para RESISTIR</strong> gastando 2🔵 — si lo hace, el robo falla y recuperas tus fichas.</li>
-                <li style="margin-bottom:8px;"><strong style="color:var(--gold);">🃏 ROBO INTELIGENTE (4🔵):</strong> Elige qué carta robarle al líder: la más antigua, la más reciente o la más extrema.</li>
-                <li style="margin-bottom:8px;"><strong style="color:#bf00ff;">AGUJERO NEGRO (5🔵):</strong> Destruye una carta aleatoria de la cronología de un rival.</li>
-            </ul>
-
-            <!-- DUELO -->
-            <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">⚔️ DUELO (3🔵)</h3>
-            <p>Reta al jugador activo. Ambos escribís el año exacto de la canción. Gana el que más se acerque; si empatáis en distancia, gana el que respondió antes. El ganador se lleva la carta. Las 3🔵 se pagan al retar y no se devuelven.</p>
-
-            <!-- EMOJIS -->
-            <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">😂 EMOJIS</h3>
-            <p style="color:#888; font-size:0.9em; margin-bottom:8px;">Los emojis tienen dos usos: efectos colectivos (gratis) y comodines de un solo uso (1🔵).</p>
-            <p><strong style="color:var(--gold);">Efectos colectivos (gratis):</strong> Si 3 o más jugadores mandan el mismo emoji en menos de 5 segundos:</p>
-            <ul style="padding-left:15px; margin-top:6px;">
-                <li style="margin-bottom:6px;">3x😂 → <strong>DISTRACCIÓN</strong>: el jugador activo ve un overlay de risas 3 segundos.</li>
-                <li style="margin-bottom:6px;">3x🔥 (justo tras un acierto) → <strong>HOMENAJE</strong>: el activo gana +1🔵.</li>
-                <li style="margin-bottom:6px;">3x💀 → <strong>JINX</strong>: si el activo falla ese turno, pierde 2 cartas en lugar de 1.</li>
-            </ul>
-            <p style="margin-top:10px;"><strong style="color:var(--gold);">Comodines (1🔵 · 1 uso por partida):</strong> Botones especiales en la interfaz:</p>
-            <ul style="padding-left:15px; margin-top:6px;">
-                <li style="margin-bottom:6px;">🔥 → Tu próximo acierto vale <strong>2 cartas</strong> en lugar de 1.</li>
-                <li style="margin-bottom:6px;">😂 → El jugador activo no puede ver los años de su cronología durante <strong>5 segundos</strong>.</li>
-                <li style="margin-bottom:6px;">💀 → <strong>Maldición silenciosa</strong>: si el activo falla, ganas <strong>+2🔵</strong>. Si acierta, solo pierdes la ficha que pagaste.</li>
-            </ul>
-            <p style="margin-top:10px;"><strong style="color:var(--gold);">Reacciones rápidas (gratis):</strong> Frases hechas para picar al de turno. No tienen efecto en el juego, solo aparecen en la pantalla de todos. Úsalas con maldad.</p>
-
-
-            <!-- VÍDEO ROTO -->
-            <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">🔗 VÍDEO QUE NO FUNCIONA</h3>
-            <p>Si el vídeo de YouTube no carga o está bloqueado, el jugador activo tiene el botón <strong>"VÍDEO NO VÁLIDO"</strong>. Descarta esa canción sin coste, la registra como enlace roto y pasa a la siguiente. En la fase del Rey aparece el mismo botón para pedir otra carta.</p>
-
-            <!-- LEYENDA DE ICONOS -->
-            <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:16px; border-bottom:1px solid #333; padding-bottom:5px;">🔎 LEYENDA DE ICONOS</h3>
-            <ul style="padding-left:15px; margin-top:8px; font-size:0.92em;">
-                <li style="margin-bottom:5px;"><strong>🔵</strong> Ficha. Moneda del juego: paga sabotajes, apuestas, pistas y especiales. Máximo 10.</li>
-                <li style="margin-bottom:5px;"><strong>🃏</strong> Comodín de pista. Revela el artista. 3 por partida, no se compran.</li>
-                <li style="margin-bottom:5px;"><strong>👑</strong> Modo Rey / jugador que ya ha llegado a 10 cartas y tiene el desafío pendiente.</li>
-                <li style="margin-bottom:5px;"><strong>⭐</strong> Carta bonificación: este turno la canción vale doble.</li>
-                <li style="margin-bottom:5px;"><strong>⚡</strong> Modo relámpago (5s) o robo de turno en curso.</li>
-                <li style="margin-bottom:5px;"><strong>🔥</strong> Racha de aciertos activa. A partir de 3 seguidos, carta extra.</li>
-                <li style="margin-bottom:5px;"><strong>🛡️</strong> Escudo activo: el próximo sabotaje que te lancen rebotará.</li>
-                <li style="margin-bottom:5px;"><strong>💀</strong> Jinx o maldición: si fallas este turno, la penalización es doble.</li>
-                <li style="margin-bottom:5px;"><strong>🎯</strong> Categoría solicitada para la próxima canción.</li>
-                <li style="margin-bottom:5px;"><strong>💿</strong> Vidas (solo en Supervivencia). A 0 vidas quedas eliminado: dejas de tener turno.</li>
-                <li style="margin-bottom:5px;"><strong>🎵🎬⛩️🎮</strong> Categoría de la canción: Original · Pelis &amp; TV · Anime · Gamer.</li>
-            </ul>
-
-        </div>
         <button class="btn" onclick="toggleRules()"
-            style="margin-top:30px; margin-bottom: 40px; background:#333; color:white; border-color:#555; width:100%; max-width:300px; padding:15px;">CERRAR
-            REGLAMENTO</button>
+            style="margin-top:20px; margin-bottom: 30px; background:var(--neon); color:#000; font-family:'Bungee'; border:none; width:100%; max-width:300px; padding:14px; border-radius:10px; cursor:pointer;">ENTENDIDO 👍</button>
     </div>
 
     <div id="remote-overlay"
@@ -3154,7 +3016,7 @@
                 qt.className = 'qr-toast';
                 qt.innerHTML = '<strong style="color:var(--neon);">' + (data.from||'?') + ':</strong> ' + (data.text||'');
                 document.body.appendChild(qt);
-                setTimeout(function(){ qt.remove(); }, 3200);
+                setTimeout(function(){ qt.remove(); }, 7500);
                 return;
             } else if (data.type === 'DISTRACTION') {
                 showDistraction();

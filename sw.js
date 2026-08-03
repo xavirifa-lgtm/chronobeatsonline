@@ -1,5 +1,5 @@
-// ── ChronoBeats Online — Service Worker v35 ──
-const CACHE_NAME = 'chronobeats-v35';
+// ── ChronoBeats Online — Service Worker v37 ──
+const CACHE_NAME = 'chronobeats-v37';
 
 // Recursos propios a pre-cachear en la instalación (pequeños, sin riesgo)
 const PRECACHE_URLS = [
@@ -110,7 +110,15 @@ self.addEventListener('fetch', event => {
         return;
     }
 
-    // Recursos propios (HTML, imágenes, .txt, etc.) → network-first con fallback a caché
+    // Páginas HTML → siempre cargar directamente de red (sin cachear en SW)
+    if (url.endsWith('.html') || event.request.mode === 'navigate') {
+        event.respondWith(
+            fetch(event.request).catch(() => caches.match(event.request))
+        );
+        return;
+    }
+
+    // Recursos propios (imágenes, .txt, etc.) → network-first con fallback a caché
     event.respondWith(
         fetch(event.request)
             .then(response => {
@@ -121,16 +129,6 @@ self.addEventListener('fetch', event => {
                 }
                 return response;
             })
-            .catch(() =>
-                caches.match(event.request).then(cached => {
-                    if (cached) return cached;
-                    if (event.request.mode === 'navigate') {
-                        return caches.match('./player_digital_mix.html')
-                            .then(res => res || caches.match('./host_digital_mix.html'))
-                            .then(res => res || caches.match('./index.html'));
-                    }
-                    return Response.error();
-                })
-            )
+            .catch(() => caches.match(event.request))
     );
 });
