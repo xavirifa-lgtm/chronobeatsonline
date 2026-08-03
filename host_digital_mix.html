@@ -1471,35 +1471,76 @@
             }
         }
 
+        function updateRoomCodeUI() {
+            if (!roomCode) {
+                var savedRoom = localStorage.getItem('CB_RoomCode');
+                roomCode = savedRoom || Math.random().toString(36).substring(2, 8).toUpperCase();
+                if (!savedRoom) localStorage.setItem('CB_RoomCode', roomCode);
+            }
+
+            var joinCodeEl = document.getElementById('join-code');
+            if (joinCodeEl) joinCodeEl.innerText = roomCode;
+
+            var liveCodeTextEl = document.getElementById('live-code-text');
+            if (liveCodeTextEl) liveCodeTextEl.innerText = roomCode;
+
+            var liveModalCodeEl = document.getElementById('live-modal-room-code');
+            if (liveModalCodeEl) liveModalCodeEl.innerText = roomCode;
+
+            var liveBadgeEl = document.getElementById('live-room-code');
+            if (liveBadgeEl) liveBadgeEl.style.display = 'block';
+
+            generateQR();
+        }
+
         function generateQR() {
-            if (qrGenerated) return;
             var qrEl = document.getElementById('qr-code');
-            if (qrEl && typeof QRCode !== 'undefined') {
-                qrEl.innerHTML = '';
-                // Generar URL directa al player con el código ya incluido
-                var baseUrl = window.location.href.replace('host_digital_mix.html', 'player_digital_mix.html');
-                baseUrl = baseUrl.split('?')[0]; // quitar parámetros del host
-                var playerUrl = baseUrl + '?sala=' + roomCode;
-                new QRCode(qrEl, {
-                    text: playerUrl,
-                    width: 160,
-                    height: 160,
-                    colorDark: '#000000',
-                    colorLight: '#ffffff',
-                    correctLevel: QRCode.CorrectLevel.M
-                });
-                qrGenerated = true;
-                // Mostrar también el enlace copiable
-                var linkEl = document.getElementById('player-link');
-                if (linkEl) {
-                    linkEl.href = playerUrl;
-                    linkEl.innerText = '🔗 Copiar enlace jugador';
-                    linkEl.style.display = 'block';
+            if (!qrEl) return;
+
+            var baseUrl = window.location.href.replace('host_digital_mix.html', 'player_digital_mix.html');
+            baseUrl = baseUrl.split('?')[0]; // quitar parámetros del host
+            var playerUrl = baseUrl + '?sala=' + roomCode;
+
+            var linkEl = document.getElementById('player-link');
+            if (linkEl) {
+                linkEl.href = playerUrl;
+                linkEl.innerText = '🔗 Copiar enlace jugador';
+                linkEl.style.display = 'block';
+            }
+
+            qrEl.innerHTML = '';
+
+            if (typeof QRCode !== 'undefined') {
+                try {
+                    new QRCode(qrEl, {
+                        text: playerUrl,
+                        width: 160,
+                        height: 160,
+                        colorDark: '#000000',
+                        colorLight: '#ffffff',
+                        correctLevel: QRCode.CorrectLevel.M
+                    });
+                    return;
+                } catch(e) {
+                    console.warn("Error QRCode.js, usando API fallback:", e);
                 }
             }
+
+            // Fallback de imagen QR por si la librería JS no ha cargado o falla
+            var img = document.createElement('img');
+            img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=' + encodeURIComponent(playerUrl);
+            img.alt = 'QR Sala ' + roomCode;
+            img.style.width = '160px';
+            img.style.height = '160px';
+            img.style.borderRadius = '8px';
+            qrEl.appendChild(img);
         }
-        // Intentar generar al cargar y también cuando el peer esté listo
-        window.addEventListener('load', function() { setTimeout(generateQR, 500); });
+
+        // Ejecutar inmediatamente y al cargar
+        document.addEventListener('DOMContentLoaded', updateRoomCodeUI);
+        window.addEventListener('load', updateRoomCodeUI);
+        setTimeout(updateRoomCodeUI, 100);
+        setTimeout(updateRoomCodeUI, 600);
 
         // Eliminadas funciones de YT API
         function onYouTubeIframeAPIReady() {
@@ -1740,18 +1781,38 @@
             if (!modal) return;
             if (modal.style.display === 'none' || !modal.style.display) {
                 var liveQrEl = document.getElementById('live-qr-canvas-container');
-                if (liveQrEl && typeof QRCode !== 'undefined' && liveQrEl.children.length === 0) {
+                if (liveQrEl) {
                     var baseUrl = window.location.href.replace('host_digital_mix.html', 'player_digital_mix.html');
                     baseUrl = baseUrl.split('?')[0];
                     var playerUrl = baseUrl + '?sala=' + roomCode;
-                    new QRCode(liveQrEl, {
-                        text: playerUrl,
-                        width: 190,
-                        height: 190,
-                        colorDark: '#000000',
-                        colorLight: '#ffffff',
-                        correctLevel: QRCode.CorrectLevel.H
-                    });
+                    liveQrEl.innerHTML = '';
+
+                    if (typeof QRCode !== 'undefined') {
+                        try {
+                            new QRCode(liveQrEl, {
+                                text: playerUrl,
+                                width: 190,
+                                height: 190,
+                                colorDark: '#000000',
+                                colorLight: '#ffffff',
+                                correctLevel: QRCode.CorrectLevel.H
+                            });
+                        } catch(e) {
+                            var img = document.createElement('img');
+                            img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=190x190&data=' + encodeURIComponent(playerUrl);
+                            img.style.width = '190px';
+                            img.style.height = '190px';
+                            img.style.borderRadius = '8px';
+                            liveQrEl.appendChild(img);
+                        }
+                    } else {
+                        var img = document.createElement('img');
+                        img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=190x190&data=' + encodeURIComponent(playerUrl);
+                        img.style.width = '190px';
+                        img.style.height = '190px';
+                        img.style.borderRadius = '8px';
+                        liveQrEl.appendChild(img);
+                    }
                 }
                 if (document.getElementById('live-modal-room-code')) {
                     document.getElementById('live-modal-room-code').innerText = roomCode;

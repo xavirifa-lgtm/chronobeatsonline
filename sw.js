@@ -1,5 +1,5 @@
-// ── ChronoBeats Online — Service Worker v17 ──
-const CACHE_NAME = 'chronobeats-v17';
+// ── ChronoBeats Online — Service Worker v18 ──
+const CACHE_NAME = 'chronobeats-v18';
 
 // Recursos propios a pre-cachear en la instalación (pequeños, sin riesgo)
 const PRECACHE_URLS = [
