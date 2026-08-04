@@ -894,9 +894,15 @@
     </div>
 
     <div class="logo">CHRONOBEATS</div>
-    <div id="live-room-code" onclick="toggleLiveQrModal()" title="Haz clic para ver QR y Código de sala"
-        style="display:none; position:fixed; top:20px; right:20px; background:var(--bg); border:1px solid var(--neon); color:var(--neon); padding:8px 15px; border-radius:10px; font-family:'Bungee'; font-size:1.2em; z-index:10000; box-shadow:0 0 10px rgba(0,242,255,0.3); cursor:pointer;">
-        CODE</div>
+    <div id="live-room-code"
+        style="display:none; position:fixed; top:20px; right:20px; background:var(--bg); border:1px solid var(--neon); color:var(--neon); padding:10px 14px; border-radius:12px; font-family:'Bungee'; font-size:1.2em; z-index:10000; box-shadow:0 0 12px rgba(0,242,255,0.3); cursor:pointer; user-select:none;"
+        onclick="toggleLiveQR()" title="Pulsa para ver el QR">
+        <span id="live-code-text">CODE</span>
+        <div id="live-qr-mini" style="display:none; margin-top:8px; text-align:center;">
+            <div id="live-qr-canvas" style="background:#fff; padding:4px; border-radius:6px; display:inline-block;"></div>
+            <div style="font-size:0.45em; color:#555; margin-top:4px; letter-spacing:1px;">ESCANEAR PARA UNIRSE</div>
+        </div>
+    </div>
     <div id="lobby">
         <div class="room-code" id="join-code">------</div>
         <button onclick="resetRoomCode()" style="font-family:'Bungee'; font-size:0.55em; color:#444; background:transparent; border:1px solid #333; border-radius:6px; padding:4px 10px; cursor:pointer; margin-top:-8px; margin-bottom:8px;">↺ Nueva sala</button>
@@ -1299,14 +1305,20 @@
             }
         }
 
+        var qrGenerated = false;
+
         function generateQR() {
             var qrEl = document.getElementById('qr-code');
             var codeEl = document.getElementById('join-code');
             if (codeEl) codeEl.innerText = roomCode;
+            var liveCodeEl = document.getElementById('live-code-text');
+            if (liveCodeEl) liveCodeEl.innerText = roomCode;
+
+            var baseUrl = window.location.href.replace('host_digital_mix.html', 'player_digital_mix.html').split('?')[0];
+            var playerUrl = baseUrl + '?sala=' + roomCode;
+
             if (qrEl && typeof QRCode !== 'undefined') {
                 qrEl.innerHTML = '';
-                var baseUrl = window.location.href.replace('host_digital_mix.html', 'player_digital_mix.html').split('?')[0];
-                var playerUrl = baseUrl + '?sala=' + roomCode;
                 new QRCode(qrEl, {
                     text: playerUrl,
                     width: 160,
@@ -1315,16 +1327,63 @@
                     colorLight: '#ffffff',
                     correctLevel: QRCode.CorrectLevel.M
                 });
-                var linkEl = document.getElementById('player-link');
-                if (linkEl) {
-                    linkEl.href = playerUrl;
-                    linkEl.innerText = '🔗 Copiar enlace jugador';
-                    linkEl.style.display = 'block';
-                }
             }
+
+            var miniEl = document.getElementById('live-qr-canvas');
+            if (miniEl && typeof QRCode !== 'undefined') {
+                miniEl.innerHTML = '';
+                new QRCode(miniEl, {
+                    text: playerUrl,
+                    width: 120,
+                    height: 120,
+                    colorDark: '#000000',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.M
+                });
+            }
+
+            var modalQrEl = document.getElementById('modal-qr-code');
+            if (modalQrEl && typeof QRCode !== 'undefined') {
+                modalQrEl.innerHTML = '';
+                new QRCode(modalQrEl, {
+                    text: playerUrl,
+                    width: 200,
+                    height: 200,
+                    colorDark: '#000000',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.M
+                });
+            }
+            var modalCodeEl = document.getElementById('modal-room-code');
+            if (modalCodeEl) modalCodeEl.innerText = roomCode;
+
+            var linkEl = document.getElementById('player-link');
+            if (linkEl) {
+                linkEl.href = playerUrl;
+                linkEl.innerText = '🔗 Copiar enlace jugador';
+                linkEl.style.display = 'block';
+            }
+            qrGenerated = true;
         }
+
+        function toggleLiveQR() {
+            var qrMini = document.getElementById('live-qr-mini');
+            if (!qrMini) return;
+            var visible = qrMini.style.display === 'block';
+            qrMini.style.display = visible ? 'none' : 'block';
+            if (!visible) generateQR();
+        }
+
+        function toggleLiveQrModal() {
+            var modal = document.getElementById('live-qr-modal');
+            if (!modal) return;
+            var visible = modal.style.display === 'flex';
+            modal.style.display = visible ? 'none' : 'flex';
+            if (!visible) generateQR();
+        }
+
         // Intentar generar al cargar y también cuando el peer esté listo
-        window.addEventListener('load', function() { setTimeout(generateQR, 500); });
+        window.addEventListener('load', function() { setTimeout(generateQR, 300); });
 
         // Eliminadas funciones de YT API
         function onYouTubeIframeAPIReady() {
@@ -1545,9 +1604,11 @@
             });
             peer.on('open', function (id) {
                 console.log("Host Peer Abierto:", id);
-                document.getElementById('live-room-code').innerText = roomCode;
-                document.getElementById('live-room-code').style.display = 'block';
-                generateQR(); // Asegurar que el QR está generado
+                var liveCodeEl = document.getElementById('live-code-text');
+                if (liveCodeEl) liveCodeEl.innerText = roomCode;
+                var liveRoomBox = document.getElementById('live-room-code');
+                if (liveRoomBox) liveRoomBox.style.display = 'block';
+                generateQR();
             });
             peer.on('connection', function (conn) {
                 console.log("Nueva conexión entrante:", conn.peer);
