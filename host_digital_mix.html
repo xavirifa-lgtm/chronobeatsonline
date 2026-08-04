@@ -1119,7 +1119,7 @@
         // Variables de estado del Modo Rey
         var gameMode = 'normal';
         var decadeFilter = 'all';
-        var teamÃ¡s = { red: [], blue: [] };
+        var teams = { red: [], blue: [] };
         var pendingSteal = null; // { thief: player, victim: player } — esperando respuesta // IDs de jugadores por equipo
         var teamCards = { red: [], blue: [] }; // cronología compartida por equipo
         var teamScore = { red: 0, blue: 0 };
@@ -1134,7 +1134,7 @@
         var sharedSongOwnerId = null; // dueño del turno "¡JUGAMOS TODOS!" — repetirá turno después
         var currentJudgeId = 'ALL';   // informativo para el móvil
         var kingLastResult = false;   // ¿el rey acertó? (para aceptar el resultado en remoto)
-        var uÃºltimoInformeListas = { malas: [], duplicadas: 0 };  // salud de los .txt
+        var ultimoInformeListas = { malas: [], duplicadas: 0 };  // salud de los .txt
         var nextBonusTurn = 7 + Math.floor(Math.random() * 4);      // carta bonificación (7-10)
         var isBonusCard = false;   // este turno la carta vale 2 puntos
         var voiceEnabled = false;
@@ -1616,8 +1616,8 @@
 
         initPeer();
 
-        var urlParamÃ¡s = new URLSearchParamÃ¡s(window.location.search);
-        var mixParam = urlParamÃ¡s.get('mix') || 'orig,anime,movies,videojuegos';
+        var urlParams = new URLSearchParams(window.location.search);
+        var mixParam = urlParams.get('mix') || 'orig,anime,movies,videojuegos';
         var mixTypes = mixParam.split(',');
 
         var cachedTxts = [];
@@ -2504,8 +2504,8 @@
                         var target = otherPlayers.length > 0 ? otherPlayers[Math.floor(Math.random() * otherPlayers.length)] : null;
                         
                         var result = Math.floor(Math.random() * 4); // 0, 1, 2, 3
-                        var mÃ¡sgP = "";
-                        var mÃ¡sgT = "";
+                        var msgP = "";
+                        var msgT = "";
                         
                         if (result === 0) { // Robar 1 carta
                             if (target && target.cards && target.cards.length > 1) {
@@ -2514,34 +2514,33 @@
                                 p.cards.sort(function(a,b){return a-b;});
                                 target.cards.sort(function(a,b){return a-b;});
                                 resyncScores();
-                                mÃ¡sgP = "¡ZAS! Le has mangado una carta a " + target.name + ". ¡Vaya suerte de forajido!";
-                                mÃ¡sgT = "¡MALAS NOTICIAS! " + p.name + " te ha levantado una carta en la Ruleta Rusa. ¡Es un mangante!";
+                                msgP = "¡ZAS! Le has mangado una carta a " + target.name + ". ¡Vaya suerte de forajido!";
+                                msgT = "¡MALAS NOTICIAS! " + p.name + " te ha levantado una carta en la Ruleta Rusa. ¡Es un mangante!";
                             } else {
-                                mÃ¡sgP = "Has intentado mangar una carta a " + (target ? target.name : "nadie") + " pero no tenía nada. ¡Pólvora mojada!";
+                                msgP = "Has intentado mangar una carta a " + (target ? target.name : "nadie") + " pero no tenía nada. ¡Pólvora mojada!";
                             }
                         } else if (result === 1) { // Robar 1 ficha
                             if (target && target.tokens > 0) {
                                 updateTokens(target, -1);
                                 updateTokens(p, 1);
-                                // Animación de robo en el target
                                 if (connections[target.id]) try { connections[target.id].send({ type: 'TOKEN_STOLEN', thief: p.name }); } catch(e){}
-                            broadcastSabotage(p.name, target.name, 'ROBAR FICHA', '💸');
-                                mÃ¡sgP = "¡Dichosa suerte! Le has birlado una ficha a " + target.name + ".";
-                                mÃ¡sgT = "¡AY! " + p.name + " te ha robado una ficha en la Ruleta Rusa. ¡Vigila tu bolsa!";
+                                broadcastSabotage(p.name, target.name, 'ROBAR FICHA', '💸');
+                                msgP = "¡Dichosa suerte! Le has birlado una ficha a " + target.name + ".";
+                                msgT = "¡AY! " + p.name + " te ha robado una ficha en la Ruleta Rusa. ¡Vigila tu bolsa!";
                             } else {
-                                mÃ¡sgP = "¡Vaya! Has ganado un hueco vacío. " + (target ? target.name : "nadie") + " no tiene ni un centavo.";
+                                msgP = "¡Vaya! Has ganado un hueco vacío. " + (target ? target.name : "nadie") + " no tiene ni un centavo.";
                             }
                         } else if (result === 2) { // Perder 1 ficha
                             updateTokens(p, -1);
-                            mÃ¡sgP = "¡BOOM! El tiro te ha rozado la oreja... Pierdes 1 ficha extra por el susto.";
+                            msgP = "¡BOOM! El tiro te ha rozado la oreja... Pierdes 1 ficha extra por el susto.";
                         } else if (result === 3) { // Perder 2 fichas
                             updateTokens(p, -2);
-                            mÃ¡sgP = "¡CRITICAL HIT! Te has pegado un tiro en el pie tú solo. Pierdes 2 fichas extras.";
+                            msgP = "¡CRITICAL HIT! Te has pegado un tiro en el pie tú solo. Pierdes 2 fichas extras.";
                         }
 
-                        if (mÃ¡sgP) try { connections[p.id].send({ type: 'BET_RESULT', mÃ¡sg: mÃ¡sgP }); } catch (e) { }
-                        if (target && mÃ¡sgT) try { connections[target.id].send({ type: 'BET_RESULT', mÃ¡sg: mÃ¡sgT }); } catch (e) { }
-                        
+                        if (msgP) try { connections[p.id].send({ type: 'BET_RESULT', msg: msgP }); } catch (e) { }
+                        if (target && msgT) try { connections[target.id].send({ type: 'BET_RESULT', msg: msgT }); } catch (e) { }
+
                         document.getElementById('host-instructions').innerHTML = "<span style='color:#ff0055; font-size:1.5em; font-family:Bungee;'>¡" + p.name + " JUGÓ A LA RULETA RUSA!</span>";
                         notifyVictim(players[activePlayerIdx].id, p.name, 'RULETA RUSA', '🎰');
                         if (checkScoreVictory(p)) return;
@@ -3808,8 +3807,8 @@
                     if (bettingAgainst) {
                         bettingAgainst.forEach(function (pid) {
                             if (connections[pid]) {
-                                var mÃ¡sg = losesPhrases[Math.floor(Math.random() * losesPhrases.length)];
-                                connections[pid].send({ type: 'BET_RESULT', mÃ¡sg: "JAJAJAJA...\n\n" + mÃ¡sg });
+                                var msg = losesPhrases[Math.floor(Math.random() * losesPhrases.length)];
+                                connections[pid].send({ type: 'BET_RESULT', msg: "JAJAJAJA...\n\n" + msg });
                             }
                         });
                     }
@@ -3819,7 +3818,7 @@
                             if (p) {
                                 updateTokens(p, 2);
                                 if (connections[pid]) {
-                                    connections[pid].send({ type: 'BET_RESULT', mÃ¡sg: "¡SABÍAS QUE IBA A ACERTAR Y HAS GANADO!\n\nRecompensa: +2 FICHAS AZULES." });
+                                    connections[pid].send({ type: 'BET_RESULT', msg: "¡SABÍAS QUE IBA A ACERTAR Y HAS GANADO!\n\nRecompensa: +2 FICHAS AZULES." });
                                 }
                             }
                         });
@@ -3832,7 +3831,7 @@
                             if (p) {
                                 updateTokens(p, 2);
                                 if (connections[pid]) {
-                                    connections[pid].send({ type: 'BET_RESULT', mÃ¡sg: "¡SABÍAS QUE IBA A FALLAR Y HAS GANADO!\n\nRecompensa: +2 FICHAS AZULES." });
+                                    connections[pid].send({ type: 'BET_RESULT', msg: "¡SABÍAS QUE IBA A FALLAR Y HAS GANADO!\n\nRecompensa: +2 FICHAS AZULES." });
                                 }
                             }
                         });
@@ -3847,8 +3846,8 @@
                         ];
                         bettingFor.forEach(function (pid) {
                             if (connections[pid]) {
-                                var mÃ¡sg = losesPhrasesFor[Math.floor(Math.random() * losesPhrasesFor.length)];
-                                connections[pid].send({ type: 'BET_RESULT', mÃ¡sg: "JAJAJAJA...\n\n" + mÃ¡sg });
+                                var msg = losesPhrasesFor[Math.floor(Math.random() * losesPhrasesFor.length)];
+                                connections[pid].send({ type: 'BET_RESULT', msg: "JAJAJAJA...\n\n" + msg });
                             }
                         });
                     }
@@ -4992,11 +4991,11 @@
         }
 
         function broadcastSabotage(attackerName, victimName, sabotageName, icon) {
-            var mÃ¡sg = icon + ' ' + attackerName + ' saboteó a ' + victimName + ': ' + sabotageName;
+            var msg = icon + ' ' + attackerName + ' saboteó a ' + victimName + ': ' + sabotageName;
             for (var _bs in connections) {
-                try { connections[_bs].send({ type: 'SABOTAGE_BROADCAST', mÃ¡sg: mÃ¡sg }); } catch(e) {}
+                try { connections[_bs].send({ type: 'SABOTAGE_BROADCAST', msg: msg }); } catch(e) {}
             }
-            addEvent('<span class="ev-bad">' + mÃ¡sg + '</span>', icon);
+            addEvent('<span class="ev-bad">' + msg + '</span>', icon);
         }
 
         // ── ROBO DE TURNO: ejecutar o cancelar ──

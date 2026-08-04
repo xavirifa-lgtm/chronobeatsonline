@@ -394,7 +394,7 @@
 
     <!-- BADGE DE VERSIÓN Y BOTÓN FORZAR ACTUALIZACIÓN -->
     <div style="position:fixed; bottom:15px; right:20px; font-family:'Bungee',sans-serif; font-size:0.8em; color:var(--cyan); background:rgba(2,8,16,0.92); border:1px solid var(--cyan); padding:6px 14px; border-radius:20px; box-shadow:0 0 15px rgba(0,242,255,0.4); z-index:9999; display:flex; align-items:center; gap:10px;">
-        <span style="color:#00f2ff; font-weight:bold;">v3.41 (RELOAD OK)</span>
+        <span style="color:#00f2ff; font-weight:bold;">v3.42 (RELOAD OK)</span>
         <button onclick="clearAppCache()" title="Limpiar caché y forzar actualización" style="background:linear-gradient(90deg,var(--pink),var(--cyan)); color:#000; border:none; border-radius:10px; padding:4px 10px; font-family:'Bungee'; font-size:0.75em; cursor:pointer;">🔄 ACTUALIZAR CÁCHÉ</button>
     </div>
 
@@ -432,7 +432,7 @@
             }
             localStorage.clear();
             sessionStorage.clear();
-            alert("Caché purgada con éxito. Recargando la aplicación v3.41 limpia...");
+            alert("Caché purgada con éxito. Recargando la aplicación v3.42 limpia...");
             setTimeout(function() { window.location.href = window.location.pathname + '?v=' + Date.now(); }, 500);
         }
 
