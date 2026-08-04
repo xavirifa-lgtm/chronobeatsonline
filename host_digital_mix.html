@@ -1696,7 +1696,7 @@
                 lineasMalas.forEach(function (x) { console.warn('   ' + x); });
             }
             if (duplicadas) console.warn('[HOST] ' + duplicadas + ' URLs duplicadas ignoradas en las listas.');
-            uÃºltimoInformeListas = { malas: lineasMalas, duplicadas: duplicadas };
+            ultimoInformeListas = { malas: lineasMalas, duplicadas: duplicadas };
             return rawSongs;
         }
 
@@ -1896,7 +1896,7 @@
                 shuffled.forEach(function(pl, i) {
                     var rp = players.find(function(p) { return p.id === pl.id; });
                     rp.team = i % 2 === 0 ? 'red' : 'blue';
-                    teamÃ¡s[rp.team].push(rp.id);
+                    teams[rp.team].push(rp.id);
                 });
                 document.getElementById('team-display').style.display = 'flex';
             } else {
