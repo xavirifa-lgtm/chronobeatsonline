@@ -881,17 +881,6 @@
             <button class="btn-start" onclick="location.reload()" style="background:#333; color:#fff; box-shadow:none; padding:14px 35px;">🏠 MENÚ PRINCIPAL</button>
         </div>
     </div>
-    <!-- MODAL POPUP QR DE LA SALA -->
-    <div id="live-qr-modal" onclick="toggleLiveQrModal()" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.92); backdrop-filter:blur(10px); z-index:99999; align-items:center; justify-content:center; flex-direction:column; cursor:pointer;">
-        <div style="background:#111; border:2px solid var(--neon); border-radius:20px; padding:25px; text-align:center; max-width:360px; width:90%; box-shadow:0 0 40px rgba(0,242,255,0.5); position:relative;" onclick="event.stopPropagation()">
-            <button onclick="toggleLiveQrModal()" style="position:absolute; top:12px; right:12px; background:transparent; border:none; color:var(--neon); font-family:'Bungee'; font-size:1.4em; cursor:pointer;">✕</button>
-            <div style="font-family:'Bungee'; color:var(--neon); font-size:1.2em; margin-bottom:10px;">📲 UNIRSE A LA PARTIDA</div>
-            <div id="modal-room-code" style="font-family:'Bungee'; font-size:3em; color:var(--gold); letter-spacing:6px; margin:10px 0;">------</div>
-            <div id="modal-qr-code" style="background:#fff; padding:15px; border-radius:12px; display:inline-block; margin:10px 0;"></div>
-            <div style="font-family:'Bungee'; font-size:0.7em; color:#aaa; margin-top:8px;">ESCANEA CON TU MÓVIL PARA ENTRAR</div>
-            <button onclick="toggleLiveQrModal()" style="margin-top:18px; width:100%; background:var(--neon); color:#000; border:none; padding:10px; border-radius:10px; font-family:'Bungee'; cursor:pointer;">CERRAR</button>
-        </div>
-    </div>
 
     <div class="logo">CHRONOBEATS</div>
     <div id="live-room-code"
@@ -1050,26 +1039,6 @@
 
 
     <script>
-        function toggleLiveQrModal() {
-            var modal = document.getElementById('live-qr-modal');
-            if (!modal) return;
-            var isHidden = modal.style.display === 'none' || modal.style.display === '';
-            if (isHidden) {
-                document.getElementById('modal-room-code').innerText = roomCode;
-                var modalQr = document.getElementById('modal-qr-code');
-                if (modalQr) {
-                    modalQr.innerHTML = '';
-                    var joinUrl = window.location.href.replace('host_digital_mix.html', 'player_digital_mix.html').split('?')[0] + '?code=' + roomCode;
-                    if (window.QRCode) {
-                        new QRCode(modalQr, { text: joinUrl, width: 180, height: 180 });
-                    }
-                }
-                modal.style.display = 'flex';
-            } else {
-                modal.style.display = 'none';
-            }
-        }
-
         // Wake Lock
         let wakeLock = null;
         async function requestWakeLock() {
@@ -1342,21 +1311,6 @@
                 });
             }
 
-            var modalQrEl = document.getElementById('modal-qr-code');
-            if (modalQrEl && typeof QRCode !== 'undefined') {
-                modalQrEl.innerHTML = '';
-                new QRCode(modalQrEl, {
-                    text: playerUrl,
-                    width: 200,
-                    height: 200,
-                    colorDark: '#000000',
-                    colorLight: '#ffffff',
-                    correctLevel: QRCode.CorrectLevel.M
-                });
-            }
-            var modalCodeEl = document.getElementById('modal-room-code');
-            if (modalCodeEl) modalCodeEl.innerText = roomCode;
-
             var linkEl = document.getElementById('player-link');
             if (linkEl) {
                 linkEl.href = playerUrl;
@@ -1371,14 +1325,6 @@
             if (!qrMini) return;
             var visible = qrMini.style.display === 'block';
             qrMini.style.display = visible ? 'none' : 'block';
-            if (!visible) generateQR();
-        }
-
-        function toggleLiveQrModal() {
-            var modal = document.getElementById('live-qr-modal');
-            if (!modal) return;
-            var visible = modal.style.display === 'flex';
-            modal.style.display = visible ? 'none' : 'flex';
             if (!visible) generateQR();
         }
 
