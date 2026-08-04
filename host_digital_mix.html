@@ -1277,13 +1277,10 @@
         var qrGenerated = false;
 
         function generateQR() {
+            if (qrGenerated) return;
             var qrEl = document.getElementById('qr-code');
-            var codeEl = document.getElementById('join-code');
-            if (codeEl) codeEl.innerText = roomCode;
-            var liveCodeEl = document.getElementById('live-code-text');
-            if (liveCodeEl) liveCodeEl.innerText = roomCode;
-
-            var baseUrl = window.location.href.replace('host_digital_mix.html', 'player_digital_mix.html').split('?')[0];
+            var baseUrl = window.location.href.replace('host_digital_mix.html', 'player_digital_mix.html');
+            baseUrl = baseUrl.split('?')[0]; // quitar parámetros del host
             var playerUrl = baseUrl + '?sala=' + roomCode;
 
             if (qrEl && typeof QRCode !== 'undefined') {
@@ -1311,14 +1308,17 @@
                 });
             }
 
+            qrGenerated = true;
+
             var linkEl = document.getElementById('player-link');
             if (linkEl) {
                 linkEl.href = playerUrl;
                 linkEl.innerText = '🔗 Copiar enlace jugador';
                 linkEl.style.display = 'block';
             }
-            qrGenerated = true;
         }
+        // Intentar generar al cargar y también cuando el peer esté listo
+        window.addEventListener('load', function() { setTimeout(generateQR, 500); });
 
         function toggleLiveQR() {
             var qrMini = document.getElementById('live-qr-mini');
@@ -1550,11 +1550,9 @@
             });
             peer.on('open', function (id) {
                 console.log("Host Peer Abierto:", id);
-                var liveCodeEl = document.getElementById('live-code-text');
-                if (liveCodeEl) liveCodeEl.innerText = roomCode;
-                var liveRoomBox = document.getElementById('live-room-code');
-                if (liveRoomBox) liveRoomBox.style.display = 'block';
-                generateQR();
+                document.getElementById('live-room-code').innerText = roomCode;
+                document.getElementById('live-room-code').style.display = 'block';
+                generateQR(); // Asegurar que el QR está generado
             });
             peer.on('connection', function (conn) {
                 console.log("Nueva conexión entrante:", conn.peer);
