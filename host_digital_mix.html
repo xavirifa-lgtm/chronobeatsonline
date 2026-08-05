@@ -1730,32 +1730,18 @@
             console.log("Lista recargada:", songs.length, "canciones.");
         }
 
-        function fetchTxtSafe(url, type, color) {
-            return fetch(url).then(function(r) {
-                return r.arrayBuffer();
-            }).then(function(buffer) {
-                var decoderUtf8 = new TextDecoder('utf-8', { fatal: false });
-                var text = decoderUtf8.decode(buffer);
-                if (text.indexOf('\uFFFD') !== -1 || text.indexOf('') !== -1) {
-                    var decoderLatin1 = new TextDecoder('iso-8859-1');
-                    text = decoderLatin1.decode(buffer);
-                }
-                return { text: text, type: type, color: color };
-            });
-        }
-
         var fetchPromises = [];
         if (mixTypes.includes('orig')) {
-            fetchPromises.push(fetchTxtSafe('lista_final.txt?v=' + new Date().getTime(), 'orig', '#00f2ff'));
+            fetchPromises.push(fetch('lista_final.txt?v=' + new Date().getTime()).then(function(r){return r.text()}).then(function(t){return {text:t,type:'orig',color:'#00f2ff'}}));
         }
         if (mixTypes.includes('anime')) {
-            fetchPromises.push(fetchTxtSafe('lista_final_anime.txt?v=' + new Date().getTime(), 'anime', '#ff00cc'));
+            fetchPromises.push(fetch('lista_final_anime.txt?v=' + new Date().getTime()).then(function(r){return r.text()}).then(function(t){return {text:t,type:'anime',color:'#ff00cc'}}));
         }
         if (mixTypes.includes('movies')) {
-            fetchPromises.push(fetchTxtSafe('lista_final_pelis.txt?v=' + new Date().getTime(), 'movies', '#ffaa00'));
+            fetchPromises.push(fetch('lista_final_pelis.txt?v=' + new Date().getTime()).then(function(r){return r.text()}).then(function(t){return {text:t,type:'movies',color:'#ffaa00'}}));
         }
         if (mixTypes.includes('videojuegos')) {
-            fetchPromises.push(fetchTxtSafe('lista_videojuegos.txt?v=' + new Date().getTime(), 'videojuegos', '#bf00ff'));
+            fetchPromises.push(fetch('lista_videojuegos.txt?v=' + new Date().getTime()).then(function(r){return r.text()}).then(function(t){return {text:t,type:'videojuegos',color:'#bf00ff'}}));
         }
 
         Promise.all(fetchPromises).then(function (results) {
