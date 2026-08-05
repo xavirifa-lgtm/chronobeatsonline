@@ -853,14 +853,16 @@
 <body>
     <a href="index.html" class="btn-hub" title="Volver al Hub">H</a>
     <div id="flash-overlay"></div>
-    <div id="winner-screen">
+    <div id="winner-screen" style="padding-top: 35px; overflow-y: auto;">
         <h1 style="font-size:2.5em; margin-bottom:5px;">🏆 ¡GANADOR!</h1>
-        <div id="winner-avatar-img" style="margin: 15px 0;"></div>
-        <h2 id="winner-name" style="font-size:2.5em; margin-bottom:5px;">---</h2>
-        <!-- PODIO VISUAL CENTRADO EN EL MEDIO -->
-        <div id="winner-podium-center" style="width:100%; max-width:650px; margin:15px auto;"></div>
-        <!-- PREMIOS ESPECIALES DEBAJO -->
-        <div id="winner-awards" style="margin:12px auto; width:100%; max-width:850px;"></div>
+        <div id="winner-avatar-img" style="margin: 10px 0;"></div>
+        <h2 id="winner-name" style="font-size:2.2em; margin-bottom:15px;">---</h2>
+        <!-- LAYOUT 3 COLUMNAS: IZQUIERDA (Premios) | CENTRO (Podio) | DERECHA (Premios/Stats) -->
+        <div style="display:flex; width:100%; max-width:1100px; justify-content:space-between; align-items:center; margin:10px auto; gap:15px;">
+            <div id="winner-awards-left" style="flex:1; max-width:280px; display:flex; flex-direction:column; gap:10px; align-items:flex-end;"></div>
+            <div id="winner-podium-center" style="flex:2; max-width:550px; margin:0 auto;"></div>
+            <div id="winner-awards-right" style="flex:1; max-width:280px; display:flex; flex-direction:column; gap:10px; align-items:flex-start;"></div>
+        </div>
         <div id="winner-stats" style="margin:15px 0; width:100%; max-width:600px;"></div>
         <div id="winner-ranking" style="margin:10px 0; width:100%; max-width:600px; display:flex; flex-wrap:wrap; gap:10px; justify-content:center;"></div>
         <div id="winner-replay" style="display:none; width:100%; max-width:600px; margin:12px 0;"></div>
@@ -871,8 +873,14 @@
     </div>
     <div class="logo">CHRONOBEATS</div>
     <div id="live-room-code"
-        style="display:none; position:fixed; top:20px; right:20px; background:var(--bg); border:1px solid var(--neon); color:var(--neon); padding:8px 15px; border-radius:10px; font-family:'Bungee'; font-size:1.2em; z-index:10000; box-shadow:0 0 10px rgba(0,242,255,0.3);">
-        CODE</div>
+        style="display:none; position:fixed; top:20px; right:20px; background:var(--bg); border:1px solid var(--neon); color:var(--neon); padding:10px 14px; border-radius:12px; font-family:'Bungee'; font-size:1.2em; z-index:10000; box-shadow:0 0 12px rgba(0,242,255,0.3); cursor:pointer; user-select:none;"
+        onclick="toggleLiveQR()" title="Pulsa para ver el QR">
+        <span id="live-code-text">CODE</span>
+        <div id="live-qr-mini" style="display:none; margin-top:8px; text-align:center;">
+            <div id="live-qr-canvas" style="background:#fff; padding:4px; border-radius:6px; display:inline-block;"></div>
+            <div style="font-size:0.45em; color:#555; margin-top:4px; letter-spacing:1px;">ESCANEAR PARA UNIRSE</div>
+        </div>
+    </div>
     <div id="lobby">
         <div class="room-code" id="join-code">------</div>
         <button onclick="resetRoomCode()" style="font-family:'Bungee'; font-size:0.55em; color:#444; background:transparent; border:1px solid #333; border-radius:6px; padding:4px 10px; cursor:pointer; margin-top:-8px; margin-bottom:8px;">↺ Nueva sala</button>
@@ -1282,6 +1290,37 @@
                 }
             }
         }
+
+        function toggleLiveQR() {
+            var qrMini = document.getElementById('live-qr-mini');
+            if (!qrMini) return;
+            var visible = qrMini.style.display === 'block';
+            qrMini.style.display = visible ? 'none' : 'block';
+            if (!visible) {
+                var miniEl = document.getElementById('live-qr-canvas');
+                if (miniEl) {
+                    var baseUrl = window.location.href.replace('host_digital_mix.html', 'player_digital_mix.html').split('?')[0];
+                    var playerUrl = baseUrl + '?sala=' + roomCode;
+                    miniEl.innerHTML = '';
+                    if (typeof QRCode !== 'undefined') {
+                        try {
+                            new QRCode(miniEl, {
+                                text: playerUrl,
+                                width: 120,
+                                height: 120,
+                                colorDark: '#000000',
+                                colorLight: '#ffffff',
+                                correctLevel: QRCode.CorrectLevel.M
+                            });
+                        } catch (e) {
+                            miniEl.innerHTML = '<img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=' + encodeURIComponent(playerUrl) + '" style="width:120px;height:120px;display:block;margin:0 auto;">';
+                        }
+                    } else {
+                        miniEl.innerHTML = '<img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=' + encodeURIComponent(playerUrl) + '" style="width:120px;height:120px;display:block;margin:0 auto;">';
+                    }
+                }
+            }
+        }
         // Intentar generar al cargar y también cuando el peer esté listo
         window.addEventListener('load', function() { setTimeout(generateQR, 500); });
 
@@ -1504,7 +1543,8 @@
             });
             peer.on('open', function (id) {
                 console.log("Host Peer Abierto:", id);
-                document.getElementById('live-room-code').innerText = roomCode;
+                var liveCodeTextEl = document.getElementById('live-code-text');
+                if (liveCodeTextEl) liveCodeTextEl.innerText = roomCode;
                 document.getElementById('live-room-code').style.display = 'block';
                 generateQR(); // Asegurar que el QR está generado
             });
@@ -3305,6 +3345,10 @@
                     if (!puedeUsarMando(peerId)) break;
                     finishDuel();
                     break;
+                case 'REMOTE_AWARD_CHALLENGER':
+                    if (!puedeUsarMando(peerId)) break;
+                    if (value && typeof awardToChallenger === 'function') awardToChallenger(value);
+                    break;
                 case 'MARKET_WILDCARD':
                     var p = players.find(function (pl) { return pl.id === peerId; });
                     // Un valor desconocido caía en silencio en 'song'. Se valida.
@@ -4082,52 +4126,58 @@
             statsHtml += '<div class="stat-card"><span class="stat-val">' + duration + 'min</span><span class="stat-lbl">DURACIÓN</span></div>';
             document.getElementById('winner-stats').innerHTML = statsHtml;
 
-            // Premios especiales
-            var awardsHtml = '<div style="width:100%;max-width:700px;margin:12px 0;">';
-            awardsHtml += '<div style="font-family:Bungee,sans-serif;font-size:0.6em;color:#444;letter-spacing:3px;text-align:center;margin-bottom:10px;">PREMIOS ESPECIALES</div>';
-            awardsHtml += '<div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;">';
-
+            // Premios especiales repartidos a izquierda y derecha
+            var awardsList = [];
             if (stats.hardestSong && stats.hardestSong.fails > 0) {
-                awardsHtml += '<div class="award-card">' +
+                awardsList.push('<div class="award-card" style="width:100%;box-sizing:border-box;">' +
                     '<div class="award-icon">💀</div>' +
                     '<div class="award-title">CANCIÓN MÁS DIFÍCIL</div>' +
                     '<div class="award-val">' + stats.hardestSong.artist + '</div>' +
                     '<div class="award-sub">' + stats.hardestSong.song + ' (' + stats.hardestSong.year + ') — ' + stats.hardestSong.fails + ' fallos</div>' +
-                    '</div>';
+                    '</div>');
             }
             if (mvpSaboteur && (stats.playerSabotages[mvpSaboteur.id]||0) > 0) {
-                awardsHtml += '<div class="award-card">' +
+                awardsList.push('<div class="award-card" style="width:100%;box-sizing:border-box;">' +
                     '<div class="award-icon">😈</div>' +
                     '<div class="award-title">MÁS SABOTEADOR</div>' +
                     '<div class="award-val">' + mvpSaboteur.name + '</div>' +
                     '<div class="award-sub">' + (stats.playerSabotages[mvpSaboteur.id]||0) + ' sabotajes lanzados</div>' +
-                    '</div>';
+                    '</div>');
             }
             if (mostSabotaged && (stats.playerSabotaged[mostSabotaged.id]||0) > 0) {
-                awardsHtml += '<div class="award-card">' +
+                awardsList.push('<div class="award-card" style="width:100%;box-sizing:border-box;">' +
                     '<div class="award-icon">🎯</div>' +
                     '<div class="award-title">MÁS SABOTEADO</div>' +
                     '<div class="award-val">' + mostSabotaged.name + '</div>' +
                     '<div class="award-sub">' + (stats.playerSabotaged[mostSabotaged.id]||0) + ' veces víctima</div>' +
-                    '</div>';
+                    '</div>');
             }
             if (bestStreak && (stats.maxStreaks[bestStreak.id]||0) > 1) {
-                awardsHtml += '<div class="award-card">' +
+                awardsList.push('<div class="award-card" style="width:100%;box-sizing:border-box;">' +
                     '<div class="award-icon">🔥</div>' +
                     '<div class="award-title">MEJOR RACHA</div>' +
                     '<div class="award-val">' + bestStreak.name + '</div>' +
                     '<div class="award-sub">' + (stats.maxStreaks[bestStreak.id]||0) + ' aciertos seguidos</div>' +
-                    '</div>';
+                    '</div>');
             }
             if (mvpBetter && (stats.playerBetsWon[mvpBetter.id]||0) > 0) {
-                awardsHtml += '<div class="award-card">' +
+                awardsList.push('<div class="award-card" style="width:100%;box-sizing:border-box;">' +
                     '<div class="award-icon">🎲</div>' +
                     '<div class="award-title">MEJOR APOSTADOR</div>' +
                     '<div class="award-val">' + mvpBetter.name + '</div>' +
                     '<div class="award-sub">' + (stats.playerBetsWon[mvpBetter.id]||0) + ' apuestas ganadas</div>' +
-                    '</div>';
+                    '</div>');
             }
-            awardsHtml += '</div></div>';
+
+            var leftHtml = '', rightHtml = '';
+            for (var ai = 0; ai < awardsList.length; ai++) {
+                if (ai % 2 === 0) leftHtml += awardsList[ai];
+                else rightHtml += awardsList[ai];
+            }
+            var leftEl = document.getElementById('winner-awards-left');
+            var rightEl = document.getElementById('winner-awards-right');
+            if (leftEl) leftEl.innerHTML = leftHtml;
+            if (rightEl) rightEl.innerHTML = rightHtml;
 
             // ── PREMIOS DE CONSOLACIÓN ──
             if (players.length >= 2) {
@@ -4457,6 +4507,25 @@
         function getDynamicHostButtons() {
             var btns = [];
             var isValidationVisible = document.getElementById('validation-buttons') && document.getElementById('validation-buttons').style.display !== 'none';
+            var isChallengerVisible = document.getElementById('challenger-validation') && document.getElementById('challenger-validation').style.display !== 'none';
+
+            if (isChallengerVisible) {
+                for (var pid in currentBets) {
+                    var p = players.find(function(x) { return x.id === pid; });
+                    var s = songs[currentSongIdx];
+                    if (p && s && players[activePlayerIdx] && isSlotCorrect(currentBets[pid], s.year, players[activePlayerIdx].cards)) {
+                        btns.push({
+                            id: 'award_' + pid,
+                            label: '🏆 ' + p.name.toUpperCase() + ' GANÓ LA APUESTA',
+                            action: 'REMOTE_AWARD_CHALLENGER',
+                            value: pid,
+                            color: 'gold'
+                        });
+                    }
+                }
+                btns.push({ id: 'next_turn', label: '⏭️ SIGUIENTE TURNO', action: 'REMOTE_NEXT_TURN', color: 'neon' });
+                return btns;
+            }
 
             if (isValidationVisible) {
                 btns.push({ id: 'correct', label: '✅ CORRECTO (Acierto)', action: 'REMOTE_CORRECT', color: 'green' });
@@ -5430,6 +5499,9 @@
             document.body.appendChild(bubble);
             setTimeout(function() { bubble.remove(); }, 2600);
             addEvent('<span class="ev-name">' + playerName + '</span> reaccionó ' + emoji);
+            if (emoji === '🎉' && typeof confetti === 'function') {
+                confetti({ particleCount: 60, spread: 70, origin: { y: 0.7 } });
+            }
         }
 
         // reportBrokenLink(): apuntaba a 'reporte_error.php'. En GitHub Pages no hay PHP,
