@@ -1073,7 +1073,7 @@
         }
 
 
-        #wait-mÃ¡sg {
+        #wait-msg {
             font-family: 'Bungee';
             opacity: 0.4;
             font-size: 0.8em;
@@ -1434,29 +1434,13 @@
 </head>
 
 <body>
+    <!-- BADGE VERSIÓN BUILD -->
+    <div style="position:fixed; bottom:10px; left:15px; font-family:'Bungee'; font-size:0.65em; color:var(--neon); opacity:0.85; z-index:9000; pointer-events:none; background:rgba(0,0,0,0.8); padding:3px 8px; border-radius:4px; border:1px solid var(--neon);">BUILD v3.37</div>
+
     <!-- FAB REGLAMENTO -->
     <div id="fab-rules" onclick="toggleRules()"
         style="display:flex; position:fixed; top:80px; left:20px; width:50px; height:50px; background:#111; border:2px solid var(--neon); border-radius:50%; z-index:9000; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 0 10px rgba(0,242,255,0.5); font-size:1.5em; transition:0.3s; color:var(--neon); font-family:'Bungee';">
         ?
-    </div>
-
-    <!-- FAB HISTORIAL -->
-    <div id="fab-history" onclick="togglePlayerHistory()"
-        style="display:flex; position:fixed; top:80px; left:80px; width:50px; height:50px; background:#111; border:2px solid var(--gold); border-radius:50%; z-index:9000; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 0 10px rgba(255,215,0,0.5); font-size:1.3em; transition:0.3s; color:var(--gold); font-family:'Bungee';" title="Ver Historial de Partida">
-        📜
-    </div>
-
-    <!-- MODAL HISTORIAL DEL JUGADOR -->
-    <div id="player-history-modal" onclick="togglePlayerHistory()"
-        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); backdrop-filter:blur(8px); z-index:9950; align-items:center; justify-content:center; padding:20px;">
-        <div style="background:#111; border:2px solid var(--gold); border-radius:16px; padding:20px; max-width:440px; width:100%; max-height:80vh; overflow-y:auto; position:relative; box-shadow:0 0 30px rgba(255,215,0,0.4); text-align:left; color:#ddd;" onclick="event.stopPropagation()">
-            <button onclick="togglePlayerHistory()" style="position:absolute; top:12px; right:12px; background:transparent; border:none; color:var(--gold); font-family:'Bungee'; font-size:1.4em; cursor:pointer;">✕</button>
-            <div style="font-family:'Bungee'; color:var(--gold); font-size:1.2em; margin-bottom:15px; border-bottom:1px solid #333; padding-bottom:8px;">📜 HISTORIAL DE LA PARTIDA</div>
-            <div id="player-event-history" style="display:flex; flex-direction:column; gap:6px; min-height:100px;">
-                <div style="font-size:0.8em; color:#666; font-style:italic;">Esperando eventos de la partida...</div>
-            </div>
-            <button onclick="togglePlayerHistory()" style="margin-top:20px; width:100%; background:var(--gold); color:#000; border:none; padding:10px; border-radius:8px; font-family:'Bungee'; cursor:pointer;">CERRAR</button>
-        </div>
     </div>
 
     <!-- MANDO DEL HOST (REMOTE) -->
@@ -1586,10 +1570,6 @@
             var el = document.getElementById('rules-overlay');
             el.style.display = (el.style.display === 'none' || el.style.display === '') ? 'flex' : 'none';
         }
-        function togglePlayerHistory() {
-            var el = document.getElementById('player-history-modal');
-            if (el) el.style.display = (el.style.display === 'none' || el.style.display === '') ? 'flex' : 'none';
-        }
         function toggleRemote() {
             var el = document.getElementById('remote-overlay');
             el.style.display = (el.style.display === 'none' || el.style.display === '') ? 'flex' : 'none';
@@ -1607,7 +1587,7 @@
                 <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:0; font-size:1.3em;">🕹️ MODOS DE JUEGO</h3>
                 <p><strong>• 🎵 Clásico:</strong> El primero en colocar 10 cartas en su línea de tiempo gana la partida.</p>
                 <p><strong>• 👑 Modo Rey:</strong> Al llegar a 10 cartas, el turno pasa al rival. Cuando vuelva a tocarte, los rivales eligen la canción y debes adivinar el año con ±2 años de margen para ganar definitivamente.</p>
-                <p><strong>• 💿 Supervivencia:</strong> 3 vidas por jugador. Cada fallo quita 1 vida. Si llegas a 0 vidas quedas eliminado. Gana el úÃºltimo superviviente o quien llegue a 10 cartas.</p>
+                <p><strong>• 💿 Supervivencia:</strong> 3 vidas por jugador. Cada fallo quita 1 vida. Si llegas a 0 vidas quedas eliminado. Gana el último superviviente o quien llegue a 10 cartas.</p>
                 <p><strong>• 🔵🔴 Equipos:</strong> Rojo vs Azul. Todos los miembros del equipo votan el hueco de la canción simultáneamente.</p>
                 <p><strong>• 🏆 Competitivo:</strong> Desactiva todas las fichas, sabotajes y apuestas. Solo cronología pura.</p>
             `,
@@ -1682,7 +1662,7 @@
     <!-- Pop-up de Resultado Cabrón (Visibilidad Global) -->
     <div id="duel-feedback-popup" class="duel-feedback" style="display:none;">
         <h2 id="duel-result-title"></h2>
-        <p id="duel-result-mÃ¡sg"></p>
+        <p id="duel-result-msg"></p>
         <button class="btn" style="margin-top: 20px; background: var(--neon); color: #000; font-family: 'Bungee';" onclick="this.parentElement.style.display='none'">VALE...</button>
     </div>
 
@@ -1873,7 +1853,7 @@
                         <div id="c-year">1999</div>
                     </div>
                 </div>
-                <div id="wait-mÃ¡sg">ESPERANDO SIGUIENTE TRACK...</div>
+                <div id="wait-msg">ESPERANDO SIGUIENTE TRACK...</div>
             </div>
 
             <!-- APUESTAS: solo visibles fuera del turno propio -->
@@ -1917,7 +1897,7 @@
                 <div style="font-family: 'Montserrat'; font-size: 0.8em; color: #fff;">Introduce el año que creas correcto:</div>
                 <input type="number" id="duel-year-input" placeholder="Ej: 1995" style="width: 100%; font-size: 1.5em; border-color: var(--gold); background: #000;">
                 <button class="btn" style="background: var(--gold); color: #000; font-family: 'Bungee';" onclick="sendDuelGuess()">🔫 ¡DISPARAR! 🔫</button>
-                <div id="duel-wait-mÃ¡sg" style="display:none; font-size: 0.7em; color: var(--gold); font-family: 'Bungee';">¡DISPARO RECIBIDO! Esperando al rival...</div>
+                <div id="duel-wait-msg" style="display:none; font-size: 0.7em; color: var(--gold); font-family: 'Bungee';">¡DISPARO RECIBIDO! Esperando al rival...</div>
             </div>
 
         </div>
@@ -1926,7 +1906,7 @@
         <div id="tab-sabotage" class="tab-content">
             <h2 style="font-family:'Bungee'; color:var(--neon); margin-top:20px;">SABOTAJE</h2>
             
-            <p style="color:#666; font-size:0.8em; text-align:center; margin-bottom:15px;" id="sabotage-status-mÃ¡sg">DISPONIBLE SOLO CUANDO OTROS JUEGAN</p>
+            <p style="color:#666; font-size:0.8em; text-align:center; margin-bottom:15px;" id="sabotage-status-msg">DISPONIBLE SOLO CUANDO OTROS JUEGAN</p>
 
             <!-- Cuadrícula de Sabotajes (Rivales) -->
             <div class="special-actions" id="sabotage-ctrl" style="display:none; width:100%; max-width:340px; margin-top:10px;">
@@ -1979,7 +1959,7 @@
         <div
             style="background:#111; border:2px solid var(--neon); border-radius:15px; padding:20px; width:80%; max-width:350px; text-align:center; box-shadow: 0 0 20px var(--neon);">
             <h3 style="font-family:'Bungee'; color:var(--neon); margin-top:0;">AVISO</h3>
-            <p id="custom-alert-mÃ¡sg" style="font-size:1em; margin-bottom:20px;"></p>
+            <p id="custom-alert-msg" style="font-size:1em; margin-bottom:20px;"></p>
             <button class="btn"
                 onclick="document.getElementById('custom-alert').style.display='none'">ENTENDIDO</button>
         </div>
@@ -1990,7 +1970,7 @@
         <div
             style="background:#111; border:2px solid var(--gold); border-radius:15px; padding:20px; width:80%; max-width:350px; text-align:center; box-shadow: 0 0 20px var(--gold);">
             <h3 style="font-family:'Bungee'; color:var(--gold); margin-top:0;">CONFIRMAR</h3>
-            <p id="custom-confirm-mÃ¡sg" style="font-size:1em; margin-bottom:20px;"></p>
+            <p id="custom-confirm-msg" style="font-size:1em; margin-bottom:20px;"></p>
             <div style="display:flex; gap:10px; justify-content:center;">
                 <button class="btn" id="custom-confirm-yes"
                     style="background:var(--gold); color:#000; box-shadow:0 0 10px var(--gold); flex:1; padding:15px 5px;">SÍ</button>
@@ -2008,8 +1988,8 @@
         // Cargar datos guardados al iniciar
         window.addEventListener('load', function () {
             // Autorellenar código de sala desde URL (?sala=XXXX)
-            var urlParamÃ¡s = new URLSearchParamÃ¡s(window.location.search);
-            var salaParam = urlParamÃ¡s.get('sala');
+            var urlParams = new URLSearchParams(window.location.search);
+            var salaParam = urlParams.get('sala');
             if (salaParam) {
                 document.getElementById('host-id').value = salaParam.toUpperCase();
             }
@@ -2147,13 +2127,13 @@
             } finally {
                 overlay.style.display = 'none';
             }
-        } function showCustomAlert(mÃ¡sg) {
-            document.getElementById('custom-alert-mÃ¡sg').innerText = mÃ¡sg;
+        } function showCustomAlert(msg) {
+            document.getElementById('custom-alert-msg').innerText = msg;
             document.getElementById('custom-alert').style.display = 'flex';
         }
 
-        function showCustomConfirm(mÃ¡sg, callback) {
-            document.getElementById('custom-confirm-mÃ¡sg').innerText = mÃ¡sg;
+        function showCustomConfirm(msg, callback) {
+            document.getElementById('custom-confirm-msg').innerText = msg;
             var confirmDialog = document.getElementById('custom-confirm');
             var btnYes = document.getElementById('custom-confirm-yes');
             var btnNo = document.getElementById('custom-confirm-no');
@@ -2457,10 +2437,10 @@
 
         // ── NOTIFICACIÓN DE APUESTA ──
         var betNotifTimeout = null;
-        function showBetNotif(mÃ¡sg) {
+        function showBetNotif(msg) {
             var el = document.getElementById('bet-notification');
             if (!el) return;
-            el.innerText = mÃ¡sg;
+            el.innerText = msg;
             el.classList.add('show');
             if (betNotifTimeout) clearTimeout(betNotifTimeout);
             betNotifTimeout = setTimeout(function() {
@@ -2829,11 +2809,11 @@
             }, 3500);
         }
 
-        function showSabotageBroadcast(mÃ¡sg) {
+        function showSabotageBroadcast(msg) {
             // Banner discreto abajo — no interrumpe el juego
             var el = document.createElement('div');
             el.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.85);border:1px solid #333;border-radius:8px;padding:8px 16px;font-family:Montserrat;font-size:0.75em;color:#888;z-index:9700;pointer-events:none;animation:danger-slide 2.5s ease forwards;';
-            el.innerText = mÃ¡sg;
+            el.innerText = msg;
             document.body.appendChild(el);
             setTimeout(function() { el.remove(); }, 2600);
         }
@@ -2882,10 +2862,10 @@
             showDangerAlert('⚡ ¡MODO RELÁMPAGO! Solo 5 segundos', false);
         }
 
-        function showDangerAlert(mÃ¡sg, critical) {
+        function showDangerAlert(msg, critical) {
             var el = document.createElement('div');
             el.className = 'danger-alert-popup ' + (critical ? 'critical' : 'normal');
-            el.innerText = mÃ¡sg;
+            el.innerText = msg;
             document.body.appendChild(el);
             if (critical) soundSabotage(); else soundBet();
             setTimeout(function() { el.remove(); }, 3100);
@@ -2980,32 +2960,13 @@
             console.log("Evento:", data.type, data);
 
             if (data.type === 'EVENT_TOAST') {
-                // Toast temporal flotante en pantalla
-                var evToast = document.createElement('div');
-                evToast.className = 'qr-toast';
-                evToast.style.borderColor = 'var(--gold)';
-                evToast.style.boxShadow = '0 0 20px rgba(255,215,0,0.4)';
-                evToast.innerHTML = '<strong style="color:var(--gold);">📢 HISTORIAL:</strong> ' + (data.text || '');
-                document.body.appendChild(evToast);
-                setTimeout(function(){ evToast.remove(); }, 6500);
-
-                // Guardar en el histórico persistente del jugador
-                var histEl = document.getElementById('player-event-history');
-                if (histEl) {
-                    var emptyText = histEl.querySelector('div[style*="italic"]');
-                    if (emptyText) emptyText.remove();
-                    var entry = document.createElement('div');
-                    entry.style.cssText = 'padding:6px 10px; border-bottom:1px solid #222; font-size:0.75em; color:#ddd; font-family:\'Montserrat\',sans-serif;';
-                    entry.innerHTML = '<span style="color:var(--gold); font-size:0.8em; font-weight:bold; margin-right:6px;">[' + new Date().toLocaleTimeString('es', {hour:'2-digit', minute:'2-digit'}) + ']</span>' + (data.html || data.text || '');
-                    histEl.insertBefore(entry, histEl.firstChild);
-                    if (histEl.children.length > 25) histEl.removeChild(histEl.lastChild);
-                }
+                showSabotageBroadcast(data.text || data.html);
                 return;
             } else if (data.type === 'BET_RESULT') {
-                showCustomAlert(data.mÃ¡sg);
+                showCustomAlert(data.msg);
                 return;
             } else if (data.type === 'SABOTAGE_SKIP_ALERT') {
-                showCustomAlert(data.mÃ¡sg);
+                showCustomAlert(data.msg);
                 return;
             } else if (data.type === 'TOKEN_STOLEN') {
                 vibrate(300);
@@ -3024,7 +2985,7 @@
                 showLightningMode();
                 return;
             } else if (data.type === 'DANGER_ALERT') {
-                showDangerAlert(data.mÃ¡sg, data.critical);
+                showDangerAlert(data.msg, data.critical);
                 return;
             } else if (data.type === 'STREAK_BONUS') {
                 soundToken();
@@ -3080,7 +3041,7 @@
                 return;
             } else if (data.type === 'SABOTAGE_BROADCAST') {
                 vibrate([50, 30, 50]);
-                showSabotageBroadcast(data.mÃ¡sg);
+                showSabotageBroadcast(data.msg);
                 return;
             }
 
@@ -3245,8 +3206,8 @@
                     // durante DUEL y KING_GUESS_RESULT → el mando mostraba "INICIAR PARTIDA"
                     // en plena partida y tapaba los botones del duelo.
                     if (!data.gameStarted) {
-                        var mÃ¡str = "<h4 style='color:var(--neon); font-family:Bungee; font-size:1em; margin-bottom:5px; margin-top:0'>MODO:</h4>";
-                        mÃ¡str += "<div style='display:flex; gap:5px; margin-bottom:20px; flex-wrap:wrap;'>";
+                        var mstr = "<h4 style='color:var(--neon); font-family:Bungee; font-size:1em; margin-bottom:5px; margin-top:0'>MODO:</h4>";
+                        mstr += "<div style='display:flex; gap:5px; margin-bottom:20px; flex-wrap:wrap;'>";
                         var modos = [
                             ['normal', 'CLÁSICO'],
                             ['rey', 'MODO REY'],
@@ -3255,13 +3216,13 @@
                         ];
                         modos.forEach(function (m) {
                             var activo = (data.gameMode === m[0]);
-                            mÃ¡str += "<button class='btn' style='padding:10px; font-size:0.75em; flex:1 1 45%; " +
+                            mstr += "<button class='btn' style='padding:10px; font-size:0.75em; flex:1 1 45%; " +
                                 (activo ? "background:var(--neon);color:#000;" : "background:#222;color:#888") +
                                 "' onclick=\"send('REMOTE_SET_GAME_MODE', '" + m[0] + "')\">" + m[1] + "</button>";
                         });
-                        mÃ¡str += "</div>";
+                        mstr += "</div>";
 
-                        rContainer.innerHTML = mÃ¡str + `<button class="btn" style="background:#ff00ff; color:white; border-color:#ff00ff; padding:20px; font-size:1.2em;" onclick="send('REMOTE_START_GAME'); toggleRemote();">▶ INICIAR PARTIDA</button>`;
+                        rContainer.innerHTML = mstr + `<button class="btn" style="background:#ff00ff; color:white; border-color:#ff00ff; padding:20px; font-size:1.2em;" onclick="send('REMOTE_START_GAME'); toggleRemote();">▶ INICIAR PARTIDA</button>`;
                     } else if (data.turnPhase === 'DUEL' && !data.currentDuel) {
                         rContainer.innerHTML = `<button class="btn" style="background:var(--neon); color:#000; padding:20px; font-size:1.2em;" onclick="send('REMOTE_NEXT_TURN'); toggleRemote();">SIGUIENTE TURNO</button>`;
                     } else if (data.turnPhase === 'DUEL') {
@@ -3554,7 +3515,7 @@
                 // Botones Especiales y Sabotajes
                 var specialCtrl = document.getElementById('special-ctrl');
                 var sabotageCtrl = document.getElementById('sabotage-ctrl');
-                var sabotageStatusMsg = document.getElementById('sabotage-status-mÃ¡sg');
+                var sabotageStatusMsg = document.getElementById('sabotage-status-msg');
 
                 if (isMyTurn && !data.revealed && (!data.turnPhase || data.turnPhase === 'NORMAL')) {
                     specialCtrl.style.display = 'flex';
@@ -3659,11 +3620,11 @@
                         if (hasAnswered) {
                             document.getElementById('duel-year-input').style.display = 'none';
                             document.querySelector('#duel-mode-ui button').style.display = 'none';
-                            document.getElementById('duel-wait-mÃ¡sg').style.display = 'block';
+                            document.getElementById('duel-wait-msg').style.display = 'block';
                         } else {
                             document.getElementById('duel-year-input').style.display = 'block';
                             document.querySelector('#duel-mode-ui button').style.display = 'block';
-                            document.getElementById('duel-wait-mÃ¡sg').style.display = 'none';
+                            document.getElementById('duel-wait-msg').style.display = 'none';
                         }
                     } else {
                         if (duelModeUi) duelModeUi.style.display = 'none';
@@ -3679,14 +3640,14 @@
                     if (data.duelResult.winnerId === myId) {
                         document.getElementById('duel-result-title').innerText = "¡HAS GANADO EL DUELO!";
                         document.getElementById('duel-result-title').style.color = "var(--neon)";
-                        document.getElementById('duel-result-mÃ¡sg').innerText = data.duelResult.winnerMsg;
+                        document.getElementById('duel-result-msg').innerText = data.duelResult.winnerMsg;
                         duelFeedback.className = "duel-feedback";
                         duelFeedback.style.display = "block";
                         window.feedbackShown = true;
                     } else if (data.duelResult.loserId === myId) {
                         document.getElementById('duel-result-title').innerText = "¡HAS PERDIDO EL DUELO!";
                         document.getElementById('duel-result-title').style.color = "#ff0055";
-                        document.getElementById('duel-result-mÃ¡sg').innerText = data.duelResult.loserMsg;
+                        document.getElementById('duel-result-msg').innerText = data.duelResult.loserMsg;
                         duelFeedback.className = "duel-feedback lose";
                         duelFeedback.style.display = "block";
                         window.feedbackShown = true;
@@ -3694,7 +3655,7 @@
                 }
                 if (!data.duelResult) window.feedbackShown = false;
 
-                var wm = document.getElementById('wait-mÃ¡sg');
+                var wm = document.getElementById('wait-msg');
                 if (!isMyTurn && !isKingMode) {
                     wm.style.display = 'block';
                     wm.innerText = "ESPERANDO SIGUIENTE TRACK...";
@@ -3969,7 +3930,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', function () {
-            var mÃ¡sgs = {
+            var msgs = {
                 'btn-sabotage-buzzer': '¡Zumbido enviado al DJ!',
                 'btn-sabotage-veto': '¡Has vetado su recarga!',
                 'btn-sabotage-panic': '¡Ataque de Pánico enviado!',
@@ -3978,12 +3939,12 @@
                 'btn-sabotage-steal-turn': '⚡ Intentando robar el turno... (puede resistirse con 2 🔵)',
                 'btn-sabotage-blackhole': '¡Agujero Negro lanzado!'
             };
-            for (var id in mÃ¡sgs) {
+            for (var id in msgs) {
                 var b = document.getElementById(id);
                 if (b) {
-                    b.addEventListener('click', (function (mÃ¡sg) {
-                        return function () { showCustomAlert(mÃ¡sg); }
-                    })(mÃ¡sgs[id]));
+                    b.addEventListener('click', (function (msg) {
+                        return function () { showCustomAlert(msg); }
+                    })(msgs[id]));
                 }
             }
         });
@@ -4006,7 +3967,7 @@
                 send('DUEL_GUESS', year);
                 document.getElementById('duel-year-input').style.display = 'none';
                 document.querySelector('#duel-mode-ui button').style.display = 'none';
-                document.getElementById('duel-wait-mÃ¡sg').style.display = 'block';
+                document.getElementById('duel-wait-msg').style.display = 'block';
             } else {
                 showCustomAlert("Introduce un año válido");
             }

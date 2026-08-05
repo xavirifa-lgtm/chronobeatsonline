@@ -1,5 +1,5 @@
-// 🔥🎧 ChronoBeats Online — Service Worker v49 🎧🔥
-const CACHE_NAME = 'chronobeats-v49';
+// 🔥🎧 ChronoBeats Online — Service Worker v50 🎧🔥
+const CACHE_NAME = 'chronobeats-v50';
 
 // Recursos propios a pre-cachear en la instalación (pequeños, sin riesgo)
 const PRECACHE_URLS = [
