@@ -13,8 +13,6 @@
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script src="https://www.youtube.com/iframe_api"></script>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <script src="https://www.youtube.com/iframe_api"></script>
     <style>
         :root {
             --neon:   #00f2ff;
@@ -778,13 +776,11 @@
             justify-content: center;
             color: var(--neon, #00f2ff);
             text-decoration: none;
-            font-family: 'Bungee', sans-serif;
+            font-family: 'Bungee';
             font-size: 1.5em;
             box-shadow: 0 0 20px rgba(0, 242, 255, 0.5);
             transition: 0.3s;
             cursor: pointer;
-            line-height: 1;
-            padding: 0;
         }
 
         .btn-hub:hover {
@@ -857,41 +853,24 @@
 <body>
     <a href="index.html" class="btn-hub" title="Volver al Hub">H</a>
     <div id="flash-overlay"></div>
-    <div id="winner-screen" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(2,8,16,0.95); backdrop-filter:blur(12px); z-index:1000; flex-direction:column; align-items:center; justify-content:flex-start; text-align:center; padding:25px 15px; overflow-y:auto;">
-        <h1 style="font-size:2.5em; margin-bottom:5px; text-shadow:0 0 20px var(--gold);">🏆 ¡GANADOR!</h1>
-        <div id="winner-avatar-img" style="margin: 10px 0;"></div>
-        <h2 id="winner-name" style="font-size:2.2em; margin-bottom:5px;">---</h2>
-
-        <!-- PODIO VISUAL CENTRADO EN EL MEDIO -->
-        <div id="winner-podium-center" style="width:100%; max-width:650px; margin:15px auto;"></div>
-
-        <!-- MEDALLAS Y PREMIOS ESPECIALES DEBAJO / A LOS LADOS -->
-        <div id="winner-awards" style="margin:12px auto; width:100%; max-width:850px;"></div>
-
-        <!-- ESTADÍSTICAS GENERALES DE LA PARTIDA -->
-        <div id="winner-stats" style="margin:12px auto; width:100%; max-width:750px; display:flex; gap:12px; flex-wrap:wrap; justify-content:center;"></div>
-
-        <!-- RANKING DETALLADO DE CARTAS -->
-        <div id="winner-ranking" style="margin:12px auto; width:100%; max-width:850px; display:flex; flex-wrap:wrap; gap:10px; justify-content:center;"></div>
-
+    <div id="winner-screen">
+        <h1 style="font-size:2.5em; margin-bottom:5px;">🏆 ¡GANADOR!</h1>
+        <div id="winner-avatar-img" style="margin: 15px 0;"></div>
+        <h2 id="winner-name" style="font-size:2.5em; margin-bottom:5px;">---</h2>
+        <div id="winner-stats" style="margin:15px 0; width:100%; max-width:600px;"></div>
+        <div id="winner-ranking" style="margin:10px 0; width:100%; max-width:600px; display:flex; flex-wrap:wrap; gap:10px; justify-content:center;"></div>
         <div id="winner-replay" style="display:none; width:100%; max-width:600px; margin:12px 0;"></div>
         <div id="winner-history" style="display:none; width:100%; max-width:700px; margin:12px 0;"></div>
-        <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin-top:20px; margin-bottom:40px;">
-            <button class="btn-start" onclick="rematch()" style="background:linear-gradient(90deg,var(--neon),var(--pink)); padding:14px 35px;">🔄 REVANCHA</button>
-            <button class="btn-start" onclick="location.reload()" style="background:#333; color:#fff; box-shadow:none; padding:14px 35px;">🏠 MENÚ PRINCIPAL</button>
+        <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin-top:20px;">
+            <button class="btn-start" onclick="rematch()" style="background:linear-gradient(90deg,var(--neon),var(--pink));">🔄 REVANCHA</button>
+            <button class="btn-start" onclick="location.reload()" style="background:#333; color:#fff; box-shadow:none;">🏠 MENÚ PRINCIPAL</button>
         </div>
     </div>
-
+    <div style="position:fixed; bottom:15px; left:20px; font-family:'Bungee'; font-size:0.75em; color:var(--neon); opacity:0.95; z-index:9000; pointer-events:none; background:rgba(0,0,0,0.8); padding:4px 10px; border-radius:6px; border:1px solid var(--neon);">BUILD v3.37</div>
     <div class="logo">CHRONOBEATS</div>
     <div id="live-room-code"
-        style="display:none; position:fixed; top:20px; right:20px; background:var(--bg); border:1px solid var(--neon); color:var(--neon); padding:10px 14px; border-radius:12px; font-family:'Bungee'; font-size:1.2em; z-index:10000; box-shadow:0 0 12px rgba(0,242,255,0.3); cursor:pointer; user-select:none;"
-        onclick="toggleLiveQR()" title="Pulsa para ver el QR">
-        <span id="live-code-text">CODE</span>
-        <div id="live-qr-mini" style="display:none; margin-top:8px; text-align:center;">
-            <div id="live-qr-canvas" style="background:#fff; padding:4px; border-radius:6px; display:inline-block;"></div>
-            <div style="font-size:0.45em; color:#555; margin-top:4px; letter-spacing:1px;">ESCANEAR PARA UNIRSE</div>
-        </div>
-    </div>
+        style="display:none; position:fixed; top:20px; right:20px; background:var(--bg); border:1px solid var(--neon); color:var(--neon); padding:8px 15px; border-radius:10px; font-family:'Bungee'; font-size:1.2em; z-index:10000; box-shadow:0 0 10px rgba(0,242,255,0.3);">
+        CODE</div>
     <div id="lobby">
         <div class="room-code" id="join-code">------</div>
         <button onclick="resetRoomCode()" style="font-family:'Bungee'; font-size:0.55em; color:#444; background:transparent; border:1px solid #333; border-radius:6px; padding:4px 10px; cursor:pointer; margin-top:-8px; margin-bottom:8px;">↺ Nueva sala</button>
@@ -1071,7 +1050,7 @@
             "Vaya empanada mental llevas. Turno perdido.",
             "El oráculo dice: eres demasiado lento para este juego.",
             "¡BOOM! El tiempo explotó en tu cara. ¡A pastar!",
-            "Esa parsimonia te va a costar la partida. ¡Siguiente pringaÃ±o!",
+            "Esa parsimonia te va a costar la partida. ¡Siguiente pringao!",
             "¿Estás analizando la frecuencia del bombo? Porque el tiempo ya se acabó.",
             "Error 404: Reflejos no encontrados.",
             "Si tardas más, se acaba la década antes que tu turno.",
@@ -1183,7 +1162,7 @@
             if (scorer && scorer.score === 7) {
                 var alertMsg = '⚠️ ' + scorer.name.toUpperCase() + ' ESTÁ A 3 DE GANAR';
                 for (var cid in connections) {
-                    try { connections[cid].send({ type: 'DANGER_ALERT', mÃ¡sg: alertMsg }); } catch(e) {}
+                    try { connections[cid].send({ type: 'DANGER_ALERT', msg: alertMsg }); } catch(e) {}
                 }
                 addEvent('<span class="ev-bad">⚠️ ' + scorer.name + ' lleva 7 cartas — ¡PELIGRO!</span>');
             }
@@ -1191,7 +1170,7 @@
             if (scorer && scorer.score === 9) {
                 var alertMsg9 = '🚨 ' + scorer.name.toUpperCase() + ' ESTÁ A 1 DE GANAR';
                 for (var cid9 in connections) {
-                    try { connections[cid9].send({ type: 'DANGER_ALERT', mÃ¡sg: alertMsg9, critical: true }); } catch(e) {}
+                    try { connections[cid9].send({ type: 'DANGER_ALERT', msg: alertMsg9, critical: true }); } catch(e) {}
                 }
             }
         }
@@ -1274,17 +1253,15 @@
             }
         }
 
-        var qrGenerated = false;
-
         function generateQR() {
             if (qrGenerated) return;
             var qrEl = document.getElementById('qr-code');
-            var baseUrl = window.location.href.replace('host_digital_mix.html', 'player_digital_mix.html');
-            baseUrl = baseUrl.split('?')[0]; // quitar parámetros del host
-            var playerUrl = baseUrl + '?sala=' + roomCode;
-
             if (qrEl && typeof QRCode !== 'undefined') {
                 qrEl.innerHTML = '';
+                // Generar URL directa al player con el código ya incluido
+                var baseUrl = window.location.href.replace('host_digital_mix.html', 'player_digital_mix.html');
+                baseUrl = baseUrl.split('?')[0]; // quitar parámetros del host
+                var playerUrl = baseUrl + '?sala=' + roomCode;
                 new QRCode(qrEl, {
                     text: playerUrl,
                     width: 160,
@@ -1293,43 +1270,18 @@
                     colorLight: '#ffffff',
                     correctLevel: QRCode.CorrectLevel.M
                 });
-            }
-
-            var miniEl = document.getElementById('live-qr-canvas');
-            if (miniEl && typeof QRCode !== 'undefined') {
-                miniEl.innerHTML = '';
-                new QRCode(miniEl, {
-                    text: playerUrl,
-                    width: 120,
-                    height: 120,
-                    colorDark: '#000000',
-                    colorLight: '#ffffff',
-                    correctLevel: QRCode.CorrectLevel.M
-                });
-            }
-
-            qrGenerated = true;
-
-            var linkEl = document.getElementById('player-link');
-            if (linkEl) {
-                linkEl.href = playerUrl;
-                linkEl.innerText = '🔗 Copiar enlace jugador';
-                linkEl.style.display = 'block';
+                qrGenerated = true;
+                // Mostrar también el enlace copiable
+                var linkEl = document.getElementById('player-link');
+                if (linkEl) {
+                    linkEl.href = playerUrl;
+                    linkEl.innerText = '🔗 Copiar enlace jugador';
+                    linkEl.style.display = 'block';
+                }
             }
         }
         // Intentar generar al cargar y también cuando el peer esté listo
         window.addEventListener('load', function() { setTimeout(generateQR, 500); });
-
-        function toggleLiveQR() {
-            var qrMini = document.getElementById('live-qr-mini');
-            if (!qrMini) return;
-            var visible = qrMini.style.display === 'block';
-            qrMini.style.display = visible ? 'none' : 'block';
-            if (!visible) generateQR();
-        }
-
-        // Intentar generar al cargar y también cuando el peer esté listo
-        window.addEventListener('load', function() { setTimeout(generateQR, 300); });
 
         // Eliminadas funciones de YT API
         function onYouTubeIframeAPIReady() {
@@ -1406,7 +1358,7 @@
                 try {
                     connections[id].send({
                         type: 'BET_RESULT',
-                        mÃ¡sg: '⚠️ VÍDEO NO DISPONIBLE EN YOUTUBE.\nSaltando automáticamente a la siguiente canción...'
+                        msg: '⚠️ VÍDEO NO DISPONIBLE EN YOUTUBE.\nSaltando automáticamente a la siguiente canción...'
                     });
                 } catch(e){}
             }
@@ -1461,7 +1413,7 @@
                 document.getElementById('host-instructions').innerHTML = "<span style='color:#ff0055; font-size:1.5em; font-family:Bungee;'>¡TIEMPO AGOTADO! ⏰</span><br><span style='font-size:0.9em;'>" + phrase + "</span>";
                 var activeP = players[activePlayerIdx];
                 if (activeP && connections[activeP.id]) {
-                    try { connections[activeP.id].send({ type: 'BET_RESULT', mÃ¡sg: "¡TIEMPO AGOTADO!\n" + phrase }); } catch(e){}
+                    try { connections[activeP.id].send({ type: 'BET_RESULT', msg: "¡TIEMPO AGOTADO!\n" + phrase }); } catch(e){}
                 }
                 trackFail(players[activePlayerIdx].id);
                 // ── HISTORIAL: marcar fallo ──
@@ -1490,7 +1442,7 @@
                     var curser = players.find(function(pl) { return pl.id === curse.playerId; });
                     if (curser) {
                         updateTokens(curser, 2);
-                        try { if (connections[curse.playerId]) connections[curse.playerId].send({ type: 'BET_RESULT', mÃ¡sg: '💀 ¡Maldición eÃ©Ã©xitosa! +2🔵' }); } catch(e) {}
+                        try { if (connections[curse.playerId]) connections[curse.playerId].send({ type: 'BET_RESULT', msg: '💀 ¡Maldición exitosa! +2🔵' }); } catch(e) {}
                     }
                 });
                 silentCurses = [];
@@ -1706,32 +1658,18 @@
             console.log("Lista recargada:", songs.length, "canciones.");
         }
 
-        function fetchTxtSafe(url, type, color) {
-            return fetch(url).then(function(r) {
-                return r.arrayBuffer();
-            }).then(function(buffer) {
-                var decoderUtf8 = new TextDecoder('utf-8', { fatal: false });
-                var text = decoderUtf8.decode(buffer);
-                if (text.indexOf('\uFFFD') !== -1 || text.indexOf('') !== -1) {
-                    var decoderLatin1 = new TextDecoder('iso-8859-1');
-                    text = decoderLatin1.decode(buffer);
-                }
-                return { text: text, type: type, color: color };
-            });
-        }
-
         var fetchPromises = [];
         if (mixTypes.includes('orig')) {
-            fetchPromises.push(fetchTxtSafe('lista_final.txt?v=' + new Date().getTime(), 'orig', '#00f2ff'));
+            fetchPromises.push(fetch('lista_final.txt?v=' + new Date().getTime()).then(function(r){return r.text()}).then(function(t){return {text:t,type:'orig',color:'#00f2ff'}}));
         }
         if (mixTypes.includes('anime')) {
-            fetchPromises.push(fetchTxtSafe('lista_final_anime.txt?v=' + new Date().getTime(), 'anime', '#ff00cc'));
+            fetchPromises.push(fetch('lista_final_anime.txt?v=' + new Date().getTime()).then(function(r){return r.text()}).then(function(t){return {text:t,type:'anime',color:'#ff00cc'}}));
         }
         if (mixTypes.includes('movies')) {
-            fetchPromises.push(fetchTxtSafe('lista_final_pelis.txt?v=' + new Date().getTime(), 'movies', '#ffaa00'));
+            fetchPromises.push(fetch('lista_final_pelis.txt?v=' + new Date().getTime()).then(function(r){return r.text()}).then(function(t){return {text:t,type:'movies',color:'#ffaa00'}}));
         }
         if (mixTypes.includes('videojuegos')) {
-            fetchPromises.push(fetchTxtSafe('lista_videojuegos.txt?v=' + new Date().getTime(), 'videojuegos', '#bf00ff'));
+            fetchPromises.push(fetch('lista_videojuegos.txt?v=' + new Date().getTime()).then(function(r){return r.text()}).then(function(t){return {text:t,type:'videojuegos',color:'#bf00ff'}}));
         }
 
         Promise.all(fetchPromises).then(function (results) {
@@ -1799,8 +1737,8 @@
         // El host no tenía showCustomAlert (solo existía en el player) → checkReadyAndStart
         // lanzaba ReferenceError y el botón EMPEZAR no hacía nada ni avisaba.
         // No usamos alert(): es modal y bloquearía la tablet si lo dispara un móvil.
-        function showCustomAlert(mÃ¡sg) {
-            console.warn('[HOST]', mÃ¡sg);
+        function showCustomAlert(msg) {
+            console.warn('[HOST]', msg);
             var inLobby = document.getElementById('lobby') &&
                           document.getElementById('lobby').style.display !== 'none';
             var el = document.getElementById(inLobby ? 'lobby-ready-status' : 'host-instructions');
@@ -1808,9 +1746,9 @@
             if (!el) return;
             var prev = el.innerHTML;
             var prevColor = el.style.color;
-            el.innerHTML = "<span style='color:#ff8800; font-family:Bungee;'>⚠️ " + mÃ¡sg + "</span>";
+            el.innerHTML = "<span style='color:#ff8800; font-family:Bungee;'>⚠️ " + msg + "</span>";
             setTimeout(function () {
-                if (el.innerHTML.indexOf(mÃ¡sg) !== -1) {
+                if (el.innerHTML.indexOf(msg) !== -1) {
                     el.innerHTML = prev;
                     el.style.color = prevColor;
                 }
@@ -1884,7 +1822,7 @@
 
             // Modo equipos: asignar jugadores alternadamente rojo/azul
             if (gameMode === 'equipos') {
-                teamÃ¡s = { red: [], blue: [] };
+                teams = { red: [], blue: [] };
                 teamCards = { red: [], blue: [] };
                 teamScore = { red: 0, blue: 0 };
                 teamTurn = 'red';
@@ -2028,7 +1966,7 @@
                     players[activePlayerIdx].canReload = true;
                     addEvent('<span class="ev-name">' + players[_ownerIdx].name + '</span> <span class="ev-good">repite turno tras el ¡JUGAMOS TODOS! 🎤</span>', '🎤');
                     for (var _rc in connections) {
-                        try { connections[_rc].send({ type: 'DANGER_ALERT', mÃ¡sg: '🎤 ' + players[_ownerIdx].name + ' repite turno (le tocó el ¡JUGAMOS TODOS!)', critical: false }); } catch(e) {}
+                        try { connections[_rc].send({ type: 'DANGER_ALERT', msg: '🎤 ' + players[_ownerIdx].name + ' repite turno (le tocó el ¡JUGAMOS TODOS!)', critical: false }); } catch(e) {}
                     }
                 }
             }
@@ -2206,7 +2144,7 @@
                         if (tokenStarvationTurns[pl.id] >= 2) {
                             updateTokens(pl, 1);
                             tokenStarvationTurns[pl.id] = 0;
-                            try { if (connections[pl.id]) connections[pl.id].send({ type: 'BET_RESULT', mÃ¡sg: '🔵 Auto-recarga: recibes 1 ficha por llevar 2 turnos sin fichas.' }); } catch(e) {}
+                            try { if (connections[pl.id]) connections[pl.id].send({ type: 'BET_RESULT', msg: '🔵 Auto-recarga: recibes 1 ficha por llevar 2 turnos sin fichas.' }); } catch(e) {}
                         }
                     } else { tokenStarvationTurns[pl.id] = 0; }
                 });
@@ -2528,8 +2466,9 @@
                             if (target && target.tokens > 0) {
                                 updateTokens(target, -1);
                                 updateTokens(p, 1);
+                                // Animación de robo en el target
                                 if (connections[target.id]) try { connections[target.id].send({ type: 'TOKEN_STOLEN', thief: p.name }); } catch(e){}
-                                broadcastSabotage(p.name, target.name, 'ROBAR FICHA', '💸');
+                            broadcastSabotage(p.name, target.name, 'ROBAR FICHA', '💸');
                                 msgP = "¡Dichosa suerte! Le has birlado una ficha a " + target.name + ".";
                                 msgT = "¡AY! " + p.name + " te ha robado una ficha en la Ruleta Rusa. ¡Vigila tu bolsa!";
                             } else {
@@ -2545,7 +2484,7 @@
 
                         if (msgP) try { connections[p.id].send({ type: 'BET_RESULT', msg: msgP }); } catch (e) { }
                         if (target && msgT) try { connections[target.id].send({ type: 'BET_RESULT', msg: msgT }); } catch (e) { }
-
+                        
                         document.getElementById('host-instructions').innerHTML = "<span style='color:#ff0055; font-size:1.5em; font-family:Bungee;'>¡" + p.name + " JUGÓ A LA RULETA RUSA!</span>";
                         notifyVictim(players[activePlayerIdx].id, p.name, 'RULETA RUSA', '🎰');
                         if (checkScoreVictory(p)) return;
@@ -2557,7 +2496,7 @@
                         var p = players.find(function (pl) { return pl.id === peerId; });
                         if (p) {
                             var _perdidas = cobrarSabotajeRebotado(p, action);
-                            try { if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', mÃ¡sg: "¡ZASCA! El Escudo de " + activeP.name + " ha rebotado tu sabotaje. Pierdes " + _perdidas + "🔵 jajaja" }); } catch (e) { }
+                            try { if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "¡ZASCA! El Escudo de " + activeP.name + " ha rebotado tu sabotaje. Pierdes " + _perdidas + "🔵 jajaja" }); } catch (e) { }
                             addEvent('<span class="ev-good">🛡️ El escudo de ' + activeP.name + ' rebotó el sabotaje de ' + p.name + ' (−' + _perdidas + '🔵)</span>', '🛡️');
                         }
                         hasShield[activeP.id] = false;
@@ -2729,7 +2668,7 @@
                         var p = players.find(function (pl) { return pl.id === peerId; });
                         if (p) {
                             var _perdidas = cobrarSabotajeRebotado(p, action);
-                            try { if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', mÃ¡sg: "¡ZASCA! El Escudo de " + activeP.name + " ha rebotado tu sabotaje. Pierdes " + _perdidas + "🔵 jajaja" }); } catch (e) { }
+                            try { if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "¡ZASCA! El Escudo de " + activeP.name + " ha rebotado tu sabotaje. Pierdes " + _perdidas + "🔵 jajaja" }); } catch (e) { }
                             addEvent('<span class="ev-good">🛡️ El escudo de ' + activeP.name + ' rebotó el sabotaje de ' + p.name + ' (−' + _perdidas + '🔵)</span>', '🛡️');
                         }
                         hasShield[activeP.id] = false;
@@ -2753,7 +2692,7 @@
                         if (targetConn) {
                             targetConn.send({
                                 type: 'SABOTAGE_SKIP_ALERT',
-                                mÃ¡sg: "¡" + p.name + " HA SEMBRADO EL PÁNICO EN TU TURNO! 😱"
+                                msg: "¡" + p.name + " HA SEMBRADO EL PÁNICO EN TU TURNO! 😱"
                             });
                         }
 
@@ -2797,7 +2736,7 @@
                         var p = players.find(function (pl) { return pl.id === peerId; });
                         if (p) {
                             var _perdidas = cobrarSabotajeRebotado(p, action);
-                            try { if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', mÃ¡sg: "¡ZASCA! El Escudo de " + activeP.name + " ha rebotado tu sabotaje. Pierdes " + _perdidas + "🔵 jajaja" }); } catch (e) { }
+                            try { if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "¡ZASCA! El Escudo de " + activeP.name + " ha rebotado tu sabotaje. Pierdes " + _perdidas + "🔵 jajaja" }); } catch (e) { }
                             addEvent('<span class="ev-good">🛡️ El escudo de ' + activeP.name + ' rebotó el sabotaje de ' + p.name + ' (−' + _perdidas + '🔵)</span>', '🛡️');
                         }
                         hasShield[activeP.id] = false;
@@ -2817,7 +2756,7 @@
                         if (targetConn) {
                             targetConn.send({
                                 type: 'SABOTAGE_SKIP_ALERT',
-                                mÃ¡sg: "¡" + p.name + " HA LANZADO NIEBLA SOBRE TU TURNO! 🌫️"
+                                msg: "¡" + p.name + " HA LANZADO NIEBLA SOBRE TU TURNO! 🌫️"
                             });
                         }
 
@@ -2833,7 +2772,7 @@
                         var p = players.find(function (pl) { return pl.id === peerId; });
                         if (p) {
                             var _perdidas = cobrarSabotajeRebotado(p, action);
-                            try { if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', mÃ¡sg: "¡ZASCA! El Escudo de " + activeP.name + " ha rebotado tu sabotaje. Pierdes " + _perdidas + "🔵 jajaja" }); } catch (e) { }
+                            try { if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "¡ZASCA! El Escudo de " + activeP.name + " ha rebotado tu sabotaje. Pierdes " + _perdidas + "🔵 jajaja" }); } catch (e) { }
                             addEvent('<span class="ev-good">🛡️ El escudo de ' + activeP.name + ' rebotó el sabotaje de ' + p.name + ' (−' + _perdidas + '🔵)</span>', '🛡️');
                         }
                         hasShield[activeP.id] = false;
@@ -2871,7 +2810,7 @@
                         if (targetConn) {
                             targetConn.send({
                                 type: 'SABOTAGE_SKIP_ALERT',
-                                mÃ¡sg: "¡" + p.name + " HA SALTADO TU CANCIÓN! ⏭️"
+                                msg: "¡" + p.name + " HA SALTADO TU CANCIÓN! ⏭️"
                             });
                         }
 
@@ -2965,7 +2904,7 @@
                         var p = players.find(function (pl) { return pl.id === peerId; });
                         if (p) {
                             var _perdidas = cobrarSabotajeRebotado(p, action);
-                            try { if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', mÃ¡sg: "¡ZASCA! El Escudo de " + activeP.name + " ha rebotado tu sabotaje. Pierdes " + _perdidas + "🔵 jajaja" }); } catch (e) { }
+                            try { if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "¡ZASCA! El Escudo de " + activeP.name + " ha rebotado tu sabotaje. Pierdes " + _perdidas + "🔵 jajaja" }); } catch (e) { }
                             addEvent('<span class="ev-good">🛡️ El escudo de ' + activeP.name + ' rebotó el sabotaje de ' + p.name + ' (−' + _perdidas + '🔵)</span>', '🛡️');
                         }
                         hasShield[activeP.id] = false;
@@ -3035,7 +2974,7 @@
                             document.getElementById('host-instructions').innerHTML = "<span style='color:#00ff88; font-size:1.5em; font-family:Bungee;'>¡" + resistVictim.name + " RESISTIÓ EL ROBO!</span>";
                             // Notificar al ladrón
                             if (connections[pendingSteal.thief.id]) {
-                                try { connections[pendingSteal.thief.id].send({ type: 'BET_RESULT', mÃ¡sg: '🛡️ ' + resistVictim.name + ' resistió tu robo. Te devuelven las fichas.' }); } catch(e) {}
+                                try { connections[pendingSteal.thief.id].send({ type: 'BET_RESULT', msg: '🛡️ ' + resistVictim.name + ' resistió tu robo. Te devuelven las fichas.' }); } catch(e) {}
                             }
                             var bannerEl2 = document.getElementById('steal-resistance-banner');
                             if (bannerEl2) bannerEl2.style.display = 'none';
@@ -3098,8 +3037,8 @@
                             var typeLabel = value==='first'?'MÁS ANTIGUA':value==='last'?'MÁS RECIENTE':'MÁS EXTREMA';
                             addEvent('<span class="ev-name">' + p.name + '</span> <span class="ev-info">robó carta ' + typeLabel + ' (' + stolenCard + ') a ' + target.name + ' 🃏</span>');
                             trackSabotage(p.id, target.id);
-                            if (connections[p.id]) try { connections[p.id].send({ type: 'BET_RESULT', mÃ¡sg: '🃏 Robaste el año ' + stolenCard + ' a ' + target.name + '!' }); } catch(e){}
-                            if (connections[target.id]) try { connections[target.id].send({ type: 'BET_RESULT', mÃ¡sg: '🎯 ' + p.name + ' te robó la carta del ' + stolenCard + '!' }); } catch(e){}
+                            if (connections[p.id]) try { connections[p.id].send({ type: 'BET_RESULT', msg: '🃏 Robaste el año ' + stolenCard + ' a ' + target.name + '!' }); } catch(e){}
+                            if (connections[target.id]) try { connections[target.id].send({ type: 'BET_RESULT', msg: '🎯 ' + p.name + ' te robó la carta del ' + stolenCard + '!' }); } catch(e){}
                             if (checkScoreVictory(p)) return;
                             syncState();
                         }
@@ -3279,7 +3218,7 @@
                     if (!gameStarted) {
                         var _rc = Object.keys(readyPlayers).length;
                         if (players.length < 2 || _rc < players.length) {
-                            try { if (connections[peerId]) connections[peerId].send({ type: 'BET_RESULT', mÃ¡sg: '⏳ Aún no. Faltan jugadores por marcar LISTO (' + _rc + '/' + players.length + ').' }); } catch(e) {}
+                            try { if (connections[peerId]) connections[peerId].send({ type: 'BET_RESULT', msg: '⏳ Aún no. Faltan jugadores por marcar LISTO (' + _rc + '/' + players.length + ').' }); } catch(e) {}
                         }
                         checkReadyAndStart();
                     }
@@ -3374,12 +3313,12 @@
                         if (value === 'artist') {
                             document.getElementById('ui-card-artist').innerText = s.artist;
                             document.getElementById('ui-card-artist').style.color = "var(--gold)";
-                            try { connections[peerId].send({ type: 'BET_RESULT', mÃ¡sg: '🃏 Artista revelado en la pantalla grande: ' + s.artist + ' (te quedan ' + p.wildcards + ' comodines)' }); } catch(e) {}
+                            try { connections[peerId].send({ type: 'BET_RESULT', msg: '🃏 Artista revelado en la pantalla grande: ' + s.artist + ' (te quedan ' + p.wildcards + ' comodines)' }); } catch(e) {}
                             addEvent('<span class="ev-info">🃏 ' + p.name + ' gastó un comodín: artista revelado</span>');
                         } else {
                             document.getElementById('ui-card-song').innerText = s.song;
                             document.getElementById('ui-card-song').style.color = "var(--gold)";
-                            try { connections[peerId].send({ type: 'BET_RESULT', mÃ¡sg: '🃏 Canción revelada en la pantalla grande: ' + s.song + ' (te quedan ' + p.wildcards + ' comodines)' }); } catch(e) {}
+                            try { connections[peerId].send({ type: 'BET_RESULT', msg: '🃏 Canción revelada en la pantalla grande: ' + s.song + ' (te quedan ' + p.wildcards + ' comodines)' }); } catch(e) {}
                             addEvent('<span class="ev-info">🃏 ' + p.name + ' gastó un comodín: canción revelada</span>');
                         }
                         syncState();
@@ -3395,7 +3334,7 @@
                             decadeStr = Math.floor(sYear / 10) * 10 + "s";
                         }
                         try {
-                            if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', mÃ¡sg: "PISTA! Años " + decadeStr });
+                            if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "PISTA! Años " + decadeStr });
                         } catch (e) { }
                         syncState();
                     }
@@ -3406,7 +3345,7 @@
                         updateTokens(p, -3);
                         hasShield[p.id] = true;
                         try {
-                            if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', mÃ¡sg: "ESCUDO ACTIVADO! Tu proximo sabotaje enemigo será neutralizado." });
+                            if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "ESCUDO ACTIVADO! Tu proximo sabotaje enemigo será neutralizado." });
                         } catch (e) { }
                         syncState();
                     }
@@ -3434,11 +3373,11 @@
                                 try { connections[_sc].send({ type: 'STREAK_STOLEN', thief: p.name, victim: bestRival.name, streak: stolenStreak }); } catch(e) {}
                             }
                             // Notificar al rival víctima
-                            if (connections[bestRival.id]) try { connections[bestRival.id].send({ type: 'DANGER_ALERT', mÃ¡sg: '🔥 ' + p.name + ' te ha robado la racha ×' + stolenStreak, critical: false }); } catch(e) {}
+                            if (connections[bestRival.id]) try { connections[bestRival.id].send({ type: 'DANGER_ALERT', msg: '🔥 ' + p.name + ' te ha robado la racha ×' + stolenStreak, critical: false }); } catch(e) {}
                             trackSabotage(p.id, bestRival.id);
                             syncState();
                         } else {
-                            try { connections[peerId].send({ type: 'BET_RESULT', mÃ¡sg: 'Ningún rival lleva racha ×3 o más ahora mismo.' }); } catch(e) {}
+                            try { connections[peerId].send({ type: 'BET_RESULT', msg: 'Ningún rival lleva racha ×3 o más ahora mismo.' }); } catch(e) {}
                         }
                     }
                     break;
@@ -3449,19 +3388,19 @@
                     // se cobraban 4 fichas y la categoría nunca se aplicaba. Ahora se valida.
                     if (p && p.tokens >= 4 && !requestedCategory && gameStarted) {
                         if (!CATEGORIAS[value]) {
-                            try { connections[peerId].send({ type: 'BET_RESULT', mÃ¡sg: '❌ Categoría no válida. No se te ha cobrado nada.' }); } catch(e) {}
+                            try { connections[peerId].send({ type: 'BET_RESULT', msg: '❌ Categoría no válida. No se te ha cobrado nada.' }); } catch(e) {}
                             break;
                         }
                         var hayEnMazo = songs.some(function (sg, i) { return i >= currentSongIdx && sg && sg.type === value; });
                         if (!hayEnMazo) {
-                            try { connections[peerId].send({ type: 'BET_RESULT', mÃ¡sg: '❌ No quedan canciones de ' + CATEGORIAS[value] + ' en el mazo. No se te ha cobrado nada.' }); } catch(e) {}
+                            try { connections[peerId].send({ type: 'BET_RESULT', msg: '❌ No quedan canciones de ' + CATEGORIAS[value] + ' en el mazo. No se te ha cobrado nada.' }); } catch(e) {}
                             break;
                         }
                         updateTokens(p, -4);
                         requestedCategory = value;
                         addEvent('<span class="ev-info">🎯 ' + p.name + ' pidió categoría: ' + CATEGORIAS[value] + '</span>');
                         document.getElementById('host-instructions').innerHTML += ' <span style="color:var(--gold)">🎯 Próxima: ' + CATEGORIAS[value] + '</span>';
-                        try { connections[peerId].send({ type: 'BET_RESULT', mÃ¡sg: '🎯 Categoría solicitada: ' + CATEGORIAS[value] + '. Se aplicará en el próximo turno.' }); } catch(e) {}
+                        try { connections[peerId].send({ type: 'BET_RESULT', msg: '🎯 Categoría solicitada: ' + CATEGORIAS[value] + '. Se aplicará en el próximo turno.' }); } catch(e) {}
                         syncState();
                     }
                     break;
@@ -3501,13 +3440,13 @@
                     // 😂 y 💀 actúan sobre el jugador activo: usarlos en tu propio turno
                     // era sabotearte a ti mismo, y con 💀 cobrabas +2🔵 por fallar tú (exploit).
                     if (p && (value === '😂' || value === '💀') && players[activePlayerIdx] && players[activePlayerIdx].id === peerId) {
-                        try { connections[peerId].send({ type: 'BET_RESULT', mÃ¡sg: 'Ese comodín no se puede usar en tu propio turno. No se te ha cobrado.' }); } catch(e) {}
+                        try { connections[peerId].send({ type: 'BET_RESULT', msg: 'Ese comodín no se puede usar en tu propio turno. No se te ha cobrado.' }); } catch(e) {}
                         break;
                     }
                     if (p && p.tokens >= 1 && gameStarted) {
                         if (!p.emojiWildcardUsed) p.emojiWildcardUsed = {};
                         if (p.emojiWildcardUsed[value]) {
-                            try { connections[peerId].send({ type: 'BET_RESULT', mÃ¡sg: 'Ya usaste el comodín ' + value + ' en esta partida.' }); } catch(e) {}
+                            try { connections[peerId].send({ type: 'BET_RESULT', msg: 'Ya usaste el comodín ' + value + ' en esta partida.' }); } catch(e) {}
                         } else {
                             updateTokens(p, -1);
                             p.emojiWildcardUsed[value] = true;
@@ -3767,7 +3706,7 @@
                     // El jugador activo ACIERTA: los que apostaron en contra pierden. los que apostaron a favor ganan.
                     var losesPhrases = [
                         "Has dudado de un puto experto... y has perdido.",
-                        "¿Ni de coña? Ni de coña vas a recuperar esa ficha, pringaÃ±o.",
+                        "¿Ni de coña? Ni de coña vas a recuperar esa ficha, pringao.",
                         "Para la próxima te callas. El maestro sabe lo que hace.",
                         "A llorar a la llorería. Esa ficha es historia.",
                         "Has apostado contra Dios y te has quemado.",
@@ -3794,7 +3733,7 @@
                         "Ficha denegada por listillo. A tu cueva.",
                         "Te la ha clavado por la escuadra. A pastar.",
                         "Tu intento de sabotaje da más pena que otra cosa.",
-                        "Otra fichita pal bote. Gracias por la donación, pringaÃ±o.",
+                        "Otra fichita pal bote. Gracias por la donación, pringao.",
                         "Te iba a devolver la ficha por pena, pero mejor me la quedo.",
                         "Cárgate de paciencia, porque de fichas vas justito.",
                         "El oráculo musical ataca de nuevo. Tú agacha la cabeza.",
@@ -3973,7 +3912,7 @@
                             "<span style='color:var(--gold); font-size:1.4em; font-family:Bungee;'>👑 " + _kingName + " ES EL REY</span><br>" +
                             "<span style='font-size:0.8em;'>Debe superar el DESAFÍO FINAL en su próximo turno para ganar</span>";
                         for (var _kc in connections) {
-                            try { connections[_kc].send({ type: 'DANGER_ALERT', mÃ¡sg: '👑 ' + _kingName + ' ha llegado a 10. Deberá superar el DESAFÍO DEL REY para ganar.', critical: true }); } catch(e) {}
+                            try { connections[_kc].send({ type: 'DANGER_ALERT', msg: '👑 ' + _kingName + ' ha llegado a 10. Deberá superar el DESAFÍO DEL REY para ganar.', critical: true }); } catch(e) {}
                         }
                         activePlayerIdx = (activePlayerIdx + 1) % players.length;
                         players[activePlayerIdx].canReload = true;
@@ -4019,7 +3958,7 @@
                     var curser = players.find(function(pl) { return pl.id === curse.playerId; });
                     if (curser) {
                         updateTokens(curser, 2);
-                        try { if (connections[curse.playerId]) connections[curse.playerId].send({ type: 'BET_RESULT', mÃ¡sg: '💀 ¡Maldición eÃ©Ã©xitosa! +2🔵' }); } catch(e) {}
+                        try { if (connections[curse.playerId]) connections[curse.playerId].send({ type: 'BET_RESULT', msg: '💀 ¡Maldición exitosa! +2🔵' }); } catch(e) {}
                     }
                 });
                 silentCurses = [];
@@ -4226,7 +4165,7 @@
                         '</div>';
                 }
 
-                // 3. A la Experiencia Completa — úÃºltimo puesto (excluir ganador)
+                // 3. A la Experiencia Completa — último puesto (excluir ganador)
                 var lastPlace = players.slice().sort(function(a,b){ return a.score - b.score; })[0];
                 if (lastPlace && lastPlace.name !== name) {
                     jokeHtml += '<div class="award-card" style="border-color:#555;">' +
@@ -4344,10 +4283,8 @@
             }
             podiumHtml += '</div>';
 
-            document.getElementById('winner-podium-center').innerHTML = podiumHtml;
-            document.getElementById('winner-awards').innerHTML = awardsHtml;
+            document.getElementById('winner-ranking').innerHTML = podiumHtml + awardsHtml + '<div style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center; width:100%;">' + rankHtml + '</div>';
             document.getElementById('winner-stats').innerHTML = statsHtml;
-            document.getElementById('winner-ranking').innerHTML = '<div style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center; width:100%;">' + rankHtml + '</div>';
 
             // Limpiar confeti previo si existe
             if (window.victoryInterval) clearInterval(window.victoryInterval);
@@ -4444,7 +4381,7 @@
             // ── REPLAY DE MOMENTOS CLAVE ──
             var replayEl = document.getElementById('winner-replay');
             if (replayEl && replayLog.length > 0) {
-                var topMoments = replayLog.slice(-6); // úÃºltimos 6 o menos
+                var topMoments = replayLog.slice(-6); // últimos 6 o menos
                 var replayHtml = '<div style="font-family:Bungee;font-size:0.55em;color:#444;letter-spacing:3px;text-align:center;margin-bottom:8px;">MOMENTOS CLAVE</div>';
                 replayHtml += '<div style="display:flex;flex-direction:column;gap:6px;">';
                 topMoments.forEach(function(ev) {
@@ -4890,7 +4827,7 @@
                 // Próximo acierto del jugador = carta doble
                 emojiWildcardBonus[playerId] = true;
                 addEvent('<span class="ev-good">🔥 ' + p.name + ' activa PRÓXIMO ACIERTO DOBLE</span>');
-                try { if (connections[playerId]) connections[playerId].send({ type: 'BET_RESULT', mÃ¡sg: '🔥 Comodín activado: tu próximo acierto valdrá 2 cartas' }); } catch(e) {}
+                try { if (connections[playerId]) connections[playerId].send({ type: 'BET_RESULT', msg: '🔥 Comodín activado: tu próximo acierto valdrá 2 cartas' }); } catch(e) {}
             } else if (emoji === '😂') {
                 // Ocultar años de la cronología del activo 5 segundos
                 if (!activo) return;
@@ -4900,7 +4837,7 @@
                 // Maldición silenciosa
                 silentCurses.push({ playerId: playerId });
                 addEvent('<span class="ev-info">💀 ' + p.name + ' lanzó una maldición silenciosa...</span>');
-                try { if (connections[playerId]) connections[playerId].send({ type: 'BET_RESULT', mÃ¡sg: '💀 Maldición lanzada. Si falla, +2🔵 para ti.' }); } catch(e) {}
+                try { if (connections[playerId]) connections[playerId].send({ type: 'BET_RESULT', msg: '💀 Maldición lanzada. Si falla, +2🔵 para ti.' }); } catch(e) {}
             }
         }
 
@@ -4978,10 +4915,10 @@
             hasShield[victima.id] = false;
             var perdidas = cobrarSabotajeRebotado(atacante, accion);
             if (atacante && connections[atacante.id]) {
-                try { connections[atacante.id].send({ type: 'BET_RESULT', mÃ¡sg: '🛡️ ¡ZASCA! El Escudo de ' + victima.name + ' ha rebotado tu sabotaje. Pierdes ' + perdidas + '🔵' }); } catch(e) {}
+                try { connections[atacante.id].send({ type: 'BET_RESULT', msg: '🛡️ ¡ZASCA! El Escudo de ' + victima.name + ' ha rebotado tu sabotaje. Pierdes ' + perdidas + '🔵' }); } catch(e) {}
             }
             if (connections[victima.id]) {
-                try { connections[victima.id].send({ type: 'BET_RESULT', mÃ¡sg: '🛡️ Tu Escudo ha bloqueado el sabotaje de ' + (atacante ? atacante.name : '?') + '.' }); } catch(e) {}
+                try { connections[victima.id].send({ type: 'BET_RESULT', msg: '🛡️ Tu Escudo ha bloqueado el sabotaje de ' + (atacante ? atacante.name : '?') + '.' }); } catch(e) {}
             }
             addEvent('<span class="ev-good">🛡️ El escudo de ' + victima.name + ' rebotó el sabotaje de ' + (atacante ? atacante.name : '?') + ' (−' + perdidas + '🔵)</span>', '🛡️');
             syncState();
@@ -5081,8 +5018,8 @@
             bettingFor = [];
 
             // Avisar a ambos
-            try { if (connections[thief.id]) connections[thief.id].send({ type: 'BET_RESULT', mÃ¡sg: '⚡ ¡TURNO ROBADO! Ahora te toca a ti: coloca el año.' }); } catch(e) {}
-            try { if (connections[victim.id]) connections[victim.id].send({ type: 'BET_RESULT', mÃ¡sg: '⚡ ' + thief.name + ' te ha robado el turno. Esta canción ya no es tuya.' }); } catch(e) {}
+            try { if (connections[thief.id]) connections[thief.id].send({ type: 'BET_RESULT', msg: '⚡ ¡TURNO ROBADO! Ahora te toca a ti: coloca el año.' }); } catch(e) {}
+            try { if (connections[victim.id]) connections[victim.id].send({ type: 'BET_RESULT', msg: '⚡ ' + thief.name + ' te ha robado el turno. Esta canción ya no es tuya.' }); } catch(e) {}
             addEvent('<span class="ev-name">' + thief.name + '</span> <span class="ev-bad">ROBÓ EL TURNO a ' + victim.name + ' ⚡</span>');
 
             document.getElementById('host-instructions').innerHTML = "<span style='color:#00f2fe; font-size:1.5em; font-family:Bungee;'>¡" + thief.name + " HA ROBADO EL TURNO A " + victim.name + "!</span>";
@@ -5225,7 +5162,7 @@
             if (panicInterval) clearInterval(panicInterval);
             stopCountdown();
             initStats();
-            teamÃ¡s = { red: [], blue: [] };
+            teams = { red: [], blue: [] };
             teamCards = { red: [], blue: [] };
             teamScore = { red: 0, blue: 0 };
             teamTurn = 'red';
@@ -5265,7 +5202,7 @@
             sharedSongOwnerId = null;
             isDoubleOrNothing = false;
             turnCounter = 0;
-            teamÃ¡s = { red: [], blue: [] };
+            teams = { red: [], blue: [] };
             teamCards = { red: [], blue: [] };
             teamScore = { red: 0, blue: 0 };
             teamTurn = 'red';
@@ -5412,7 +5349,7 @@
                     else { ringFill.style.stroke = '#ff4444';
                         // Pulso cuando queda poco
                         ring.style.transform = remaining <= 5 ? 'scale(' + (1 + Math.sin(Date.now()/200)*0.05) + ')' : '';
-                        // ── TICK SONORO en los úÃºltimos 10 segundos ──
+                        // ── TICK SONORO en los últimos 10 segundos ──
                         if (remaining <= 10 && remaining > 0) {
                             var freq = remaining <= 3 ? 1200 : remaining <= 5 ? 900 : 660;
                             playToneHost(freq, 0.06, 'sine', 0.08);
@@ -5471,19 +5408,6 @@
                 var txt = html.replace(/<[^>]+>/g, '').trim();
                 replayLog.push({ turn: turnCounter, text: txt, icon: replayIcon });
                 if (replayLog.length > 20) replayLog.shift();
-            }
-            // Broadcast del evento a los móviles de todos los jugadores
-            var cleanText = html.replace(/<[^>]+>/g, '').trim();
-            if (cleanText) {
-                for (var id in connections) {
-                    try {
-                        connections[id].send({
-                            type: 'EVENT_TOAST',
-                            text: cleanText,
-                            html: html
-                        });
-                    } catch(e){}
-                }
             }
         }
 
