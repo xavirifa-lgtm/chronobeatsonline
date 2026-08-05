@@ -1054,6 +1054,10 @@
 
         // Sala persistente: recuperar código del localStorage o generar uno nuevo
         var savedRoom = localStorage.getItem('CB_RoomCode');
+        if (savedRoom && (savedRoom === 'null' || savedRoom === 'undefined' || savedRoom.trim().length < 3)) {
+            localStorage.removeItem('CB_RoomCode');
+            savedRoom = null;
+        }
         var peer, roomCode = savedRoom || Math.random().toString(36).substring(2, 8).toUpperCase();
         if (!savedRoom) localStorage.setItem('CB_RoomCode', roomCode);
         var player; // YouTube Player Instance
@@ -1243,13 +1247,6 @@
         var hasShield = {}; // playerId -> boolean
 
         // Duel Mode variables
-        var currentDuel = null;
-        var duelResult = null; // Para mensajes de fin de duelo
-        var duelTriggered = false; // Bloqueo de un duelo por turno
-
-        document.getElementById('join-code').innerText = roomCode;
-
-        // Generar QR con el código de sala
         var qrGenerated = false;
         function copyPlayerLink(e) {
             e.preventDefault();
@@ -1261,7 +1258,6 @@
                     setTimeout(function() { link.innerText = old; }, 2000);
                 });
             } else if (link) {
-                // Fallback para iOS Safari
                 var ta = document.createElement('textarea');
                 ta.value = link.href;
                 document.body.appendChild(ta);
@@ -1274,38 +1270,56 @@
             }
         }
 
-        var qrGenerated = false;
-
         function generateQR() {
-            if (qrGenerated) return;
-            var qrEl = document.getElementById('qr-code');
-            var baseUrl = window.location.href.replace('host_digital_mix.html', 'player_digital_mix.html');
-            baseUrl = baseUrl.split('?')[0]; // quitar parámetros del host
+            var codeEl = document.getElementById('join-code');
+            if (codeEl) codeEl.innerText = roomCode;
+
+            var liveCodeEl = document.getElementById('live-code-text');
+            if (liveCodeEl) liveCodeEl.innerText = roomCode;
+
+            var baseUrl = window.location.href.replace('host_digital_mix.html', 'player_digital_mix.html').split('?')[0];
             var playerUrl = baseUrl + '?sala=' + roomCode;
 
-            if (qrEl && typeof QRCode !== 'undefined') {
+            var qrEl = document.getElementById('qr-code');
+            if (qrEl) {
                 qrEl.innerHTML = '';
-                new QRCode(qrEl, {
-                    text: playerUrl,
-                    width: 160,
-                    height: 160,
-                    colorDark: '#000000',
-                    colorLight: '#ffffff',
-                    correctLevel: QRCode.CorrectLevel.M
-                });
+                if (typeof QRCode !== 'undefined') {
+                    try {
+                        new QRCode(qrEl, {
+                            text: playerUrl,
+                            width: 160,
+                            height: 160,
+                            colorDark: '#000000',
+                            colorLight: '#ffffff',
+                            correctLevel: QRCode.CorrectLevel.M
+                        });
+                    } catch (e) {
+                        qrEl.innerHTML = '<img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=' + encodeURIComponent(playerUrl) + '" style="width:160px;height:160px;display:block;margin:0 auto;">';
+                    }
+                } else {
+                    qrEl.innerHTML = '<img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=' + encodeURIComponent(playerUrl) + '" style="width:160px;height:160px;display:block;margin:0 auto;">';
+                }
             }
 
             var miniEl = document.getElementById('live-qr-canvas');
-            if (miniEl && typeof QRCode !== 'undefined') {
+            if (miniEl) {
                 miniEl.innerHTML = '';
-                new QRCode(miniEl, {
-                    text: playerUrl,
-                    width: 120,
-                    height: 120,
-                    colorDark: '#000000',
-                    colorLight: '#ffffff',
-                    correctLevel: QRCode.CorrectLevel.M
-                });
+                if (typeof QRCode !== 'undefined') {
+                    try {
+                        new QRCode(miniEl, {
+                            text: playerUrl,
+                            width: 120,
+                            height: 120,
+                            colorDark: '#000000',
+                            colorLight: '#ffffff',
+                            correctLevel: QRCode.CorrectLevel.M
+                        });
+                    } catch (e) {
+                        miniEl.innerHTML = '<img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=' + encodeURIComponent(playerUrl) + '" style="width:120px;height:120px;display:block;margin:0 auto;">';
+                    }
+                } else {
+                    miniEl.innerHTML = '<img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=' + encodeURIComponent(playerUrl) + '" style="width:120px;height:120px;display:block;margin:0 auto;">';
+                }
             }
 
             qrGenerated = true;
@@ -1317,34 +1331,22 @@
                 linkEl.style.display = 'block';
             }
         }
-        // Intentar generar al cargar y también cuando el peer esté listo
-        window.addEventListener('load', function() { setTimeout(generateQR, 500); });
 
         function toggleLiveQR() {
             var qrMini = document.getElementById('live-qr-mini');
             if (!qrMini) return;
             var visible = qrMini.style.display === 'block';
             qrMini.style.display = visible ? 'none' : 'block';
-            if (!visible) {
-                var miniEl = document.getElementById('live-qr-canvas');
-                if (miniEl && typeof QRCode !== 'undefined') {
-                    var baseUrl = window.location.href.replace('host_digital_mix.html', 'player_digital_mix.html').split('?')[0];
-                    var playerUrl = baseUrl + '?sala=' + roomCode;
-                    miniEl.innerHTML = '';
-                    new QRCode(miniEl, {
-                        text: playerUrl,
-                        width: 120,
-                        height: 120,
-                        colorDark: '#000000',
-                        colorLight: '#ffffff',
-                        correctLevel: QRCode.CorrectLevel.M
-                    });
-                }
-            }
+            if (!visible) generateQR();
         }
 
-        // Intentar generar al cargar y también cuando el peer esté listo
-        window.addEventListener('load', function() { setTimeout(generateQR, 300); });
+        // Ejecutar inmediatamente, en DOMContentLoaded y en load
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', generateQR);
+        } else {
+            generateQR();
+        }
+        window.addEventListener('load', generateQR);
 
         // Eliminadas funciones de YT API
         function onYouTubeIframeAPIReady() {
