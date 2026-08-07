@@ -93,8 +93,8 @@
             margin-top: 8px;
         }
 
-        /* ── BANNER ¡TODOS JUEGAN! & CARTA BONIFICACIÓN ── */
-        #shared-song-player-banner, #bonus-banner {
+        /* ── BANNER ¡TODOS JUEGAN! ── */
+        #shared-song-player-banner {
             display: none;
             background: linear-gradient(90deg, var(--gold), #ff8800);
             color: #000;
@@ -106,10 +106,6 @@
             border-radius: 8px;
             margin: 6px 0;
             animation: pulse-banner 1s ease-in-out infinite alternate;
-        }
-        #bonus-banner {
-            background: linear-gradient(90deg, #ffaa00, #ff0055);
-            color: #fff;
         }
 
         /* ── ROBO DE TURNO: BOTÓN RESISTIR ── */
@@ -1579,51 +1575,55 @@
         var RULE_TOPICS = {
             cards: `
                 <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:0; font-size:1.3em;">🎯 CARTA Y CRONOLOGÍA</h3>
-                <p><strong>• Objetivo:</strong> Coloca las canciones en orden cronológico en tu línea de tiempo. El primero en llegar a <strong>10 cartas</strong> gana.</p>
+                <p><strong>• Objetivo:</strong> Coloca las canciones en orden cronológico en tu línea de tiempo. El primero en llegar a la meta (10 o 7 cartas en Blitz) gana.</p>
                 <p><strong>• Adivinación:</strong> Elige el hueco exacto entre los años de tu cronología (<code>⬇️ PONER AQUÍ ⬇️</code>). Acierto = +1 carta y +2🔵 fichas.</p>
-                <p><strong>• 🔥 Racha de Aciertos:</strong> A partir del 3.er acierto seguido, ganas 1 carta extra adicional con cada acierto posterior de la racha.</p>
+                <p><strong>• 🎯 Bonus por Año Exacto (+2🔵):</strong> Si además de adivinar la posición introduces el <strong>año exacto</strong> de la canción, ganas +2 Fichas 🔵 extra.</p>
+                <p><strong>• 🔥 Racha de Aciertos & 👑 Rey del Ritmo:</strong> A partir del 3.er acierto seguido, obtienes 1 carta extra y ostentas la corona de <strong>👑 REY DEL RITMO</strong> en la TV.</p>
                 <p><strong>• ⚔️ Camino del Guerrero:</strong> Si fallas 3 veces seguidas, tu siguiente acierto vale 2 puntos gratis para recuperar terreno.</p>
             `,
             modes: `
-                <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:0; font-size:1.3em;">🕹️ MODOS DE JUEGO</h3>
-                <p><strong>• 🎵 Clásico:</strong> El primero en colocar 10 cartas en su línea de tiempo gana la partida.</p>
-                <p><strong>• 👑 Modo Rey:</strong> Al llegar a 10 cartas, el turno pasa al rival. Cuando vuelva a tocarte, los rivales eligen la canción y debes adivinar el año con ±2 años de margen para ganar definitivamente.</p>
-                <p><strong>• 💿 Supervivencia:</strong> 3 vidas por jugador. Cada fallo quita 1 vida. Si llegas a 0 vidas quedas eliminado. Gana el último superviviente o quien llegue a 10 cartas.</p>
+                <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:0; font-size:1.3em;">🕹️ MODOS Y METAS DE JUEGO</h3>
+                <p><strong>• 🏆 Clásico (10 Cartas):</strong> El primero en colocar 10 cartas en su línea de tiempo gana la partida.</p>
+                <p><strong>• ⚡ Blitz Rápido (7 Cartas):</strong> Partida ultra-rápida y dinámica a 7 cartas ideal para fiestas.</p>
+                <p><strong>• ⚡ MODO FRENESÍ:</strong> Al llegar a 2 cartas de la victoria, las recompensas de fichas se duplican (×2 🔵) para remontadas finales.</p>
+                <p><strong>• 👑 Modo Rey:</strong> Al llegar a 10 cartas, debes superar el reto final con ±2 años de margen para ganar definitivamente.</p>
+                <p><strong>• 💿 Supervivencia:</strong> 3 vidas por jugador. Cada fallo quita 1 vida. Si llegas a 0 quedas eliminado.</p>
                 <p><strong>• 🔵🔴 Equipos:</strong> Rojo vs Azul. Todos los miembros del equipo votan el hueco de la canción simultáneamente.</p>
-                <p><strong>• 🏆 Competitivo:</strong> Desactiva todas las fichas, sabotajes y apuestas. Solo cronología pura.</p>
             `,
             sabotages: `
                 <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:0; font-size:1.3em;">💀 SABOTAJES Y MERCADO</h3>
+                <p><strong>• 🔀 Permuta Temporal (4🔵):</strong> Le robas 1 carta de la cronología al líder y la sumas automáticamente a la tuya.</p>
+                <p><strong>• ⚡ Robar Turno (4🔵):</strong> Le arrebatas el turno en curso al jugador activo para jugar tú esa canción.</p>
                 <p><strong>• 🔇 Mute (1🔵):</strong> Quita el sonido de la televisión durante 15 segundos.</p>
                 <p><strong>• ⏰ Pánico (2🔵):</strong> Reduce el tiempo de respuesta del jugador activo a solo 10 segundos.</p>
                 <p><strong>• 🌫️ Niebla (2🔵):</strong> Oculta los años de la cronología del rival activo durante su turno.</p>
-                <p><strong>• 🎰 Ruleta Rusa (2🔵):</strong> Haces girar la ruleta al azar para ganar/perder cartas o fichas.</p>
+                <p><strong>• ⚡ Zumbido (1🔵):</strong> Hace vibrar y desorienta el mando del jugador activo.</p>
                 <p><strong>• 🛡️ Escudo (3🔵):</strong> Hace que el próximo sabotaje recibido rebote automáticamente al atacante.</p>
                 <p><strong>• 🌌 Agujero Negro (5🔵):</strong> Destruye una carta de la cronología de un rival.</p>
                 <p><strong>• 🃏 Comodines de Canción (3 de uso libre):</strong> Revelan el Artista o el Título en la pantalla de la TV.</p>
             `,
             bets: `
-                <h3 style="color:var(--gold); font-family:'Bungee'; margin-top:0; font-size:1.3em;">🎲 ACCIONES ESPECIALES Y APUESTAS</h3>
-                <p><strong>• ⚡ ¡Ni de Coña! (1🔵):</strong> Apuestas a que el activo falla. Si falla, te llevas la carta y +2🔵.</p>
-                <p><strong>• ✨ ¡Conmigo! (1🔵):</strong> Apuestas a que el activo acierta. Si acierta, ganas +2🔵.</p>
+                <h3 style="color:var(--gold); font-family:'Bungee'; margin-top:0; font-size:1.3em;">🎲 APUESTAS Y DESAFÍOS FUERA DE TURNO</h3>
+                <p><strong>• 🎲 ¡Se Equivoca! (1🔵):</strong> Apuestas a que el activo falla. Si falla, te llevas la carta y +2🔵.</p>
+                <p><strong>• 💥 Combo de Apuestas (×3🔵):</strong> Si 2 o más jugadores coinciden apostando a que el activo falla y efectivamente falla, ganan <strong>+3 Fichas 🔵 cada uno</strong>.</p>
+                <p><strong>• 🎯 Desafío Año Exacto Fuera de Turno (+2🔵):</strong> Los jugadores inactivos pueden escribir el año exacto en cualquier turno. Si aciertan, ganan +2 Fichas 🔵.</p>
+                <p><strong>• 🤝 ¡Acierta! (1🔵):</strong> Apuestas a que el activo acierta. Si acierta, ganas +2🔵.</p>
                 <p><strong>• 🎲 Doble o Nada (4🔵):</strong> Acierto = +2 cartas. Fallo = pierdes 1 carta ya colocada.</p>
-                <p><strong>• 🛡️ Seguro de Fallo (2🔵):</strong> Evita penalizaciones extra en caso de fallo.</p>
                 <p><strong>• 🃏 Farolero / Brag (4🔵):</strong> Acierto = +3 cartas. Fallo = pierdes 2 cartas ya colocadas.</p>
-                <p><strong>• ⚔️ Retar a Duelo (2🔵):</strong> Reta al jugador activo a adivinar el año exacto.</p>
             `,
             tokens: `
                 <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:0; font-size:1.3em;">🔵 FICHAS Y ECONOMÍA</h3>
                 <p><strong>• Inicio:</strong> Empiezas la partida con 3 fichas 🔵.</p>
-                <p><strong>• Ganar Fichas:</strong> +2🔵 por cada acierto propio y +2🔵 en apuestas acertadas.</p>
+                <p><strong>• Ganar Fichas:</strong> +2🔵 por aciertos y apuestas. (¡En ⚡ MODO FRENESÍ se duplican a ×2!).</p>
                 <p><strong>• Límite:</strong> Máximo 10 fichas 🔵 acumulables.</p>
                 <p><strong>• Auto-Rescate:</strong> Si te quedas a 0 fichas durante 2 turnos seguidos, recibes +1🔵 automáticamente.</p>
             `,
             emojis: `
                 <h3 style="color:var(--pink); font-family:'Bungee'; margin-top:0; font-size:1.3em;">💬 EMOJIS, FRASES Y DISTRACCIONES</h3>
-                <p><strong>• 😂 Reacciones Rápidas:</strong> Pulsa los emojis (😂, 🔥, 💩, 🤡, 🎉, 😱) para lanzarlos a la TV en tiempo real.</p>
-                <p><strong>• 💬 Frases Picantes:</strong> Envía mensajes como <em>"¡Vas a fallar!"</em> o <em>"¡Sabelotodo!"</em> que aparecen gigantes en el móvil del rival.</p>
-                <p><strong>• 🔊 Distracciones Sonoras:</strong> Haz sonar la <em>Bocina Rival</em> o la <em>Risa Malévola</em> durante 3 segundos para despistar.</p>
-                <p><strong>• 📺 Mando TV:</strong> Pulsa el botón 📺 arriba a la derecha para ver en tu móvil los mismos botones activos de la tele.</p>
+                <p><strong>• 😂 Reacciones Rápidas:</strong> Pulsa emojis para ver tu bocadillo de diálogo flotando sobre tu avatar en la TV.</p>
+                <p><strong>• 💬 Frases Picantes:</strong> Envía mensajes como <em>"¡Vas a fallar!"</em> que aparecen en el móvil del rival.</p>
+                <p><strong>• 🔊 Distracciones Sonoras:</strong> Haz sonar la <em>Bocina Rival</em> durante 3 segundos para despistar.</p>
+                <p><strong>• 📺 Mando TV:</strong> Pulsa el botón 📺 arriba a la derecha para controlar la TV desde tu móvil.</p>
             `
         };
 
@@ -1856,7 +1856,6 @@
                     </div>
                 </div>
                 <div id="wait-msg">ESPERANDO SIGUIENTE TRACK...</div>
-                <div id="bonus-banner">🎁 ¡CARTA BONIFICACIÓN! ACIERTO = +1 CARTA EXTRA O +2 🔵</div>
             </div>
 
             <!-- APUESTAS: solo visibles fuera del turno propio -->
@@ -1925,6 +1924,7 @@
                     <button class="spec-btn" id="btn-sabotage-steal-turn" style="background:var(--bg); border-color:#ff00ff; color:#ff00ff;" onclick="send('SABOTAGE_STEAL_TURN')">ROBAR TURNO (4 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
                     <button class="spec-btn" id="btn-sabotage-blackhole" style="background:var(--bg); border-color:#9900ff; color:#9900ff; grid-column: span 2;" onclick="soundBlackhole();send('SABOTAGE_BLACKHOLE')">AGUJERO NEGRO (5 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
                     <button class="spec-btn" id="btn-smart-steal" style="background:var(--bg); border-color:var(--gold); color:var(--gold); grid-column: span 2;" onclick="openSmartSteal()">🃏 ROBO INTELIGENTE (4 <span class="neon-chip" style="width:10px;height:10px;background:var(--gold);"></span>)</button>
+                    <button class="spec-btn" id="btn-sabotage-swap" style="background:var(--bg); border-color:var(--neon); color:var(--neon); grid-column: span 2;" onclick="soundSabotage();send('SABOTAGE_SWAP')">🔀 PERMUTA TEMPORAL (4 <span class="neon-chip" style="width:10px;height:10px;background:var(--neon);"></span>)</button>
                 </div>
             </div>
         </div>
@@ -2253,29 +2253,6 @@
             btn.disabled = true;
             btn.innerText = "CONECTANDO...";
 
-            var iceConfig = [
-                { urls: 'stun:stun.l.google.com:19302' },
-                { urls: 'stun:stun1.l.google.com:19302' },
-                { urls: 'stun:stun2.l.google.com:19302' },
-                { urls: 'stun:stun3.l.google.com:19302' },
-                { urls: 'stun:stun4.l.google.com:19302' },
-                { urls: 'stun:stun.cloudflare.com:3478' },
-                { urls: 'stun:stun.nextcloud.com:443' },
-                { urls: 'stun:stun.sipgate.net:10000' },
-                { urls: 'turn:openrelay.metered.ca:80', username: 'openrelay', credential: 'openrelay' },
-                { urls: 'turn:openrelay.metered.ca:443', username: 'openrelay', credential: 'openrelay' },
-                { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelay', credential: 'openrelay' },
-                { urls: 'turns:openrelay.metered.ca:443', username: 'openrelay', credential: 'openrelay' },
-                { urls: 'turns:openrelay.metered.ca:443?transport=tcp', username: 'openrelay', credential: 'openrelay' },
-                { urls: 'turn:global.relay.metered.ca:80', username: 'openrelay', credential: 'openrelay' },
-                { urls: 'turn:global.relay.metered.ca:443', username: 'openrelay', credential: 'openrelay' },
-                { urls: 'turn:global.relay.metered.ca:443?transport=tcp', username: 'openrelay', credential: 'openrelay' },
-                { urls: 'turns:global.relay.metered.ca:443?transport=tcp', username: 'openrelay', credential: 'openrelay' },
-                { urls: 'turn:freestun.net:3478', username: 'free', credential: 'free' },
-                { urls: 'turn:freestun.net:5349', username: 'free', credential: 'free' },
-                { urls: 'turns:freestun.net:5349', username: 'free', credential: 'free' }
-            ];
-
             peer = new Peer({
                 debug: 2,
                 host: '0.peerjs.com',
@@ -2284,40 +2261,33 @@
                 path: '/',
                 pingInterval: 5000,
                 config: {
-                    iceCandidatePoolSize: 10,
-                    iceServers: iceConfig
-                },
-                iceServers: iceConfig
+                    'iceServers': [
+                        { urls: 'stun:stun.l.google.com:19302' },
+                        { urls: 'stun:stun1.l.google.com:19302' },
+                        { urls: 'stun:stun2.l.google.com:19302' },
+                        { urls: 'stun:stun3.l.google.com:19302' },
+                        { urls: 'stun:stun4.l.google.com:19302' },
+                        { urls: 'stun:stun.cloudflare.com:3478' },
+                        { urls: 'stun:stun.nextcloud.com:443' },
+                        { urls: 'stun:stun.sipgate.net:10000' },
+                        { urls: 'turn:openrelay.metered.ca:80', username: 'openrelay', credential: 'openrelay' },
+                        { urls: 'turn:openrelay.metered.ca:443', username: 'openrelay', credential: 'openrelay' },
+                        { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelay', credential: 'openrelay' },
+                        { urls: 'turns:openrelay.metered.ca:443', username: 'openrelay', credential: 'openrelay' },
+                        { urls: 'turns:openrelay.metered.ca:443?transport=tcp', username: 'openrelay', credential: 'openrelay' },
+                        { urls: 'turn:freestun.net:3478', username: 'free', credential: 'free' },
+                        { urls: 'turn:freestun.net:5349', username: 'free', credential: 'free' },
+                        { urls: 'turns:freestun.net:5349', username: 'free', credential: 'free' }
+                    ]
+                }
             });
-
             peer.on('open', function (id) {
                 myId = id;
                 console.log("Conectando con ID Peer:", id);
-                connectToHost();
-            });
-
-            var connAttempts = 0;
-            function connectToHost() {
-                connAttempts++;
-                if (conn) {
-                    try { conn.close(); } catch(e) {}
-                }
-                console.log("Conectando a CB-HOST-" + hostId + " (Intento " + connAttempts + ")...");
-                conn = peer.connect("CB-HOST-" + hostId, {
-                    reliable: true,
-                    config: { iceServers: iceConfig, iceCandidatePoolSize: 10 }
-                });
-
-                var retryTimer = setTimeout(function() {
-                    if (conn && !conn.open && connAttempts < 3) {
-                        console.warn("[4G/5G FIX] Reintentando canal TURN por temporizador...");
-                        connectToHost();
-                    }
-                }, 3000);
+                conn = peer.connect("CB-HOST-" + hostId, { reliable: true });
 
                 conn.on('open', function () {
-                    if (retryTimer) clearTimeout(retryTimer);
-                    console.log("¡Conectado con Host!");
+                    console.log("¡Conectado!");
                     requestWakeLockPlayer();
                     conn.send({ type: 'JOIN', name: playerName, avatar: playerAvatarDataUrl });
                     document.getElementById('login-screen').style.display = 'none';
@@ -2329,17 +2299,14 @@
                 conn.on('data', handle);
 
                 conn.on('close', function () {
-                    console.warn("Canal cerrado.");
-                    if (document.getElementById('login-screen').style.display === 'none') {
-                        showCustomAlert("Conexión cerrada. El Host se ha desconectado.");
-                        setTimeout(() => location.reload(), 3000);
-                    }
+                    showCustomAlert("Conexión cerrada. El Host se ha desconectado.");
+                    setTimeout(() => location.reload(), 3000);
                 });
-            }
+            });
 
             peer.on('error', function (err) {
                 console.error("Error PeerJS:", err);
-                showCustomAlert("Error de conexión: " + (err.type || err));
+                showCustomAlert("Error de conexión: " + err.type);
                 btn.disabled = false;
                 btn.innerText = "ENTRAR";
             });
@@ -2951,12 +2918,56 @@
             setTimeout(function() { btn.classList.remove('flash'); }, 200);
         }
 
+        function vibratePattern(type) {
+            if (!('vibrate' in navigator)) return;
+            try {
+                if (type === 'sabotage') navigator.vibrate([80, 50, 80, 50, 150]);
+                else if (type === 'success') navigator.vibrate([150, 80, 200]);
+                else if (type === 'turn') navigator.vibrate([120]);
+                else if (type === 'danger') navigator.vibrate([200, 100, 200, 100, 200]);
+                else if (type === 'exact') navigator.vibrate([100, 50, 100, 50, 300]);
+                else navigator.vibrate(100);
+            } catch(e) {}
+        }
+
         function send(action, value) {
             if (conn && conn.open) {
-                conn.send({ type: 'COMMAND', action: action, value: value });
+                var exactVal = null;
+                if (action === 'PLACE_CARD') {
+                    var yInp = document.getElementById('exact-year-input');
+                    if (yInp && yInp.value.trim()) exactVal = yInp.value.trim();
+                }
+                conn.send({ type: 'COMMAND', action: action, value: value, exactYear: exactVal });
             } else {
                 showCustomAlert("Conexión perdida. Recarga la página.");
             }
+        }
+
+        function sendExactYearChallenge() {
+            var inp = document.getElementById('non-active-exact-year');
+            if (!inp || !inp.value.trim()) {
+                showCustomAlert("Escribe un año válido (ej. 1994).");
+                return;
+            }
+            var val = inp.value.trim();
+            vibratePattern('turn');
+            conn.send({ type: 'COMMAND', action: 'EXACT_YEAR_CHALLENGE', value: val });
+            showCustomAlert("🎯 Desafío enviado: ¡" + val + "! Si aciertas ganas +2 Fichas 🔵");
+        }
+
+        function proposeAlliancePrompt() {
+            if (!lastState || !lastState.players) return;
+            var nonActiveRivals = lastState.players.filter(function(p){
+                return p.id !== myId && p.id !== lastState.activePlayer.id;
+            });
+            if (nonActiveRivals.length === 0) {
+                showCustomAlert("No hay rivales inactivos disponibles para alianza.");
+                return;
+            }
+            var target = nonActiveRivals[0];
+            vibratePattern('turn');
+            conn.send({ type: 'COMMAND', action: 'PROPOSE_ALLIANCE', targetId: target.id });
+            showCustomAlert("🤝 Propuesta de Alianza enviada a " + target.name + ".");
         }
 
         function updateMarket(state) {
@@ -3006,6 +3017,18 @@
 
             if (data.type === 'EVENT_TOAST') {
                 showSabotageBroadcast(data.text || data.html);
+                return;
+            } else if (data.type === 'ALLIANCE_PROPOSAL') {
+                vibratePattern('turn');
+                if (confirm('🤝 ' + data.fromName + ' te propone un Pacto de Alianza contra el jugador activo. ¿Aceptas?')) {
+                    conn.send({ type: 'COMMAND', action: 'ACCEPT_ALLIANCE' });
+                }
+                return;
+            } else if (data.type === 'ALLIANCE_ACTIVE') {
+                vibratePattern('success');
+                showCustomAlert('🤝 ¡ALIANZA ACTIVA CON ' + data.partnerName.toUpperCase() + '!\n\nSi el activo falla ambos ganáis +2 Fichas 🔵.');
+                var bBtn = document.getElementById('btn-betray-alliance');
+                if (bBtn) bBtn.style.display = 'inline-block';
                 return;
             } else if (data.type === 'BET_RESULT') {
                 showCustomAlert(data.msg);
@@ -3461,8 +3484,15 @@
                 });
                 var tokensUi = document.getElementById('my-tokens-ui');
                 if (tokensUi) tokensUi.style.display = '';
-                if (isComp) {
-                    // Si estábamos en una pestaña oculta, volver a JUEGO
+
+                // V4: En mi turno, asegurar que la pestaña activa sea Juego (manteniendo Mercado accesible)
+                if (isMyTurn) {
+                    var sabTab = document.getElementById('tab-sabotage');
+                    if (sabTab && sabTab.style.display !== 'none' && sabTab.style.display !== '') {
+                        var gt = document.querySelector('.tab-btn[onclick*="tab-game"]');
+                        if (gt) switchTab('tab-game', gt);
+                    }
+                } else if (isComp) {
                     var sabTab = document.getElementById('tab-sabotage');
                     var mktTab = document.getElementById('tab-market');
                     if ((sabTab && sabTab.style.display !== 'none' && sabTab.style.display !== '') ||
@@ -3552,9 +3582,6 @@
                 // Banner ¡Todos Juegan!
                 var sharedBanner = document.getElementById('shared-song-player-banner');
                 if (sharedBanner) sharedBanner.style.display = (data.isSharedSong && data.gameStarted) ? 'block' : 'none';
-                // Banner Carta Bonificación
-                var bonusBanner = document.getElementById('bonus-banner');
-                if (bonusBanner) bonusBanner.style.display = (data.isBonusCard && data.gameStarted) ? 'block' : 'none';
 
                 // Reacciones: visibles para TODOS cuando la partida está activa
                 var reactionBar = document.getElementById('reaction-bar');
@@ -3736,7 +3763,9 @@
 
                     if (isMyTurn) {
                         if (data.myCards) {
-                            var h = "";
+                            var h = '<div style="margin:6px 0 10px; text-align:center;">' +
+                                '<input type="number" id="exact-year-input" placeholder="🎯 Año exacto opcional (Bonus +2 🔵)" style="background:rgba(10,15,28,0.9); border:1px solid var(--gold); color:var(--gold); border-radius:8px; padding:6px 12px; font-family:\'Montserrat\',sans-serif; font-size:0.75em; width:85%; max-width:260px; text-align:center; box-shadow:0 0 10px rgba(255,215,0,0.2);">' +
+                                '</div>';
                             var isSingleCard = (data.myCards.length === 1);
                             if (isSingleCard) h += '<div style="font-size:0.8em; color:var(--neon); text-align:center; font-family:\'Bungee\'; margin-bottom:5px;">↑ ANTES ↑</div>';
                             h += renderBetSlot(0, data.currentBets, data.activeGuess, true);
@@ -3750,7 +3779,16 @@
                         }
                     } else {
                         if (data.activeTimeline) {
-                            var h = "";
+                            var h = '<div style="margin:6px 0 10px; text-align:center; display:flex; gap:6px; justify-content:center; align-items:center; flex-wrap:wrap;">' +
+                                '<input type="number" id="non-active-exact-year" placeholder="🎯 ¿Año Exacto? (+2 🔵)" style="background:rgba(10,15,28,0.9); border:1px solid var(--gold); color:var(--gold); border-radius:8px; padding:6px 8px; font-family:\'Montserrat\',sans-serif; font-size:0.75em; width:140px; text-align:center; box-shadow:0 0 10px rgba(255,215,0,0.2);">' +
+                                '<button onclick="sendExactYearChallenge()" style="background:linear-gradient(90deg,var(--gold),#ff8800); color:#000; border:none; border-radius:8px; padding:6px 10px; font-family:\'Bungee\'; font-size:0.7em; cursor:pointer;">ENVIAR</button>' +
+                                '</div>' +
+                                '<div style="margin:4px 0 10px; text-align:center; display:flex; gap:6px; justify-content:center; align-items:center; flex-wrap:wrap;">' +
+                                '<button onclick="proposeAlliancePrompt()" style="background:rgba(0,242,255,0.15); border:1px solid var(--neon); color:var(--neon); border-radius:8px; padding:6px 10px; font-family:\'Bungee\'; font-size:0.7em; cursor:pointer;">🤝 ALIANZA</button>' +
+                                '<button id="btn-betray-alliance" onclick="send(\'BETRAY_ALLIANCE\')" style="display:none; background:rgba(255,0,85,0.3); border:1px solid var(--accent); color:var(--accent); border-radius:8px; padding:6px 10px; font-family:\'Bungee\'; font-size:0.7em; cursor:pointer;">🗡️ TRAICIONAR</button>' +
+                                '<button onclick="send(\'VOTE_TOO_EASY\')" style="background:rgba(255,0,85,0.15); border:1px solid var(--pink); color:var(--pink); border-radius:8px; padding:6px 10px; font-family:\'Bungee\'; font-size:0.7em; cursor:pointer;">👎 FÁCIL</button>' +
+                                '<button onclick="send(\'GUARDIAN_SHIELD\')" style="background:rgba(255,215,0,0.15); border:1px solid var(--gold); color:var(--gold); border-radius:8px; padding:6px 10px; font-family:\'Bungee\'; font-size:0.7em; cursor:pointer;">🛡️ GUARDIÁN (1🔵)</button>' +
+                                '</div>';
                             var isSingleCard = (data.activeTimeline.length === 1);
                             if (isSingleCard) h += '<div style="font-size:0.8em; color:var(--neon); text-align:center; font-family:\'Bungee\'; margin-bottom:5px;">↑ ANTES ↑</div>';
                             h += renderBetSlot(0, data.currentBets, data.activeGuess, false);

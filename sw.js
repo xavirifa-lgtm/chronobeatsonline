@@ -1,5 +1,5 @@
-// ── ChronoBeats Online — Service Worker v3.4 (PURE CONFETTI & PERFECT SCROLL) ──
-const CACHE_NAME = 'chronobeats-v3-06';
+// 🔥🎧 ChronoBeats Online — Service Worker v4.9 (SYNCED WINNER SCREEN & CONFETTI FIX) 🎧🔥
+const CACHE_NAME = 'chronobeats-v4-10';
 
 // Recursos propios a pre-cachear en la instalación (pequeños, sin riesgo)
 const PRECACHE_URLS = [
