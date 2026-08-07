@@ -1509,12 +1509,15 @@
                 momentoDeInicio = Date.now();
                 document.getElementById('host-instructions').innerText = isMuted ? "REPRODUCIENDO (MUTE)" : "REPRODUCIENDO";
                 syncState();
+                startCountdown();
             }
             if (event.data === YT.PlayerState.PAUSED) {
                 isPlaying = false;
                 syncState();
+                stopCountdown();
             }
             if (event.data === YT.PlayerState.ENDED) {
+                stopCountdown();
                 handleSongEnd();
             }
         }
@@ -5017,6 +5020,16 @@
                         return Object.keys(set);
                     })(),
                     isPlaying: isPlaying,
+                    remainingSeconds: (function() {
+                        try {
+                            if (player && player.getDuration && player.getCurrentTime) {
+                                var d = player.getDuration() || 0;
+                                var c = player.getCurrentTime() || 0;
+                                if (d > 0 && c <= d) return Math.max(0, Math.ceil(d - c));
+                            }
+                        } catch(e) {}
+                        return 0;
+                    })(),
                     isMuted: isMuted,
                     muteTimeRemaining: muteTimeRemaining,
                     panicActive: panicActive,

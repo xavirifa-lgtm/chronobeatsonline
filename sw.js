@@ -1,5 +1,5 @@
-// 🔥🎧 ChronoBeats Online — Service Worker v4.91 (FULL DB MASTER SONG COUNTER) 🎧🔥
-const CACHE_NAME = 'chronobeats-v4-11';
+// 🔥🎧 ChronoBeats Online — Service Worker v4.92 (LIVE COUNTDOWN TIMER ENHANCEMENT) 🎧🔥
+const CACHE_NAME = 'chronobeats-v4-12';
 
 // Recursos propios a pre-cachear en la instalación (pequeños, sin riesgo)
 const PRECACHE_URLS = [

@@ -3594,6 +3594,17 @@
                 if (btnPlay)  btnPlay.classList.toggle('active', !!data.isPlaying);
                 if (btnPause) btnPause.classList.toggle('active', !data.isPlaying && data.gameStarted);
 
+                var waitMsg = document.getElementById('wait-msg');
+                if (waitMsg && data.gameStarted) {
+                    if (data.isPlaying) {
+                        waitMsg.innerText = (data.remainingSeconds > 0) ? ("🎵 REPRODUCIENDO — QUEDAN " + data.remainingSeconds + "s") : "🎵 REPRODUCIENDO CANCIÓN...";
+                        waitMsg.style.color = "var(--neon)";
+                    } else {
+                        waitMsg.innerText = "ESPERANDO SIGUIENTE TRACK...";
+                        waitMsg.style.color = "#aaa";
+                    }
+                }
+
                 // Botones Especiales y Sabotajes
                 var specialCtrl = document.getElementById('special-ctrl');
                 var sabotageCtrl = document.getElementById('sabotage-ctrl');
