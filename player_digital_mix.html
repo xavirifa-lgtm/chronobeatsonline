@@ -1807,7 +1807,7 @@
             <div class="reaction-bar" id="reaction-bar" style="display:none;">
                 <button class="reaction-btn" onclick="sendReaction('😂')">😂</button>
                 <button class="reaction-btn" onclick="sendReaction('🔥')">🔥</button>
-                <button class="reaction-btn" style="background:rgba(255,215,0,0.25); border:1px solid var(--gold);" onclick="send('CONFETTI_BURST');sendReaction('🎉');" title="¡Disparar Confeti en la TV!">🎉</button>
+                <button class="reaction-btn" style="background:rgba(255,215,0,0.25); border:1px solid var(--gold);" onclick="send('CONFETTI_BURST');" title="¡Disparar Confeti en la TV!">🎉</button>
                 <button class="reaction-btn" onclick="sendReaction('😤')">😤</button>
                 <button class="reaction-btn" onclick="sendReaction('👏')">👏</button>
                 <button class="reaction-btn" onclick="sendReaction('💀')">💀</button>
@@ -2267,6 +2267,10 @@
                 { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelay', credential: 'openrelay' },
                 { urls: 'turns:openrelay.metered.ca:443', username: 'openrelay', credential: 'openrelay' },
                 { urls: 'turns:openrelay.metered.ca:443?transport=tcp', username: 'openrelay', credential: 'openrelay' },
+                { urls: 'turn:global.relay.metered.ca:80', username: 'openrelay', credential: 'openrelay' },
+                { urls: 'turn:global.relay.metered.ca:443', username: 'openrelay', credential: 'openrelay' },
+                { urls: 'turn:global.relay.metered.ca:443?transport=tcp', username: 'openrelay', credential: 'openrelay' },
+                { urls: 'turns:global.relay.metered.ca:443?transport=tcp', username: 'openrelay', credential: 'openrelay' },
                 { urls: 'turn:freestun.net:3478', username: 'free', credential: 'free' },
                 { urls: 'turn:freestun.net:5349', username: 'free', credential: 'free' },
                 { urls: 'turns:freestun.net:5349', username: 'free', credential: 'free' }
@@ -2292,13 +2296,27 @@
                 connectToHost();
             });
 
+            var connAttempts = 0;
             function connectToHost() {
+                connAttempts++;
                 if (conn) {
                     try { conn.close(); } catch(e) {}
                 }
-                conn = peer.connect("CB-HOST-" + hostId, { reliable: true });
+                console.log("Conectando a CB-HOST-" + hostId + " (Intento " + connAttempts + ")...");
+                conn = peer.connect("CB-HOST-" + hostId, {
+                    reliable: true,
+                    config: { iceServers: iceConfig, iceCandidatePoolSize: 10 }
+                });
+
+                var retryTimer = setTimeout(function() {
+                    if (conn && !conn.open && connAttempts < 3) {
+                        console.warn("[4G/5G FIX] Reintentando canal TURN por temporizador...");
+                        connectToHost();
+                    }
+                }, 3000);
 
                 conn.on('open', function () {
+                    if (retryTimer) clearTimeout(retryTimer);
                     console.log("¡Conectado con Host!");
                     requestWakeLockPlayer();
                     conn.send({ type: 'JOIN', name: playerName, avatar: playerAvatarDataUrl });

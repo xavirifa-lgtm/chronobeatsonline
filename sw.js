@@ -1,5 +1,5 @@
-// ── ChronoBeats Online — Service Worker v3.3 (DB MASTER COUNT & STABLE WEBRTC) ──
-const CACHE_NAME = 'chronobeats-v3-05';
+// ── ChronoBeats Online — Service Worker v3.4 (PURE CONFETTI & PERFECT SCROLL) ──
+const CACHE_NAME = 'chronobeats-v3-06';
 
 // Recursos propios a pre-cachear en la instalación (pequeños, sin riesgo)
 const PRECACHE_URLS = [
