@@ -2976,6 +2976,13 @@
                 // Resetear estado local del player
                 prevState = null;
                 return;
+            } else if (data.type === 'WINNER') {
+                vibrate([200, 100, 200, 100, 300]);
+                soundToken();
+                showCustomAlert('🏆 ¡VICTORIA DE ' + (data.winner || '').toUpperCase() + '! 🎉\n🎵 ' + (data.songTitle || ''));
+                var reactionBar = document.getElementById('reaction-bar');
+                if (reactionBar) reactionBar.style.display = 'flex';
+                return;
             } else if (data.type === 'STEAL_INCOMING') {
                 showStealIncoming(data.thiefName, data.canResist);
                 return;
@@ -3406,7 +3413,7 @@
                     if (t) t.style.display = isComp ? 'none' : '';
                 });
                 var tokensUi = document.getElementById('my-tokens-ui');
-                if (tokensUi) tokensUi.style.display = isComp ? 'none' : '';
+                if (tokensUi) tokensUi.style.display = '';
                 if (isComp) {
                     // Si estábamos en una pestaña oculta, volver a JUEGO
                     var sabTab = document.getElementById('tab-sabotage');

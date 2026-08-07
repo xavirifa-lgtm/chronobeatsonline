@@ -1517,7 +1517,6 @@
 
         function updateTokens(player, delta) {
             if (!player) return;
-            if (competitiveMode) return; // modo competitivo: sin fichas
             player.tokens = Math.max(0, Math.min(10, (player.tokens || 0) + delta));
         }
 
@@ -4126,8 +4125,10 @@
             statsHtml += '<div class="stat-card"><span class="stat-val">' + duration + 'min</span><span class="stat-lbl">DURACIÓN</span></div>';
             document.getElementById('winner-stats').innerHTML = statsHtml;
 
-            // Premios especiales repartidos a izquierda y derecha
+            // ── PREMIOS ESPECIALES, CONSOLACIÓN Y LOGROS REPARTIDOS A IZQUIERDA Y DERECHA ──
             var awardsList = [];
+
+            // 1. Premios Especiales
             if (stats.hardestSong && stats.hardestSong.fails > 0) {
                 awardsList.push('<div class="award-card" style="width:100%;box-sizing:border-box;">' +
                     '<div class="award-icon">💀</div>' +
@@ -4169,23 +4170,8 @@
                     '</div>');
             }
 
-            var leftHtml = '', rightHtml = '';
-            for (var ai = 0; ai < awardsList.length; ai++) {
-                if (ai % 2 === 0) leftHtml += awardsList[ai];
-                else rightHtml += awardsList[ai];
-            }
-            var leftEl = document.getElementById('winner-awards-left');
-            var rightEl = document.getElementById('winner-awards-right');
-            if (leftEl) leftEl.innerHTML = leftHtml;
-            if (rightEl) rightEl.innerHTML = rightHtml;
-
-            // ── PREMIOS DE CONSOLACIÓN ──
+            // 2. Premios de Consolación
             if (players.length >= 2) {
-                var jokeHtml = '<div style="width:100%;max-width:700px;margin:12px 0;">';
-                jokeHtml += '<div style="font-family:Bungee,sans-serif;font-size:0.6em;color:#333;letter-spacing:3px;text-align:center;margin-bottom:10px;">PREMIOS DE CONSOLACIÓN</div>';
-                jokeHtml += '<div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;">';
-
-                // 1. Al Espíritu Libre — peor % acierto (mín 2 intentos)
                 var worstAcc = null, worstPct = -1;
                 players.forEach(function(pl) {
                     var c = stats.playerCorrect[pl.id] || 0;
@@ -4196,83 +4182,69 @@
                     }
                 });
                 if (worstAcc) {
-                    jokeHtml += '<div class="award-card" style="border-color:#555;">' +
+                    awardsList.push('<div class="award-card" style="width:100%;box-sizing:border-box;border-color:#555;">' +
                         '<div class="award-icon">🎖️</div>' +
                         '<div class="award-title" style="color:#aaa;">EL OÍDO DE PALO</div>' +
                         '<div class="award-val" style="color:#ccc;">' + worstAcc.name + '</div>' +
                         '<div class="award-sub">La música le emociona. Adivinar el año, no tanto</div>' +
-                        '</div>';
+                        '</div>');
                 }
-
-                // 2. A la Popularidad Involuntaria — más veces saboteado
-                var mostSab = players.slice().sort(function(a,b){
-                    return (stats.playerSabotaged[b.id]||0)-(stats.playerSabotaged[a.id]||0);
-                })[0];
-                if (mostSab && (stats.playerSabotaged[mostSab.id]||0) > 0) {
-                    jokeHtml += '<div class="award-card" style="border-color:#555;">' +
-                        '<div class="award-icon">🎖️</div>' +
-                        '<div class="award-title" style="color:#aaa;">EL PARARRAYOS</div>' +
-                        '<div class="award-val" style="color:#ccc;">' + mostSab.name + '</div>' +
-                        '<div class="award-sub">Consiguió despertar lo peor de sus amigos. Eso también es un talento</div>' +
-                        '</div>';
-                }
-
-                // 3. A la Experiencia Completa — último puesto (excluir ganador)
                 var lastPlace = players.slice().sort(function(a,b){ return a.score - b.score; })[0];
                 if (lastPlace && lastPlace.name !== name) {
-                    jokeHtml += '<div class="award-card" style="border-color:#555;">' +
+                    awardsList.push('<div class="award-card" style="width:100%;box-sizing:border-box;border-color:#555;">' +
                         '<div class="award-icon">🎖️</div>' +
                         '<div class="award-title" style="color:#aaa;">EL GRAN TURISTA</div>' +
                         '<div class="award-val" style="color:#ccc;">' + lastPlace.name + '</div>' +
-                        '<div class="award-sub">Vino, escuchó, y disfrutó del paisaje. El ranking es lo de menos</div>' +
-                        '</div>';
+                        '<div class="award-sub">Vino, escuchó, y disfrutó del paisaje</div>' +
+                        '</div>');
                 }
-
-                // 4. A la Convicción Inquebrantable — más fallos absolutos (si es distinto del anterior)
                 var mostFails = players.slice().sort(function(a,b){
                     return (stats.playerFails[b.id]||0)-(stats.playerFails[a.id]||0);
                 })[0];
                 if (mostFails && (stats.playerFails[mostFails.id]||0) >= 3 && (!worstAcc || mostFails.id !== worstAcc.id)) {
-                    jokeHtml += '<div class="award-card" style="border-color:#555;">' +
+                    awardsList.push('<div class="award-card" style="width:100%;box-sizing:border-box;border-color:#555;">' +
                         '<div class="award-icon">🎖️</div>' +
                         '<div class="award-title" style="color:#aaa;">EL PALEONTÓLOGO</div>' +
                         '<div class="award-val" style="color:#ccc;">' + mostFails.name + '</div>' +
-                        '<div class="award-sub">Para él/ella, las canciones de los 2000 suenan muy modernas</div>' +
-                        '</div>';
+                        '<div class="award-sub">Para él/ella, los 2000 suenan muy modernos</div>' +
+                        '</div>');
                 }
-
-                // 5. Al Juego Limpio — 0 sabotajes lanzados
                 var monkPlayer = players.find(function(pl) { return (stats.playerSabotages[pl.id]||0) === 0; });
-                if (monkPlayer) {
-                    jokeHtml += '<div class="award-card" style="border-color:#555;">' +
+                if (monkPlayer && !competitiveMode) {
+                    awardsList.push('<div class="award-card" style="width:100%;box-sizing:border-box;border-color:#555;">' +
                         '<div class="award-icon">🎖️</div>' +
                         '<div class="award-title" style="color:#aaa;">EL MONJE SHAOLÍN</div>' +
                         '<div class="award-val" style="color:#ccc;">' + monkPlayer.name + '</div>' +
-                        '<div class="award-sub">Podría haberte fastidiado. Decidió no hacerlo. Respétale</div>' +
-                        '</div>';
+                        '<div class="award-sub">Podría haber saboteado. Decidió no hacerlo</div>' +
+                        '</div>');
                 }
-
-                // 6. A la Elegancia Minimalista — menos acciones totales
-                var leastActive = players.slice().sort(function(a,b){
-                    var tA = (stats.playerCorrect[a.id]||0)+(stats.playerFails[a.id]||0)+(stats.playerSabotages[a.id]||0);
-                    var tB = (stats.playerCorrect[b.id]||0)+(stats.playerFails[b.id]||0)+(stats.playerSabotages[b.id]||0);
-                    return tA - tB;
-                })[0];
-                if (leastActive) {
-                    var totalAct = (stats.playerCorrect[leastActive.id]||0)+(stats.playerFails[leastActive.id]||0)+(stats.playerSabotages[leastActive.id]||0);
-                    if (totalAct <= 4) {
-                        jokeHtml += '<div class="award-card" style="border-color:#555;">' +
-                            '<div class="award-icon">🎖️</div>' +
-                            '<div class="award-title" style="color:#aaa;">EL ESPECTADOR PRIVILEGIADO</div>' +
-                            '<div class="award-val" style="color:#ccc;">' + leastActive.name + '</div>' +
-                            '<div class="award-sub">Lo de participar lo veía más como una sugerencia</div>' +
-                            '</div>';
-                    }
-                }
-
-                jokeHtml += '</div></div>';
-                awardsHtml += jokeHtml;
             }
+
+            // 3. Logros & Medallas
+            var achData = calculateAchievements(players, stats);
+            if (achData.length > 0) {
+                achData.forEach(function(a) {
+                    a.badges.forEach(function(b) {
+                        awardsList.push('<div class="award-card" style="width:100%;box-sizing:border-box;border-color:var(--gold);">' +
+                            '<div class="award-icon">' + b.icon + '</div>' +
+                            '<div class="award-title" style="color:var(--gold);">' + b.name + '</div>' +
+                            '<div class="award-val">' + a.player + '</div>' +
+                            '<div class="award-sub">' + b.desc + '</div>' +
+                            '</div>');
+                    });
+                });
+            }
+
+            // Repartir awardsList alternadamente a izquierda y derecha del podio central
+            var leftHtml = '', rightHtml = '';
+            for (var ai = 0; ai < awardsList.length; ai++) {
+                if (ai % 2 === 0) leftHtml += awardsList[ai];
+                else rightHtml += awardsList[ai];
+            }
+            var leftEl = document.getElementById('winner-awards-left');
+            var rightEl = document.getElementById('winner-awards-right');
+            if (leftEl) leftEl.innerHTML = leftHtml;
+            if (rightEl) rightEl.innerHTML = rightHtml;
 
             // Ranking final con detalles por jugador
             var rankHtml = '';
@@ -4300,7 +4272,6 @@
                     '</div>';
             });
 
-            // Insertar premios antes del ranking
             // ── PODIO VISUAL 3 POSICIONES ──
             var podiumHtml = '<div class="winner-podium" style="display:flex; justify-content:center; align-items:flex-end; gap:15px; width:100%; max-width:650px; margin:20px auto 10px; padding:10px 0;">';
             var p1 = sorted[0];
@@ -4335,22 +4306,35 @@
             }
             podiumHtml += '</div>';
 
-            document.getElementById('winner-ranking').innerHTML = podiumHtml + awardsHtml + '<div style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center; width:100%;">' + rankHtml + '</div>';
+            var centerPodiumEl = document.getElementById('winner-podium-center');
+            if (centerPodiumEl) centerPodiumEl.innerHTML = podiumHtml;
+            document.getElementById('winner-ranking').innerHTML = '<div style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center; width:100%;">' + rankHtml + '</div>';
             document.getElementById('winner-stats').innerHTML = statsHtml;
 
             // Limpiar confeti previo si existe
             if (window.victoryInterval) clearInterval(window.victoryInterval);
 
-            // V26.3: Integración de IDs Verificados por el Usuario
+            // Canción de victoria personalizada: Xavi, Sonia o Pool Friki
             var isXavi = name.toLowerCase().includes('xavi');
+            var isSonia = name.toLowerCase().includes('sonia');
             var songId = "";
             var songTitle = "";
 
             if (isXavi) {
                 songId = '04854XqcfCY'; // Queen - We Are The Champions
                 songTitle = "Queen - We Are The Champions";
+            } else if (isSonia) {
+                var celinePool = [
+                    { id: 'WNIPqafd4As', t: "Celine Dion - My Heart Will Go On" },
+                    { id: 'P44zM_QOQk0', t: "Celine Dion - Because You Loved Me" },
+                    { id: 'p2Rch60qV5U', t: "Celine Dion - It's All Coming Back to Me Now" },
+                    { id: 'Y8HOfcYWZoo', t: "Celine Dion - The Power of Love" }
+                ];
+                var pickedSonia = celinePool[Math.floor(Math.random() * celinePool.length)];
+                songId = pickedSonia.id;
+                songTitle = pickedSonia.t;
             } else {
-                // El "Pool de la Frikada" (V26.3 - IDs proporcionados por el usuario)
+                // El Pool de la Frikada
                 var frikiPool = [
                     { id: 'wfeCIvOxXBo', t: "Rodolfo Chikilicuatre - Chiki Chiki" },
                     { id: '5mKKc2F0GbQ', t: "El Koala - Opá" },
@@ -4369,43 +4353,18 @@
 
             console.log("Ganador:", name, "| Sonando:", songTitle);
 
-            // ── LOGROS ──
-            var achData = calculateAchievements(players, stats);
-            if (achData.length > 0) {
-                // Foto del ganador a un lado + medallas a la derecha
-                var winnerObj = players.find(function(pl){ return pl.name === name; });
-                var winnerAvatarHtml = '';
-                if (winnerObj && winnerObj.avatar) {
-                    winnerAvatarHtml = '<img src="' + winnerObj.avatar + '" style="width:90px;height:90px;border-radius:50%;border:3px solid var(--neon);object-fit:cover;box-shadow:0 0 20px var(--neon);flex-shrink:0;">';
-                } else if (winnerObj) {
-                    winnerAvatarHtml = '<div style="width:90px;height:90px;border-radius:50%;background:#111;border:3px solid var(--neon);color:var(--neon);display:flex;align-items:center;justify-content:center;font-family:Bungee;font-size:2em;flex-shrink:0;">' + winnerObj.name.charAt(0).toUpperCase() + '</div>';
-                }
-
-                var achHtml = '<div style="width:100%;max-width:720px;margin:14px 0;">';
-                achHtml += '<div style="font-family:Bungee;font-size:0.6em;color:#444;letter-spacing:3px;text-align:center;margin-bottom:10px;">LOGROS</div>';
-                // Layout: foto ganador a la izquierda, medallas a la derecha
-                achHtml += '<div style="display:flex;gap:16px;align-items:flex-start;">';
-                if (winnerAvatarHtml) {
-                    achHtml += '<div style="display:flex;flex-direction:column;align-items:center;gap:6px;padding-top:4px;">';
-                    achHtml += winnerAvatarHtml;
-                    achHtml += '<div style="font-family:Bungee;font-size:0.55em;color:var(--neon);text-align:center;max-width:90px;word-break:break-word;">' + (winnerObj ? winnerObj.name : name) + '</div>';
-                    achHtml += '<div style="font-size:0.7em;color:var(--gold);">🏆</div>';
-                    achHtml += '</div>';
-                }
-                achHtml += '<div style="display:flex;flex-wrap:wrap;gap:10px;flex:1;">';
-                achData.forEach(function(a) {
-                    a.badges.forEach(function(b) {
-                        achHtml += '<div style="background:rgba(255,255,255,0.06);border:1px solid #333;border-radius:12px;padding:12px 14px;text-align:center;min-width:110px;max-width:160px;">';
-                        achHtml += '<div style="font-size:2.2em;line-height:1;">' + b.icon + '</div>';
-                        achHtml += '<div style="font-family:Bungee;font-size:0.75em;color:var(--gold);margin-top:6px;line-height:1.2;">' + b.name + '</div>';
-                        achHtml += '<div style="font-family:Montserrat;font-size:0.65em;color:#888;margin-top:3px;font-weight:600;">' + a.player + '</div>';
-                        achHtml += '<div style="font-family:Montserrat;font-size:0.6em;color:#555;margin-top:3px;line-height:1.3;">' + b.desc + '</div>';
-                        achHtml += '</div>';
+            // Transmitir victoria a todos los móviles
+            for (var _cid in connections) {
+                try {
+                    connections[_cid].send({
+                        type: 'WINNER',
+                        winner: name,
+                        songTitle: songTitle
                     });
-                });
-                achHtml += '</div></div></div>';
-                awardsHtml += achHtml;
+                } catch(e) {}
             }
+
+
 
             // ── HISTORIAL COMPLETO DE CANCIONES ──
             var histEl = document.getElementById('winner-history');
@@ -4454,14 +4413,21 @@
             } catch(e) {}
             player = null;
 
-            // Inyectar el iframe de victoria
+            // Inyectar el iframe de victoria visible en la pantalla final
             var container = document.getElementById('player-container');
-            container.style.display = '';
-            container.innerHTML = '<iframe src="https://www.youtube.com/embed/' + songId + '?autoplay=1&mute=0&enablejsapi=1&playsinline=1&origin=' + window.location.origin + '" allow="autoplay; encrypted-media" allowfullscreen style="position:absolute;top:-9999px;left:-9999px;width:300px;height:200px;border:none;"></iframe>';
+            container.style.display = 'block';
+            var originParam = (window.location.origin && window.location.origin !== 'null') ? ('&origin=' + encodeURIComponent(window.location.origin)) : '';
+            container.innerHTML = '<div style="font-family:Bungee; font-size:0.9em; color:var(--gold); text-align:center; margin:10px 0;">🎵 CANCIÓN DE VICTORIA: ' + songTitle + '</div>' +
+                '<iframe src="https://www.youtube.com/embed/' + songId + '?autoplay=1&mute=0&enablejsapi=1&playsinline=1' + originParam + '" allow="autoplay; encrypted-media; fullscreen" allowfullscreen style="width:100%; max-width:560px; height:200px; border:2px solid var(--gold); border-radius:12px; box-shadow:0 0 20px rgba(255,215,0,0.4); margin:0 auto; display:block;"></iframe>';
 
             // Confeti personalizado por categoría dominante del ganador
             function randomInRange(min, max) { return Math.random() * (max - min) + min; }
             var confettiDefaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 2000 };
+
+            // Confeti inmediato al declarar victoria
+            if (typeof confetti === 'function') {
+                confetti({ particleCount: 120, spread: 90, origin: { y: 0.6 } });
+            }
 
             // Determinar categoría dominante de las cartas del ganador
             var catCount = {};
@@ -4784,19 +4750,20 @@
             var deck = buildSongsFromCache(false);
             var available = deck.length;
 
-            // Desglose real por categoría del mazo que se va a jugar
+            // Desglose real por categoría de las canciones sin jugar
             var byType = {};
             deck.forEach(function (s) { byType[s.type] = (byType[s.type] || 0) + 1; });
-            var labels = { orig: '🎵', movies: '🎬', anime: '⛩️', videojuegos: '🎮' };
+            var labels = { orig: '🎵 Original', movies: '🎬 Pelis', anime: '⛩️ Anime', videojuegos: '🎮 Gamer' };
             var parts = [];
             Object.keys(byType).forEach(function (t) {
-                parts.push((labels[t] || t) + ' ' + byType[t]);
+                parts.push((labels[t] || t) + ': ' + byType[t] + ' sin jugar');
             });
 
-            counter.innerHTML = available + ' canciones en el mazo' +
-                (total !== available ? ' <span style="color:#333">(' + (total - available) + ' ya jugadas)</span>' : '') +
-                (decadeFilter !== 'all' ? ' <span style="color:var(--gold)">con filtro activo</span>' : '') +
-                (parts.length ? '<br><span style="color:#666; font-size:0.9em;">' + parts.join(' · ') + '</span>' : '');
+            var playedCount = total - available;
+            counter.innerHTML = '<span style="font-weight:bold; color:var(--neon); font-size:1.1em;">' + available + ' CANCIONES DISPONIBLES</span>' +
+                (playedCount > 0 ? ' <span style="color:#aaa;">(' + playedCount + ' ya jugadas de ' + total + ' mazo)</span>' : ' <span style="color:#888;">(' + total + ' mazo completo)</span>') +
+                (decadeFilter !== 'all' ? ' <span style="color:var(--gold)">· filtro activo</span>' : '') +
+                (parts.length ? '<br><span style="color:#888; font-size:0.9em; margin-top:2px; display:inline-block;">' + parts.join(' · ') + '</span>' : '');
         }
 
         // ── LOGROS ──
