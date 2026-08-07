@@ -1,5 +1,5 @@
-// ── ChronoBeats Online — Service Worker v3.2 (4G/5G & CONFETI PRO FIX) ──
-const CACHE_NAME = 'chronobeats-v3-04';
+// ── ChronoBeats Online — Service Worker v3.3 (DB MASTER COUNT & STABLE WEBRTC) ──
+const CACHE_NAME = 'chronobeats-v3-05';
 
 // Recursos propios a pre-cachear en la instalación (pequeños, sin riesgo)
 const PRECACHE_URLS = [

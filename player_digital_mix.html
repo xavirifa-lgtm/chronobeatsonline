@@ -2281,29 +2281,25 @@
                 pingInterval: 5000,
                 config: {
                     iceCandidatePoolSize: 10,
-                    sdpSemantics: 'unified-plan',
                     iceServers: iceConfig
                 },
                 iceServers: iceConfig
             });
+
             peer.on('open', function (id) {
                 myId = id;
                 console.log("Conectando con ID Peer:", id);
-                
-                function connectToHost() {
-                    conn = peer.connect("CB-HOST-" + hostId, { reliable: true, serialization: 'json' });
+                connectToHost();
+            });
 
-                    var retryTimer = setTimeout(function() {
-                        if (conn && !conn.open) {
-                            console.warn("[4G/5G FIX] Reintentando conexión vía TURN...");
-                            try { conn.close(); } catch(e) {}
-                            connectToHost();
-                        }
-                    }, 3500);
+            function connectToHost() {
+                if (conn) {
+                    try { conn.close(); } catch(e) {}
+                }
+                conn = peer.connect("CB-HOST-" + hostId, { reliable: true });
 
-                    conn.on('open', function () {
-                        if (retryTimer) clearTimeout(retryTimer);
-                        console.log("¡Conectado!");
+                conn.on('open', function () {
+                    console.log("¡Conectado con Host!");
                     requestWakeLockPlayer();
                     conn.send({ type: 'JOIN', name: playerName, avatar: playerAvatarDataUrl });
                     document.getElementById('login-screen').style.display = 'none';
@@ -2315,16 +2311,17 @@
                 conn.on('data', handle);
 
                 conn.on('close', function () {
-                    showCustomAlert("Conexión cerrada. El Host se ha desconectado.");
-                    setTimeout(() => location.reload(), 3000);
+                    console.warn("Canal cerrado.");
+                    if (document.getElementById('login-screen').style.display === 'none') {
+                        showCustomAlert("Conexión cerrada. El Host se ha desconectado.");
+                        setTimeout(() => location.reload(), 3000);
+                    }
                 });
-                }
-                connectToHost();
-            });
+            }
 
             peer.on('error', function (err) {
                 console.error("Error PeerJS:", err);
-                showCustomAlert("Error de conexión: " + err.type);
+                showCustomAlert("Error de conexión: " + (err.type || err));
                 btn.disabled = false;
                 btn.innerText = "ENTRAR";
             });
