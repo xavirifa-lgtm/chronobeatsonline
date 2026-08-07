@@ -1,5 +1,5 @@
-// ── ChronoBeats Online — Service Worker v3.4 (PURE CONFETTI & PERFECT SCROLL) ──
-const CACHE_NAME = 'chronobeats-v3-06';
+// 🔥🎧 ChronoBeats Online — Service Worker v4.98 (CRITICAL SYNTAX ERROR FIX - HOST RESTORED) 🎧🔥
+const CACHE_NAME = 'chronobeats-v4-16';
 
 // Recursos propios a pre-cachear en la instalación (pequeños, sin riesgo)
 const PRECACHE_URLS = [
