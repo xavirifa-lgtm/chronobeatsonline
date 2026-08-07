@@ -1,5 +1,5 @@
-// 🔥🎧 ChronoBeats Online — Service Worker v4.96 (AUTOMATIC FAIL-SAFE ROOM CODE & QR) 🎧🔥
-const CACHE_NAME = 'chronobeats-v4-14';
+// 🔥🎧 ChronoBeats Online — Service Worker v4.97 (SYNCHRONOUS IMMEDIATE ROOM CODE & QR) 🎧🔥
+const CACHE_NAME = 'chronobeats-v4-15';
 
 // Recursos propios a pre-cachear en la instalación (pequeños, sin riesgo)
 const PRECACHE_URLS = [

@@ -1197,6 +1197,10 @@
         var savedRoom = localStorage.getItem('CB_RoomCode');
         var peer, roomCode = savedRoom || Math.random().toString(36).substring(2, 8).toUpperCase();
         if (!savedRoom) localStorage.setItem('CB_RoomCode', roomCode);
+        
+        // Asignar inmediatamente el código a la pantalla sin esperar a PeerJS ni eventos asíncronos
+        var initialJoinCodeEl = document.getElementById('join-code');
+        if (initialJoinCodeEl) initialJoinCodeEl.innerText = roomCode;
         var player; // YouTube Player Instance
         var players = [], connections = {}, songs = [], currentSongIdx = -1, activePlayerIdx = 0, isRevealed = false;
         var currentBets = {}; // playerId -> slotIndex
