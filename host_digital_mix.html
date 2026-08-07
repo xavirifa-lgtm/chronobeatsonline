@@ -608,143 +608,6 @@
             100% { opacity: 0; transform: translateY(-200px) scale(0.8); }
         }
 
-        /* ── V4: MODAL SPOTLIGHT DEL JUGADOR ACTIVO ── */
-        .leader-item.active-turn {
-            border: 2px solid var(--neon) !important;
-            box-shadow: 0 0 25px var(--neon), inset 0 0 15px rgba(0, 242, 255, 0.25) !important;
-            transform: scale(1.02);
-            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-            z-index: 10;
-        }
-        .leader-item.inactive-turn {
-            opacity: 0.85;
-            transition: opacity 0.3s ease, transform 0.3s ease;
-        }
-
-        /* ── V4: TOASTS FLOTANTES ANIMADOS (TV HUD) ── */
-        #tv-toast-container {
-            position: fixed;
-            top: 25px;
-            right: 25px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            z-index: 10000;
-            pointer-events: none;
-            max-width: 340px;
-        }
-        .tv-toast {
-            background: rgba(10, 15, 28, 0.95);
-            border: 1px solid var(--neon);
-            box-shadow: 0 0 20px rgba(0, 242, 255, 0.3);
-            color: #fff;
-            padding: 10px 16px;
-            border-radius: 12px;
-            font-family: 'Montserrat', sans-serif;
-            font-size: 0.85em;
-            animation: toast-slide-in 0.35s ease-out forwards;
-            backdrop-filter: blur(8px);
-        }
-        @keyframes toast-slide-in {
-            0% { opacity: 0; transform: translateX(50px) scale(0.9); }
-            100% { opacity: 1; transform: translateX(0) scale(1); }
-        }
-        @keyframes toast-fade-out {
-            0% { opacity: 1; transform: translateX(0) scale(1); }
-            100% { opacity: 0; transform: translateX(30px) scale(0.95); }
-        }
-
-        /* ── V4: REVELACIÓN DRAMÁTICA DE CARTA ── */
-        .card-pulse-reveal {
-            animation: pulse-gold-reveal 1.2s infinite alternate;
-        }
-        @keyframes pulse-gold-reveal {
-            0% { box-shadow: 0 0 10px var(--gold); border-color: var(--gold); }
-            100% { box-shadow: 0 0 35px var(--gold), 0 0 50px var(--gold); border-color: #fff; transform: scale(1.08); }
-        }
-
-        /* ── V4.3: MODO FRENESÍ ── */
-        body.rush-mode-active {
-            animation: rush-vignette 1.8s infinite alternate;
-        }
-        @keyframes rush-vignette {
-            0% { box-shadow: inset 0 0 40px rgba(255, 0, 85, 0.4); }
-            100% { box-shadow: inset 0 0 100px rgba(255, 215, 0, 0.7); }
-        }
-
-        /* ── V4.3: CORONA REY DEL RITMO ── */
-        .king-crown-badge {
-            position: absolute;
-            top: -22px;
-            right: -10px;
-            background: linear-gradient(135deg, #ffd700, #ff8800);
-            color: #000;
-            font-family: 'Bungee', sans-serif;
-            font-size: 0.65em;
-            padding: 3px 8px;
-            border-radius: 12px;
-            box-shadow: 0 0 12px rgba(255, 215, 0, 0.8);
-            animation: crown-bounce 1s infinite alternate;
-            z-index: 10;
-        }
-        @keyframes crown-bounce {
-            0% { transform: translateY(0) scale(1); }
-            100% { transform: translateY(-4px) scale(1.08); }
-        }
-
-        /* ── V4.3: FOTO GANADOR EN PODIO ── */
-        .winner-avatar-frame {
-            width: 110px;
-            height: 110px;
-            border-radius: 50%;
-            border: 4px solid var(--gold);
-            box-shadow: 0 0 25px var(--gold), 0 0 40px rgba(255, 215, 0, 0.6);
-            object-fit: cover;
-            margin: 0 auto 10px auto;
-            display: block;
-            animation: winner-avatar-glow 1.5s infinite alternate;
-        }
-        @keyframes winner-avatar-glow {
-            0% { transform: scale(1); box-shadow: 0 0 20px var(--gold); }
-            100% { transform: scale(1.06); box-shadow: 0 0 45px var(--gold), 0 0 60px rgba(255,255,255,0.8); }
-        }
-
-        /* ── V4: BOCADILLOS DE DIÁLOGO EN AVATARES ── */
-        .avatar-speech-bubble {
-            position: absolute;
-            top: -45px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(10, 15, 28, 0.95);
-            border: 2px solid var(--neon);
-            color: #fff;
-            font-family: 'Bungee', sans-serif;
-            font-size: 0.75em;
-            padding: 5px 12px;
-            border-radius: 14px;
-            white-space: nowrap;
-            z-index: 9999;
-            box-shadow: 0 0 15px rgba(0, 242, 255, 0.4);
-            animation: speech-pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-            pointer-events: none;
-        }
-        .avatar-speech-bubble::after {
-            content: '';
-            position: absolute;
-            bottom: -8px;
-            left: 50%;
-            transform: translateX(-50%);
-            border-width: 8px 6px 0;
-            border-style: solid;
-            border-color: var(--neon) transparent;
-            display: block;
-            width: 0;
-        }
-        @keyframes speech-pop {
-            0% { opacity: 0; transform: translateX(-50%) scale(0.6) translateY(10px); }
-            100% { opacity: 1; transform: translateX(-50%) scale(1) translateY(0); }
-        }
-
         /* ── HISTORIAL DE EVENTOS ── */
         #event-log {
             margin-top: 12px;
@@ -992,7 +855,6 @@
 </head>
 
 <body>
-    <div id="tv-toast-container"></div>
     <a href="index.html" class="btn-hub" title="Volver al Hub">H</a>
     <div id="flash-overlay"></div>
     <div id="winner-screen" style="padding-top: 60px; overflow-y: auto;">
@@ -1007,7 +869,6 @@
         </div>
         <div id="winner-stats" style="margin:15px 0; width:100%; max-width:600px;"></div>
         <div id="winner-ranking" style="margin:10px 0; width:100%; max-width:600px; display:flex; flex-wrap:wrap; gap:10px; justify-content:center;"></div>
-        <div id="winner-history" style="margin:15px 0; width:100%; max-width:650px;"></div>
         <div id="winner-replay" style="display:none; width:100%; max-width:600px; margin:12px 0;"></div>
         <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin-top:20px;">
             <button class="btn-start" onclick="rematch()" style="background:linear-gradient(90deg,var(--neon),var(--pink));">🔄 REVANCHA</button>
@@ -1047,14 +908,6 @@
                 <option value="supervivencia">SUPERVIVENCIA (3 Vidas)</option>
                 <option value="equipos">EQUIPOS ROJO vs AZUL</option>
             </select>
-
-            <div id="target-score-selector" style="margin-top: 15px;">
-                <label style="font-family: 'Bungee'; color: var(--gold); font-size: 0.9em; display: block; margin-bottom: 8px;">🎯 META DE VICTORIA</label>
-                <div style="display:flex; justify-content:center; gap:10px;">
-                    <button type="button" id="btn-target-10" onclick="setTargetScore(10)" style="background:var(--gold); color:#000; font-family:'Bungee'; border:none; border-radius:10px; padding:8px 14px; font-size:0.75em; cursor:pointer;">🏆 10 CARTAS (NORMAL)</button>
-                    <button type="button" id="btn-target-7" onclick="setTargetScore(7)" style="background:#222; color:#888; border:1px solid #444; font-family:'Bungee'; border-radius:10px; padding:8px 14px; font-size:0.75em; cursor:pointer;">⚡ 7 CARTAS (BLITZ)</button>
-                </div>
-            </div>
         </div>
 
         <div style="margin-bottom:20px;">
@@ -1197,10 +1050,6 @@
         var savedRoom = localStorage.getItem('CB_RoomCode');
         var peer, roomCode = savedRoom || Math.random().toString(36).substring(2, 8).toUpperCase();
         if (!savedRoom) localStorage.setItem('CB_RoomCode', roomCode);
-        
-        // Asignar inmediatamente el código a la pantalla sin esperar a PeerJS ni eventos asíncronos
-        var initialJoinCodeEl = document.getElementById('join-code');
-        if (initialJoinCodeEl) initialJoinCodeEl.innerText = roomCode;
         var player; // YouTube Player Instance
         var players = [], connections = {}, songs = [], currentSongIdx = -1, activePlayerIdx = 0, isRevealed = false;
         var currentBets = {}; // playerId -> slotIndex
@@ -1392,19 +1241,10 @@
         var duelResult = null; // Para mensajes de fin de duelo
         var duelTriggered = false; // Bloqueo de un duelo por turno
 
-        function ensureRoomCodeUI() {
-            if (!roomCode) {
-                var savedRoom = localStorage.getItem('CB_RoomCode');
-                roomCode = savedRoom || Math.random().toString(36).substring(2, 8).toUpperCase();
-                localStorage.setItem('CB_RoomCode', savedRoom ? savedRoom : roomCode);
-            }
-            var el1 = document.getElementById('join-code');
-            if (el1) el1.innerText = roomCode;
-            var el2 = document.getElementById('live-code-text');
-            if (el2) el2.innerText = roomCode;
-        }
+        document.getElementById('join-code').innerText = roomCode;
 
-        // Generar QR con el código de sala (con fallback garantizado)
+        // Generar QR con el código de sala
+        var qrGenerated = false;
         function copyPlayerLink(e) {
             e.preventDefault();
             var link = document.getElementById('player-link');
@@ -1429,37 +1269,31 @@
         }
 
         function generateQR() {
-            ensureRoomCodeUI();
+            if (qrGenerated) return;
             var qrEl = document.getElementById('qr-code');
-            if (!qrEl) return;
-            var baseUrl = window.location.href.replace('host_digital_mix.html', 'player_digital_mix.html').split('?')[0];
-            var playerUrl = baseUrl + '?sala=' + roomCode;
-
-            var linkEl = document.getElementById('player-link');
-            if (linkEl) {
-                linkEl.href = playerUrl;
-                linkEl.innerText = '🔗 Copiar enlace jugador';
-                linkEl.style.display = 'block';
-            }
-
-            qrEl.innerHTML = '';
-            if (typeof QRCode !== 'undefined') {
-                try {
-                    new QRCode(qrEl, {
-                        text: playerUrl,
-                        width: 160,
-                        height: 160,
-                        colorDark: '#000000',
-                        colorLight: '#ffffff',
-                        correctLevel: QRCode.CorrectLevel.M
-                    });
-                    return;
-                } catch(e) {
-                    console.warn('QRCode JS throw:', e);
+            if (qrEl && typeof QRCode !== 'undefined') {
+                qrEl.innerHTML = '';
+                // Generar URL directa al player con el código ya incluido
+                var baseUrl = window.location.href.replace('host_digital_mix.html', 'player_digital_mix.html');
+                baseUrl = baseUrl.split('?')[0]; // quitar parámetros del host
+                var playerUrl = baseUrl + '?sala=' + roomCode;
+                new QRCode(qrEl, {
+                    text: playerUrl,
+                    width: 160,
+                    height: 160,
+                    colorDark: '#000000',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.M
+                });
+                qrGenerated = true;
+                // Mostrar también el enlace copiable
+                var linkEl = document.getElementById('player-link');
+                if (linkEl) {
+                    linkEl.href = playerUrl;
+                    linkEl.innerText = '🔗 Copiar enlace jugador';
+                    linkEl.style.display = 'block';
                 }
             }
-            // Fallback 100% garantizado con API de imagen QR
-            qrEl.innerHTML = '<img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=' + encodeURIComponent(playerUrl) + '" style="width:160px;height:160px;display:block;margin:0 auto;border-radius:8px;border:2px solid var(--neon);box-shadow:0 0 15px rgba(0,242,255,0.4);" alt="QR ' + roomCode + '">';
         }
 
         function toggleLiveQR() {
@@ -1492,11 +1326,8 @@
                 }
             }
         }
-
-        // Ejecutar inmediatamente y al cargar
-        ensureRoomCodeUI();
-        window.addEventListener('DOMContentLoaded', generateQR);
-        window.addEventListener('load', function() { setTimeout(generateQR, 200); });
+        // Intentar generar al cargar y también cuando el peer esté listo
+        window.addEventListener('load', function() { setTimeout(generateQR, 500); });
 
         // Eliminadas funciones de YT API
         function onYouTubeIframeAPIReady() {
@@ -1531,15 +1362,12 @@
                 momentoDeInicio = Date.now();
                 document.getElementById('host-instructions').innerText = isMuted ? "REPRODUCIENDO (MUTE)" : "REPRODUCIENDO";
                 syncState();
-                startCountdown();
             }
             if (event.data === YT.PlayerState.PAUSED) {
                 isPlaying = false;
                 syncState();
-                stopCountdown();
             }
             if (event.data === YT.PlayerState.ENDED) {
-                stopCountdown();
                 handleSongEnd();
             }
         }
@@ -1694,40 +1522,46 @@
 
         function updateTokens(player, delta) {
             if (!player) return;
-            if (delta > 0 && typeof isRushMode !== 'undefined' && isRushMode) {
-                delta = delta * 2; // V4.3: Modo Frenesí duplica fichas ganadas
-            }
             player.tokens = Math.max(0, Math.min(10, (player.tokens || 0) + delta));
         }
 
         function initPeer() {
+            var iceConfig = [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun1.l.google.com:19302' },
+                { urls: 'stun:stun2.l.google.com:19302' },
+                { urls: 'stun:stun3.l.google.com:19302' },
+                { urls: 'stun:stun4.l.google.com:19302' },
+                { urls: 'stun:stun.cloudflare.com:3478' },
+                { urls: 'stun:stun.nextcloud.com:443' },
+                { urls: 'stun:stun.sipgate.net:10000' },
+                { urls: 'turn:openrelay.metered.ca:80', username: 'openrelay', credential: 'openrelay' },
+                { urls: 'turn:openrelay.metered.ca:443', username: 'openrelay', credential: 'openrelay' },
+                { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelay', credential: 'openrelay' },
+                { urls: 'turns:openrelay.metered.ca:443', username: 'openrelay', credential: 'openrelay' },
+                { urls: 'turns:openrelay.metered.ca:443?transport=tcp', username: 'openrelay', credential: 'openrelay' },
+                { urls: 'turn:global.relay.metered.ca:80', username: 'openrelay', credential: 'openrelay' },
+                { urls: 'turn:global.relay.metered.ca:443', username: 'openrelay', credential: 'openrelay' },
+                { urls: 'turn:global.relay.metered.ca:443?transport=tcp', username: 'openrelay', credential: 'openrelay' },
+                { urls: 'turns:global.relay.metered.ca:443?transport=tcp', username: 'openrelay', credential: 'openrelay' },
+                { urls: 'turn:freestun.net:3478', username: 'free', credential: 'free' },
+                { urls: 'turn:freestun.net:5349', username: 'free', credential: 'free' },
+                { urls: 'turns:freestun.net:5349', username: 'free', credential: 'free' }
+            ];
+
             peer = new Peer("CB-HOST-" + roomCode, {
-                debug: 3,
+                debug: 2,
                 host: '0.peerjs.com',
                 port: 443,
                 secure: true,
                 path: '/',
                 pingInterval: 5000,
                 config: {
-                    'iceServers': [
-                        { urls: 'stun:stun.l.google.com:19302' },
-                        { urls: 'stun:stun1.l.google.com:19302' },
-                        { urls: 'stun:stun2.l.google.com:19302' },
-                        { urls: 'stun:stun3.l.google.com:19302' },
-                        { urls: 'stun:stun4.l.google.com:19302' },
-                        { urls: 'stun:stun.cloudflare.com:3478' },
-                        { urls: 'stun:stun.nextcloud.com:443' },
-                        { urls: 'stun:stun.sipgate.net:10000' },
-                        { urls: 'turn:openrelay.metered.ca:80', username: 'openrelay', credential: 'openrelay' },
-                        { urls: 'turn:openrelay.metered.ca:443', username: 'openrelay', credential: 'openrelay' },
-                        { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelay', credential: 'openrelay' },
-                        { urls: 'turns:openrelay.metered.ca:443', username: 'openrelay', credential: 'openrelay' },
-                        { urls: 'turns:openrelay.metered.ca:443?transport=tcp', username: 'openrelay', credential: 'openrelay' },
-                        { urls: 'turn:freestun.net:3478', username: 'free', credential: 'free' },
-                        { urls: 'turn:freestun.net:5349', username: 'free', credential: 'free' },
-                        { urls: 'turns:freestun.net:5349', username: 'free', credential: 'free' }
-                    ]
-                }
+                    iceCandidatePoolSize: 10,
+                    sdpSemantics: 'unified-plan',
+                    iceServers: iceConfig
+                },
+                iceServers: iceConfig
             });
             peer.on('open', function (id) {
                 console.log("Host Peer Abierto:", id);
@@ -1776,18 +1610,11 @@
                 });
             });
             peer.on('error', function (err) {
-                console.warn("PeerJS Host error:", err.type);
                 if (err.type === 'unavailable-id') {
-                    console.warn("ID de sala ocupado (" + roomCode + "), generando nuevo código automáticamente...");
-                    roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-                    localStorage.setItem('CB_RoomCode', roomCode);
-                    ensureRoomCodeUI();
-                    generateQR();
-                    setTimeout(function() {
-                        initPeer();
-                    }, 400);
+                    alert("El ID de sala ya existe o hay un error. Probando uno nuevo...");
+                    window.location.reload();
                 } else {
-                    console.error("Error PeerJS Host: " + err.type);
+                    alert("Error PeerJS Host: " + err.type);
                 }
             });
         }
@@ -2105,22 +1932,6 @@
         // ── CATEGORÍA SOLICITADA ──
         // Antes esta búsqueda SOLO existía en la rama de equipos: en modo normal/rey/
         // supervivencia se cobraban 4 fichas y la canción no cambiaba nunca.
-        var targetScore = 10;
-        function setTargetScore(val) {
-            targetScore = val;
-            var b10 = document.getElementById('btn-target-10');
-            var b7 = document.getElementById('btn-target-7');
-            if (val === 7) {
-                if (b7) { b7.style.background = 'var(--pink)'; b7.style.color = '#fff'; b7.style.borderColor = 'var(--pink)'; }
-                if (b10) { b10.style.background = '#222'; b10.style.color = '#888'; b10.style.borderColor = '#444'; }
-                addEvent('<span class="ev-good">⚡ META BLITZ RÁPIDO SELECCIONADA: 7 CARTAS</span>');
-            } else {
-                if (b10) { b10.style.background = 'var(--gold)'; b10.style.color = '#000'; b10.style.borderColor = 'var(--gold)'; }
-                if (b7) { b7.style.background = '#222'; b7.style.color = '#888'; b7.style.borderColor = '#444'; }
-                addEvent('<span class="ev-good">🏆 META NORMAL SELECCIONADA: 10 CARTAS</span>');
-            }
-        }
-
         var CATEGORIAS = {
             orig:        '🎵 Original',
             anime:       '⛩️ Anime',
@@ -2147,29 +1958,9 @@
             requestedCategory = null;
         }
 
-        var exactYearChallenges = {};
-        var isRushMode = false;
-        var kingOfBeatsPlayerId = null;
-        var maxStreakInGame = 0;
-        var activeAlliance = null;
-        var allianceProposals = {};
-        var tooEasyVotes = {};
-
         function nextTurn() {
             stopCountdown();
             resetLightning();
-            exactYearChallenges = {};
-            activeAlliance = null;
-            allianceProposals = {};
-            tooEasyVotes = {};
-
-            // V4.3: Comprobar activación del MODO FRENESÍ (a 2 cartas de ganar)
-            if (!isRushMode && players.some(function(p){ return (p.score || p.cards.length) >= 8; })) {
-                isRushMode = true;
-                document.body.classList.add('rush-mode-active');
-                playCyberSFX('sabotage');
-                addEvent('<span class="ev-good" style="color:#ff0055;font-weight:bold;">⚡ ¡MODO FRENESÍ ACTIVADO! Recompensas de fichas se duplican (×2 🔵)</span>', '⚡');
-            }
             // ── ¿El turno que acaba de terminar era "¡JUGAMOS TODOS!"? ──
             // Si lo era, su dueño repite turno (le "robaron" su canción todos los rivales)
             var _repeatOwnerId = (isSharedSong && sharedSongOwnerId) ? sharedSongOwnerId : null;
@@ -2291,7 +2082,6 @@
                 var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]');
                 if (!_pl.includes(songs[currentSongIdx].id)) { _pl.push(songs[currentSongIdx].id); localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl)); }
             }
-            updateSongCounter();
             isRevealed = false;
             segundosAcumulados = 0;
             momentoDeInicio = 0;
@@ -2586,10 +2376,6 @@
 
         function handlePlayerCommand(peerId, action, value) {
             var activeP = players[activePlayerIdx];
-            if (!activeP && players.length > 0) {
-                activePlayerIdx = 0;
-                activeP = players[0];
-            }
             var s = songs[currentSongIdx];
             var container = document.getElementById('player-container');
 
@@ -3203,34 +2989,6 @@
                         syncState();
                     }
                     break;
-
-                case 'SABOTAGE_SWAP':
-                    var p = players.find(function (pl) { return pl.id === peerId; });
-                    if (p && p.tokens >= 4) {
-                        var target = players.find(function(x){ return x.id === value || x.id === (cmd && cmd.targetId); });
-                        if (!target || target.id === p.id || !target.cards || target.cards.length === 0) {
-                            target = players.filter(function(x){ return x.id !== p.id && x.cards && x.cards.length > 0; }).sort(function(a,b){ return b.cards.length - a.cards.length; })[0];
-                        }
-                        if (!target) {
-                            try { if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: '⚠️ Ningún rival tiene cartas para intercambiar.' }); } catch(e){}
-                            break;
-                        }
-                        if (escudoBloquea(target, p, action)) break;
-                        updateTokens(p, -4);
-                        var stolenCard = target.cards.pop();
-                        target.score = target.cards.length;
-                        p.cards.push(stolenCard);
-                        p.cards.sort(function(a,b){ return a - b; });
-                        p.score = p.cards.length;
-
-                        playCyberSFX('sabotage');
-                        showAvatarSpeech(p.id, '🔀 ¡PERMUTA TEMPORAL!');
-                        showAvatarSpeech(target.id, '💔 ¡CARTA ROBADA!');
-                        addEvent('<span class="ev-good">🔀 ¡PERMUTA TEMPORAL! ' + p.name + ' intercambió 1 carta con ' + target.name + '</span>', '🔀');
-                        trackSabotage(p.id, target.id);
-                        syncState();
-                    }
-                    break;
                 case 'SABOTAGE_STEAL_TURN':
                     if (escudoBloquea(activeP, players.find(function(pl){ return pl.id === peerId; }), action)) break;
                     var p = players.find(function (pl) { return pl.id === peerId; });
@@ -3459,6 +3217,9 @@
                         syncState();
                     }
                     break;
+                case 'CONFETTI_BURST':
+                    lanzarConfeti();
+                    break;
                 case 'KING_SKIP_VIDEO':
                     // El rey salta el video (link inválido) — volver a selección con cartas nuevas
                     if (turnPhase !== 'KING_GUESS') return;
@@ -3542,9 +3303,6 @@
                     if (turnPhase !== 'LOBBY' && !isRevealed) {
                         revealData();
                     }
-                    break;
-                case 'CONFETTI_BURST':
-                    lanzarConfeti();
                     break;
                 case 'REMOTE_CORRECT':
                     // Solo tras revelar (que es cuando el mando enseña estos botones).
@@ -3785,88 +3543,6 @@
                     }
                     break;
 
-                case 'PROPOSE_ALLIANCE':
-                    var p = players.find(function(pl){ return pl.id === peerId; });
-                    var target = players.find(function(pl){ return pl.id === value || pl.id === (cmd && cmd.targetId); });
-                    if (p && target && p.id !== target.id && p.id !== players[activePlayerIdx].id && target.id !== players[activePlayerIdx].id) {
-                        allianceProposals[target.id] = p.id;
-                        try {
-                            if (connections[target.id]) {
-                                connections[target.id].send({ type: 'ALLIANCE_PROPOSAL', fromId: p.id, fromName: p.name });
-                            }
-                        } catch(e) {}
-                        showAvatarSpeech(p.id, '🤝 ¿ALIANZA CON ' + target.name + '?');
-                    }
-                    break;
-
-                case 'ACCEPT_ALLIANCE':
-                    var p = players.find(function(pl){ return pl.id === peerId; });
-                    var senderId = allianceProposals[p.id];
-                    var sender = players.find(function(pl){ return pl.id === senderId; });
-                    if (p && sender) {
-                        activeAlliance = { p1: sender.id, p2: p.id, betrayedBy: null };
-                        delete allianceProposals[p.id];
-                        showAvatarSpeech(p.id, '🤝 ¡ALIANZA ACEPTADA!');
-                        showAvatarSpeech(sender.id, '🤝 ¡PACTO FORMADO!');
-                        addEvent('<span class="ev-good">🤝 ¡PACTO DE ALIANZA! ' + sender.name + ' y ' + p.name + ' se alían contra ' + players[activePlayerIdx].name + '</span>', '🤝');
-                        try {
-                            if (connections[sender.id]) connections[sender.id].send({ type: 'ALLIANCE_ACTIVE', partnerName: p.name });
-                            if (connections[p.id]) connections[p.id].send({ type: 'ALLIANCE_ACTIVE', partnerName: sender.name });
-                        } catch(e) {}
-                    }
-                    break;
-
-                case 'BETRAY_ALLIANCE':
-                    var p = players.find(function(pl){ return pl.id === peerId; });
-                    if (p && activeAlliance && (activeAlliance.p1 === p.id || activeAlliance.p2 === p.id)) {
-                        activeAlliance.betrayedBy = p.id;
-                        var partnerId = (activeAlliance.p1 === p.id) ? activeAlliance.p2 : activeAlliance.p1;
-                        var partner = players.find(function(pl){ return pl.id === partnerId; });
-                        showAvatarSpeech(p.id, '🗡️ ¡TRAICIÓN!');
-                        if (partner) showAvatarSpeech(partner.id, '💔 ¡APUÑALADO!');
-                        addEvent('<span class="ev-bad">🗡️ ¡TRAICIÓN EN LA ALIANZA! ' + p.name + ' ha apuñalado por la espalda a ' + (partner ? partner.name : 'su aliado') + '</span>', '🗡️');
-                        try {
-                            if (connections[partnerId]) connections[partnerId].send({ type: 'BET_RESULT', msg: '🗡️ ¡TU ALIADO TE HA TRAICIONADO POR LA ESPALDA!' });
-                        } catch(e) {}
-                    }
-                    break;
-
-                case 'VOTE_TOO_EASY':
-                    var p = players.find(function(pl){ return pl.id === peerId; });
-                    if (p && p.id !== players[activePlayerIdx].id && !tooEasyVotes[p.id]) {
-                        tooEasyVotes[p.id] = true;
-                        showAvatarSpeech(p.id, '👎 ¡DEMASIADO FÁCIL!');
-                        addEvent('<span class="ev-info">👎 ' + p.name + ' votó "Demasiado Fácil"</span>');
-                        var nonActiveCount = players.length - 1;
-                        var needed = Math.max(1, Math.ceil(nonActiveCount / 2));
-                        var currentVotes = Object.keys(tooEasyVotes).length;
-                        if (currentVotes >= needed && isPlaying && !isRevealed) {
-                            addEvent('<span class="ev-good" style="color:var(--pink);font-weight:bold;">👎 ¡EL PÚBLICO HA HABLADO! Canción cambiada por ser demasiado fácil (' + currentVotes + '/' + needed + ' votos)</span>', '👎');
-                            playCyberSFX('sabotage');
-                            cambiarCancion();
-                            tooEasyVotes = {};
-                        }
-                    }
-                    break;
-
-                case 'GUARDIAN_SHIELD':
-                    var p = players.find(function(pl){ return pl.id === peerId; });
-                    if (p && p.tokens >= 1) {
-                        var lastPlacePlayer = players.slice().sort(function(a,b){ return a.score - b.score; })[0];
-                        if (lastPlacePlayer) {
-                            updateTokens(p, -1);
-                            hasShield[lastPlacePlayer.id] = true;
-                            playCyberSFX('exact');
-                            showAvatarSpeech(p.id, '🛡️ ESCUDO PARA ' + lastPlacePlayer.name);
-                            showAvatarSpeech(lastPlacePlayer.id, '🛡️ ¡PROTEGIDO!');
-                            addEvent('<span class="ev-good">🛡️ ¡ESCUDO GUARDIÁN! ' + p.name + ' otorgó un escudo protector a ' + lastPlacePlayer.name + '</span>', '🛡️');
-                            try {
-                                if (connections[lastPlacePlayer.id]) connections[lastPlacePlayer.id].send({ type: 'BET_RESULT', msg: '🛡️ ¡' + p.name + ' TE HA REGALADO UN ESCUDO GUARDIÁN!' });
-                            } catch(e) {}
-                        }
-                    }
-                    break;
-
                 case 'FAIL_SAFE':
                     var p = players.find(function(pl) { return pl.id === peerId; });
                     if (p && p.tokens >= 2 && isMyTurnPeer(peerId) && !failSafeActive) {
@@ -3924,19 +3600,6 @@
                         if (reactionBuffer[value].length >= 3) {
                             triggerCollectiveEffect(value);
                             reactionBuffer[value] = [];
-                        }
-                    }
-                    break;
-
-                case 'EXACT_YEAR_CHALLENGE':
-                    var p = players.find(function(pl) { return pl.id === peerId; });
-                    if (p && value) {
-                        var yearVal = parseInt(value, 10);
-                        if (!isNaN(yearVal) && yearVal >= 1900 && yearVal <= 2100) {
-                            exactYearChallenges[p.id] = yearVal;
-                            playCyberSFX('tick');
-                            showAvatarSpeech(p.id, '🎯 ¿' + yearVal + '?');
-                            addEvent('<span class="ev-name">' + p.name + '</span> <span class="ev-info">desafía año exacto ' + yearVal + ' (Gana 2 🔵 si acierta)</span>');
                         }
                     }
                     break;
@@ -4177,46 +3840,16 @@
                     }
                 } else {
                     // El jugador activo FALLA: los que apostaron en contra ganan. los que apostaron a favor pierden.
-                    if (bettingAgainst && bettingAgainst.length > 0) {
-                        var isComboBet = (bettingAgainst.length >= 2);
-                        var rewardAmt = isComboBet ? 3 : 2;
+                    if (bettingAgainst) {
                         bettingAgainst.forEach(function (pid) {
                             var p = players.find(x => x.id === pid);
                             if (p) {
-                                updateTokens(p, rewardAmt);
+                                updateTokens(p, 2);
                                 if (connections[pid]) {
-                                    connections[pid].send({
-                                        type: 'BET_RESULT',
-                                        msg: isComboBet ?
-                                            "💥 ¡COMBO DE APUESTAS GANADO!\n\nRecompensa: +3 FICHAS AZULES (Humillación colectiva x" + bettingAgainst.length + ")." :
-                                            "¡SABÍAS QUE IBA A FALLAR Y HAS GANADO!\n\nRecompensa: +2 FICHAS AZULES."
-                                    });
+                                    connections[pid].send({ type: 'BET_RESULT', msg: "¡SABÍAS QUE IBA A FALLAR Y HAS GANADO!\n\nRecompensa: +2 FICHAS AZULES." });
                                 }
                             }
                         });
-                        if (isComboBet) {
-                            playCyberSFX('exact');
-                            addEvent('<span class="ev-good" style="color:var(--gold);font-weight:bold;">💥 ¡COMBO DE APUESTAS! ' + bettingAgainst.length + ' jugadores acertaron el fallo de ' + players[activePlayerIdx].name + ' (+3 Fichas 🔵 cada uno)</span>', '💥');
-                        }
-                    }
-
-                    // V4.6: Resolver Pacto de Alianza
-                    if (activeAlliance) {
-                        var p1Obj = players.find(function(x){ return x.id === activeAlliance.p1; });
-                        var p2Obj = players.find(function(x){ return x.id === activeAlliance.p2; });
-                        if (!activeAlliance.betrayedBy) {
-                            if (p1Obj) updateTokens(p1Obj, 2);
-                            if (p2Obj) updateTokens(p2Obj, 2);
-                            playCyberSFX('exact');
-                            addEvent('<span class="ev-good">🤝 ¡ALIANZA EXITOSA! ' + (p1Obj ? p1Obj.name : '') + ' y ' + (p2Obj ? p2Obj.name : '') + ' ganan +2 Fichas 🔵 cada uno</span>', '🤝');
-                        } else {
-                            var betrayerObj = players.find(function(x){ return x.id === activeAlliance.betrayedBy; });
-                            if (betrayerObj) {
-                                updateTokens(betrayerObj, 4);
-                                playCyberSFX('exact');
-                                addEvent('<span class="ev-good">🗡️ ¡RECOMPENSA DE TRAICIÓN! ' + betrayerObj.name + ' se lleva +4 Fichas 🔵 por la traición</span>', '🗡️');
-                            }
-                        }
                     }
                     if (bettingFor) {
                         var losesPhrasesFor = [
@@ -4254,17 +3887,6 @@
                     // Notificar a todos
                     for (var _cid in connections) { try { connections[_cid].send({ type: 'STREAK_BONUS', name: players[activePlayerIdx].name, streak: streakNow }); } catch(e){} }
                 }
-
-                // V4.3: Comprobar Rey del Ritmo
-                if (streakNow >= 3 && streakNow > maxStreakInGame) {
-                    maxStreakInGame = streakNow;
-                    if (kingOfBeatsPlayerId !== players[activePlayerIdx].id) {
-                        kingOfBeatsPlayerId = players[activePlayerIdx].id;
-                        playCyberSFX('exact');
-                        showAvatarSpeech(players[activePlayerIdx].id, '👑 REY DEL RITMO!');
-                        addEvent('<span class="ev-good">👑 ¡ROBO DE CORONA! ' + players[activePlayerIdx].name + ' se corona como REY DEL RITMO (Racha ×' + streakNow + ')</span>', '👑');
-                    }
-                }
                 // ── FAROLERO: si farolea y acierta, +2 cartas extra ──
                 if (isBragging) {
                     var pid = players[activePlayerIdx].id;
@@ -4298,30 +3920,6 @@
                         try { connections[_wc].send({ type: 'WARRIOR_BONUS', name: players[activePlayerIdx].name }); } catch(e) {}
                     }
                 }
-                
-                // ── DOBLE O NADA: si estaba activo, sumar punto extra adicional ──
-                if (isDoubleOrNothing) {
-                    players[activePlayerIdx].score++;
-                    players[activePlayerIdx].cards.push(parseInt(songs[currentSongIdx].year));
-                    players[activePlayerIdx].cards.sort(function(a,b){return a-b;});
-                    addEvent('<span class="ev-good">🎲 DOBLE O NADA — ' + players[activePlayerIdx].name + ' acierta: +2 cartas</span>', '🎲');
-                }
-
-                // ── V4.2: EVALUAR DESAFÍOS DE AÑO EXACTO DE OTROS JUGADORES ──
-                if (songs[currentSongIdx]) {
-                    var actualYear = parseInt(songs[currentSongIdx].year, 10);
-                    Object.keys(exactYearChallenges).forEach(function(pid) {
-                        var guessedYear = exactYearChallenges[pid];
-                        var plObj = players.find(function(x){ return x.id === pid; });
-                        if (plObj && guessedYear === actualYear) {
-                            updateTokens(plObj, 2);
-                            playCyberSFX('exact');
-                            showAvatarSpeech(plObj.id, '🎯 ¡BULLSEYE! ' + actualYear + ' (+2 🔵)');
-                            addEvent('<span class="ev-good">🎯 ¡BULLSEYE DE ' + plObj.name + '! Acertó el año exacto ' + actualYear + ' fuera de su turno (+2 Fichas)</span>', '🎯');
-                        }
-                    });
-                }
-                
                 stats.consecutiveFails[players[activePlayerIdx].id] = 0;
                 // ── COMODÍN 🔥: próximo acierto doble ──
                 if (emojiWildcardBonus[players[activePlayerIdx].id]) {
@@ -4555,32 +4153,6 @@
 
             // ── PREMIOS ESPECIALES, CONSOLACIÓN Y LOGROS REPARTIDOS A IZQUIERDA Y DERECHA ──
             var awardsList = [];
-
-            // ── RADAR DE CONOCIMIENTO MUSICAL POR DÉCADAS (V4) ──
-            var radarCardHtml = '<div class="award-card" style="width:100%;box-sizing:border-box;border-color:var(--neon);">';
-            radarCardHtml += '<div class="award-icon">🕸️</div>';
-            radarCardHtml += '<div class="award-title" style="color:var(--neon);">RADAR MUSICAL</div>';
-            var radarEntries = [];
-            players.forEach(function(pl) {
-                var decMap = {};
-                songHistory.forEach(function(sh) {
-                    if (sh.playerName !== pl.name) return;
-                    var d = Math.floor(parseInt(sh.year || 0, 10) / 10) * 10;
-                    if (!d || d < 1950) return;
-                    if (!decMap[d]) decMap[d] = { ok: 0, total: 0 };
-                    decMap[d].total++;
-                    if (sh.correct === true) decMap[d].ok++;
-                });
-                var bestDec = '-', bestPct = -1;
-                Object.keys(decMap).forEach(function(d) {
-                    var pct = decMap[d].ok / decMap[d].total;
-                    if (pct > bestPct) { bestPct = pct; bestDec = d + 's (' + Math.round(pct * 100) + '%)'; }
-                });
-                radarEntries.push('<div style="font-size:0.65em;color:#aaa;margin-top:2px;">' + pl.name + ': <strong style="color:var(--gold);">' + (bestDec !== '-' ? bestDec : 'Equilibrado') + '</strong></div>');
-            });
-            radarCardHtml += '<div class="award-val">DOMINIO POR DÉCADA</div>';
-            radarCardHtml += '<div class="award-sub">' + radarEntries.join('') + '</div></div>';
-            awardsList.push(radarCardHtml);
 
             // 1. Premios Especiales
             if (stats.hardestSong && stats.hardestSong.fails > 0) {
@@ -5050,16 +4622,6 @@
                         return Object.keys(set);
                     })(),
                     isPlaying: isPlaying,
-                    remainingSeconds: (function() {
-                        try {
-                            if (player && player.getDuration && player.getCurrentTime) {
-                                var d = player.getDuration() || 0;
-                                var c = player.getCurrentTime() || 0;
-                                if (d > 0 && c <= d) return Math.max(0, Math.ceil(d - c));
-                            }
-                        } catch(e) {}
-                        return 0;
-                    })(),
                     isMuted: isMuted,
                     muteTimeRemaining: muteTimeRemaining,
                     panicActive: panicActive,
@@ -5114,8 +4676,7 @@
         }
 
         function updateUI() {
-            if (!players || players.length === 0) return;
-            var sortedPlayers = players.slice().sort(function (a, b) { return b.score - a.score; });
+            var sortedPlayers = players.slice().sort(function (a, b) { return b.score - a.score });
             var maxScore = sortedPlayers.length > 0 ? sortedPlayers[0].score : 0;
             var h = ""; 
             
@@ -5125,68 +4686,54 @@
                 var avatarHtml = '';
                 var wantedHtml = '';
                 var avatarCore = '';
-                var isActive = players[activePlayerIdx] && p.id === players[activePlayerIdx].id;
                 if (p.avatar) {
-                    avatarCore = '<img src="' + p.avatar + '" style="width:40px; height:40px; border-radius:50%; border:2px solid ' + (isActive ? 'var(--neon)' : '#555') + '; object-fit:cover;">';
+                    avatarCore = '<img src="' + p.avatar + '" style="width:35px; height:35px; border-radius:50%; border:2px solid ' + (players[activePlayerIdx] && p.id === players[activePlayerIdx].id ? 'var(--neon)' : '#555') + '; object-fit:cover;">';
                 } else {
-                    avatarCore = '<div style="width:40px; height:40px; border-radius:50%; background:#222; border:2px solid ' + (isActive ? 'var(--neon)' : '#555') + '; color:#fff; display:flex; align-items:center; justify-content:center; font-family:Bungee,sans-serif; font-size:1.2em;">' + (p.name ? p.name.charAt(0).toUpperCase() : '?') + '</div>';
+                    avatarCore = '<div style="width:35px; height:35px; border-radius:50%; background:#222; border:2px solid ' + (players[activePlayerIdx] && p.id === players[activePlayerIdx].id ? 'var(--neon)' : '#555') + '; color:#fff; display:flex; align-items:center; justify-content:center; font-family:Bungee,sans-serif; font-size:1.2em; box-shadow:0 0 5px rgba(0,0,0,0.5);">?</div>';
                 }
 
-                // Cartel SE BUSCA al líder
+                // Mostrar cartel de SE BUSCA al que va ganando
                 if (p.score === maxScore && maxScore > 0) {
-                    var wantedAvatar = p.avatar ? '<img src="' + p.avatar + '">' : '<div class="initial">' + (p.name ? p.name.charAt(0).toUpperCase() : '?') + '</div>';
+                    var wantedAvatar = p.avatar ? '<img src="' + p.avatar + '">' : '<div class="initial">' + p.name.charAt(0).toUpperCase() + '</div>';
                     wantedHtml = '<div class="wanted-poster"><div class="txt1">WANTED</div><div class="txt2">LÍDER</div><div class="wanted-img-placeholder">' + wantedAvatar + '</div></div>';
                 }
 
                 avatarHtml = '<div style="position:relative; display:inline-block; margin-right:12px; vertical-align:middle;">' + 
                              wantedHtml + avatarCore + '</div>';
 
-                var elimStyle = (gameMode === 'supervivencia' && p.lives <= 0) ? 'opacity:0.3; filter:grayscale(1);' : '';
                 var pLives = (gameMode === 'supervivencia') ? (p.lives !== undefined ? p.lives : INITIAL_LIVES) : null;
                 var livesHtml = '';
                 if (gameMode === 'supervivencia') {
-                    livesHtml = '<div class="lives-display" style="margin:2px 0;">';
+                    livesHtml = '<div class=\"lives-display\" style=\"margin:2px 0;\">';
                     for (var lv = 0; lv < INITIAL_LIVES; lv++) {
                         livesHtml += vinylSVG(lv < pLives);
                     }
                     livesHtml += '</div>';
                 }
-                var crownHtml = (typeof kingOfBeatsPlayerId !== 'undefined' && kingOfBeatsPlayerId === p.id) ? '<div class="king-crown-badge">👑 REY DEL RITMO</div>' : '';
-                h += '<div class="leader-item ' + (isActive ? 'active active-turn' : 'inactive-turn') + '" data-pid="' + p.id + '" style="display:flex; align-items:center; margin-bottom:10px; position:relative;' + elimStyle + '">' +
-                     crownHtml +
+                var elimStyle = (gameMode === 'supervivencia' && p.lives !== undefined && p.lives <= 0) ? 'opacity:0.35;' : '';
+                h += '<div class=\"leader-item ' + (p.id === players[activePlayerIdx].id ? 'active' : '') + '\" data-pid=\"' + p.id + '\" style=\"display:flex; align-items:center; margin-bottom:10px; position:relative;' + elimStyle + '\">' +
                      avatarHtml +
-                     '<span style="flex:1; font-family:Bungee,sans-serif; font-size:0.85em;">' + p.name + (gameMode === 'equipos' && p.team ? '<span class="team-badge team-' + p.team + '">' + (p.team==='red'?'🔴':'🔵') + '</span>' : '') + '<div>' + livesHtml + '</div><span style="opacity:0.6; font-size:0.7em;">' + chipsHtml + '</span></span>' +
-                     '<span class="score" style="font-family:Bungee,sans-serif; color:var(--gold); font-size:1.1em;">' + p.score + '/10</span></div>' +
-                     '<div class="progress-bar-wrap">' +
-                     '<div class="progress-bar-fill' + (p.score >= 9 ? ' critical' : p.score >= 7 ? ' warning' : '') + '" style="width:' + Math.min(p.score/10*100,100) + '%"></div>' +
+                     '<span style=\"flex:1; font-family:Bungee,sans-serif; font-size:0.8em;\">' + p.name + (gameMode === 'equipos' && p.team ? '<span class=\"team-badge team-' + p.team + '\">' + (p.team==='red'?'🔴':'🔵') + '</span>' : '') + '<div>' + livesHtml + '</div><span style=\"opacity:0.6; font-size:0.7em;\">' + chipsHtml + '</span></span>' +
+                     '<span class=\"score\" style=\"font-family:Bungee,sans-serif; color:var(--gold);\">' + p.score + '/10</span></div>' +
+                     '<div class=\"progress-bar-wrap\">' +
+                     '<div class=\"progress-bar-fill' + (p.score >= 9 ? ' critical' : p.score >= 7 ? ' warning' : '') + '\" style=\"width:' + Math.min(p.score/10*100,100) + '%\"></div>' +
                      '</div>';
             });
             var lbEl = document.getElementById('leaderboard-list');
-            if (lbEl) {
-                lbEl.innerHTML = h;
-                if (sortedPlayers.length >= 6) lbEl.classList.add('two-cols');
-                else lbEl.classList.remove('two-cols');
+            lbEl.innerHTML = h;
+            // 2 columnas si hay 6 o más jugadores
+            if (sortedPlayers.length >= 6) {
+                lbEl.classList.add('two-cols');
+            } else {
+                lbEl.classList.remove('two-cols');
             }
 
             // Mostrar cartas del jugador actual en el centro
-            if (players[activePlayerIdx] && players[activePlayerIdx].cards) {
-                var currentCardsHtml = "";
-                players[activePlayerIdx].cards.forEach(function (year) {
-                    currentCardsHtml += '<div class="mini-card">' + (isFogActive ? '????' : year) + '</div>';
-                });
-                var invEl = document.getElementById('active-player-inventory');
-                if (invEl) invEl.innerHTML = currentCardsHtml;
-            }
-
-            var timelinesHtml = "";
-            players.forEach(function (p) {
-                timelinesHtml += '<div class="player-row"><div style="font-size:0.6em;color:#888;">' + p.name + '</div><div class="slots">';
-                for (var k = 0; k < 10; k++) timelinesHtml += '<div class="slot ' + (p.cards && p.cards[k] ? 'filled' : '') + '">' + (p.cards && p.cards[k] ? (isFogActive ? '????' : p.cards[k]) : '') + '</div>';
-                timelinesHtml += '</div></div>';
+            var currentCardsHtml = "";
+            players[activePlayerIdx].cards.forEach(function (year) {
+                currentCardsHtml += '<div class="mini-card">' + (isFogActive ? '????' : year) + '</div>';
             });
-            var gtlEl = document.getElementById('global-timelines');
-            if (gtlEl) gtlEl.innerHTML = timelinesHtml;
-        }
+            document.getElementById('active-player-inventory').innerHTML = currentCardsHtml;
 
             var timelinesHtml = ""; players.forEach(function (p) {
                 timelinesHtml += '<div class="player-row"><div style="font-size:0.6em;color:#888;">' + p.name + '</div><div class="slots">';
@@ -5945,106 +5492,8 @@
             setTimeout(function() { card.remove(); }, 950);
         }
 
-        // ── SINTETIZADOR DE EFECTOS SONOROS FUTURISTAS WEBAUDIO (V4) ──
-        var audioCtx = null;
-        function getAudioCtx() {
-            if (!audioCtx) {
-                var AudioContext = window.AudioContext || window.webkitAudioContext;
-                if (AudioContext) audioCtx = new AudioContext();
-            }
-            if (audioCtx && audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
-            return audioCtx;
-        }
-
-        function playCyberSFX(type) {
-            try {
-                var ctx = getAudioCtx();
-                if (!ctx) return;
-                var now = ctx.currentTime;
-                if (type === 'correct') {
-                    [523.25, 659.25, 783.99, 1046.50].forEach(function(freq, i) {
-                        var osc = ctx.createOscillator();
-                        var gain = ctx.createGain();
-                        osc.type = 'triangle';
-                        osc.frequency.setValueAtTime(freq, now + i * 0.08);
-                        gain.gain.setValueAtTime(0.15, now + i * 0.08);
-                        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.3);
-                        osc.connect(gain);
-                        gain.connect(ctx.destination);
-                        osc.start(now + i * 0.08);
-                        osc.stop(now + i * 0.08 + 0.35);
-                    });
-                } else if (type === 'wrong') {
-                    var osc = ctx.createOscillator();
-                    var gain = ctx.createGain();
-                    osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(180, now);
-                    osc.frequency.exponentialRampToValueAtTime(60, now + 0.4);
-                    gain.gain.setValueAtTime(0.2, now);
-                    gain.gain.linearRampToValueAtTime(0.001, now + 0.4);
-                    osc.connect(gain);
-                    gain.connect(ctx.destination);
-                    osc.start(now);
-                    osc.stop(now + 0.4);
-                } else if (type === 'sabotage') {
-                    var osc = ctx.createOscillator();
-                    var gain = ctx.createGain();
-                    osc.type = 'square';
-                    osc.frequency.setValueAtTime(800, now);
-                    osc.frequency.linearRampToValueAtTime(200, now + 0.25);
-                    gain.gain.setValueAtTime(0.12, now);
-                    gain.gain.linearRampToValueAtTime(0.001, now + 0.25);
-                    osc.connect(gain);
-                    gain.connect(ctx.destination);
-                    osc.start(now);
-                    osc.stop(now + 0.25);
-                } else if (type === 'exact') {
-                    [440, 554.37, 659.25, 880, 1108.73].forEach(function(freq, i) {
-                        var osc = ctx.createOscillator();
-                        var gain = ctx.createGain();
-                        osc.type = 'sine';
-                        osc.frequency.setValueAtTime(freq, now + i * 0.07);
-                        gain.gain.setValueAtTime(0.2, now + i * 0.07);
-                        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.07 + 0.4);
-                        osc.connect(gain);
-                        gain.connect(ctx.destination);
-                        osc.start(now + i * 0.07);
-                        osc.stop(now + i * 0.07 + 0.45);
-                    });
-                }
-            } catch(e) {}
-        }
-
-        // ── BOCADILLOS DE DIÁLOGO EN AVATARES (V4) ──
-        function showAvatarSpeech(playerId, text) {
-            var item = document.querySelector('.leader-item[data-pid="' + playerId + '"]');
-            if (!item) return;
-            var old = item.querySelector('.avatar-speech-bubble');
-            if (old) old.remove();
-            var bubble = document.createElement('div');
-            bubble.className = 'avatar-speech-bubble';
-            bubble.innerHTML = text;
-            item.appendChild(bubble);
-            setTimeout(function() { bubble.remove(); }, 3200);
-        }
-
-        // ── LOG DE EVENTOS & TOASTS (V4) ──
+        // ── LOG DE EVENTOS ──
         var eventLog = [];
-        function showTvToast(html) {
-            var container = document.getElementById('tv-toast-container');
-            if (!container) return;
-            var toast = document.createElement('div');
-            toast.className = 'tv-toast';
-            toast.innerHTML = html;
-            container.appendChild(toast);
-            setTimeout(function() {
-                toast.style.animation = 'toast-fade-out 0.4s ease-in forwards';
-                setTimeout(function() { toast.remove(); }, 400);
-            }, 3500);
-        }
-
         function addEvent(html, replayIcon) {
             var ts = new Date().toLocaleTimeString('es', {hour:'2-digit', minute:'2-digit'});
             eventLog.unshift({ html: html, ts: ts });
@@ -6055,8 +5504,6 @@
                     return '<div class="event-entry">' + e.html + '</div>';
                 }).join('');
             }
-            showTvToast(html);
-
             // Transmitir evento a los móviles conectados
             for (var cid in connections) {
                 try {
