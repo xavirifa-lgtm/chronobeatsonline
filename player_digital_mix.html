@@ -93,8 +93,8 @@
             margin-top: 8px;
         }
 
-        /* ── BANNER ¡TODOS JUEGAN! ── */
-        #shared-song-player-banner {
+        /* ── BANNER ¡TODOS JUEGAN! & CARTA BONIFICACIÓN ── */
+        #shared-song-player-banner, #bonus-banner {
             display: none;
             background: linear-gradient(90deg, var(--gold), #ff8800);
             color: #000;
@@ -106,6 +106,10 @@
             border-radius: 8px;
             margin: 6px 0;
             animation: pulse-banner 1s ease-in-out infinite alternate;
+        }
+        #bonus-banner {
+            background: linear-gradient(90deg, #ffaa00, #ff0055);
+            color: #fff;
         }
 
         /* ── ROBO DE TURNO: BOTÓN RESISTIR ── */
@@ -1803,7 +1807,7 @@
             <div class="reaction-bar" id="reaction-bar" style="display:none;">
                 <button class="reaction-btn" onclick="sendReaction('😂')">😂</button>
                 <button class="reaction-btn" onclick="sendReaction('🔥')">🔥</button>
-                <button class="reaction-btn" onclick="sendReaction('🎉')">🎉</button>
+                <button class="reaction-btn" style="background:rgba(255,215,0,0.25); border:1px solid var(--gold);" onclick="send('CONFETTI_BURST');sendReaction('🎉');" title="¡Disparar Confeti en la TV!">🎉</button>
                 <button class="reaction-btn" onclick="sendReaction('😤')">😤</button>
                 <button class="reaction-btn" onclick="sendReaction('👏')">👏</button>
                 <button class="reaction-btn" onclick="sendReaction('💀')">💀</button>
@@ -1852,10 +1856,7 @@
                     </div>
                 </div>
                 <div id="wait-msg">ESPERANDO SIGUIENTE TRACK...</div>
-                <div id="bonus-banner" style="display:none; background:linear-gradient(90deg, #ffaa00, #ff0055); color:#fff; font-family:'Bungee'; font-size:0.85em; padding:10px 14px; border-radius:12px; margin:10px auto; text-align:center; box-shadow:0 0 15px rgba(255,170,0,0.5); width:100%; max-width:340px;">
-                    🎁 ¡TURNO DE CARTA BONIFICACIÓN! 🎁<br>
-                    <span style="font-size:0.8em; font-family:'Montserrat';">Acierto = +1 Carta Extra o +2 Fichas 🔵</span>
-                </div>
+                <div id="bonus-banner">🎁 ¡CARTA BONIFICACIÓN! ACIERTO = +1 CARTA EXTRA O +2 🔵</div>
             </div>
 
             <!-- APUESTAS: solo visibles fuera del turno propio -->
@@ -2252,6 +2253,25 @@
             btn.disabled = true;
             btn.innerText = "CONECTANDO...";
 
+            var iceConfig = [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun1.l.google.com:19302' },
+                { urls: 'stun:stun2.l.google.com:19302' },
+                { urls: 'stun:stun3.l.google.com:19302' },
+                { urls: 'stun:stun4.l.google.com:19302' },
+                { urls: 'stun:stun.cloudflare.com:3478' },
+                { urls: 'stun:stun.nextcloud.com:443' },
+                { urls: 'stun:stun.sipgate.net:10000' },
+                { urls: 'turn:openrelay.metered.ca:80', username: 'openrelay', credential: 'openrelay' },
+                { urls: 'turn:openrelay.metered.ca:443', username: 'openrelay', credential: 'openrelay' },
+                { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelay', credential: 'openrelay' },
+                { urls: 'turns:openrelay.metered.ca:443', username: 'openrelay', credential: 'openrelay' },
+                { urls: 'turns:openrelay.metered.ca:443?transport=tcp', username: 'openrelay', credential: 'openrelay' },
+                { urls: 'turn:freestun.net:3478', username: 'free', credential: 'free' },
+                { urls: 'turn:freestun.net:5349', username: 'free', credential: 'free' },
+                { urls: 'turns:freestun.net:5349', username: 'free', credential: 'free' }
+            ];
+
             peer = new Peer({
                 debug: 2,
                 host: '0.peerjs.com',
@@ -2260,33 +2280,30 @@
                 path: '/',
                 pingInterval: 5000,
                 config: {
-                    'iceServers': [
-                        { urls: 'stun:stun.l.google.com:19302' },
-                        { urls: 'stun:stun1.l.google.com:19302' },
-                        { urls: 'stun:stun2.l.google.com:19302' },
-                        { urls: 'stun:stun3.l.google.com:19302' },
-                        { urls: 'stun:stun4.l.google.com:19302' },
-                        { urls: 'stun:stun.cloudflare.com:3478' },
-                        { urls: 'stun:stun.nextcloud.com:443' },
-                        { urls: 'stun:stun.sipgate.net:10000' },
-                        { urls: 'turn:openrelay.metered.ca:80', username: 'openrelay', credential: 'openrelay' },
-                        { urls: 'turn:openrelay.metered.ca:443', username: 'openrelay', credential: 'openrelay' },
-                        { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelay', credential: 'openrelay' },
-                        { urls: 'turns:openrelay.metered.ca:443', username: 'openrelay', credential: 'openrelay' },
-                        { urls: 'turns:openrelay.metered.ca:443?transport=tcp', username: 'openrelay', credential: 'openrelay' },
-                        { urls: 'turn:freestun.net:3478', username: 'free', credential: 'free' },
-                        { urls: 'turn:freestun.net:5349', username: 'free', credential: 'free' },
-                        { urls: 'turns:freestun.net:5349', username: 'free', credential: 'free' }
-                    ]
-                }
+                    iceCandidatePoolSize: 10,
+                    sdpSemantics: 'unified-plan',
+                    iceServers: iceConfig
+                },
+                iceServers: iceConfig
             });
             peer.on('open', function (id) {
                 myId = id;
                 console.log("Conectando con ID Peer:", id);
-                conn = peer.connect("CB-HOST-" + hostId, { reliable: true });
+                
+                function connectToHost() {
+                    conn = peer.connect("CB-HOST-" + hostId, { reliable: true, serialization: 'json' });
 
-                conn.on('open', function () {
-                    console.log("¡Conectado!");
+                    var retryTimer = setTimeout(function() {
+                        if (conn && !conn.open) {
+                            console.warn("[4G/5G FIX] Reintentando conexión vía TURN...");
+                            try { conn.close(); } catch(e) {}
+                            connectToHost();
+                        }
+                    }, 3500);
+
+                    conn.on('open', function () {
+                        if (retryTimer) clearTimeout(retryTimer);
+                        console.log("¡Conectado!");
                     requestWakeLockPlayer();
                     conn.send({ type: 'JOIN', name: playerName, avatar: playerAvatarDataUrl });
                     document.getElementById('login-screen').style.display = 'none';
@@ -2301,6 +2318,8 @@
                     showCustomAlert("Conexión cerrada. El Host se ha desconectado.");
                     setTimeout(() => location.reload(), 3000);
                 });
+                }
+                connectToHost();
             });
 
             peer.on('error', function (err) {

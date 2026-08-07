@@ -1,5 +1,5 @@
-// ── ChronoBeats Online — Service Worker v3.1 (CONFETTI & PODIUM FIX) ──
-const CACHE_NAME = 'chronobeats-v3-03';
+// ── ChronoBeats Online — Service Worker v3.2 (4G/5G & CONFETI PRO FIX) ──
+const CACHE_NAME = 'chronobeats-v3-04';
 
 // Recursos propios a pre-cachear en la instalación (pequeños, sin riesgo)
 const PRECACHE_URLS = [

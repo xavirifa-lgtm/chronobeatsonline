@@ -1522,33 +1522,38 @@
         }
 
         function initPeer() {
+            var iceConfig = [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun1.l.google.com:19302' },
+                { urls: 'stun:stun2.l.google.com:19302' },
+                { urls: 'stun:stun3.l.google.com:19302' },
+                { urls: 'stun:stun4.l.google.com:19302' },
+                { urls: 'stun:stun.cloudflare.com:3478' },
+                { urls: 'stun:stun.nextcloud.com:443' },
+                { urls: 'stun:stun.sipgate.net:10000' },
+                { urls: 'turn:openrelay.metered.ca:80', username: 'openrelay', credential: 'openrelay' },
+                { urls: 'turn:openrelay.metered.ca:443', username: 'openrelay', credential: 'openrelay' },
+                { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelay', credential: 'openrelay' },
+                { urls: 'turns:openrelay.metered.ca:443', username: 'openrelay', credential: 'openrelay' },
+                { urls: 'turns:openrelay.metered.ca:443?transport=tcp', username: 'openrelay', credential: 'openrelay' },
+                { urls: 'turn:freestun.net:3478', username: 'free', credential: 'free' },
+                { urls: 'turn:freestun.net:5349', username: 'free', credential: 'free' },
+                { urls: 'turns:freestun.net:5349', username: 'free', credential: 'free' }
+            ];
+
             peer = new Peer("CB-HOST-" + roomCode, {
-                debug: 3,
+                debug: 2,
                 host: '0.peerjs.com',
                 port: 443,
                 secure: true,
                 path: '/',
                 pingInterval: 5000,
                 config: {
-                    'iceServers': [
-                        { urls: 'stun:stun.l.google.com:19302' },
-                        { urls: 'stun:stun1.l.google.com:19302' },
-                        { urls: 'stun:stun2.l.google.com:19302' },
-                        { urls: 'stun:stun3.l.google.com:19302' },
-                        { urls: 'stun:stun4.l.google.com:19302' },
-                        { urls: 'stun:stun.cloudflare.com:3478' },
-                        { urls: 'stun:stun.nextcloud.com:443' },
-                        { urls: 'stun:stun.sipgate.net:10000' },
-                        { urls: 'turn:openrelay.metered.ca:80', username: 'openrelay', credential: 'openrelay' },
-                        { urls: 'turn:openrelay.metered.ca:443', username: 'openrelay', credential: 'openrelay' },
-                        { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelay', credential: 'openrelay' },
-                        { urls: 'turns:openrelay.metered.ca:443', username: 'openrelay', credential: 'openrelay' },
-                        { urls: 'turns:openrelay.metered.ca:443?transport=tcp', username: 'openrelay', credential: 'openrelay' },
-                        { urls: 'turn:freestun.net:3478', username: 'free', credential: 'free' },
-                        { urls: 'turn:freestun.net:5349', username: 'free', credential: 'free' },
-                        { urls: 'turns:freestun.net:5349', username: 'free', credential: 'free' }
-                    ]
-                }
+                    iceCandidatePoolSize: 10,
+                    sdpSemantics: 'unified-plan',
+                    iceServers: iceConfig
+                },
+                iceServers: iceConfig
             });
             peer.on('open', function (id) {
                 console.log("Host Peer Abierto:", id);
@@ -3204,6 +3209,11 @@
                         syncState();
                     }
                     break;
+                case 'CONFETTI_BURST':
+                    lanzarConfeti();
+                    showAvatarSpeech(peerId, '🎉 ¡CONFETI!');
+                    addEvent('<span class="ev-good">🎉 ' + (players.find(function(x){return x.id===peerId;})||{name:'?'}).name + ' disparó una ráfaga de confeti!</span>', '🎉');
+                    break;
                 case 'KING_SKIP_VIDEO':
                     // El rey salta el video (link inválido) — volver a selección con cartas nuevas
                     if (turnPhase !== 'KING_GUESS') return;
@@ -4429,7 +4439,21 @@
             } catch(e) {}
             player = null;
 
-            // Inyectar el iframe de victoria visible en la pantalla final
+            function lanzarConfeti() {
+            var confettiDefaults = { startVelocity: 35, spread: 360, ticks: 120, zIndex: 100000 };
+            if (typeof confetti === 'function') {
+                confetti(Object.assign({}, confettiDefaults, { particleCount: 140, spread: 90, origin: { y: 0.6 } }));
+                setTimeout(function() {
+                    confetti(Object.assign({}, confettiDefaults, { particleCount: 90, spread: 100, origin: { x: 0.25, y: 0.5 } }));
+                }, 200);
+                setTimeout(function() {
+                    confetti(Object.assign({}, confettiDefaults, { particleCount: 90, spread: 100, origin: { x: 0.75, y: 0.5 } }));
+                }, 400);
+            }
+        }
+        window.lanzarConfeti = lanzarConfeti;
+
+        // Inyectar el iframe de victoria visible en la pantalla final
             var container = document.getElementById('player-container');
             container.style.display = 'block';
             var originParam = (window.location.origin && window.location.origin !== 'null') ? ('&origin=' + encodeURIComponent(window.location.origin)) : '';
@@ -4438,11 +4462,11 @@
 
             // Confeti personalizado por categoría dominante del ganador
             function randomInRange(min, max) { return Math.random() * (max - min) + min; }
-            var confettiDefaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 2000 };
+            var confettiDefaults = { startVelocity: 35, spread: 360, ticks: 120, zIndex: 100000 };
 
             // Confeti inmediato al declarar victoria
             if (typeof confetti === 'function') {
-                confetti({ particleCount: 120, spread: 90, origin: { y: 0.6 } });
+                confetti({ particleCount: 150, spread: 100, origin: { y: 0.6 }, zIndex: 100000 });
             }
 
             // Determinar categoría dominante de las cartas del ganador
