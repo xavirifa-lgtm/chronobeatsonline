@@ -5185,27 +5185,44 @@
             console.log('[HOST] Mazo rebarajado. Canciones olvidadas:', jugadas, '| Mazo nuevo:', songs.length);
         }
 
+        function countAllDatabaseSongs() {
+            var grandTotal = 0;
+            var playedIds = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]');
+            var uniqueIds = new Set();
+            var playedCount = 0;
+
+            cachedTxts.forEach(function (res) {
+                var lines = res.text.replace(/\r/g, '').split('\n');
+                lines.forEach(function (l) {
+                    var p = l.split('|');
+                    var m = p[3] ? p[3].match(/[?&]v=([^&#]+)|youtu\.be\/([^?&#]+)/) : null;
+                    if (m) {
+                        var songYear = parseInt(String(p[2]).trim(), 10);
+                        if (!isNaN(songYear) && songYear >= 1900 && songYear <= 2100) {
+                            var currentId = (m[1] || m[2]);
+                            if (!uniqueIds.has(currentId)) {
+                                uniqueIds.add(currentId);
+                                grandTotal++;
+                                if (playedIds.includes(currentId)) playedCount++;
+                            }
+                        }
+                    }
+                });
+            });
+            return { total: grandTotal, played: playedCount, available: Math.max(0, grandTotal - playedCount) };
+        }
+
         function updateSongCounter() {
             var counter = document.getElementById('song-counter');
             if (!counter || !cachedTxts || cachedTxts.length === 0) return;
-            var total = buildSongsFromCache(true).length;
-            var deck = buildSongsFromCache(false);
-            var available = deck.length;
+            var dbStats = countAllDatabaseSongs();
+            var total = dbStats.total;
+            var available = dbStats.available;
+            var playedCount = dbStats.played;
 
-            // Desglose real por categoría de las canciones sin jugar
-            var byType = {};
-            deck.forEach(function (s) { byType[s.type] = (byType[s.type] || 0) + 1; });
-            var labels = { orig: '🎵 Original', movies: '🎬 Pelis', anime: '⛩️ Anime', videojuegos: '🎮 Gamer' };
-            var parts = [];
-            Object.keys(byType).forEach(function (t) {
-                parts.push((labels[t] || t) + ': ' + byType[t] + ' sin jugar');
-            });
-
-            var playedCount = total - available;
-            counter.innerHTML = '<span style="font-weight:bold; color:var(--neon); font-size:1.1em;">' + available + ' CANCIONES DISPONIBLES</span>' +
-                (playedCount > 0 ? ' <span style="color:#aaa;">(' + playedCount + ' ya jugadas de ' + total + ' mazo)</span>' : ' <span style="color:#888;">(' + total + ' mazo completo)</span>') +
-                (decadeFilter !== 'all' ? ' <span style="color:var(--gold)">· filtro activo</span>' : '') +
-                (parts.length ? '<br><span style="color:#888; font-size:0.9em; margin-top:2px; display:inline-block;">' + parts.join(' · ') + '</span>' : '');
+            counter.innerHTML = '<span style="font-weight:bold; color:var(--neon); font-size:1.1em;">🎵 ' + available + ' / ' + total + ' CANCIONES DISPONIBLES EN BASE DE DATOS</span>' +
+                (playedCount > 0 ? ' <span style="color:#aaa;">(' + playedCount + ' jugadas acumuladas de ' + total + ' total)</span>' : ' <span style="color:#888;">(Base de datos completa sin jugar)</span>') +
+                (decadeFilter !== 'all' ? ' <span style="color:var(--gold)">· filtro por década activo</span>' : '');
         }
 
         // ── LOGROS ──
