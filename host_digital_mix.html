@@ -2262,6 +2262,7 @@
                 var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]');
                 if (!_pl.includes(songs[currentSongIdx].id)) { _pl.push(songs[currentSongIdx].id); localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl)); }
             }
+            updateSongCounter();
             isRevealed = false;
             segundosAcumulados = 0;
             momentoDeInicio = 0;
@@ -5084,7 +5085,8 @@
         }
 
         function updateUI() {
-            var sortedPlayers = players.slice().sort(function (a, b) { return b.score - a.score });
+            if (!players || players.length === 0) return;
+            var sortedPlayers = players.slice().sort(function (a, b) { return b.score - a.score; });
             var maxScore = sortedPlayers.length > 0 ? sortedPlayers[0].score : 0;
             var h = ""; 
             
@@ -5094,55 +5096,68 @@
                 var avatarHtml = '';
                 var wantedHtml = '';
                 var avatarCore = '';
+                var isActive = players[activePlayerIdx] && p.id === players[activePlayerIdx].id;
                 if (p.avatar) {
-                    avatarCore = '<img src="' + p.avatar + '" style="width:35px; height:35px; border-radius:50%; border:2px solid ' + (players[activePlayerIdx] && p.id === players[activePlayerIdx].id ? 'var(--neon)' : '#555') + '; object-fit:cover;">';
+                    avatarCore = '<img src="' + p.avatar + '" style="width:40px; height:40px; border-radius:50%; border:2px solid ' + (isActive ? 'var(--neon)' : '#555') + '; object-fit:cover;">';
                 } else {
-                    avatarCore = '<div style="width:35px; height:35px; border-radius:50%; background:#222; border:2px solid ' + (players[activePlayerIdx] && p.id === players[activePlayerIdx].id ? 'var(--neon)' : '#555') + '; color:#fff; display:flex; align-items:center; justify-content:center; font-family:Bungee,sans-serif; font-size:1.2em; box-shadow:0 0 5px rgba(0,0,0,0.5);">?</div>';
+                    avatarCore = '<div style="width:40px; height:40px; border-radius:50%; background:#222; border:2px solid ' + (isActive ? 'var(--neon)' : '#555') + '; color:#fff; display:flex; align-items:center; justify-content:center; font-family:Bungee,sans-serif; font-size:1.2em;">' + (p.name ? p.name.charAt(0).toUpperCase() : '?') + '</div>';
                 }
 
-                // Mostrar cartel de SE BUSCA al que va ganando
+                // Cartel SE BUSCA al líder
                 if (p.score === maxScore && maxScore > 0) {
-                    var wantedAvatar = p.avatar ? '<img src="' + p.avatar + '">' : '<div class="initial">' + p.name.charAt(0).toUpperCase() + '</div>';
+                    var wantedAvatar = p.avatar ? '<img src="' + p.avatar + '">' : '<div class="initial">' + (p.name ? p.name.charAt(0).toUpperCase() : '?') + '</div>';
                     wantedHtml = '<div class="wanted-poster"><div class="txt1">WANTED</div><div class="txt2">LÍDER</div><div class="wanted-img-placeholder">' + wantedAvatar + '</div></div>';
                 }
 
                 avatarHtml = '<div style="position:relative; display:inline-block; margin-right:12px; vertical-align:middle;">' + 
                              wantedHtml + avatarCore + '</div>';
 
+                var elimStyle = (gameMode === 'supervivencia' && p.lives <= 0) ? 'opacity:0.3; filter:grayscale(1);' : '';
                 var pLives = (gameMode === 'supervivencia') ? (p.lives !== undefined ? p.lives : INITIAL_LIVES) : null;
                 var livesHtml = '';
                 if (gameMode === 'supervivencia') {
-                    livesHtml = '<div class=\"lives-display\" style=\"margin:2px 0;\">';
+                    livesHtml = '<div class="lives-display" style="margin:2px 0;">';
                     for (var lv = 0; lv < INITIAL_LIVES; lv++) {
                         livesHtml += vinylSVG(lv < pLives);
                     }
                     livesHtml += '</div>';
                 }
                 var crownHtml = (typeof kingOfBeatsPlayerId !== 'undefined' && kingOfBeatsPlayerId === p.id) ? '<div class="king-crown-badge">👑 REY DEL RITMO</div>' : '';
-                h += '<div class=\"leader-item ' + (p.id === players[activePlayerIdx].id ? 'active active-turn' : 'inactive-turn') + '\" data-pid=\"' + p.id + '\" style=\"display:flex; align-items:center; margin-bottom:10px; position:relative;' + elimStyle + '\">' +
+                h += '<div class="leader-item ' + (isActive ? 'active active-turn' : 'inactive-turn') + '" data-pid="' + p.id + '" style="display:flex; align-items:center; margin-bottom:10px; position:relative;' + elimStyle + '">' +
                      crownHtml +
                      avatarHtml +
-                     '<span style=\"flex:1; font-family:Bungee,sans-serif; font-size:0.8em;\">' + p.name + (gameMode === 'equipos' && p.team ? '<span class=\"team-badge team-' + p.team + '\">' + (p.team==='red'?'🔴':'🔵') + '</span>' : '') + '<div>' + livesHtml + '</div><span style=\"opacity:0.6; font-size:0.7em;\">' + chipsHtml + '</span></span>' +
-                     '<span class=\"score\" style=\"font-family:Bungee,sans-serif; color:var(--gold);\">' + p.score + '/10</span></div>' +
-                     '<div class=\"progress-bar-wrap\">' +
-                     '<div class=\"progress-bar-fill' + (p.score >= 9 ? ' critical' : p.score >= 7 ? ' warning' : '') + '\" style=\"width:' + Math.min(p.score/10*100,100) + '%\"></div>' +
+                     '<span style="flex:1; font-family:Bungee,sans-serif; font-size:0.85em;">' + p.name + (gameMode === 'equipos' && p.team ? '<span class="team-badge team-' + p.team + '">' + (p.team==='red'?'🔴':'🔵') + '</span>' : '') + '<div>' + livesHtml + '</div><span style="opacity:0.6; font-size:0.7em;">' + chipsHtml + '</span></span>' +
+                     '<span class="score" style="font-family:Bungee,sans-serif; color:var(--gold); font-size:1.1em;">' + p.score + '/10</span></div>' +
+                     '<div class="progress-bar-wrap">' +
+                     '<div class="progress-bar-fill' + (p.score >= 9 ? ' critical' : p.score >= 7 ? ' warning' : '') + '" style="width:' + Math.min(p.score/10*100,100) + '%"></div>' +
                      '</div>';
             });
             var lbEl = document.getElementById('leaderboard-list');
-            lbEl.innerHTML = h;
-            // 2 columnas si hay 6 o más jugadores
-            if (sortedPlayers.length >= 6) {
-                lbEl.classList.add('two-cols');
-            } else {
-                lbEl.classList.remove('two-cols');
+            if (lbEl) {
+                lbEl.innerHTML = h;
+                if (sortedPlayers.length >= 6) lbEl.classList.add('two-cols');
+                else lbEl.classList.remove('two-cols');
             }
 
             // Mostrar cartas del jugador actual en el centro
-            var currentCardsHtml = "";
-            players[activePlayerIdx].cards.forEach(function (year) {
-                currentCardsHtml += '<div class="mini-card">' + (isFogActive ? '????' : year) + '</div>';
+            if (players[activePlayerIdx] && players[activePlayerIdx].cards) {
+                var currentCardsHtml = "";
+                players[activePlayerIdx].cards.forEach(function (year) {
+                    currentCardsHtml += '<div class="mini-card">' + (isFogActive ? '????' : year) + '</div>';
+                });
+                var invEl = document.getElementById('active-player-inventory');
+                if (invEl) invEl.innerHTML = currentCardsHtml;
+            }
+
+            var timelinesHtml = "";
+            players.forEach(function (p) {
+                timelinesHtml += '<div class="player-row"><div style="font-size:0.6em;color:#888;">' + p.name + '</div><div class="slots">';
+                for (var k = 0; k < 10; k++) timelinesHtml += '<div class="slot ' + (p.cards && p.cards[k] ? 'filled' : '') + '">' + (p.cards && p.cards[k] ? (isFogActive ? '????' : p.cards[k]) : '') + '</div>';
+                timelinesHtml += '</div></div>';
             });
-            document.getElementById('active-player-inventory').innerHTML = currentCardsHtml;
+            var gtlEl = document.getElementById('global-timelines');
+            if (gtlEl) gtlEl.innerHTML = timelinesHtml;
+        }
 
             var timelinesHtml = ""; players.forEach(function (p) {
                 timelinesHtml += '<div class="player-row"><div style="font-size:0.6em;color:#888;">' + p.name + '</div><div class="slots">';
