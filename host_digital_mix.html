@@ -853,12 +853,12 @@
 <body>
     <a href="index.html" class="btn-hub" title="Volver al Hub">H</a>
     <div id="flash-overlay"></div>
-    <div id="winner-screen" style="padding-top: 35px; overflow-y: auto;">
-        <h1 style="font-size:2.5em; margin-bottom:5px;">🏆 ¡GANADOR!</h1>
+    <div id="winner-screen" style="padding-top: 60px; overflow-y: auto;">
+        <h1 style="font-size:2.5em; margin-bottom:5px; margin-top:20px;">🏆 ¡GANADOR!</h1>
         <div id="winner-avatar-img" style="margin: 10px 0;"></div>
         <h2 id="winner-name" style="font-size:2.2em; margin-bottom:15px;">---</h2>
         <!-- LAYOUT 3 COLUMNAS: IZQUIERDA (Premios) | CENTRO (Podio) | DERECHA (Premios/Stats) -->
-        <div style="display:flex; width:100%; max-width:1100px; justify-content:space-between; align-items:center; margin:10px auto; gap:15px;">
+        <div style="display:flex; width:100%; max-width:1100px; justify-content:space-between; align-items:center; margin:20px auto 10px; gap:15px; padding-top:15px;">
             <div id="winner-awards-left" style="flex:1; max-width:280px; display:flex; flex-direction:column; gap:10px; align-items:flex-end;"></div>
             <div id="winner-podium-center" style="flex:2; max-width:550px; margin:0 auto;"></div>
             <div id="winner-awards-right" style="flex:1; max-width:280px; display:flex; flex-direction:column; gap:10px; align-items:flex-start;"></div>
@@ -868,6 +868,7 @@
         <div id="winner-replay" style="display:none; width:100%; max-width:600px; margin:12px 0;"></div>
         <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin-top:20px;">
             <button class="btn-start" onclick="rematch()" style="background:linear-gradient(90deg,var(--neon),var(--pink));">🔄 REVANCHA</button>
+            <button class="btn-start" onclick="lanzarConfeti()" style="background:linear-gradient(90deg,var(--gold),#ffaa00); color:#000;">🎉 LANZAR CONFETI</button>
             <button class="btn-start" onclick="location.reload()" style="background:#333; color:#fff; box-shadow:none;">🏠 MENÚ PRINCIPAL</button>
         </div>
     </div>
@@ -4288,8 +4289,10 @@
             var p3 = sorted[2];
 
             if (p2) {
+                var p2Avatar = p2.avatar ? '<img src="' + p2.avatar + '" style="width:60px; height:60px; border-radius:50%; border:2px solid #888; object-fit:cover; margin:4px 0;">' : '<div style="width:60px; height:60px; border-radius:50%; border:2px solid #888; background:#222; display:flex; align-items:center; justify-content:center; font-size:1.8em; margin:4px 0;">👤</div>';
                 podiumHtml += '<div class="podium-step step-2" style="display:flex; flex-direction:column; align-items:center; flex:1; max-width:140px;">' +
                     '<div style="font-size:2.2em;">🥈</div>' +
+                    p2Avatar +
                     '<div style="font-family:\'Bungee\'; color:var(--neon); font-size:1em; margin:4px 0; text-shadow:0 0 10px rgba(0,242,255,0.5); text-align:center;">' + p2.name + '</div>' +
                     '<div style="font-family:\'Bungee\'; color:#aaa; font-size:0.85em; margin-bottom:6px;">' + p2.score + ' cartas</div>' +
                     '<div style="width:100%; height:90px; background:linear-gradient(180deg, #3a3a4d 0%, #1a1a24 100%); border:2px solid #888; border-radius:10px 10px 0 0; display:flex; align-items:center; justify-content:center; font-family:\'Bungee\'; font-size:1.8em; color:#fff; box-shadow:0 0 15px rgba(255,255,255,0.2);">2</div>' +
@@ -4297,8 +4300,10 @@
             }
 
             if (p1) {
+                var p1Avatar = p1.avatar ? '<img src="' + p1.avatar + '" style="width:85px; height:85px; border-radius:50%; border:3px solid var(--gold); box-shadow:0 0 25px var(--gold); object-fit:cover; margin:4px 0; animation:pulse 1.5s infinite;">' : '<div style="width:85px; height:85px; border-radius:50%; border:3px solid var(--gold); background:#222; display:flex; align-items:center; justify-content:center; font-size:2.5em; margin:4px 0;">👤</div>';
                 podiumHtml += '<div class="podium-step step-1" style="display:flex; flex-direction:column; align-items:center; flex:1; max-width:160px; z-index:2;">' +
                     '<div style="font-size:3em; filter:drop-shadow(0 0 15px var(--gold));">👑</div>' +
+                    p1Avatar +
                     '<div style="font-family:\'Bungee\'; color:var(--gold); font-size:1.25em; margin:4px 0; text-shadow:0 0 15px var(--gold); text-align:center;">' + p1.name + '</div>' +
                     '<div style="font-family:\'Bungee\'; color:var(--neon); font-size:1em; margin-bottom:6px;">' + p1.score + ' cartas</div>' +
                     '<div style="width:100%; height:130px; background:linear-gradient(180deg, #ffd700 0%, #b8860b 100%); border:2px solid var(--gold); border-radius:12px 12px 0 0; display:flex; align-items:center; justify-content:center; font-family:\'Bungee\'; font-size:2.5em; color:#000; box-shadow:0 0 30px var(--gold);">1</div>' +
@@ -4306,8 +4311,10 @@
             }
 
             if (p3) {
+                var p3Avatar = p3.avatar ? '<img src="' + p3.avatar + '" style="width:55px; height:55px; border-radius:50%; border:2px solid #cd7f32; object-fit:cover; margin:4px 0;">' : '<div style="width:55px; height:55px; border-radius:50%; border:2px solid #cd7f32; background:#222; display:flex; align-items:center; justify-content:center; font-size:1.6em; margin:4px 0;">👤</div>';
                 podiumHtml += '<div class="podium-step step-3" style="display:flex; flex-direction:column; align-items:center; flex:1; max-width:140px;">' +
                     '<div style="font-size:2em;">🥉</div>' +
+                    p3Avatar +
                     '<div style="font-family:\'Bungee\'; color:#cd7f32; font-size:0.95em; margin:4px 0; text-align:center;">' + p3.name + '</div>' +
                     '<div style="font-family:\'Bungee\'; color:#aaa; font-size:0.8em; margin-bottom:6px;">' + p3.score + ' cartas</div>' +
                     '<div style="width:100%; height:65px; background:linear-gradient(180deg, #8c6239 0%, #4a3520 100%); border:2px solid #cd7f32; border-radius:10px 10px 0 0; display:flex; align-items:center; justify-content:center; font-family:\'Bungee\'; font-size:1.5em; color:#fff; box-shadow:0 0 10px rgba(205,127,50,0.3);">3</div>' +

@@ -1852,6 +1852,10 @@
                     </div>
                 </div>
                 <div id="wait-msg">ESPERANDO SIGUIENTE TRACK...</div>
+                <div id="bonus-banner" style="display:none; background:linear-gradient(90deg, #ffaa00, #ff0055); color:#fff; font-family:'Bungee'; font-size:0.85em; padding:10px 14px; border-radius:12px; margin:10px auto; text-align:center; box-shadow:0 0 15px rgba(255,170,0,0.5); width:100%; max-width:340px;">
+                    🎁 ¡TURNO DE CARTA BONIFICACIÓN! 🎁<br>
+                    <span style="font-size:0.8em; font-family:'Montserrat';">Acierto = +1 Carta Extra o +2 Fichas 🔵</span>
+                </div>
             </div>
 
             <!-- APUESTAS: solo visibles fuera del turno propio -->
@@ -3514,6 +3518,9 @@
                 // Banner ¡Todos Juegan!
                 var sharedBanner = document.getElementById('shared-song-player-banner');
                 if (sharedBanner) sharedBanner.style.display = (data.isSharedSong && data.gameStarted) ? 'block' : 'none';
+                // Banner Carta Bonificación
+                var bonusBanner = document.getElementById('bonus-banner');
+                if (bonusBanner) bonusBanner.style.display = (data.isBonusCard && data.gameStarted) ? 'block' : 'none';
 
                 // Reacciones: visibles para TODOS cuando la partida está activa
                 var reactionBar = document.getElementById('reaction-bar');
