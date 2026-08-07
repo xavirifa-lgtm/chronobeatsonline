@@ -1388,10 +1388,19 @@
         var duelResult = null; // Para mensajes de fin de duelo
         var duelTriggered = false; // Bloqueo de un duelo por turno
 
-        document.getElementById('join-code').innerText = roomCode;
+        function ensureRoomCodeUI() {
+            if (!roomCode) {
+                var savedRoom = localStorage.getItem('CB_RoomCode');
+                roomCode = savedRoom || Math.random().toString(36).substring(2, 8).toUpperCase();
+                localStorage.setItem('CB_RoomCode', savedRoom ? savedRoom : roomCode);
+            }
+            var el1 = document.getElementById('join-code');
+            if (el1) el1.innerText = roomCode;
+            var el2 = document.getElementById('live-code-text');
+            if (el2) el2.innerText = roomCode;
+        }
 
-        // Generar QR con el código de sala
-        var qrGenerated = false;
+        // Generar QR con el código de sala (con fallback garantizado)
         function copyPlayerLink(e) {
             e.preventDefault();
             var link = document.getElementById('player-link');
@@ -1416,31 +1425,37 @@
         }
 
         function generateQR() {
-            if (qrGenerated) return;
+            ensureRoomCodeUI();
             var qrEl = document.getElementById('qr-code');
-            if (qrEl && typeof QRCode !== 'undefined') {
-                qrEl.innerHTML = '';
-                // Generar URL directa al player con el código ya incluido
-                var baseUrl = window.location.href.replace('host_digital_mix.html', 'player_digital_mix.html');
-                baseUrl = baseUrl.split('?')[0]; // quitar parámetros del host
-                var playerUrl = baseUrl + '?sala=' + roomCode;
-                new QRCode(qrEl, {
-                    text: playerUrl,
-                    width: 160,
-                    height: 160,
-                    colorDark: '#000000',
-                    colorLight: '#ffffff',
-                    correctLevel: QRCode.CorrectLevel.M
-                });
-                qrGenerated = true;
-                // Mostrar también el enlace copiable
-                var linkEl = document.getElementById('player-link');
-                if (linkEl) {
-                    linkEl.href = playerUrl;
-                    linkEl.innerText = '🔗 Copiar enlace jugador';
-                    linkEl.style.display = 'block';
+            if (!qrEl) return;
+            var baseUrl = window.location.href.replace('host_digital_mix.html', 'player_digital_mix.html').split('?')[0];
+            var playerUrl = baseUrl + '?sala=' + roomCode;
+
+            var linkEl = document.getElementById('player-link');
+            if (linkEl) {
+                linkEl.href = playerUrl;
+                linkEl.innerText = '🔗 Copiar enlace jugador';
+                linkEl.style.display = 'block';
+            }
+
+            qrEl.innerHTML = '';
+            if (typeof QRCode !== 'undefined') {
+                try {
+                    new QRCode(qrEl, {
+                        text: playerUrl,
+                        width: 160,
+                        height: 160,
+                        colorDark: '#000000',
+                        colorLight: '#ffffff',
+                        correctLevel: QRCode.CorrectLevel.M
+                    });
+                    return;
+                } catch(e) {
+                    console.warn('QRCode JS throw:', e);
                 }
             }
+            // Fallback 100% garantizado con API de imagen QR
+            qrEl.innerHTML = '<img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=' + encodeURIComponent(playerUrl) + '" style="width:160px;height:160px;display:block;margin:0 auto;border-radius:8px;border:2px solid var(--neon);box-shadow:0 0 15px rgba(0,242,255,0.4);" alt="QR ' + roomCode + '">';
         }
 
         function toggleLiveQR() {
@@ -1473,8 +1488,11 @@
                 }
             }
         }
-        // Intentar generar al cargar y también cuando el peer esté listo
-        window.addEventListener('load', function() { setTimeout(generateQR, 500); });
+
+        // Ejecutar inmediatamente y al cargar
+        ensureRoomCodeUI();
+        window.addEventListener('DOMContentLoaded', generateQR);
+        window.addEventListener('load', function() { setTimeout(generateQR, 200); });
 
         // Eliminadas funciones de YT API
         function onYouTubeIframeAPIReady() {
@@ -1754,11 +1772,18 @@
                 });
             });
             peer.on('error', function (err) {
+                console.warn("PeerJS Host error:", err.type);
                 if (err.type === 'unavailable-id') {
-                    alert("El ID de sala ya existe o hay un error. Probando uno nuevo...");
-                    window.location.reload();
+                    console.warn("ID de sala ocupado (" + roomCode + "), generando nuevo código automáticamente...");
+                    roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+                    localStorage.setItem('CB_RoomCode', roomCode);
+                    ensureRoomCodeUI();
+                    generateQR();
+                    setTimeout(function() {
+                        initPeer();
+                    }, 400);
                 } else {
-                    alert("Error PeerJS Host: " + err.type);
+                    console.error("Error PeerJS Host: " + err.type);
                 }
             });
         }

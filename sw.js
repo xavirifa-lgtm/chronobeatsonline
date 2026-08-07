@@ -1,5 +1,5 @@
-// 🔥🎧 ChronoBeats Online — Service Worker v4.95 (FIXED HOST DASHBOARD, PWA PROFILE & REMOVED ROULETTE) 🎧🔥
-const CACHE_NAME = 'chronobeats-v4-13';
+// 🔥🎧 ChronoBeats Online — Service Worker v4.96 (AUTOMATIC FAIL-SAFE ROOM CODE & QR) 🎧🔥
+const CACHE_NAME = 'chronobeats-v4-14';
 
 // Recursos propios a pre-cachear en la instalación (pequeños, sin riesgo)
 const PRECACHE_URLS = [
