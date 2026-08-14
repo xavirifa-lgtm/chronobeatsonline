@@ -2906,6 +2906,20 @@
                         addEvent('<span class="ev-name">' + p.name + '</span> <span class="ev-info">retó a ' + target.name + ' 🔫</span>');
                         trackSabotage(p.id, target.id);
 
+                        // Red de seguridad desde el INICIO: si en 90s el duelo no se ha
+                        // resuelto (p.ej. NINGUNO de los dos contesta), se fuerza la
+                        // resolución para no dejar la partida colgada en fase DUEL. Antes el
+                        // timeout solo se armaba cuando UNO ya había contestado.
+                        currentDuel._timeout = setTimeout(function() {
+                            if (currentDuel && !currentDuel._resolved) {
+                                if (currentDuel.challengerYear === null) currentDuel.challengerYear = 9999;
+                                if (currentDuel.targetYear === null) currentDuel.targetYear = 9999;
+                                currentDuel._resolved = true;
+                                document.getElementById('host-instructions').innerHTML = "<div style='color:#ff4444; font-family:Bungee;'>TIEMPO AGOTADO EN DUELO</div>";
+                                revealData();
+                            }
+                        }, 90000);
+
                         syncState();
                     }
                     break;
@@ -2922,25 +2936,14 @@
                         
                         // Si ambos han contestado, revelar automáticamente
                         if (currentDuel.challengerYear !== null && currentDuel.targetYear !== null) {
+                            currentDuel._resolved = true;
+                            if (currentDuel._timeout) { clearTimeout(currentDuel._timeout); currentDuel._timeout = null; }
                             var audioContainer = document.getElementById('audio-player-container');
                             if (audioContainer) audioContainer.innerHTML = '';
                             document.getElementById('host-instructions').innerHTML = "<div style='color:var(--gold); font-family:Bungee; font-size:2em;'>¡DUELO FINALIZADO!</div><div style='font-size:1.2em;'>Calculando resultados...</div>";
                             revealData();
                         } else {
-                            // Timeout de seguridad: si en 60s no contesta el otro, forzar resolución
-                            if (!currentDuel._timeout) {
-                                currentDuel._timeout = setTimeout(function() {
-                                    if (currentDuel) {
-                                        // Dar año imposible al que no contestó
-                                        if (currentDuel.challengerYear === null) currentDuel.challengerYear = 9999;
-                                        if (currentDuel.targetYear === null) currentDuel.targetYear = 9999;
-                                        var audioContainer = document.getElementById('audio-player-container');
-                                        if (audioContainer) audioContainer.innerHTML = '';
-                                        document.getElementById('host-instructions').innerHTML = "<div style='color:#ff4444; font-family:Bungee;'>TIEMPO AGOTADO EN DUELO</div>";
-                                        revealData();
-                                    }
-                                }, 60000);
-                            }
+                            // (El timeout de seguridad ya se armó al iniciar el duelo.)
                         }
                         syncState();
                     }
