@@ -1226,6 +1226,14 @@
         var segundosAcumulados = 0;
         var momentoDeInicio = 0;
         var isPlaying = false;
+        // Marca si la canción del turno actual ya ha sonado (aunque luego se pause).
+        // Farol y Doble o Nada deben decidirse A CIEGAS, antes de reproducir; con solo
+        // comprobar !isPlaying se podían activar tras pausar habiendo escuchado la canción.
+        var songPlayedThisTurn = false;
+        // Cuando se recrea el reproductor de YouTube en una revancha, hay que esperar a que
+        // esté listo (onPlayerReady) antes de arrancar el primer turno; si no, cueVideoById
+        // se llamaría sobre un player aún no inicializado y no sonaría nada.
+        var _startTurnOnReady = false;
         var isMuted = false;
         var muteTimeRemaining = 0;
         var muteIntervalTimer = null;
@@ -1354,11 +1362,16 @@
 
         function onPlayerReady(event) {
             console.log("YouTube Player Listo");
+            if (_startTurnOnReady) {
+                _startTurnOnReady = false;
+                nextTurn();
+            }
         }
 
         function onPlayerStateChange(event) {
             if (event.data === YT.PlayerState.PLAYING) {
                 isPlaying = true;
+                songPlayedThisTurn = true;
                 momentoDeInicio = Date.now();
                 document.getElementById('host-instructions').innerText = isMuted ? "REPRODUCIENDO (MUTE)" : "REPRODUCIENDO";
                 syncState();
@@ -1453,6 +1466,10 @@
             if (isRevealed) return; // ya procesado
             isPlaying = false;
 
+            // ¡TODOS JUEGAN!: si la canción termina sin que nadie haya acertado, se cierra
+            // la ronda sin ganador (nadie se lleva la carta) y sin cobrar a nadie.
+            if (isSharedSong) { finalizarSharedSongSinGanador(); return; }
+
             if (activeGuess === null) {
                 // Caso 1: no eligió slot — tiempo agotado sin respuesta
                 var phrase = timesUpPhrases[Math.floor(Math.random() * timesUpPhrases.length)];
@@ -1464,45 +1481,13 @@
                 trackFail(players[activePlayerIdx].id);
                 // ── HISTORIAL: marcar fallo ──
                 if (songHistory.length > 0) { songHistory[songHistory.length-1].correct = false; songHistory[songHistory.length-1].fails++; }
-                // ── SEGURO DE FALLO: bypass de efectos negativos ──
-                if (failSafeActive) {
-                    jinxActive = false;
-                    // isDoubleOrNothing fallo no aplica
-                    isDoubleOrNothing = false;
-                    // Supervivencia: no pierde vida
-                    addEvent('<span class="ev-info">🛡️ SEGURO — ' + players[activePlayerIdx].name + ' no sufre penalizaciones</span>');
+                // ── PENALIZACIONES DE FALLO (Farol / Doble o Nada / Jinx + maldiciones) ──
+                // Mismo criterio que la validación manual: el Seguro cancela las tres y
+                // también protege la vida en Supervivencia.
+                var _seguroTO = aplicarPenalizacionesDeFallo(players[activePlayerIdx]);
+                if (gameMode === 'supervivencia' && !_seguroTO) {
+                    loseLife(players[activePlayerIdx], null);
                 }
-                failSafeActive = false;
-                // ── SEGURO DE FALLO ──
-                if (failSafeActive) { jinxActive = false; isDoubleOrNothing = false; failSafeActive = false; }
-                // ── JINX COLECTIVO: fallo con jinx activo = pierde carta extra ──
-                if (jinxActive && players[activePlayerIdx].cards.length > 1) {
-                    players[activePlayerIdx].cards.pop();
-                    players[activePlayerIdx].score = Math.max(1, players[activePlayerIdx].score - 1);
-                    addEvent('<span class="ev-bad">💀 JINX — ' + players[activePlayerIdx].name + ' pierde carta extra</span>');
-                }
-                jinxActive = false;
-                justSucceeded = false;
-                // ── MALDICIONES SILENCIOSAS: el activo falló, los que maldijeron cobran ──
-                silentCurses.forEach(function(curse) {
-                    var curser = players.find(function(pl) { return pl.id === curse.playerId; });
-                    if (curser) {
-                        updateTokens(curser, 2);
-                        try { if (connections[curse.playerId]) connections[curse.playerId].send({ type: 'BET_RESULT', msg: '💀 ¡Maldición exitosa! +2🔵' }); } catch(e) {}
-                    }
-                });
-                silentCurses = [];
-
-                // Doble o nada: fallo → perder una carta
-                if (isDoubleOrNothing) {
-                    if (players[activePlayerIdx].cards.length > 1) {
-                        players[activePlayerIdx].cards.pop();
-                        players[activePlayerIdx].score = Math.max(1, players[activePlayerIdx].score - 1);
-                        addEvent('<span class="ev-bad">🎲 DOBLE O NADA — ' + players[activePlayerIdx].name + ' falla: pierde una carta</span>', '🎲');
-                    }
-                    isDoubleOrNothing = false;
-                }
-                if (gameMode === 'supervivencia') loseLife(players[activePlayerIdx], null);
                 refundBets();
                 stopCountdown();
                 syncState();
@@ -1962,6 +1947,7 @@
         function nextTurn() {
             stopCountdown();
             resetLightning();
+            songPlayedThisTurn = false; // nueva canción del turno: aún no ha sonado
             // ── ¿El turno que acaba de terminar era "¡JUGAMOS TODOS!"? ──
             // Si lo era, su dueño repite turno (le "robaron" su canción todos los rivales)
             var _repeatOwnerId = (isSharedSong && sharedSongOwnerId) ? sharedSongOwnerId : null;
@@ -2423,43 +2409,19 @@
                     }
                     break;
 
-                case 'REMOTE_REVEAL':
-                    revealCard();
-                    break;
-
-                case 'REMOTE_CORRECT':
-                    validateGuess(true);
-                    break;
-
-                case 'REMOTE_WRONG':
-                    validateGuess(false);
-                    break;
-
-                case 'REMOTE_NEXT_TURN':
-                    nextTurn();
-                    break;
-
+                // NOTA: aquí había casos REMOTE_REVEAL, REMOTE_CORRECT, REMOTE_WRONG,
+                // REMOTE_NEXT_TURN, REMOTE_KING_RESOLVE, REMOTE_DUEL_FINISH,
+                // REMOTE_TOGGLE_LIGHTNING y REMOTE_SHARED_SONG que llamaban a funciones
+                // inexistentes (revealCard, validateGuess, toggleLightningMode,
+                // triggerSharedSong, resolveKingGuess, finishDuelRound) y, al estar
+                // duplicados, TAPABAN a las versiones correctas y con guardas de más abajo
+                // (un switch ejecuta el primer case que coincide). Se han eliminado para que
+                // el mando del móvil vuelva a funcionar con las versiones buenas.
                 case 'REMOTE_REPORT_INVALID':
                     if (!window.brokenVideoHandling) {
                         window.brokenVideoHandling = true;
                         triggerBrokenVideoAutoSkip();
                     }
-                    break;
-
-                case 'REMOTE_TOGGLE_LIGHTNING':
-                    toggleLightningMode();
-                    break;
-
-                case 'REMOTE_SHARED_SONG':
-                    triggerSharedSong();
-                    break;
-
-                case 'REMOTE_KING_RESOLVE':
-                    if (typeof resolveKingGuess === 'function') resolveKingGuess();
-                    break;
-
-                case 'REMOTE_DUEL_FINISH':
-                    if (typeof finishDuelRound === 'function') finishDuelRound();
                     break;
 
                 case 'PLAY':
@@ -2494,6 +2456,10 @@
                     }
                     break;
                 case 'STOP':
+                    // En "¡TODOS JUEGAN!" el activo es un jugador más de la carrera: STOP no
+                    // debe revelar la carta (delataría la respuesta a todos) ni disparar la
+                    // validación individual. La ronda se resuelve al primer acierto o por tiempo.
+                    if (isSharedSong) { break; }
                     var isTeamMemberStop = gameMode === 'equipos' && players.some(function(pl){
                         return pl.id === peerId && pl.team === teamTurn;
                     });
@@ -3174,10 +3140,28 @@
                     for (var pid in currentBets) { if (currentBets[pid] == valNum) slotOccupiedByBet = true; }
 
                     var maxSlotGuess = players[activePlayerIdx] ? players[activePlayerIdx].cards.length : 0;
-                    // Canción compartida: no-activos se registran como BET
-                    // (solo en turno NORMAL: antes podía cobrar fichas en fase de rey/duelo)
-                    if (isSharedSong && (!turnPhase || turnPhase === 'NORMAL') && p && p.id !== players[activePlayerIdx].id && !currentBets[peerId] && p.tokens >= 1 && valNum >= 0 && valNum <= maxSlotGuess) {
-                        currentBets[peerId] = valNum; updateTokens(p, -1); syncState(); break;
+                    // ── ¡TODOS JUEGAN!: cualquiera (activo o no) juega UN intento GRATIS.
+                    // El primer acierto se lleva la carta al instante; fallar bloquea tu
+                    // intento pero NO cuesta ficha (como colocar en tu turno normal).
+                    if (isSharedSong && (!turnPhase || turnPhase === 'NORMAL') && p) {
+                        var _esActivo = (p.id === players[activePlayerIdx].id);
+                        var _yaJugo = _esActivo ? (activeGuess !== null) : (currentBets[peerId] !== undefined);
+                        if (_yaJugo) break;                                   // un solo intento
+                        if (valNum < 0 || valNum > maxSlotGuess) break;
+                        // un hueco ya intentado por otro siempre sería fallo: no dejar pisarlo
+                        if (slotOccupiedByBet || (activeGuess !== null && activeGuess == valNum)) break;
+                        if (isSlotCorrect(valNum, songs[currentSongIdx].year, players[activePlayerIdx].cards)) {
+                            resolverSharedSongGanador(p, valNum);             // ¡primer acierto gana!
+                        } else {
+                            if (_esActivo) activeGuess = valNum; else currentBets[peerId] = valNum;
+                            addEvent('<span class="ev-name">' + p.name + '</span> pincha su hueco en ¡TODOS JUEGAN! ❌');
+                            var _todosJugaron = players.every(function(pl){
+                                return (pl.id === players[activePlayerIdx].id) ? (activeGuess !== null) : (currentBets[pl.id] !== undefined);
+                            });
+                            if (_todosJugaron) { finalizarSharedSongSinGanador(); }
+                            else { syncState(); }
+                        }
+                        break;
                     }
                     if (p && p.id === players[activePlayerIdx].id && !slotOccupiedByBet && activeGuess === null && valNum >= 0 && valNum <= maxSlotGuess) {
                         console.log("[OK] Marca del activo fijada en", valNum);
@@ -3534,7 +3518,7 @@
 
                 case 'BRAG':
                     var p = players.find(function(pl){ return pl.id === peerId; });
-                    if (p && isMyTurnPeer(peerId) && !isBragging && !isPlaying && !isRevealed && p.tokens >= 4) {
+                    if (p && isMyTurnPeer(peerId) && !isBragging && !isPlaying && !songPlayedThisTurn && !isRevealed && p.tokens >= 4) {
                         updateTokens(p, -4);
                         isBragging = true;
                         if (!stats.braggingAttempts[peerId]) stats.braggingAttempts[peerId] = 0;
@@ -3562,7 +3546,7 @@
                 case 'DOUBLE_OR_NOTHING':
                     // Solo el jugador activo puede activar doble o nada (coste 4🔵, antes de reproducir)
                     var _donP = players.find(function(pl){ return pl.id === peerId; });
-                    if (players[activePlayerIdx] && peerId === players[activePlayerIdx].id && !isPlaying && !isRevealed && !isDoubleOrNothing && _donP && _donP.tokens >= 4) {
+                    if (players[activePlayerIdx] && peerId === players[activePlayerIdx].id && !isPlaying && !songPlayedThisTurn && !isRevealed && !isDoubleOrNothing && _donP && _donP.tokens >= 4) {
                         updateTokens(_donP, -4);
                         isDoubleOrNothing = true;
                         addEvent('<span class="ev-info">🎲 ' + players[activePlayerIdx].name + ' activa DOBLE O NADA</span>');
@@ -3639,6 +3623,64 @@
                 players[activePlayerIdx].canReload = true;
                 nextTurn();
             }
+        }
+
+        // ── RESOLUCIÓN INSTANTÁNEA DE "¡TODOS JUEGAN!" ──
+        // El primer jugador (activo o no) que acierta el hueco correcto se lleva la carta
+        // al momento y termina la ronda. Los intentos fallidos NO cuestan ficha (igual que
+        // colocar en tu propio turno). Antes la ronda dependía de que el activo fallase a
+        // mano, o se perdía por completo si se agotaba el tiempo.
+        function resolverSharedSongGanador(winner, slot) {
+            if (!winner) return;
+            isRevealed = true;
+            var s = songs[currentSongIdx];
+            if (s) {
+                document.getElementById('ui-card-artist').innerText = s.artist;
+                document.getElementById('ui-card-song').innerText = s.song;
+                document.getElementById('ui-card-year').innerText = s.year;
+                songHistory.push({ turn: turnCounter, id: s.id, artist: s.artist || '?', song: s.song || '?', year: s.year || '?', correct: true, playerName: winner.name, fails: 0 });
+                winner.score++;
+                winner.cards.push(parseInt(s.year));
+                winner.cards.sort(function(a,b){ return a - b; });
+            }
+            trackCorrect(winner.id);
+            addEvent('<span class="ev-name">' + winner.name + '</span> <span class="ev-good">¡ACIERTA el primero y se lleva la carta en ¡TODOS JUEGAN!! 🎵</span>', '🎵');
+            if (player && player.pauseVideo) player.pauseVideo();
+            isPlaying = false;
+            stopCountdown();
+            document.getElementById('host-instructions').innerHTML = "<span style='color:#00ff00; font-size:1.4em; font-family:Bungee;'>🎵 " + winner.name + " SE LLEVA LA CARTA</span>";
+            for (var _c in connections) {
+                try { connections[_c].send({ type: 'BET_RESULT', msg: '🎵 ' + winner.name + ' acertó el primero y se llevó la carta' }); } catch(e) {}
+            }
+            syncState();
+            if (checkScoreVictory(winner)) return; // en normal/supervivencia puede ganar ya
+            setTimeout(function() {
+                activePlayerIdx = (activePlayerIdx + 1) % players.length;
+                players[activePlayerIdx].canReload = true;
+                nextTurn(); // nextTurn respeta la repetición de turno del dueño del compartido
+            }, 3500);
+        }
+
+        function finalizarSharedSongSinGanador() {
+            isRevealed = true;
+            var s = songs[currentSongIdx];
+            if (s) {
+                document.getElementById('ui-card-artist').innerText = s.artist;
+                document.getElementById('ui-card-song').innerText = s.song;
+                document.getElementById('ui-card-year').innerText = s.year;
+                songHistory.push({ turn: turnCounter, id: s.id, artist: s.artist || '?', song: s.song || '?', year: s.year || '?', correct: false, playerName: '(todos)', fails: 0 });
+            }
+            if (player && player.pauseVideo) player.pauseVideo();
+            isPlaying = false;
+            stopCountdown();
+            addEvent('<span class="ev-bad">Nadie acertó en ¡TODOS JUEGAN! — la carta se descarta</span>');
+            document.getElementById('host-instructions').innerHTML = "<span style='color:#ff4444; font-size:1.3em;'>Nadie acertó — nadie se lleva la carta</span>";
+            syncState();
+            setTimeout(function() {
+                activePlayerIdx = (activePlayerIdx + 1) % players.length;
+                players[activePlayerIdx].canReload = true;
+                nextTurn();
+            }, 3500);
         }
 
         function refundBets() {
@@ -3727,6 +3769,15 @@
                 return;
             }
 
+            // ── MODO EQUIPOS: la resolución es por votos (validateTeamResult), no por los
+            // botones SÍ/NO individuales. Si los mostráramos y el host los pulsara, correría
+            // validateResult sobre el jugador activo y corromperia la puntuación de equipo.
+            if (gameMode === 'equipos') {
+                document.getElementById('validation-buttons').style.display = 'none';
+                syncState();
+                return;
+            }
+
             // Validación automática
             var activeP = players[activePlayerIdx];
             var isCorrect = false;
@@ -3759,6 +3810,68 @@
         // mando. No hay rol de "juez": solo hace falta ser un jugador de la partida.
         function puedeUsarMando(peerId) {
             return players.some(function (pl) { return pl.id === peerId; });
+        }
+
+        // ── PENALIZACIONES DE FALLO UNIFICADAS ──
+        // Antes, el castigo del Farol (−2) solo se aplicaba en la validación manual y el
+        // de Doble o Nada (−1) solo en el fallo por tiempo, así que cada uno se podía
+        // esquivar eligiendo cómo fallar. Además el Seguro de Fallo no cubría el Farol ni
+        // la vida en Supervivencia por tiempo. Esta función centraliza TODO: el Seguro
+        // cancela Farol, Doble o Nada y Jinx; si no hay Seguro, se aplican los tres.
+        // Devuelve true si el Seguro estaba activo (para que el llamador NO quite vida).
+        function aplicarPenalizacionesDeFallo(activeP) {
+            if (!activeP) { failSafeActive = false; isBragging = false; isDoubleOrNothing = false; jinxActive = false; justSucceeded = false; return false; }
+            var seguro = failSafeActive;
+            if (seguro) {
+                if (isBragging || isDoubleOrNothing || jinxActive) {
+                    addEvent('<span class="ev-info">🛡️ SEGURO — ' + activeP.name + ' no sufre penalizaciones extra</span>');
+                }
+                isBragging = false;
+                isDoubleOrNothing = false;
+                jinxActive = false;
+                failSafeActive = false;
+            } else {
+                failSafeActive = false;
+                // FAROLERO: si farolea y falla, −2 cartas
+                if (isBragging) {
+                    for (var _bf = 0; _bf < 2; _bf++) {
+                        if (activeP.cards.length > 1) {
+                            activeP.cards.pop();
+                            activeP.score = Math.max(1, activeP.score - 1);
+                        }
+                    }
+                    addEvent('<span class="ev-bad">🃏 ¡FAROLERO CAZADO! ' + activeP.name + ' pierde 2 cartas</span>', '🃏');
+                    isBragging = false;
+                }
+                // DOBLE O NADA: fallo → −1 carta
+                if (isDoubleOrNothing) {
+                    if (activeP.cards.length > 1) {
+                        activeP.cards.pop();
+                        activeP.score = Math.max(1, activeP.score - 1);
+                        addEvent('<span class="ev-bad">🎲 DOBLE O NADA — ' + activeP.name + ' falla: pierde una carta</span>', '🎲');
+                    }
+                    isDoubleOrNothing = false;
+                }
+                // JINX COLECTIVO: fallo con jinx activo → −1 carta
+                if (jinxActive && activeP.cards.length > 1) {
+                    activeP.cards.pop();
+                    activeP.score = Math.max(1, activeP.score - 1);
+                    addEvent('<span class="ev-bad">💀 JINX — ' + activeP.name + ' pierde carta extra</span>');
+                }
+                jinxActive = false;
+            }
+            justSucceeded = false;
+            // MALDICIONES SILENCIOSAS: el activo falló → los que maldijeron cobran.
+            // (El Seguro protege al activo de sus propias pérdidas, no impide el premio ajeno.)
+            silentCurses.forEach(function(curse) {
+                var curser = players.find(function(pl) { return pl.id === curse.playerId; });
+                if (curser) {
+                    updateTokens(curser, 2);
+                    try { if (connections[curse.playerId]) connections[curse.playerId].send({ type: 'BET_RESULT', msg: '💀 ¡Maldición exitosa! +2🔵' }); } catch(e) {}
+                }
+            });
+            silentCurses = [];
+            return seguro;
         }
 
         function validateResult(isCardOk, isTokenOk) {
@@ -4002,45 +4115,9 @@
             } else {
                 addEvent('<span class="ev-name">' + players[activePlayerIdx].name + '</span> <span class="ev-bad">falló ❌</span>');
                 trackFail(players[activePlayerIdx].id);
-                // ── FAROLERO: si farolea y falla, −2 cartas ──
-                if (isBragging) {
-                    for (var _bf = 0; _bf < 2; _bf++) {
-                        if (players[activePlayerIdx].cards.length > 1) {
-                            players[activePlayerIdx].cards.pop();
-                            players[activePlayerIdx].score = Math.max(1, players[activePlayerIdx].score - 1);
-                        }
-                    }
-                    addEvent('<span class="ev-bad">🃏 ¡FAROLERO CAZADO! ' + players[activePlayerIdx].name + ' pierde 2 cartas</span>', '🃏');
-                    isBragging = false;
-                }
-                // ── SEGURO DE FALLO: bypass de penalizaciones ──
-                var _seguroActivo = failSafeActive;
-                if (failSafeActive) {
-                    jinxActive = false;
-                    isDoubleOrNothing = false;
-                    failSafeActive = false;
-                    addEvent('<span class="ev-info">🛡️ SEGURO — ' + players[activePlayerIdx].name + ' no sufre penalizaciones</span>');
-                } else { failSafeActive = false; }
-                // ── JINX COLECTIVO: fallo con jinx activo = pierde carta extra ──
-                if (jinxActive && players[activePlayerIdx].cards.length > 1) {
-                    players[activePlayerIdx].cards.pop();
-                    players[activePlayerIdx].score = Math.max(1, players[activePlayerIdx].score - 1);
-                    addEvent('<span class="ev-bad">💀 JINX — ' + players[activePlayerIdx].name + ' pierde carta extra</span>');
-                }
-                jinxActive = false;
-                justSucceeded = false;
-                // ── MALDICIONES SILENCIOSAS: el activo falló, cobran ──
-                silentCurses.forEach(function(curse) {
-                    var curser = players.find(function(pl) { return pl.id === curse.playerId; });
-                    if (curser) {
-                        updateTokens(curser, 2);
-                        try { if (connections[curse.playerId]) connections[curse.playerId].send({ type: 'BET_RESULT', msg: '💀 ¡Maldición exitosa! +2🔵' }); } catch(e) {}
-                    }
-                });
-                silentCurses = [];
-                // Modo supervivencia: perder vida al fallar.
-                // El SEGURO DE FALLO protege también de esto (antes no lo hacía,
-                // pese a que las reglas lo prometían explícitamente).
+                // ── PENALIZACIONES DE FALLO (Farol / Doble o Nada / Jinx + maldiciones) ──
+                var _seguroActivo = aplicarPenalizacionesDeFallo(players[activePlayerIdx]);
+                // Modo supervivencia: perder vida al fallar (el Seguro también protege esto).
                 if (gameMode === 'supervivencia' && !_seguroActivo) {
                     loseLife(players[activePlayerIdx], null);
                 }
@@ -4131,6 +4208,16 @@
 
             // ── ESTADÍSTICAS RICAS ──
             var sorted = players.slice().sort(function(a,b) { return b.score - a.score; });
+            // El ganador NO siempre es el de más cartas: en Supervivencia gana el último
+            // vivo y en Modo Rey el que supera el desafío, aunque otro rival tenga más
+            // cartas. Antes el podio se ordenaba solo por score, así que el nº1 mostraba a
+            // otro jugador. Fijamos al ganador real en cabeza. (En Equipos 'name' es el
+            // nombre del equipo y no coincide con ningún jugador, así que no se altera.)
+            var _winnerObj = players.find(function(p){ return p.name === name; });
+            if (_winnerObj) {
+                sorted = sorted.filter(function(p){ return p !== _winnerObj; });
+                sorted.unshift(_winnerObj);
+            }
             var duration = stats.startTime ? Math.round((Date.now() - stats.startTime) / 60000) : '?';
 
             // Calcular premios especiales
@@ -4627,6 +4714,7 @@
                         return Object.keys(set);
                     })(),
                     isPlaying: isPlaying,
+                    songPlayedThisTurn: songPlayedThisTurn,
                     isMuted: isMuted,
                     muteTimeRemaining: muteTimeRemaining,
                     panicActive: panicActive,
@@ -5330,7 +5418,24 @@
 
             gameStarted = true;
             requestWakeLock();
-            nextTurn();
+
+            // Reconstruir el reproductor de YouTube. Al ganar, showWinner() destruye el
+            // player (player.destroy()) y además el iframe de la canción de victoria
+            // sobreescribe el innerHTML de #player-container, eliminando el
+            // <div id="youtube-player">. Sin reconstruirlo, la revancha se queda sin música.
+            var _pcRe = document.getElementById('player-container');
+            if (_pcRe) {
+                _pcRe.style.display = 'block';
+                _pcRe.innerHTML = '<div id="youtube-player"></div>';
+            }
+            player = null;
+            if (typeof YT !== 'undefined' && YT && YT.Player) {
+                _startTurnOnReady = true;           // nextTurn() se lanza en onPlayerReady
+                onYouTubeIframeAPIReady();           // recrea el player sobre el div nuevo
+            } else {
+                // Fallback improbable (API de YT no disponible): arrancar igualmente
+                nextTurn();
+            }
         }
 
         // ── MODO SUPERVIVENCIA ──

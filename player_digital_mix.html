@@ -1609,7 +1609,7 @@
                 <p><strong>• 🎲 Doble o Nada (4🔵):</strong> Acierto = +2 cartas. Fallo = pierdes 1 carta ya colocada.</p>
                 <p><strong>• 🛡️ Seguro de Fallo (2🔵):</strong> Evita penalizaciones extra en caso de fallo.</p>
                 <p><strong>• 🃏 Farolero / Brag (4🔵):</strong> Acierto = +3 cartas. Fallo = pierdes 2 cartas ya colocadas.</p>
-                <p><strong>• ⚔️ Retar a Duelo (2🔵):</strong> Reta al jugador activo a adivinar el año exacto.</p>
+                <p><strong>• ⚔️ Retar a Duelo (3🔵):</strong> Reta al jugador activo a adivinar el año exacto.</p>
             `,
             tokens: `
                 <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:0; font-size:1.3em;">🔵 FICHAS Y ECONOMÍA</h3>
@@ -1916,7 +1916,7 @@
                 <div id="sabotage-grid">
                     <button class="spec-btn" id="btn-sabotage-mute" style="background:var(--bg); border-color:#ff0055; color:#ff0055;" onclick="soundMute();send('SABOTAGE_MUTE')">MUTE 15s (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
                     <button class="spec-btn" id="btn-sabotage-buzzer" style="background:var(--bg); border-color:#00ff00; color:#00ff00;" onclick="send('SABOTAGE_BUZZER')">¡ZUMBIDO! (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
-                    <button class="spec-btn" id="btn-sabotage-duel" style="background:var(--bg); border:2px dashed var(--gold); color:var(--gold);" onclick="if(lastState && lastState.myTokens >= 3) { send('SABOTAGE_DUEL'); } else { showCustomAlert('Necesitas 3 fichas para retar a duelo.'); }">🔫 DUELO 🔫 (1 <span class="neon-chip" style="width:10px;height:10px; background:var(--gold);"></span>)</button>
+                    <button class="spec-btn" id="btn-sabotage-duel" style="background:var(--bg); border:2px dashed var(--gold); color:var(--gold);" onclick="if(lastState && lastState.myTokens >= 3) { send('SABOTAGE_DUEL'); } else { showCustomAlert('Necesitas 3 fichas para retar a duelo.'); }">🔫 DUELO 🔫 (3 <span class="neon-chip" style="width:10px;height:10px; background:var(--gold);"></span>)</button>
                     <button class="spec-btn" id="btn-sabotage-veto" style="background:var(--bg); border-color:#ff8800; color:#ff8800;" onclick="send('SABOTAGE_VETO')">VETO CAMBIAR (1 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
                     <button class="spec-btn" id="btn-sabotage-skip" style="background:var(--bg); border-color:#ff00ff; color:#ff00ff;" onclick="soundSkip();send('SABOTAGE_FORCE_SKIP')">FORZAR SALTO (3 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
                     <button class="spec-btn" id="btn-sabotage-panic" style="background:var(--bg); border-color:#ff0000; color:#ff0000;" onclick="soundPanic();send('SABOTAGE_PANIC')">PÁNICO 10s (2 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
@@ -3413,7 +3413,7 @@
                 var bragBtn = document.getElementById('btn-brag');
                 if (bragBtn) {
                     var myPlBrag = data.players && data.players.find(function(pl){ return pl.id === myId; });
-                    bragBtn.style.display = (isMyTurn && data.gameStarted && !data.isPlaying && !data.isRevealed && !data.isBragging && myPlBrag && myPlBrag.tokens >= 4) ? 'block' : 'none';
+                    bragBtn.style.display = (isMyTurn && data.gameStarted && !data.isPlaying && !data.songPlayedThisTurn && !data.isRevealed && !data.isBragging && myPlBrag && myPlBrag.tokens >= 4) ? 'block' : 'none';
                     if (data.isBragging && isMyTurn) {
                         bragBtn.style.display = 'block';
                         bragBtn.disabled = true;
@@ -3542,7 +3542,7 @@
                 var donBtn = document.getElementById('btn-double-or-nothing');
                 if (donBtn) {
                     var myPlDon = data.players && data.players.find(function(pl){ return pl.id === myId; });
-                    var showDon = isMyTurn && data.gameStarted && !data.isDoubleOrNothing && !data.isRevealed && !data.isPlaying && myPlDon && myPlDon.tokens >= 4;
+                    var showDon = isMyTurn && data.gameStarted && !data.isDoubleOrNothing && !data.isRevealed && !data.isPlaying && !data.songPlayedThisTurn && myPlDon && myPlDon.tokens >= 4;
                     donBtn.style.display = showDon ? 'block' : (data.isDoubleOrNothing && isMyTurn ? 'block' : 'none');
                     if (data.isDoubleOrNothing) {
                         donBtn.className = 'active';
@@ -3787,10 +3787,24 @@
                         btnDuel.disabled = (data.myTokens < 3 || isActionLocked || data.duelTriggered || data.turnPhase === 'DUEL');
                         if (data.duelTriggered) {
                             btnDuel.style.opacity = '0.5';
+                            btnDuel.style.borderColor = '#444';
+                            btnDuel.style.color = '#444';
                             btnDuel.innerText = "DUELO INICIADO";
                         } else {
-                            btnDuel.style.opacity = '1';
-                            btnDuel.innerHTML = '🔥 DUELO 🔥 (1 <span class="neon-chip" style="width:10px;height:10px; background:var(--gold);"></span>)';
+                            btnDuel.innerHTML = '🔫 DUELO 🔫 (3 <span class="neon-chip" style="width:10px;height:10px; background:var(--gold);"></span>)';
+                            // Apagar el botón cuando no se pueda usar (sin fichas suficientes,
+                            // acción bloqueada o fase de duelo). El borde/color dorados están
+                            // inline en el HTML, así que hay que grisarlos también a mano:
+                            // la regla CSS .spec-btn:disabled no puede sobrescribir estilos inline.
+                            if (btnDuel.disabled) {
+                                btnDuel.style.opacity = '0.4';
+                                btnDuel.style.borderColor = '#444';
+                                btnDuel.style.color = '#444';
+                            } else {
+                                btnDuel.style.opacity = '1';
+                                btnDuel.style.borderColor = 'var(--gold)';
+                                btnDuel.style.color = 'var(--gold)';
+                            }
                         }
                     }
 
@@ -3907,7 +3921,7 @@
                     showCustomAlert("¡Ya has apostado en esta ¡Todos Juegan!!");
                     return;
                 }
-                showCustomConfirm("🎵 ¡TODOS JUEGAN! ¿Apostar en este hueco? (Coste: 1 Ficha)", function (confirmed) {
+                showCustomConfirm("🎵 ¡TODOS JUEGAN! ¿Jugar tu intento en este hueco? (¡Gratis! El primero en acertar se lleva la carta)", function (confirmed) {
                     if (confirmed) send('GUESS', idx);
                 });
 
@@ -3928,65 +3942,15 @@
             }
         }
 
-        // CHEAT SYSTEM
+        // CHEAT SYSTEM — ELIMINADO
+        // Antes, si te llamabas xavi / mimi / sonia, podías mantener pulsada la carta para
+        // darle la vuelta y ver artista/canción/año del rival (Mecánica 1), y xavi podía
+        // activar/desactivar el truco tocando la primera carta de la cronología (Mecánica 2).
+        // Ambas cosas se han retirado. La función se deja como no-op para no tener que tocar
+        // la llamada existente a initCheatSystem(). Las canciones de victoria (Xavi → Queen,
+        // Sonia → Celine Dion) NO están aquí, viven en el host (showWinner) y siguen intactas.
         function initCheatSystem() {
-            var auth = ['xavi', 'mimi', 'sonia'];
-            var pName = (playerName || '').toLowerCase();
-            if (!auth.includes(pName)) return;
-
-            console.log("Cheat System Initialized for", pName);
-
-            // Mechanic 1: Peek at the card (Hold)
-            var card = document.getElementById('card');
-
-            function isMyTurn() {
-                return lastState && lastState.activePlayer && lastState.activePlayer.id === myId;
-            }
-
-            function startPeek(e) {
-                // Peek allowed if cheats are enabled, it's not our turn (or king mode), and we have track data
-                if (lastState && lastState.cheatsEnabled !== false && (!isMyTurn() || (lastState.turnPhase && lastState.turnPhase !== 'NORMAL')) && lastState.currentTrack) {
-                    if (e && e.preventDefault) e.preventDefault(); // Prevent text selection
-                    document.getElementById('card').classList.add('flipped');
-                    document.getElementById('c-artist').innerText = lastState.currentTrack.artist || "";
-                    document.getElementById('c-song').innerText = lastState.currentTrack.song || "";
-                    document.getElementById('c-year').innerText = lastState.currentTrack.year || "";
-                }
-            }
-
-            function stopPeek(e) {
-                if (lastState && !lastState.revealed && !lastState.turnPhase?.includes('GUESS_RESULT')) {
-                    document.getElementById('card').classList.remove('flipped');
-                }
-            }
-
-            // Touch events for mobile, mouse events for desktop
-            card.addEventListener('touchstart', startPeek, { passive: false });
-            card.addEventListener('touchend', stopPeek);
-            card.addEventListener('touchcancel', stopPeek);
-            card.addEventListener('mousedown', startPeek);
-            card.addEventListener('mouseup', stopPeek);
-            card.addEventListener('mouseleave', stopPeek);
-
-            // Mechanic 2: Toggle Master Cheat (Xavi Only via Timeline tap)
-            if (pName === 'xavi') {
-                var container = document.getElementById('my-cards-list');
-                // Use event delegation for tapping the first timeline year
-                container.addEventListener('click', function (e) {
-                    var targetRow = e.target.closest('.card-row');
-                    // Si ha pulsado el texto de un año en la cronología rival
-                    if (targetRow) {
-                        var rows = container.querySelectorAll('.card-row');
-                        // Verificamos que sea la primera carta (index 0) y que no sea el turno de xavi
-                        if (rows.length > 0 && targetRow === rows[0] && !isMyTurn) {
-                            console.log("Xavi toggling master cheat via timeline tap");
-                            targetRow.style.color = (lastState && lastState.cheatsEnabled) ? 'red' : 'green';
-                            setTimeout(() => { targetRow.style.color = '#888'; }, 500);
-                            send('TOGGLE_CHEAT');
-                        }
-                    }
-                });
-            }
+            return; // trucos desactivados
         }
 
         document.addEventListener('DOMContentLoaded', function () {
