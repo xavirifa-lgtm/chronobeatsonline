@@ -430,9 +430,12 @@
                     for (let name of names) caches.delete(name);
                 });
             }
-            localStorage.clear();
-            sessionStorage.clear();
-            alert("Caché purgada con éxito. Recargando la aplicación v3.60 limpia...");
+            // IMPORTANTE: NO se borra localStorage/sessionStorage. Ahí viven datos TUYOS,
+            // no caché de código: tu selfie (cb_player_avatar), tu nombre (cb_player_name),
+            // la sala guardada y el progreso de canciones. Purgar la caché es solo cosa del
+            // service worker y del almacén 'caches'. Antes esto hacía localStorage.clear()
+            // y por eso el selfie desaparecía cada vez que actualizabas la caché.
+            alert("Caché purgada. Tu selfie y tu nombre se conservan. Recargando la app limpia...");
             setTimeout(function() { window.location.href = window.location.pathname + '?v=' + Date.now(); }, 500);
         }
 
