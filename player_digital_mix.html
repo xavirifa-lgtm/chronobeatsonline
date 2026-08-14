@@ -1580,7 +1580,8 @@
             cards: `
                 <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:0; font-size:1.3em;">🎯 CARTA Y CRONOLOGÍA</h3>
                 <p><strong>• Objetivo:</strong> Coloca las canciones en orden cronológico en tu línea de tiempo. El primero en llegar a <strong>10 cartas</strong> gana.</p>
-                <p><strong>• Adivinación:</strong> Elige el hueco exacto entre los años de tu cronología (<code>⬇️ PONER AQUÍ ⬇️</code>). Acierto = +1 carta y +2🔵 fichas.</p>
+                <p><strong>• Adivinación:</strong> Elige el hueco exacto entre los años de tu cronología (<code>⬇️ PONER AQUÍ ⬇️</code>). Acertar el hueco = <strong>+1 carta</strong>.</p>
+                <p><strong>• 🔵 Fichas por la canción:</strong> Si además dices <strong>en voz alta el grupo o el título</strong> y aciertas, el host te concede <strong>+1🔵</strong> (botón "+ FICHA"). La ficha es por acertar el grupo/canción, no por el año.</p>
                 <p><strong>• 🔥 Racha de Aciertos:</strong> A partir del 3.er acierto seguido, ganas 1 carta extra adicional con cada acierto posterior de la racha.</p>
                 <p><strong>• ⚔️ Camino del Guerrero:</strong> Si fallas 3 veces seguidas, tu siguiente acierto vale 2 puntos gratis para recuperar terreno.</p>
             `,
@@ -1604,7 +1605,8 @@
             `,
             bets: `
                 <h3 style="color:var(--gold); font-family:'Bungee'; margin-top:0; font-size:1.3em;">🎲 ACCIONES ESPECIALES Y APUESTAS</h3>
-                <p><strong>• ⚡ ¡Ni de Coña! (1🔵):</strong> Apuestas a que el activo falla. Si falla, te llevas la carta y +2🔵.</p>
+                <p><strong>• ⚡ ¡Ni de Coña! (1🔵):</strong> Apuestas a que el activo falla. Si falla, ganas <strong>+2🔵</strong> (no te llevas la carta).</p>
+                <p><strong>• 🎯 Robar el hueco (1🔵):</strong> El jugador de turno elige su hueco primero. Mientras suena la canción, el resto podéis apostar por <strong>otro hueco distinto</strong> antes del STOP. Si el activo <strong>falla</strong> y tú habías elegido el hueco <strong>correcto</strong>, <strong>te llevas la carta</strong>.</p>
                 <p><strong>• ✨ ¡Conmigo! (1🔵):</strong> Apuestas a que el activo acierta. Si acierta, ganas +2🔵.</p>
                 <p><strong>• 🎲 Doble o Nada (4🔵):</strong> Acierto = +2 cartas. Fallo = pierdes 1 carta ya colocada.</p>
                 <p><strong>• 🛡️ Seguro de Fallo (2🔵):</strong> Evita penalizaciones extra en caso de fallo.</p>
@@ -1614,7 +1616,7 @@
             tokens: `
                 <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:0; font-size:1.3em;">🔵 FICHAS Y ECONOMÍA</h3>
                 <p><strong>• Inicio:</strong> Empiezas la partida con 3 fichas 🔵.</p>
-                <p><strong>• Ganar Fichas:</strong> +2🔵 por cada acierto propio y +2🔵 en apuestas acertadas.</p>
+                <p><strong>• Ganar Fichas:</strong> +1🔵 si dices el grupo/título de la canción en voz alta y el host lo da por bueno, y +2🔵 en apuestas acertadas.</p>
                 <p><strong>• Límite:</strong> Máximo 10 fichas 🔵 acumulables.</p>
                 <p><strong>• Auto-Rescate:</strong> Si te quedas a 0 fichas durante 2 turnos seguidos, recibes +1🔵 automáticamente.</p>
             `,
@@ -1863,12 +1865,12 @@
             <div id="bet-btns" style="display:none; flex-direction:column; gap:8px; width:100%; max-width:340px; margin-top:4px;">
                 <button class="spec-btn" id="btn-bet-against"
                     style="background:var(--bg); border-color:var(--accent); color:var(--accent); font-size:0.8em;"
-                    onclick="send('BET_AGAINST_ACTIVE')">
+                    onclick="confirmarApuesta('BET_AGAINST_ACTIVE', '⚡ ¡NI DE COÑA!\n\n¿Apuestas 1 ficha a que el jugador falla? Si acierta, pierdes la ficha.')">
                     ¡NI DE COÑA! (1 <span class="neon-chip" style="width:10px;height:10px;background:var(--accent);box-shadow:0 0 6px var(--accent);"></span>)
                 </button>
                 <button class="spec-btn" id="btn-bet-for"
                     style="background:var(--bg); border-color:#00ff88; color:#00ff88; font-size:0.8em;"
-                    onclick="send('BET_FOR_ACTIVE')">
+                    onclick="confirmarApuesta('BET_FOR_ACTIVE', '✨ ¡CONMIGO!\n\n¿Apuestas 1 ficha a que el jugador acierta? Si falla, pierdes la ficha.')">
                     ¡CONMIGO! (1 <span class="neon-chip" style="width:10px;height:10px;background:#00ff88;box-shadow:0 0 6px #00ff88;"></span>)
                 </button>
             </div>
@@ -2133,6 +2135,15 @@
         } function showCustomAlert(msg) {
             document.getElementById('custom-alert-msg').innerText = msg;
             document.getElementById('custom-alert').style.display = 'flex';
+        }
+
+        // Confirmación antes de apostar (Ni de Coña / Conmigo), para que un toque por
+        // error se pueda cancelar y no gastar la ficha sin querer. Mismo patrón que la
+        // apuesta de hueco. Solo envía la apuesta si el jugador confirma.
+        function confirmarApuesta(accion, mensaje) {
+            showCustomConfirm(mensaje, function (confirmed) {
+                if (confirmed) send(accion);
+            });
         }
 
         function showCustomConfirm(msg, callback) {
