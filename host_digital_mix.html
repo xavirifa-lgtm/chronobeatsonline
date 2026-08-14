@@ -1510,30 +1510,26 @@
             player.tokens = Math.max(0, Math.min(10, (player.tokens || 0) + delta));
         }
 
-        function initPeer() {
-            var iceConfig = [
-                { urls: 'stun:stun.l.google.com:19302' },
-                { urls: 'stun:stun1.l.google.com:19302' },
-                { urls: 'stun:stun2.l.google.com:19302' },
-                { urls: 'stun:stun3.l.google.com:19302' },
-                { urls: 'stun:stun4.l.google.com:19302' },
-                { urls: 'stun:stun.cloudflare.com:3478' },
-                { urls: 'stun:stun.nextcloud.com:443' },
-                { urls: 'stun:stun.sipgate.net:10000' },
-                { urls: 'turn:openrelay.metered.ca:80', username: 'openrelay', credential: 'openrelay' },
-                { urls: 'turn:openrelay.metered.ca:443', username: 'openrelay', credential: 'openrelay' },
-                { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelay', credential: 'openrelay' },
-                { urls: 'turns:openrelay.metered.ca:443', username: 'openrelay', credential: 'openrelay' },
-                { urls: 'turns:openrelay.metered.ca:443?transport=tcp', username: 'openrelay', credential: 'openrelay' },
-                { urls: 'turn:global.relay.metered.ca:80', username: 'openrelay', credential: 'openrelay' },
-                { urls: 'turn:global.relay.metered.ca:443', username: 'openrelay', credential: 'openrelay' },
-                { urls: 'turn:global.relay.metered.ca:443?transport=tcp', username: 'openrelay', credential: 'openrelay' },
-                { urls: 'turns:global.relay.metered.ca:443?transport=tcp', username: 'openrelay', credential: 'openrelay' },
-                { urls: 'turn:freestun.net:3478', username: 'free', credential: 'free' },
-                { urls: 'turn:freestun.net:5349', username: 'free', credential: 'free' },
-                { urls: 'turns:freestun.net:5349', username: 'free', credential: 'free' }
-            ];
+        // ── ICE servers (STUN + TURN de Metered, credenciales fijas) ──
+        // El TURN es imprescindible para conectar por DATOS MÓVILES (CGNAT): sin él, la app
+        // se quedaba en "conectando" con datos aunque por wifi sí funcionara (STUN basta en
+        // wifi doméstico). Se usan las credenciales fijas de Metered + STUN de Google.
+        // NOTA: usuario/credencial quedan visibles en el cliente (app sin backend). Puedes
+        // rotarlas o restringirlas desde el panel de Metered si te preocupa el consumo.
+        var ICE_SERVERS = [
+            { urls: 'stun:stun.l.google.com:19302' },
+            { urls: 'stun:stun1.l.google.com:19302' },
+            { urls: 'stun:stun.cloudflare.com:3478' },
+            { urls: 'stun:stun.relay.metered.ca:80' },
+            { urls: 'turn:global.relay.metered.ca:80', username: '10326e2837423e383724ad5c', credential: 'cQjHqkKcCWAIF5OB' },
+            { urls: 'turn:global.relay.metered.ca:80?transport=tcp', username: '10326e2837423e383724ad5c', credential: 'cQjHqkKcCWAIF5OB' },
+            { urls: 'turn:global.relay.metered.ca:443', username: '10326e2837423e383724ad5c', credential: 'cQjHqkKcCWAIF5OB' },
+            { urls: 'turns:global.relay.metered.ca:443?transport=tcp', username: '10326e2837423e383724ad5c', credential: 'cQjHqkKcCWAIF5OB' }
+        ];
 
+        function initPeer() {
+            var iceConfig = ICE_SERVERS;
+            console.log('[TURN] iceServers cargados:', iceConfig.length, 'servidores');
             peer = new Peer("CB-HOST-" + roomCode, {
                 debug: 2,
                 host: '0.peerjs.com',
@@ -1548,6 +1544,10 @@
                 },
                 iceServers: iceConfig
             });
+            _wireHostPeerEvents();
+        }
+
+        function _wireHostPeerEvents() {
             peer.on('open', function (id) {
                 console.log("Host Peer Abierto:", id);
                 var liveCodeTextEl = document.getElementById('live-code-text');
@@ -1700,8 +1700,12 @@
         }
 
         function reloadSongsMidGame() {
-            console.log("CANCIONES AGOTADAS — recargando lista completa sin resetear partida.");
-            localStorage.removeItem('CB_PlayedSongs');
+            // Antes esto borraba localStorage.CB_PlayedSongs POR COMPLETO (todas las
+            // categorías, no solo la que se quedó corta), reseteando el contador global
+            // de "canciones disponibles" sin avisar. Ahora solo se ignora el historial
+            // para reconstruir el mazo de ESTA partida (se pueden repetir canciones si
+            // hace falta), pero el progreso guardado NO se borra.
+            console.log("CANCIONES AGOTADAS — recargando lista completa sin resetear partida ni borrar progreso guardado.");
             songs = buildSongsFromCache(true);
             currentSongIdx = -1;
             console.log("Lista recargada:", songs.length, "canciones.");
@@ -1725,7 +1729,14 @@
             cachedTxts = results;
             var built = buildSongsFromCache(false);
             if (built.length < 10) {
-                localStorage.removeItem('CB_PlayedSongs');
+                // Antes esto borraba localStorage.CB_PlayedSongs POR COMPLETO, incluyendo
+                // el historial de categorías que ni siquiera estaban seleccionadas. Con una
+                // sola categoría o un filtro de década bastaba para vaciar el contador
+                // global de "canciones disponibles" de TODA la base de datos, aunque el
+                // resto de categorías no estuvieran ni de lejos agotadas. Ahora solo se
+                // ignora el historial para construir el mazo de ESTA partida; el progreso
+                // guardado no se toca.
+                console.warn('[HOST] Pocas canciones sin jugar con la selección actual (' + built.length + '). Se permitirán repeticiones solo para esta partida; el progreso guardado NO se borra.');
                 songs = buildSongsFromCache(true);
             } else {
                 songs = built;
