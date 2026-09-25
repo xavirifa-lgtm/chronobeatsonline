@@ -1435,6 +1435,38 @@
             }
         }
     </style>
+<style>
+    /* ── REORDENADO DE LA PESTAÑA JUEGO (solo visual, con flex `order`) ──
+       Sube lo importante (escuchar + colocar la carta) arriba, y hunde lo
+       secundario/social (frases, reacciones, comodines) abajo. No mueve HTML
+       ni toca la lógica: cada elemento conserva su id y su handler. */
+    #tab-game > * { order: 9; }                      /* por defecto: banners/overlays, justo bajo el núcleo */
+    /* ── NÚCLEO (arriba, protagonista): escuchar + colocar la carta ── */
+    #tab-game > #leaderboard-info      { order: 1; }
+    #tab-game > #mini-ranking          { order: 2; }
+    #tab-game > #turn-status           { order: 3; }
+    #tab-game > #normal-card-container { order: 4; }
+    #tab-game > #m-ctrl                { order: 5; } /* PLAY / PAUSE / STOP */
+    #tab-game > #inventory-title       { order: 6; }
+    #tab-game > #normal-collection     { order: 7; } /* TU CRONOLOGÍA = donde colocas */
+    #tab-game > #bet-btns              { order: 8; }
+    /* (order 9 = banners transitorios: jinx, sabotaje recibido, racha, relámpago…) */
+    /* ── CONTROLES SECUNDARIOS DE REPRODUCCIÓN ── */
+    #tab-game > #volume-ctrl           { order: 10; }
+    #tab-game > #s-ctrl                { order: 11; }
+    #tab-game > #my-tokens-ui          { order: 12; }
+    /* ── ACCIONES ESPECIALES (todas juntas) ── */
+    #tab-game > #special-ctrl          { order: 13; } /* comprar carta / cambiar canción / ruleta */
+    #tab-game > #btn-double-or-nothing { order: 14; }
+    #tab-game > #btn-brag              { order: 15; }
+    #tab-game > #btn-fail-safe         { order: 16; }
+    #tab-game > #btn-steal-streak      { order: 17; } /* Robar Racha */
+    #tab-game > #emoji-wildcard-bar    { order: 18; }
+    #tab-game > #request-cat-bar       { order: 19; }
+    /* ── SOCIAL / DISTRACCIONES (desplegable, al fondo del todo) ── */
+    #tab-game > #btn-social-toggle     { order: 20; }
+    #tab-game > #social-drawer         { order: 21; } /* frases + reacciones, plegable */
+</style>
 </head>
 
 <body>
@@ -1589,7 +1621,8 @@
                 <h3 style="color:var(--neon); font-family:'Bungee'; margin-top:0; font-size:1.3em;">🕹️ MODOS DE JUEGO</h3>
                 <p><strong>• 🎵 Clásico:</strong> El primero en colocar 10 cartas en su línea de tiempo gana la partida.</p>
                 <p><strong>• 👑 Modo Rey:</strong> Al llegar a 10 cartas, el turno pasa al rival. Cuando vuelva a tocarte, los rivales eligen la canción y debes adivinar el año con ±2 años de margen para ganar definitivamente.</p>
-                <p><strong>• 💿 Supervivencia:</strong> 3 vidas por jugador. Cada fallo quita 1 vida. Si llegas a 0 vidas quedas eliminado. Gana el último superviviente o quien llegue a 10 cartas.</p>
+                <p><strong>• 💿 Supervivencia:</strong> 3 vidas por jugador. Cada fallo quita 1 vida. Si llegas a 0 vidas quedas eliminado. <strong>Gana el último superviviente</strong> (las cartas NO cuentan para ganar en este modo).</p>
+                <p><strong>• 💣 Carta Bomba (solo Supervivencia):</strong> Cada cierto tiempo salta una bomba en vez del "¡Todos Juegan!". El jugador que la tiene tiene <strong>15 segundos</strong> para colocar la canción en el hueco correcto de su cronología. Si acierta, la bomba pasa al siguiente (otros 15s). A quien falle o se le acabe el tiempo, <strong>le explota y pierde una vida</strong>. Luego sigue el turno normal. Esquivarla solo te salva: no da carta ni ficha.</p>
                 <p><strong>• 🔵🔴 Equipos:</strong> Rojo vs Azul. Todos los miembros del equipo votan el hueco de la canción simultáneamente.</p>
                 <p><strong>• 🏆 Competitivo:</strong> Desactiva todas las fichas, sabotajes y apuestas. Solo cronología pura.</p>
             `,
@@ -1601,7 +1634,19 @@
                 <p><strong>• 🎰 Ruleta Rusa (2🔵):</strong> Haces girar la ruleta al azar para ganar/perder cartas o fichas.</p>
                 <p><strong>• 🛡️ Escudo (3🔵):</strong> Hace que el próximo sabotaje recibido rebote automáticamente al atacante.</p>
                 <p><strong>• 🌌 Agujero Negro (5🔵):</strong> Destruye una carta de la cronología de un rival.</p>
+                <p><strong>• 🔊 Zumbido (1🔵):</strong> Suena un pitido molesto para despistar al jugador activo.</p>
+                <p><strong>• ⏭️ Forzar Salto (3🔵):</strong> Obliga a cambiar la canción del jugador activo por otra.</p>
+                <p><strong>• 🚫 Veto Cambiar (1🔵):</strong> Impide que el jugador activo cambie su canción este turno.</p>
+                <p><strong>• ⚡ Robar Turno (4🔵):</strong> Le robas el turno al jugador activo. La víctima puede <strong>resistir pagando 2🔵</strong>.</p>
+                <p><strong>• 🃏 Robo Inteligente (4🔵):</strong> Robas una carta concreta (la más antigua, la más reciente o la más extrema) al jugador con más cartas.</p>
+                <p><strong>• 🔥 Robar Racha (2🔵):</strong> Le robas la racha a un rival que lleve 3+ aciertos seguidos y te la quedas tú.</p>
                 <p><strong>• 🃏 Comodines de Canción (3 de uso libre):</strong> Revelan el Artista o el Título en la pantalla de la TV.</p>
+                <hr style="border:none; border-top:1px dashed #444; margin:10px 0;">
+                <p><strong style="color:var(--gold);">🛒 AYUDAS DE TU TURNO (jugador activo):</strong></p>
+                <p><strong>• 💳 Comprar Carta (3🔵):</strong> Te llevas la carta de este turno automáticamente, sin arriesgar.</p>
+                <p><strong>• 🔄 Cambiar Canción (1🔵):</strong> Descartas la canción actual y sale otra (una vez por turno).</p>
+                <p><strong>• 📅 Pista de Década (1🔵):</strong> El host te revela la década de la canción.</p>
+                <p><strong>• 🎯 Pedir Categoría (4🔵):</strong> La siguiente canción será de la categoría que elijas (si queda alguna en el mazo).</p>
             `,
             bets: `
                 <h3 style="color:var(--gold); font-family:'Bungee'; margin-top:0; font-size:1.3em;">🎲 ACCIONES ESPECIALES Y APUESTAS</h3>
@@ -1622,7 +1667,11 @@
             `,
             emojis: `
                 <h3 style="color:var(--pink); font-family:'Bungee'; margin-top:0; font-size:1.3em;">💬 EMOJIS, FRASES Y DISTRACCIONES</h3>
-                <p><strong>• 😂 Reacciones Rápidas:</strong> Pulsa los emojis (😂, 🔥, 💩, 🤡, 🎉, 😱) para lanzarlos a la TV en tiempo real.</p>
+                <p><strong>• 😂 Reacciones Rápidas:</strong> Pulsa los emojis (😂, 🔥, 💩, 🤡, 🎉, 😱) para lanzarlos a la TV en tiempo real. Son gratis y no tienen efecto en el juego.</p>
+                <p style="border-top:1px dashed #444; padding-top:8px; margin-top:8px;"><strong style="color:var(--gold);">🎴 Comodines de Emoji (arriba del todo · 1🔵 cada uno · 1 solo uso por partida):</strong> Son distintos de las reacciones: sí tienen efecto.</p>
+                <p><strong>• 🔥 Próximo Acierto Doble:</strong> Tu siguiente acierto vale <strong>2 cartas</strong> en vez de 1. Puedes usarlo en tu propio turno.</p>
+                <p><strong>• 😂 Niebla Rápida:</strong> Oculta los años de la cronología del jugador activo durante <strong>5 segundos</strong>. No se puede usar en tu propio turno.</p>
+                <p><strong>• 💀 Maldición Silenciosa:</strong> Si el jugador activo <strong>falla</strong> este turno, ganas <strong>+2🔵</strong>. No se puede usar en tu propio turno.</p>
                 <p><strong>• 💬 Frases Picantes:</strong> Envía mensajes como <em>"¡Vas a fallar!"</em> o <em>"¡Sabelotodo!"</em> que aparecen gigantes en el móvil del rival.</p>
                 <p><strong>• 🔊 Distracciones Sonoras:</strong> Haz sonar la <em>Bocina Rival</em> o la <em>Risa Malévola</em> durante 3 segundos para despistar.</p>
                 <p><strong>• 📺 Mando TV:</strong> Pulsa el botón 📺 arriba a la derecha para ver en tu móvil los mismos botones activos de la tele.</p>
@@ -1653,6 +1702,13 @@
             10</div>
         <p style="color:white; font-family:'Bungee'; font-size:1.5em; text-shadow:0 0 10px black;">¡COLOCA TU CARTA
             RÁPIDO!</p>
+    </div>
+
+    <!-- Banner de CARTA BOMBA (no bloquea la cronología para poder colocar) -->
+    <div id="bomb-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; z-index:9998; background:linear-gradient(180deg, rgba(255,60,0,0.96), rgba(120,0,0,0.9)); color:#fff; text-align:center; padding:10px 8px; box-shadow:0 4px 20px rgba(255,0,0,0.5);">
+        <div style="font-family:'Bungee'; font-size:1.1em;">💣 CARTA BOMBA</div>
+        <div id="bomb-holder-txt" style="font-family:'Bungee'; font-size:0.8em; margin-top:2px;"></div>
+        <div id="bomb-timer-txt" style="font-family:'Bungee'; font-size:2.6em; line-height:1;">15</div>
     </div>
 
     <!-- Overlay de Anuncio de Duelo (Visibilidad Global) -->
@@ -1794,6 +1850,9 @@
                 <button class="cat-req-btn" data-cat="anime"       onclick="requestCategory('anime')">⛩️ Anime</button>
                 <button class="cat-req-btn" data-cat="videojuegos" onclick="requestCategory('videojuegos')">🎮 Gamer</button>
             </div>
+            <!-- DESPLEGABLE DE DISTRACCIONES (frases + reacciones) — reduce el desorden -->
+            <button id="btn-social-toggle" class="spec-btn" onclick="toggleSocial()" style="max-width:340px;">💬 CHINCHAR / REACCIONES ▾</button>
+            <div id="social-drawer" style="display:none; width:100%; max-width:360px; flex-direction:column; align-items:center; gap:6px;">
             <!-- REACCIONES RÁPIDAS -->
             <div class="quick-react-bar" id="quick-react-bar">
                 <button class="qr-btn" onclick="sendQuickReact('¡Llevas tanto tiempo en el año equivocado que ya te han mandado el padrón municipal!')">📋 ¡Te han empadronado!</button>
@@ -1815,6 +1874,7 @@
                 <button class="reaction-btn" onclick="sendReaction('💀')">💀</button>
                 <button class="reaction-btn" onclick="sendReaction('🎯')">🎯</button>
             </div>
+            </div><!-- /social-drawer -->
 
             <div id="cheat-indicator" style="display:none; position: fixed; top: 80px; left: 50%; transform: translateX(-50%); background: var(--accent); color: #fff; padding: 5px 15px; border-radius: 20px; font-family: 'Bungee'; font-size: 0.8em; z-index: 10000; box-shadow: 0 0 15px var(--accent);">TRUCOS OFF</div>
             
@@ -1923,7 +1983,6 @@
                     <button class="spec-btn" id="btn-sabotage-skip" style="background:var(--bg); border-color:#ff00ff; color:#ff00ff;" onclick="soundSkip();send('SABOTAGE_FORCE_SKIP')">FORZAR SALTO (3 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
                     <button class="spec-btn" id="btn-sabotage-panic" style="background:var(--bg); border-color:#ff0000; color:#ff0000;" onclick="soundPanic();send('SABOTAGE_PANIC')">PÁNICO 10s (2 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
                     <button class="spec-btn" id="btn-sabotage-fog" style="background:var(--bg); border-color:#aaaaaa; color:#aaaaaa;" onclick="soundFog();send('SABOTAGE_FOG')">NIEBLA TIEMPO (2 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
-                    <button class="spec-btn" id="btn-sabotage-steal-token" style="background:var(--bg); border-color:#ffff00; color:#ffff00;" onclick="send('SABOTAGE_STEAL_TOKEN')">ROBAR FICHA (4 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
                     <button class="spec-btn" id="btn-sabotage-steal-turn" style="background:var(--bg); border-color:#ff00ff; color:#ff00ff;" onclick="send('SABOTAGE_STEAL_TURN')">ROBAR TURNO (4 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
                     <button class="spec-btn" id="btn-sabotage-blackhole" style="background:var(--bg); border-color:#9900ff; color:#9900ff; grid-column: span 2;" onclick="soundBlackhole();send('SABOTAGE_BLACKHOLE')">AGUJERO NEGRO (5 <span class="neon-chip" style="width:10px;height:10px;"></span>)</button>
                     <button class="spec-btn" id="btn-smart-steal" style="background:var(--bg); border-color:var(--gold); color:var(--gold); grid-column: span 2;" onclick="openSmartSteal()">🃏 ROBO INTELIGENTE (4 <span class="neon-chip" style="width:10px;height:10px;background:var(--gold);"></span>)</button>
@@ -2730,6 +2789,19 @@
             el.style.display = 'flex';
         }
 
+        // ── DESPLEGABLE DE DISTRACCIONES (frases + reacciones) ──
+        // El contenedor #social-drawer manda sobre la visibilidad; el JV que fuerza
+        // display:flex en las barras internas sigue funcionando, pero solo se ven cuando
+        // el desplegable está abierto.
+        function toggleSocial() {
+            var d = document.getElementById('social-drawer');
+            var b = document.getElementById('btn-social-toggle');
+            if (!d) return;
+            var abierto = d.style.display !== 'none' && d.style.display !== '';
+            d.style.display = abierto ? 'none' : 'flex';
+            if (b) b.innerText = '💬 CHINCHAR / REACCIONES ' + (abierto ? '▾' : '▴');
+        }
+
         // ── REACCIONES RÁPIDAS ──
         function sendQuickReact(text) {
             send('QUICK_REACT', text);
@@ -3332,7 +3404,27 @@
                 var isMyTurn = (data.activePlayer.id === myId);
                 console.log("¿Es mi turno?", isMyTurn, "Mi ID:", myId, "ID Activo:", data.activePlayer.id);
 
-                var isKingMode = (data.turnPhase && data.turnPhase !== 'NORMAL');
+                // ── CARTA BOMBA: banner con temporizador ──
+                var bombOv = document.getElementById('bomb-overlay');
+                if (bombOv) {
+                    if (data.bombActive) {
+                        bombOv.style.display = 'block';
+                        var soyHolder = (data.bombHolderId === myId);
+                        document.getElementById('bomb-holder-txt').innerText = soyHolder
+                            ? '¡LA TIENES TÚ! COLOCA YA ⬇️'
+                            : 'La tiene ' + (data.bombHolderName || '?');
+                        document.getElementById('bomb-timer-txt').innerText = (data.bombTimer != null ? data.bombTimer : '');
+                        bombOv.style.background = (data.bombTimer != null && data.bombTimer <= 5)
+                            ? 'linear-gradient(180deg, rgba(255,0,0,0.98), rgba(150,0,0,0.92))'
+                            : 'linear-gradient(180deg, rgba(255,60,0,0.96), rgba(120,0,0,0.9))';
+                    } else {
+                        bombOv.style.display = 'none';
+                    }
+                }
+
+                // 'BOMB' (carta bomba) NO es modo rey: debe mostrar la cronología normal
+                // para que el portador pueda colocar su carta.
+                var isKingMode = (data.turnPhase && data.turnPhase !== 'NORMAL' && data.turnPhase !== 'BOMB');
                 var normalCardContainer = document.getElementById('normal-card-container');
                 var normalCollection = document.getElementById('normal-collection');
                 var kingModeUi = document.getElementById('king-mode-ui');
@@ -3398,6 +3490,9 @@
                                    myTeamForTurn && myTeamForTurn.team === data.teamTurn;
                 var showMusic = isMyTurn || isMyTeamTurn;
                 if (data.turnPhase === 'KING_SELECTION') showMusic = false;
+                // En un DUELO no se controla la canción del turno (suena el tema del duelo):
+                // ocultar los controles de música para que nadie la reproduzca superpuesta.
+                if (data.turnPhase === 'DUEL') showMusic = false;
 
                 document.getElementById('m-ctrl').style.display = showMusic ? 'grid' : 'none';
                 document.getElementById('s-ctrl').style.display = showMusic ? 'grid' : 'none';
@@ -3626,7 +3721,6 @@
                         'btn-sabotage-panic': 2,
                         'btn-sabotage-fog': 2,
                         'btn-sabotage-skip': 3,
-                        'btn-sabotage-steal-token': 4,
                         'btn-sabotage-steal-turn': 4,
                         'btn-sabotage-blackhole': 5
                     };
@@ -3739,7 +3833,9 @@
 
                 if (!isKingMode) {
                     if (isMyTurn) {
-                        document.getElementById('inventory-title').innerText = "MIS CARTAS (MARCA TU APUESTA)";
+                        document.getElementById('inventory-title').innerText = data.bombActive
+                            ? "💣 ¡COLOCA ANTES DE QUE EXPLOTE!"
+                            : "MIS CARTAS (MARCA TU APUESTA)";
                     } else {
                         document.getElementById('inventory-title').innerText = "CRONOLOGÍA DE " + data.activePlayer.name;
                     }
@@ -3818,9 +3914,6 @@
 
                     document.getElementById('btn-sabotage-panic').disabled = (data.myTokens < 2 || data.panicActive || isActionLocked);
                     document.getElementById('btn-sabotage-fog').disabled = (data.myTokens < 2 || data.isFogActive || isActionLocked);
-
-                    var btnStealToken = document.getElementById('btn-sabotage-steal-token');
-                    if (btnStealToken) btnStealToken.disabled = (data.myTokens < 4 || isActionLocked);
 
                     var btnStealTurn = document.getElementById('btn-sabotage-steal-turn');
                     if (btnStealTurn) btnStealTurn.disabled = (data.myTokens < 4 || isActionLocked);
@@ -3903,6 +3996,12 @@
         }
 
         function interactuarSlot(idx, amIActive, isGuess, isTakenByOther) {
+            // CARTA BOMBA: colocación inmediata, sin confirmación (los 15s corren).
+            if (lastState && lastState.bombActive) {
+                if (lastState.bombHolderId === myId) { send('GUESS', idx); }
+                return;
+            }
+
             if (isTakenByOther) {
                 showCustomAlert("¡Este hueco ya lo ha pillado otro jugador!");
                 return;
@@ -3964,7 +4063,6 @@
                 'btn-sabotage-veto': '¡Has vetado su recarga!',
                 'btn-sabotage-panic': '¡Ataque de Pánico enviado!',
                 'btn-sabotage-fog': '¡Niebla Temporal enviada!',
-                'btn-sabotage-steal-token': '¡Has robado una ficha (al azar)!',
                 'btn-sabotage-steal-turn': '⚡ Intentando robar el turno... (puede resistirse con 2 🔵)',
                 'btn-sabotage-blackhole': '¡Agujero Negro lanzado!'
             };

@@ -1106,6 +1106,11 @@
         var ultimoInformeListas = { malas: [], duplicadas: 0 };  // salud de los .txt
         var nextBonusTurn = 7 + Math.floor(Math.random() * 4);      // carta bonificación (7-10)
         var isBonusCard = false;   // este turno la carta vale 2 puntos
+        // ── CARTA BOMBA (solo modo SUPERVIVENCIA) ──
+        var bombActive = false;    // hay una carta bomba en curso (pásalo-rápido)
+        var bombTimer = 0;         // segundos que le quedan al portador actual
+        var bombInterval = null;   // handle del temporizador de 15s
+        var bombPassCount = 0;     // pases exitosos (para desactivar si nadie falla)
         var voiceEnabled = false;
         var competitiveMode = false;    // modo competitivo: sin sabotajes ni fichas
         var requestedCategory = null;   // categoría solicitada para la siguiente canción
@@ -1373,7 +1378,10 @@
                 isPlaying = true;
                 songPlayedThisTurn = true;
                 momentoDeInicio = Date.now();
-                document.getElementById('host-instructions').innerText = isMuted ? "REPRODUCIENDO (MUTE)" : "REPRODUCIENDO";
+                // Durante la CARTA BOMBA no sobreescribir el texto ni el temporizador propio.
+                if (!bombActive) {
+                    document.getElementById('host-instructions').innerText = isMuted ? "REPRODUCIENDO (MUTE)" : "REPRODUCIENDO";
+                }
                 syncState();
             }
             if (event.data === YT.PlayerState.PAUSED) {
@@ -1381,6 +1389,7 @@
                 syncState();
             }
             if (event.data === YT.PlayerState.ENDED) {
+                if (bombActive) return; // la bomba se gestiona con su propio temporizador
                 handleSongEnd();
             }
         }
@@ -1394,6 +1403,21 @@
         }
 
         function triggerBrokenVideoAutoSkip() {
+            // ── MODO REY: si el vídeo de la carta elegida no está disponible, NO usar el
+            // salto genérico (cambiaría la canción dejando turnPhase='KING_GUESS' y el rey,
+            // aunque acertara, no se daba por ganador). En su lugar, volver a la selección
+            // de carta con opciones nuevas, manteniendo la fase de rey coherente.
+            if (turnPhase === 'KING_SELECTION' || turnPhase === 'KING_GUESS' || turnPhase === 'KING_GUESS_RESULT') {
+                window.brokenVideoHandling = false;
+                reiniciarSeleccionRey();
+                return;
+            }
+            // ── CARTA BOMBA: un vídeo roto no debe corromper la ronda: se cierra sin víctima.
+            if (bombActive) {
+                window.brokenVideoHandling = false;
+                finalizarBombaSinVictima();
+                return;
+            }
             if (typeof reportBrokenLink === 'function') reportBrokenLink();
             refundBets();
             if (isPlaying) {
@@ -1955,9 +1979,132 @@
             requestedCategory = null;
         }
 
+        // ══════════ CARTA BOMBA (modo SUPERVIVENCIA) ══════════
+        // Pásalo-rápido: el portador tiene 15s para COLOCAR la canción en el hueco
+        // correcto de SU cronología. Si acierta, la bomba pasa al siguiente jugador vivo
+        // (otros 15s). Al primero que falla (o se le acaba el tiempo) le explota: pierde
+        // una vida y sigue el turno normal. Acertar solo hace sobrevivir (sin carta ni ficha).
+        function iniciarCartaBomba() {
+            bombActive = true;
+            turnPhase = 'BOMB';
+            bombPassCount = 0;
+            var holder = players[activePlayerIdx];
+            if (!holder) { bombActive = false; turnPhase = 'NORMAL'; nextTurn(); return; }
+            addEvent('<span class="ev-bad">💣 ¡CARTA BOMBA! Empieza ' + holder.name + ' — 15s para colocar</span>', '💣');
+            for (var _bc in connections) { try { connections[_bc].send({ type: 'BOMB_START', holder: holder.name }); } catch(e){} }
+            // La carta sale oculta y la música arranca sola (para que puedan adivinar el año)
+            document.getElementById('ui-card-artist').innerText = "????";
+            document.getElementById('ui-card-song').innerText = "💣 CARTA BOMBA";
+            document.getElementById('ui-card-year').innerText = "????";
+            var _rev = document.getElementById('btn-reveal-host'); if (_rev) _rev.style.display = 'none';
+            var _val = document.getElementById('validation-buttons'); if (_val) _val.style.display = 'none';
+            document.getElementById('host-instructions').innerHTML = "<span style='color:#ff3b3b; font-size:1.4em; font-family:Bungee;'>💣 CARTA BOMBA — " + holder.name + "</span>";
+            if (player && player.playVideo) { player.playVideo(); if (isMuted) player.mute(); else player.unMute(); }
+            isPlaying = true; songPlayedThisTurn = true; momentoDeInicio = Date.now();
+            iniciarTimerBomba();
+        }
+
+        function _pintarBombaTV() {
+            var h = players[activePlayerIdx];
+            var col = bombTimer <= 5 ? '#ff0000' : '#ff3b3b';
+            var _cp = document.getElementById('ui-current-player');
+            if (_cp && h) _cp.innerText = '💣 ' + h.name;
+            document.getElementById('host-instructions').innerHTML =
+                "<span style='color:" + col + "; font-size:1.4em; font-family:Bungee;'>💣 CARTA BOMBA — " + (h ? h.name : '?') + "</span><br>" +
+                "<span style='font-family:Bungee; font-size:2.4em; color:" + col + ";'>" + bombTimer + "s</span>";
+        }
+
+        function iniciarTimerBomba() {
+            bombTimer = 15;
+            if (bombInterval) clearInterval(bombInterval);
+            _pintarBombaTV();
+            bombInterval = setInterval(function () {
+                bombTimer--;
+                if (bombTimer <= 0) { explotarBomba(); }
+                else { _pintarBombaTV(); syncState(); }
+            }, 1000);
+            syncState();
+        }
+
+        function resolverColocacionBomba(peerId, valNum) {
+            if (!bombActive) return;
+            var holder = players[activePlayerIdx];
+            if (!holder || peerId !== holder.id) return;          // solo cuenta el portador
+            if (isNaN(valNum) || valNum < 0 || valNum > holder.cards.length) return;
+            if (isSlotCorrect(valNum, songs[currentSongIdx].year, holder.cards)) {
+                addEvent('<span class="ev-name">' + holder.name + '</span> <span class="ev-good">esquiva la bomba ✅ — la pasa</span>');
+                try { if (connections[holder.id]) connections[holder.id].send({ type: 'BET_RESULT', msg: '💣 ¡Esquivada! La bomba pasa al siguiente.' }); } catch(e){}
+                pasarBomba();
+            } else {
+                explotarBomba();
+            }
+        }
+
+        function pasarBomba() {
+            if (!bombActive) return;
+            bombPassCount++;
+            // Desactivar sola si la bomba da 2 vueltas completas sin que nadie falle
+            var vivos = players.filter(function(pl){ return !(pl.lives !== undefined && pl.lives <= 0); }).length;
+            if (vivos < 2) { // no queda con quién seguir: termina sin víctima
+                finalizarBombaSinVictima();
+                return;
+            }
+            if (bombPassCount >= vivos * 2) {
+                addEvent('<span class="ev-info">💣 La bomba se desactivó sola — nadie falló</span>');
+                for (var _bc in connections) { try { connections[_bc].send({ type: 'BOMB_END' }); } catch(e){} }
+                finalizarBombaSinVictima();
+                return;
+            }
+            // Siguiente jugador VIVO
+            var next = activePlayerIdx, guard = 0;
+            do { next = (next + 1) % players.length; guard++; }
+            while (players[next] && players[next].lives !== undefined && players[next].lives <= 0 && guard < players.length);
+            activePlayerIdx = next;
+            var holder = players[activePlayerIdx];
+            document.getElementById('host-instructions').innerHTML = "<span style='color:#ff3b3b; font-size:1.4em; font-family:Bungee;'>💣 CARTA BOMBA — " + holder.name + "</span>";
+            for (var _bp in connections) { try { connections[_bp].send({ type: 'BOMB_PASS', holder: holder.name }); } catch(e){} }
+            iniciarTimerBomba();
+            syncState();
+        }
+
+        function explotarBomba() {
+            if (!bombActive) return;
+            if (bombInterval) { clearInterval(bombInterval); bombInterval = null; }
+            bombActive = false; turnPhase = 'NORMAL';
+            var victim = players[activePlayerIdx];
+            if (player && player.stopVideo) player.stopVideo();
+            isPlaying = false;
+            triggerFlash();
+            try { playGunshot(); } catch(e){}
+            if (!victim) { nextTurn(); return; }
+            addEvent('<span class="ev-name">' + victim.name + '</span> <span class="ev-bad">💥 ¡LE EXPLOTÓ LA BOMBA! Pierde una vida</span>', '💥');
+            document.getElementById('host-instructions').innerHTML = "<span style='color:#ff0000; font-size:1.5em; font-family:Bungee;'>💥 ¡BOOM! " + victim.name + " pierde una vida</span>";
+            for (var _be in connections) { try { connections[_be].send({ type: 'BOMB_EXPLODE', victim: victim.name }); } catch(e){} }
+            // loseLife gestiona la eliminación y el fin de partida (último vivo gana).
+            loseLife(victim, function () {
+                activePlayerIdx = (activePlayerIdx + 1) % players.length;
+                if (players[activePlayerIdx]) players[activePlayerIdx].canReload = true;
+                nextTurn();
+            });
+            syncState();
+        }
+
+        function finalizarBombaSinVictima() {
+            if (bombInterval) { clearInterval(bombInterval); bombInterval = null; }
+            bombActive = false; turnPhase = 'NORMAL';
+            if (player && player.pauseVideo) player.pauseVideo();
+            isPlaying = false;
+            for (var _bf in connections) { try { connections[_bf].send({ type: 'BOMB_END' }); } catch(e){} }
+            if (players[activePlayerIdx]) players[activePlayerIdx].canReload = true;
+            setTimeout(function () { nextTurn(); }, 1500);
+        }
+
         function nextTurn() {
             stopCountdown();
             resetLightning();
+            // Limpiar cualquier resto de una carta bomba anterior antes del nuevo turno.
+            if (bombInterval) { clearInterval(bombInterval); bombInterval = null; }
+            bombActive = false; bombTimer = 0;
             songPlayedThisTurn = false; // nueva canción del turno: aún no ha sonado
             // ── ¿El turno que acaba de terminar era "¡JUGAMOS TODOS!"? ──
             // Si lo era, su dueño repite turno (le "robaron" su canción todos los rivales)
@@ -2059,10 +2206,14 @@
 
             // ¡TODOS JUEGAN! aleatorio — no siempre cae al mismo jugador
             // Nunca dos compartidas seguidas: si acabamos de devolver el turno, este es normal.
-            isSharedSong = (!_repeatOwnerId && !_kingTurnComing && turnCounter === nextSharedSongTurn && players.length >= 2);
-            if (isSharedSong) {
+            // En SUPERVIVENCIA no hay "¡TODOS JUEGAN!": a la misma cadencia se dispara la
+            // CARTA BOMBA (pásalo-rápido). Requiere >=2 jugadores VIVOS.
+            var _vivosBomba = players.filter(function(pl){ return !(pl.lives !== undefined && pl.lives <= 0); }).length;
+            var _cartaBombaTurno = (gameMode === 'supervivencia' && !_repeatOwnerId && !_kingTurnComing && turnCounter === nextSharedSongTurn && _vivosBomba >= 2);
+            isSharedSong = (gameMode !== 'supervivencia' && !_repeatOwnerId && !_kingTurnComing && turnCounter === nextSharedSongTurn && players.length >= 2);
+            if (isSharedSong || _cartaBombaTurno) {
                 nextSharedSongTurn = turnCounter + 4 + Math.floor(Math.random() * 4);
-                sharedSongOwnerId = players[activePlayerIdx] ? players[activePlayerIdx].id : null;
+                if (isSharedSong) sharedSongOwnerId = players[activePlayerIdx] ? players[activePlayerIdx].id : null;
             } else if ((_repeatOwnerId || _kingTurnComing) && turnCounter === nextSharedSongTurn) {
                 // Caía justo en un turno repetido o en la fase de rey: se pospone
                 nextSharedSongTurn = turnCounter + 1;
@@ -2215,6 +2366,8 @@
                     } else { tokenStarvationTurns[pl.id] = 0; }
                 });
             }
+            // ── CARTA BOMBA: convertir este turno en una ronda de bomba (supervivencia) ──
+            if (_cartaBombaTurno) { iniciarCartaBomba(); return; }
             syncState();
         }
 
@@ -2296,6 +2449,7 @@
                 winner.score++;
                 winner.cards.push(actualYear);
                 winner.cards.sort(function(a, b){return a - b});
+                capCartas10(winner);   // nunca más de 10 cartas
                 // Comprobar victoria tras ganar carta en duelo
                 if (winner.score >= 10) {
                     if (gameMode === 'normal' || gameMode === 'supervivencia') {
@@ -2398,6 +2552,19 @@
                     'RELOAD_SONG', 'MARKET_WILDCARD', 'MARKET_DECADE', 'MARKET_SHIELD'
                 ];
                 if (_blocked.indexOf(action) !== -1) return;
+            }
+
+            // Durante la CARTA BOMBA solo se admite COLOCAR (GUESS) y reacciones; el resto
+            // (música, sabotajes, apuestas, mando, validaciones) queda bloqueado.
+            if (bombActive) {
+                if (['GUESS','REACTION','QUICK_REACT','CONFETTI_BURST'].indexOf(action) === -1) return;
+            }
+
+            // Durante un DUELO suena SOLO el tema del duelo ("El bueno, el feo y el malo"):
+            // se bloquea cualquier reproducción de la canción del turno para que no suene
+            // superpuesta (el jugador activo seguía viendo PLAY y podía arrancarla).
+            if (turnPhase === 'DUEL') {
+                if (['PLAY','PAUSE','STOP','SKIP','REMOTE_TOGGLE_PLAY'].indexOf(action) !== -1) return;
             }
 
             switch (action) {
@@ -3127,6 +3294,8 @@
                     var p = players.find(function (pl) { return pl.id === peerId; });
                     var valNum = parseInt(value);
                     if (isNaN(valNum)) break;
+                    // CARTA BOMBA: la colocación del portador se resuelve al instante.
+                    if (bombActive) { resolverColocacionBomba(peerId, valNum); break; }
                     // Registrar tiempo de reacción del jugador activo
                     if (peerId === (players[activePlayerIdx]||{}).id && reactionStartTime > 0) {
                         var _rt = (Date.now() - reactionStartTime) / 1000;
@@ -3227,27 +3396,7 @@
                     // El rey salta el video (link inválido) — volver a selección con cartas nuevas
                     if (turnPhase !== 'KING_GUESS') return;
                     if (peerId !== players[activePlayerIdx].id) return;
-                    turnPhase = 'KING_SELECTION';
-                    kingOptions = [];
-                    var numOpts2 = Math.max(1, players.length - 1);
-                    for (var ki = 0; ki < numOpts2; ki++) {
-                        currentSongIdx++;
-                        if (songs[currentSongIdx] && songs[currentSongIdx].id) {
-                            var _pl2 = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]');
-                            if (!_pl2.includes(songs[currentSongIdx].id)) {
-                                _pl2.push(songs[currentSongIdx].id);
-                                localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl2));
-                            }
-                        }
-                        if (!songs[currentSongIdx]) { reloadSongsMidGame(); currentSongIdx++; }
-                        if (songs[currentSongIdx]) kingOptions.push(songs[currentSongIdx]);
-                    }
-                    if (player && player.stopVideo) player.stopVideo();
-                    var pcSkip = document.getElementById('player-container');
-                    if (pcSkip) pcSkip.style.display = 'none';
-                    document.getElementById('host-instructions').innerText = 'VIDEO INVÁLIDO — LOS JUGADORES ELIGEN NUEVA CARTA...';
-                    addEvent('<span class="ev-info">⏭️ Rey saltó el video — eligiendo carta nueva</span>');
-                    syncState();
+                    reiniciarSeleccionRey();
                     break;
 
                 case 'KING_GUESS':
@@ -3620,6 +3769,36 @@
             return (year >= tl[slotIdx - 1] && year <= tl[slotIdx]);
         }
 
+        // Reinicia la fase de selección del Rey con cartas nuevas (se usa cuando el vídeo
+        // de la carta elegida no está disponible, ya sea por el botón manual del rey o por
+        // el fallo automático de YouTube). Mantiene turnPhase coherente para que, cuando el
+        // rey acierte con una carta válida, SÍ se declare ganador.
+        function reiniciarSeleccionRey() {
+            turnPhase = 'KING_SELECTION';
+            kingOptions = [];
+            var numOpts = Math.max(1, players.length - 1);
+            for (var ki = 0; ki < numOpts; ki++) {
+                currentSongIdx++;
+                if (songs[currentSongIdx] && songs[currentSongIdx].id) {
+                    var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]');
+                    if (!_pl.includes(songs[currentSongIdx].id)) { _pl.push(songs[currentSongIdx].id); localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl)); }
+                }
+                if (!songs[currentSongIdx]) { reloadSongsMidGame(); currentSongIdx++; }
+                if (songs[currentSongIdx]) kingOptions.push(songs[currentSongIdx]);
+            }
+            if (player && player.stopVideo) player.stopVideo();
+            isPlaying = false;
+            var pcKR = document.getElementById('player-container');
+            if (pcKR) pcKR.style.display = 'none';
+            document.getElementById('ui-card-artist').innerText = "ELIGIENDO CARTA...";
+            document.getElementById('ui-card-song').innerText = "ESPERANDO RIVALES";
+            document.getElementById('ui-card-year').innerText = "----";
+            var _revKR = document.getElementById('btn-reveal-host'); if (_revKR) _revKR.style.display = 'none';
+            document.getElementById('host-instructions').innerText = 'VÍDEO NO VÁLIDO — LOS JUGADORES ELIGEN NUEVA CARTA...';
+            addEvent('<span class="ev-info">⏭️ Vídeo no válido — se elige carta nueva para el Rey</span>');
+            syncState();
+        }
+
         function resolveKingMode(won) {
             triggerFlash();
             document.getElementById('host-instructions').innerHTML = "CARGANDO SIGUIENTE FASE...";
@@ -3656,6 +3835,7 @@
                 winner.score++;
                 winner.cards.push(parseInt(s.year));
                 winner.cards.sort(function(a,b){ return a - b; });
+                capCartas10(winner);   // nunca más de 10 cartas
             }
             trackCorrect(winner.id);
             addEvent('<span class="ev-name">' + winner.name + '</span> <span class="ev-good">¡ACIERTA el primero y se lleva la carta en ¡TODOS JUEGAN!! 🎵</span>', '🎵');
@@ -4101,10 +4281,25 @@
                 addEvent('<span class="ev-name">' + players[activePlayerIdx].name + '</span> <span class="ev-good">acertó ✅</span> ' + songs[currentSongIdx].year);
                 flyCard(songs[currentSongIdx].year, players[activePlayerIdx].name);
                 trackCorrect(players[activePlayerIdx].id, songs[currentSongIdx].id);
+                // ── TOPE 10 CARTAS ──
+                // Los bonos (racha, farol, carta bonificación, guerrero, comodín 🔥, doble o
+                // nada) añaden COPIAS del año recién ganado. Nunca se puede pasar de 10:
+                // un jugador a 9 que gana doble se queda en 10, no en 11. Recortamos primero
+                // las copias sobrantes de esta canción para no borrar cartas ya ganadas.
+                (function () {
+                    var _cp = players[activePlayerIdx];
+                    var _y = parseInt(songs[currentSongIdx].year);
+                    while (_cp.cards.length > 10) {
+                        var _idx = _cp.cards.lastIndexOf(_y);
+                        if (_idx === -1) _idx = _cp.cards.length - 1;
+                        _cp.cards.splice(_idx, 1);
+                    }
+                    _cp.score = _cp.cards.length;
+                })();
                 if (players[activePlayerIdx].score >= 10) {
-                    // supervivencia también gana a las 10 cartas (antes NO: se llegaba a 40+
-                    // cartas y la partida no acababa nunca salvo por eliminación)
-                    if (gameMode === 'normal' || gameMode === 'supervivencia') {
+                    // En SUPERVIVENCIA ya NO se gana por llegar a 10 cartas: solo se gana
+                    // siendo el último con vidas. Las cartas no cuentan para la victoria.
+                    if (gameMode === 'normal') {
                         showWinner(players[activePlayerIdx].name);
                         return;
                     } else if (gameMode === 'rey') {
@@ -4173,6 +4368,7 @@
                 p.score++;
                 p.cards.push(parseInt(songs[currentSongIdx].year));
                 p.cards.sort(function(a,b){return a-b;});
+                capCartas10(p);   // nunca más de 10 cartas
                 addEvent('<span class="ev-name">' + p.name + '</span> <span class="ev-good">robó la carta 🎯</span> ' + songs[currentSongIdx].year);
                 flyCard(songs[currentSongIdx].year, p.name);
                 // Modo equipos: actualizar cronología del equipo
@@ -4184,7 +4380,8 @@
                     if (teamScore[p.team] >= 10) { showWinner(p.team === 'red' ? '🔴 EQUIPO ROJO' : '🔵 EQUIPO AZUL'); return; }
                 }
                 if (p.score >= 10) {
-                    if (gameMode === 'normal' || gameMode === 'supervivencia') {
+                    // En SUPERVIVENCIA no se gana por cartas (solo por ser el último vivo).
+                    if (gameMode === 'normal') {
                         showWinner(p.name);
                         return;
                     } else if (gameMode === 'rey') {
@@ -4735,6 +4932,10 @@
                     panicTimer: panicTimer,
                     isFogActive: isFogActive,
                     isSharedSong: isSharedSong,
+                    bombActive: bombActive,
+                    bombTimer: bombTimer,
+                    bombHolderId: (bombActive && players[activePlayerIdx]) ? players[activePlayerIdx].id : null,
+                    bombHolderName: (bombActive && players[activePlayerIdx]) ? players[activePlayerIdx].name : null,
                     stats: { streaks: stats.streaks, maxStreaks: stats.maxStreaks },
                     teamCards: teamCards,
                     teamScore: teamScore,
@@ -5085,9 +5286,21 @@
         // ── Mantener el invariante score === cards.length ──
         // Los robos de carta (ROBO INTELIGENTE, RULETA RUSA) movían cartas sin tocar score,
         // así que el marcador X/10 se desincronizaba de la cronología real.
+        // TOPE 10 CARTAS: ningún jugador puede tener más de 10 cartas por ninguna vía.
+        // Si se supera, se recorta (se queda con las 10 más antiguas) y el marcador se
+        // recalcula. Se usa en todos los puntos donde se gana/roba carta.
+        function capCartas10(pl) {
+            if (!pl || !pl.cards) return;
+            if (pl.cards.length > 10) pl.cards = pl.cards.slice(0, 10);
+            pl.score = pl.cards.length;
+        }
+
         function resyncScores() {
             players.forEach(function (pl) {
-                if (pl.cards) pl.score = pl.cards.length;
+                if (pl.cards) {
+                    if (pl.cards.length > 10) pl.cards = pl.cards.slice(0, 10); // tope 10
+                    pl.score = pl.cards.length;
+                }
             });
         }
 
@@ -5097,7 +5310,8 @@
         // en nextTurn() cuando le vuelva a tocar al jugador con 10 cartas.
         function checkScoreVictory(p) {
             if (!p || p.score < 10) return false;
-            if (gameMode === 'normal' || gameMode === 'supervivencia') {
+            // En SUPERVIVENCIA no se gana por cartas (solo por ser el último vivo).
+            if (gameMode === 'normal') {
                 showWinner(p.name);
                 return true;
             }
