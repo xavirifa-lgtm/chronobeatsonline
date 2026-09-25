@@ -2451,8 +2451,11 @@
                 winner.cards.sort(function(a, b){return a - b});
                 capCartas10(winner);   // nunca más de 10 cartas
                 // Comprobar victoria tras ganar carta en duelo
+                // En SUPERVIVENCIA NO se gana por llegar a 10 cartas (solo por ser el último
+                // con vidas): si el ganador del duelo llega a 10, el duelo sigue su curso
+                // normal (roba fichas y pasa turno), no se declara ganador.
                 if (winner.score >= 10) {
-                    if (gameMode === 'normal' || gameMode === 'supervivencia') {
+                    if (gameMode === 'normal') {
                         showWinner(winner.name);
                         return;
                     } else if (gameMode === 'rey') {
@@ -5019,12 +5022,23 @@
                     livesHtml += '</div>';
                 }
                 var elimStyle = (gameMode === 'supervivencia' && p.lives !== undefined && p.lives <= 0) ? 'opacity:0.35;' : '';
+                // En SUPERVIVENCIA el marcador NO es X/10 (llegar a 10 no gana): se muestran
+                // las VIDAS restantes, y la barra se vacía a medida que se pierden vidas.
+                var scoreLabel = (gameMode === 'supervivencia')
+                    ? '💿 ' + pLives
+                    : p.score + '/10';
+                var progWidth = (gameMode === 'supervivencia')
+                    ? Math.min(pLives / INITIAL_LIVES * 100, 100)
+                    : Math.min(p.score / 10 * 100, 100);
+                var progCls = (gameMode === 'supervivencia')
+                    ? (pLives <= 1 ? ' critical' : pLives <= 2 ? ' warning' : '')
+                    : (p.score >= 9 ? ' critical' : p.score >= 7 ? ' warning' : '');
                 h += '<div class=\"leader-item ' + (p.id === players[activePlayerIdx].id ? 'active' : '') + '\" data-pid=\"' + p.id + '\" style=\"display:flex; align-items:center; margin-bottom:10px; position:relative;' + elimStyle + '\">' +
                      avatarHtml +
                      '<span style=\"flex:1; font-family:Bungee,sans-serif; font-size:0.8em;\">' + p.name + (gameMode === 'equipos' && p.team ? '<span class=\"team-badge team-' + p.team + '\">' + (p.team==='red'?'🔴':'🔵') + '</span>' : '') + '<div>' + livesHtml + '</div><span style=\"opacity:0.6; font-size:0.7em;\">' + chipsHtml + '</span></span>' +
-                     '<span class=\"score\" style=\"font-family:Bungee,sans-serif; color:var(--gold);\">' + p.score + '/10</span></div>' +
+                     '<span class=\"score\" style=\"font-family:Bungee,sans-serif; color:var(--gold);\">' + scoreLabel + '</span></div>' +
                      '<div class=\"progress-bar-wrap\">' +
-                     '<div class=\"progress-bar-fill' + (p.score >= 9 ? ' critical' : p.score >= 7 ? ' warning' : '') + '\" style=\"width:' + Math.min(p.score/10*100,100) + '%\"></div>' +
+                     '<div class=\"progress-bar-fill' + progCls + '\" style=\"width:' + progWidth + '%\"></div>' +
                      '</div>';
             });
             var lbEl = document.getElementById('leaderboard-list');

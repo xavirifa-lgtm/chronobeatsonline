@@ -2776,14 +2776,24 @@
         }
 
         // ── MINI RANKING ──
-        function updateMiniRanking(players, myId) {
+        function updateMiniRanking(players, myId, gameMode) {
             var el = document.getElementById('mini-ranking');
             if (!el || !players) return;
-            var sorted = players.slice().sort(function(a,b){ return b.score - a.score; });
-            var maxScore = sorted[0] ? sorted[0].score : 1;
+            var esSuper = (gameMode === 'supervivencia');
+            // En supervivencia se ordena y muestra por VIDAS (no por cartas): los vivos
+            // primero, los eliminados al final.
+            var sorted = players.slice().sort(function(a,b){
+                if (esSuper) return (b.lives === undefined ? 3 : b.lives) - (a.lives === undefined ? 3 : a.lives);
+                return b.score - a.score;
+            });
             el.innerHTML = sorted.map(function(pl, i) {
                 var cls = pl.id === myId ? 'me' : (i === 0 ? 'leader' : '');
                 var medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '';
+                if (esSuper) {
+                    var lv = pl.lives === undefined ? 3 : pl.lives;
+                    var out = lv <= 0;
+                    return '<div class="rank-pill ' + cls + '"' + (out ? ' style="opacity:0.4;"' : '') + '>' + medal + '<span class="rname">' + pl.name + '</span><strong>' + (out ? '☠️' : lv) + '</strong>' + (out ? '' : '💿') + '</div>';
+                }
                 return '<div class="rank-pill ' + cls + '">' + medal + '<span class="rname">' + pl.name + '</span><strong>' + pl.score + '</strong>🃏</div>';
             }).join('');
             el.style.display = 'flex';
@@ -3392,12 +3402,24 @@
                     }
                 }
 
-                if (data.leader) {
-                    document.getElementById('lb-leader-name').innerText = data.leader.name;
-                    document.getElementById('lb-leader-cards').innerText = data.leader.score;
-                }
-                if (data.myCards) {
-                    document.getElementById('lb-me-cards').innerText = data.myCards.length;
+                // En SUPERVIVENCIA las cartas NO deciden (gana el último con vidas), así que
+                // el marcador muestra VIDAS en vez de "X CARTAS" para no confundir.
+                var _lbLeaderRow = document.querySelector('#leaderboard-info .leader-row');
+                var _lbMeRow = document.querySelector('#leaderboard-info .me-row');
+                if (data.gameMode === 'supervivencia') {
+                    var _myP = data.players && data.players.find(function(p){ return p.id === myId; });
+                    var _myLives = _myP && _myP.lives !== undefined ? _myP.lives : 3;
+                    var _vivos = data.players ? data.players.filter(function(p){ return (p.lives === undefined ? 3 : p.lives) > 0; }).length : 0;
+                    if (_lbLeaderRow) _lbLeaderRow.innerHTML = 'VIVOS: <span id="lb-leader-cards">' + _vivos + '</span> JUGADORES';
+                    if (_lbMeRow) _lbMeRow.innerHTML = 'TUS VIDAS: <span id="lb-me-cards">' + '💿'.repeat(Math.max(_myLives,0)) + '</span>';
+                } else {
+                    // Reconstruye las filas (por si venimos de un estado de supervivencia) para
+                    // garantizar que los spans lb-leader-name / lb-leader-cards / lb-me-cards existen.
+                    var _lname = data.leader ? data.leader.name : '---';
+                    var _lscore = data.leader ? data.leader.score : 0;
+                    var _mcards = data.myCards ? data.myCards.length : 0;
+                    if (_lbLeaderRow) _lbLeaderRow.innerHTML = 'LÍDER: <span id="lb-leader-name">' + _lname + '</span> (<span id="lb-leader-cards">' + _lscore + '</span>)';
+                    if (_lbMeRow) _lbMeRow.innerHTML = 'YO: <span id="lb-me-cards">' + _mcards + '</span> CARTAS';
                 }
 
                 // Identificar si es mi turno usando el ID de PeerJS
@@ -3500,7 +3522,7 @@
                 var volCtrl = document.getElementById('volume-ctrl');
                 if (volCtrl) volCtrl.style.display = (isMyTurn && data.gameStarted) ? 'flex' : 'none';
                 // Mini ranking
-                updateMiniRanking(data.players, myId);
+                updateMiniRanking(data.players, myId, data.gameMode);
 
                 // Tab blink — si es mi turno y la pestaña está oculta
                 var isMyTurnNow = data.players && data.players.find(function(pl){return pl.id===myId;}) &&
