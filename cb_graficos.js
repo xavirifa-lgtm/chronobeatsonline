@@ -44,6 +44,19 @@
     }
     var TIPOS = { orig: 'original', anime: 'anime', movies: 'pelis', videojuegos: 'videojuegos', mix: 'mix' };
 
+
+    // ---------- colores por edición (tema cartoon) ----------
+    // acento = color vivo para fondos/rellenos; neon = versión oscura para texto y bordes sobre papel
+    var COLORES = {
+        orig: ['#3BB4E5', '#0369A1'], anime: ['#FF5FA2', '#BE185D'], movies: ['#FFB020', '#B45309'],
+        videojuegos: ['#A78BFA', '#6D28D9'], mix: ['#4ADE80', '#15803D']
+    };
+    function ponerColores(tipo) {
+        var c = COLORES[tipo] || COLORES.mix, r = document.documentElement.style;
+        r.setProperty('--cb-acento', c[0]);
+        // solo el tema claro (cb_tema.css) necesita el color oscurecido; el retro usa el neón original
+        if (document.querySelector('link[href*="cb_tema.css"]')) r.setProperty('--neon', c[1], 'important');
+    }
     // ---------- fondo de pantalla (tablet y móvil) ----------
     css(
         'body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;' +
@@ -123,16 +136,27 @@
     }
     function textoPlano(html) { var d = document.createElement('div'); d.innerHTML = html; return d.textContent || ''; }
 
+
+    // ---------- vinilo que gira mientras suena ----------
+    function vinilo(dentroDe, antesDe) {
+        if (!dentroDe || dentroDe.querySelector('.cb-vinilo')) return;
+        var v = document.createElement('img');
+        v.className = 'cb-vinilo'; v.alt = ''; v.src = DIR + 'st_vinilo.webp';
+        if (antesDe) dentroDe.insertBefore(v, antesDe); else dentroDe.appendChild(v);
+    }
+    function marcarSonando(on) { document.body.classList.toggle('cb-sonando', !!on); }
     // ---------- HOST ----------
     function iniciarHost() {
-        ponerFondo('mix');
-        envolver('applyTheme', function (type) { ponerFondo(type); });
+        ponerFondo('mix'); ponerColores('mix');
+        envolver('applyTheme', function (type) { ponerFondo(type); ponerColores(type); });
         envolver('addEvent', function (html) { mostrarEscena(escenaPara(textoPlano(String(html || '')))); });
         envolver('notifyVictim', function (victimId, atacante, sabotaje) { mostrarEscena(escenaPara(String(sabotaje || ''))); });
         var ws = document.getElementById('winner-screen');
         if (ws) new MutationObserver(function () {
             if (ws.style.display && ws.style.display !== 'none') { var b = document.getElementById('cb-escena'); if (b) b.classList.remove('on'); }
         }).observe(ws, { attributes: true, attributeFilter: ['style'] });
+        vinilo(document.getElementById('val-card-ui'));
+        setInterval(function () { marcarSonando(window.isPlaying); }, 400);
         var hi = document.getElementById('host-instructions');
         if (hi) new MutationObserver(function () {
             var t = hi.textContent || '';
@@ -204,11 +228,12 @@
     }
 
     function iniciarPlayer() {
-        ponerFondo('mix');
+        ponerFondo('mix'); ponerColores('mix');
         ponerReverso('mix');
-        envolver('applyTheme', function (type) { ponerFondo(type); ponerReverso(type); });
+        envolver('applyTheme', function (type) { ponerFondo(type); ponerReverso(type); ponerColores(type); });
         envolver('showSabotageReceived', function (atacante, sabotaje) { mostrarEscena(escenaPara(String(sabotaje || '')), 2200); });
         selectorAvatares();
+        envolver('handle', function (d) { if (d && d.type === 'STATE_UPDATE') marcarSonando(d.isPlaying); });
         css(
             // reverso de la carta central
             '.card-front{background:#111 var(--cb-reverso,none) center/cover no-repeat !important;' +

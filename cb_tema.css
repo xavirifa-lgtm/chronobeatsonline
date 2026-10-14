@@ -1,0 +1,292 @@
+/* ChronoBeats — tema "cartoon" (mismo lenguaje visual que el juego del camping).
+ * Se carga al final de player y host y se impone a los estilos oscuros originales.
+ * Para volver al aspecto anterior basta con quitar la línea <link ... cb_tema.css> de los HTML.
+ */
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@600;700;800;900&display=swap');
+
+:root {
+    --paper: #FFFBF1;
+    --cream: #FFF1D6;
+    --line: #3A2418;
+    --line-soft: #8A6A52;
+    --sun: #FFC93C;
+    --pine: #2FA36B;
+    --pool: #3BB4E5;
+    --danger: #E5484D;
+    --sombra: 0 4px 0 var(--line);
+    --sombra-s: 0 3px 0 var(--line);
+    --radio: 18px;
+    /* colores originales del juego, oscurecidos para leerse sobre papel */
+    --gold: #B7791F !important;
+    --accent: #E11D48 !important;
+    --pink: #DB2777 !important;
+    --bg: var(--cream) !important;
+    color-scheme: light;
+}
+
+/* ---------- base ---------- */
+html, body { background: var(--cream) !important; }
+body {
+    color: var(--line) !important;
+    background-color: var(--cream) !important;
+    background-image:
+        radial-gradient(circle at 18px 18px, color-mix(in srgb, var(--cb-acento, #3BB4E5) 18%, transparent) 2.5px, transparent 3px),
+        radial-gradient(circle at 0 0, color-mix(in srgb, var(--cb-acento, #3BB4E5) 22%, transparent) 0, transparent 55%),
+        linear-gradient(180deg, color-mix(in srgb, var(--cb-acento, #3BB4E5) 16%, var(--cream)) 0, var(--cream) 420px) !important;
+    background-size: 36px 36px, 100% 100%, 100% 100% !important;
+    background-attachment: fixed !important;
+}
+body::before { display: none !important; }
+body, body * { text-shadow: none !important; font-family: 'Nunito', system-ui, sans-serif !important; }
+.cb-ico { filter: none !important; }
+
+/* titulares y textos "de juego" */
+h1, h2, h3, h4, .logo, .room-code, .active-player-name, #c-year, #c-song, #countdown-number,
+[style*="Bungee"], .btn, .btn-start, .btn-val, .reveal-btn, .ctrl-btn, .sk-btn, .spec-btn, .market-btn,
+.tab-btn, .steal-btn, .award-title, .rank-name, .stat-val, #turn-status, .chip-display, .yf-year {
+    font-family: 'Baloo 2', 'Nunito', sans-serif !important;
+    font-weight: 800 !important;
+    letter-spacing: .01em !important;
+}
+
+/* textos claros pensados para fondo negro -> marrón */
+#login-screen [style*="color:#fff"], #login-screen [style*="color: #fff"],
+#game-screen [style*="color:#fff"], #game-screen [style*="color: #fff"],
+#game-screen [style*="color:#aaa"], #game-screen [style*="color: #aaa"],
+#game-screen [style*="color:#888"], #game-screen [style*="color: #888"],
+#game-screen [style*="color:#666"], #game-screen [style*="color: #666"],
+#game-screen [style*="color:#ccc"], #game-screen [style*="color:#ddd"], #game-screen [style*="color:#bbb"],
+#lobby [style*="color:#fff"], #lobby [style*="color:#888"], #lobby [style*="color:#aaa"], #lobby [style*="color:#666"],
+#dashboard [style*="color:#fff"], #dashboard [style*="color: #fff"], #dashboard [style*="color:#888"],
+#dashboard [style*="color:#aaa"], #dashboard [style*="color:#666"], #dashboard [style*="color:#ccc"],
+#global-timelines [style*="color"] {
+    color: var(--line) !important;
+}
+
+/* fondos negros en línea -> papel */
+#game-screen [style*="background:#1"], #game-screen [style*="background: #1"],
+#game-screen [style*="background:#0"], #game-screen [style*="background: #0"],
+#game-screen [style*="background:#2"], #game-screen [style*="background: #2"],
+#game-screen [style*="background:rgba(0"], #game-screen [style*="background: rgba(0"],
+#game-screen [style*="background:rgba(255,255,255,0.0"], #game-screen [style*="background: rgba(255, 255, 255, 0.0"],
+#lobby [style*="background:#1"], #lobby [style*="background:#2"], #lobby [style*="background: #2"],
+#dashboard [style*="background:#1"], #dashboard [style*="background: #1"], #dashboard [style*="background:#2"],
+#dashboard [style*="background:rgba(0"], #dashboard [style*="background:rgba(255,255,255,0.0"] {
+    background: var(--paper) !important;
+}
+
+/* ---------- piezas comunes ---------- */
+.btn, .btn-start, .reveal-btn {
+    border: 3px solid var(--line) !important;
+    border-radius: 16px !important;
+    box-shadow: var(--sombra) !important;
+    color: var(--line) !important;
+    background: var(--sun) !important;
+    text-transform: uppercase;
+}
+.btn:active:not(:disabled), .btn-start:active, .reveal-btn:active,
+.ctrl-btn:active, .spec-btn:active:not(:disabled), .market-btn:active:not(:disabled), .btn-val:active {
+    transform: translateY(3px) !important; box-shadow: 0 1px 0 var(--line) !important;
+}
+input, select {
+    background: #fff !important;
+    color: var(--line) !important;
+    border: 3px solid var(--line) !important;
+    border-radius: 14px !important;
+    box-shadow: inset 0 2px 0 rgba(58,36,24,.08) !important;
+    backdrop-filter: none !important;
+}
+input::placeholder { color: var(--line-soft) !important; opacity: .8; }
+
+/* botones redondos flotantes (H, ?, mando) */
+.btn-hub, #fab-rules, #fab-remote, [onclick*="toggleRules"][style*="border-radius:50%"], [onclick*="toggleRemote"] {
+    background: var(--paper) !important;
+    color: var(--line) !important;
+    border: 3px solid var(--line) !important;
+    box-shadow: var(--sombra-s) !important;
+}
+
+/* ============================== MÓVIL ============================== */
+#login-screen > div:first-child {
+    -webkit-text-fill-color: var(--line) !important;
+    background: none !important; filter: none !important;
+    font-size: 2em !important;
+}
+#login-screen > div:first-child span { -webkit-text-fill-color: var(--danger) !important; }
+#avatar-placeholder { background: var(--paper) !important; border: 3px dashed var(--line) !important; color: var(--line) !important; }
+#avatar-preview { border: 3px solid var(--line) !important; box-shadow: var(--sombra-s) !important; }
+#login-screen [style*="text-shadow"], .cb-av-tit { color: var(--line) !important; }
+#cb-avatares img { border: 3px solid var(--line) !important; background: var(--paper); }
+#cb-avatares img.sel { border-color: var(--line) !important; box-shadow: 0 0 0 3px var(--sun), var(--sombra-s) !important; }
+#qr-btn { background: var(--paper) !important; color: var(--line) !important; border: 3px solid var(--line) !important; box-shadow: var(--sombra-s) !important; }
+#join-btn { background: var(--pine) !important; color: #fff !important; }
+
+/* barra de pestañas */
+.tab-bar {
+    background: var(--paper) !important;
+    border-top: 3px solid var(--line) !important;
+    backdrop-filter: none !important; box-shadow: 0 -2px 0 rgba(58,36,24,.12) !important;
+}
+.tab-btn { color: var(--line-soft) !important; }
+.tab-btn .cb-ico { filter: grayscale(.55) opacity(.75) !important; transition: transform .15s; }
+.tab-btn.active { color: var(--line) !important; }
+.tab-btn.active .cb-ico { filter: none !important; transform: translateY(-3px) scale(1.12); }
+
+/* cabecera del turno */
+#leaderboard-info, #mini-ranking { color: var(--line) !important; }
+.rank-pill { background: var(--paper) !important; color: var(--line) !important; border: 2px solid var(--line) !important; box-shadow: 0 2px 0 var(--line) !important; }
+.rank-pill.me { background: var(--sun) !important; }
+.rank-pill.leader { background: #FFD9A8 !important; }
+#turn-status {
+    display: inline-block; background: var(--paper) !important; color: var(--line) !important;
+    border: 3px solid var(--line) !important; border-radius: 999px !important; padding: 4px 16px !important;
+    box-shadow: var(--sombra-s) !important; font-size: .95em !important;
+}
+#turn-status span { color: var(--neon) !important; }
+
+/* carta */
+.card-face { border: 4px solid var(--line) !important; border-radius: 20px !important; box-shadow: 0 6px 0 var(--line) !important; backdrop-filter: none !important; }
+.card-back { background: var(--paper) !important; }
+#c-artist { color: var(--line-soft) !important; font-weight: 800 !important; }
+#c-song { color: var(--line) !important; }
+#c-year { color: var(--neon) !important; font-size: 4.2em !important; }
+#wait-msg { color: var(--line-soft) !important; opacity: 1 !important; }
+
+/* controles de música */
+.ctrl-btn, .sk-btn {
+    background: var(--paper) !important; color: var(--line) !important;
+    border: 3px solid var(--line) !important; border-radius: 14px !important; box-shadow: var(--sombra-s) !important;
+    backdrop-filter: none !important;
+}
+.btn-play { background: var(--pine) !important; color: #fff !important; }
+.btn-play.active, .playing-active { background: var(--sun) !important; color: var(--line) !important; animation: none !important; }
+.btn-stop { background: var(--danger) !important; color: #fff !important; }
+.sk-fwd { background: #D6F0FB !important; } .sk-back { background: #FFE3D1 !important; }
+
+/* cronología */
+.collection-summary {
+    background: var(--paper) !important; border: 3px solid var(--line) !important;
+    border-radius: var(--radio) !important; box-shadow: var(--sombra) !important; backdrop-filter: none !important;
+}
+.collection-summary h4 { color: var(--line) !important; }
+.card-row {
+    background: #fff url(img/x_carta_anio.webp) center/contain no-repeat !important;
+    border: none !important; box-shadow: none !important; backdrop-filter: none !important;
+    color: var(--line) !important; font-family: 'Baloo 2' !important; font-weight: 800 !important;
+    background-color: transparent !important; min-height: 46px; display: flex !important; align-items: center; justify-content: center;
+    font-size: 1.05em !important;
+}
+.bet-slot { border: 3px dashed var(--line-soft) !important; background: var(--cream) !important; color: var(--line) !important; }
+.bet-slot.active-guess { background: var(--sun) !important; border: 3px solid var(--line) !important; }
+.bet-slot.my-bet { background: var(--pool) !important; border: 3px solid var(--line) !important; }
+.bet-slot.occupied { background: #FFD9D4 !important; border: 3px solid var(--line) !important; }
+#game-screen [style*="ANTES"], #game-screen [style*="DESPU"] { color: var(--line-soft) !important; }
+
+/* fichas */
+.chip-display { color: var(--line) !important; }
+.neon-chip {
+    width: 22px !important; height: 22px !important; border-radius: 50% !important;
+    background: url(img/ico_ficha.webp) center/contain no-repeat !important; box-shadow: none !important; border: none !important;
+}
+
+/* botones de acción, sabotaje y mercado */
+.spec-btn, .market-btn, .steal-btn, .emoji-wildcard-btn, .reaction-btn, .qr-btn, .cat-req-btn {
+    background: var(--paper) !important; color: var(--line) !important;
+    border: 3px solid var(--line) !important; border-radius: 16px !important;
+    box-shadow: var(--sombra-s) !important; backdrop-filter: none !important;
+}
+.spec-btn .cb-ico, .market-btn .cb-ico { height: 1.6em !important; vertical-align: -.45em !important; }
+.spec-btn:disabled, .market-btn:disabled { opacity: .5 !important; }
+#sabotage-grid .spec-btn:nth-child(4n+1) { background: #FFD9D4 !important; }
+#sabotage-grid .spec-btn:nth-child(4n+2) { background: #FFE9B8 !important; }
+#sabotage-grid .spec-btn:nth-child(4n+3) { background: #D6F0FB !important; }
+#sabotage-grid .spec-btn:nth-child(4n+4) { background: #E7DDFB !important; }
+#btn-double-or-nothing, #btn-brag, #btn-fail-safe, #btn-steal-streak { color: var(--line) !important; }
+#tab-sabotage h2, #tab-market h2 { color: var(--line) !important; font-size: 1.8em !important; }
+#sabotage-status-msg { color: var(--line-soft) !important; font-weight: 700 !important; }
+
+/* avisos y modales */
+#custom-alert > div, #custom-confirm > div, .duel-overlay, #smart-steal-modal, .danger-alert-popup,
+#sabotage-received-banner, #bet-notific, .bet-notific, .qr-toast {
+    background: var(--paper) !important; color: var(--line) !important;
+    border: 3px solid var(--line) !important; border-radius: var(--radio) !important; box-shadow: var(--sombra) !important;
+    backdrop-filter: none !important;
+}
+#custom-alert h3, #custom-confirm h3 { color: var(--line) !important; }
+#custom-alert p, #custom-confirm p, #custom-alert-msg { color: var(--line) !important; }
+#sabotage-received-banner .sab-attacker { color: var(--danger) !important; }
+#sabotage-received-banner .sab-name { color: var(--line) !important; }
+
+/* reglamento */
+#rules-overlay { background: rgba(255,241,214,.97) !important; color: var(--line) !important; }
+#rules-overlay h2 { color: var(--line) !important; }
+#rules-overlay > div > div[style*="border"] { background: var(--paper) !important; border: 3px solid var(--line) !important; box-shadow: var(--sombra-s) !important; }
+#rules-overlay [style*="color"] { color: var(--line) !important; }
+#rules-overlay [style*="background"] { background: var(--paper) !important; border-color: var(--line) !important; }
+#rule-detail-popover > div { background: var(--paper) !important; color: var(--line) !important; border: 3px solid var(--line) !important; }
+
+/* ============================== TABLET ============================== */
+.logo {
+    -webkit-text-fill-color: var(--line) !important; background: none !important; filter: none !important;
+    font-size: 2.4em !important;
+}
+#lobby .room-code, #join-code {
+    -webkit-text-fill-color: var(--line) !important; color: var(--line) !important; background: var(--paper) !important;
+    border: 4px solid var(--line) !important; border-radius: 22px !important; box-shadow: 0 6px 0 var(--line) !important;
+    display: inline-block; padding: 6px 26px !important; filter: none !important;
+}
+#live-room-code { background: var(--paper) !important; color: var(--line) !important; border: 3px solid var(--line) !important; box-shadow: var(--sombra-s) !important; }
+.player-tag { background: var(--paper) !important; color: var(--line) !important; border: 3px solid var(--line) !important; box-shadow: var(--sombra-s) !important; border-radius: 16px !important; }
+#lobby label, #lobby [style*="letter-spacing"] { color: var(--line) !important; }
+
+.sidebar, .validation-area, .player-row, #event-log, .team-panel, .award-card, .stat-card, .rank-card {
+    background: var(--paper) !important; color: var(--line) !important;
+    border: 3px solid var(--line) !important; border-radius: var(--radio) !important;
+    box-shadow: var(--sombra) !important; backdrop-filter: none !important;
+}
+.val-card {
+    background: #fff !important; border: 3px solid var(--line) !important; border-radius: var(--radio) !important;
+    box-shadow: inset 0 0 0 6px color-mix(in srgb, var(--neon) 25%, transparent) !important;
+}
+.val-card p, .val-card h3, #ui-card-artist, #ui-card-song { color: var(--line) !important; }
+#ui-card-year { color: var(--neon) !important; font-family: 'Baloo 2' !important; font-weight: 800 !important; }
+#host-instructions { color: var(--line) !important; font-weight: 800 !important; }
+.active-player-name { color: var(--neon) !important; }
+.leader-item {
+    background: var(--cream) !important; color: var(--line) !important;
+    border: 2px solid var(--line) !important; border-radius: 14px !important; box-shadow: 0 2px 0 var(--line) !important;
+}
+.leader-item.active { background: var(--sun) !important; border-left: 2px solid var(--line) !important; }
+.leader-item .score, .leader-item [class*="score"] { color: var(--line) !important; }
+.btn-val { border: 3px solid var(--line) !important; border-radius: 14px !important; box-shadow: var(--sombra-s) !important; color: var(--line) !important; }
+.btn-ok { background: #7ED9A5 !important; }
+.btn-fail { background: #FF9C8F !important; }
+.mini-card, .slot {
+    background: var(--cream) !important; color: var(--line-soft) !important;
+    border: 2px solid var(--line) !important; border-radius: 10px !important; box-shadow: 0 2px 0 var(--line) !important;
+}
+.slot.filled, .mini-card { background: var(--sun) !important; color: var(--line) !important; font-weight: 800 !important; }
+.mini-stat { background: var(--cream) !important; color: var(--line) !important; border: 2px solid var(--line) !important; }
+.mini-stat.danger { background: #FFD9D4 !important; } .mini-stat.hot { background: #FFE0B8 !important; }
+.progress-bar-wrap { background: var(--cream) !important; border: 2px solid var(--line) !important; }
+.event-entry { color: var(--line) !important; border-color: rgba(58,36,24,.15) !important; }
+.event-entry .ev-name { color: var(--line) !important; font-weight: 900 !important; }
+.event-entry .ev-good { color: #1F7A4D !important; } .event-entry .ev-bad { color: #C2410C !important; } .event-entry .ev-info { color: #1D6FA3 !important; }
+#lightning-banner, #shared-song-banner, #bonus-card-indicator, #double-or-nothing-indicator, #steal-resistance-banner {
+    border: 3px solid var(--line) !important; box-shadow: var(--sombra-s) !important; color: var(--line) !important;
+}
+
+/* ganador: la ilustración se queda, los paneles en papel */
+#winner-screen h1 { color: var(--sun) !important; -webkit-text-stroke: 2px var(--line); }
+#winner-screen h2 { color: #fff !important; }
+
+/* ---------- ajustes v2 ---------- */
+#mini-ranking { background: transparent !important; border-bottom: none !important; }
+/* año en la cronología: pastilla amarilla gordita */
+.card-row {
+    background: var(--sun) !important; background-image: none !important;
+    border: 3px solid var(--line) !important; border-radius: 14px !important; box-shadow: var(--sombra-s) !important;
+    min-height: 0 !important; font-size: 1.25em !important; padding: 6px 10px !important;
+}
+/* mando TV: mientras no exista su icono, texto */
+#fab-remote:not(:has(img))::after { content: 'TV'; font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: .7em; color: var(--line); }

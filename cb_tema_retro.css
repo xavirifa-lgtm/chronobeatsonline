@@ -1,0 +1,226 @@
+/* ChronoBeats — tema "Sala de fiesta retro".
+ * Fondo ilustrado a todo color, paneles morado noche con borde neón de la edición,
+ * botones como teclas de radiocasete, carta como vinilo y cronologías como casetes.
+ * Para quitarlo: borrar la línea <link ... cb_tema_retro.css> de player y host.
+ */
+:root {
+    --noche: #1E1145;
+    --noche-2: #2A1A5E;
+    --panel: rgba(34, 20, 78, .82);
+    --panel-borde: color-mix(in srgb, var(--neon) 75%, #fff);
+    --tinta: #1B1035;
+    --crema: #FFF4DC;
+    --brillo: 0 0 18px color-mix(in srgb, var(--neon) 45%, transparent);
+    --sombra-panel: 0 0 0 3px rgba(10, 4, 30, .55), 0 10px 28px rgba(0, 0, 0, .45);
+    --bg: transparent !important;
+}
+
+/* ---------- fondo ilustrado, apenas velado ---------- */
+html { background: var(--noche) !important; }
+body { background: transparent !important; background-image: none !important; }
+body::before {
+    background:
+        radial-gradient(ellipse at 50% 0%, rgba(255, 120, 200, .18), transparent 60%),
+        linear-gradient(180deg, rgba(30, 14, 70, .25), rgba(30, 14, 70, .62)),
+        var(--cb-fondo, none) center / cover no-repeat !important;
+    opacity: 1 !important;
+}
+/* lucecitas de feria arriba */
+body::after {
+    content: ""; position: fixed; left: 0; right: 0; top: 0; height: 26px; z-index: 0; pointer-events: none;
+    background:
+        radial-gradient(circle, #FFD54A 0 4px, transparent 5px) 0 6px / 46px 26px repeat-x,
+        radial-gradient(circle, #FF5FA2 0 4px, transparent 5px) 23px 14px / 46px 26px repeat-x;
+    filter: drop-shadow(0 0 6px rgba(255, 210, 90, .8));
+    opacity: .85;
+}
+
+/* ---------- paneles: cristal morado con borde neón ---------- */
+.sidebar, .validation-area, .player-row, #event-log, .team-panel, .award-card, .stat-card, .rank-card,
+.collection-summary, .tab-bar, #custom-alert > div, #custom-confirm > div, .duel-overlay, #smart-steal-modal,
+.danger-alert-popup, #sabotage-received-banner, .qr-toast, .bet-notific {
+    background: var(--panel) !important;
+    border: 2px solid var(--panel-borde) !important;
+    border-radius: 20px !important;
+    box-shadow: var(--sombra-panel), var(--brillo) !important;
+    backdrop-filter: blur(8px) saturate(140%) !important;
+    -webkit-backdrop-filter: blur(8px) saturate(140%) !important;
+}
+.tab-bar { border-radius: 22px 22px 0 0 !important; border-bottom: none !important; }
+
+/* fondos negros en línea -> morado noche */
+#game-screen [style*="background:#1"], #game-screen [style*="background: #1"],
+#game-screen [style*="background:#0"], #game-screen [style*="background: #0"],
+#game-screen [style*="background:#2"], #game-screen [style*="background: #2"],
+#game-screen [style*="background:rgba(0"], #game-screen [style*="background: rgba(0"],
+#lobby [style*="background:#1"], #lobby [style*="background:#2"], #lobby [style*="background: #2"],
+#dashboard [style*="background:#1"], #dashboard [style*="background: #1"], #dashboard [style*="background:#2"],
+#dashboard [style*="background:rgba(0"] {
+    background: rgba(42, 26, 94, .85) !important;
+}
+#mini-ranking { background: transparent !important; border-bottom: none !important; }
+
+/* ---------- teclas de radiocasete ---------- */
+.ctrl-btn, .sk-btn, .btn-val, .reveal-btn, .steal-btn {
+    background: linear-gradient(180deg, #FFFDF7 0%, #E4DCCB 100%) !important;
+    color: var(--tinta) !important;
+    border: 2px solid var(--tinta) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 5px 0 var(--tinta), inset 0 2px 0 #fff, 0 8px 14px rgba(0, 0, 0, .35) !important;
+    backdrop-filter: none !important;
+    font-weight: 800 !important;
+}
+.ctrl-btn:active, .sk-btn:active, .btn-val:active, .reveal-btn:active, .steal-btn:active,
+.btn-play.active, .playing-active {
+    transform: translateY(4px) !important;
+    box-shadow: 0 1px 0 var(--tinta), inset 0 2px 4px rgba(0, 0, 0, .25) !important;
+}
+.btn-play { background: linear-gradient(180deg, #B8F5CF, #4CC985) !important; }
+.btn-play.active, .playing-active { background: linear-gradient(180deg, #8EEAB4, #2FA36B) !important; animation: none !important; }
+.btn-stop { background: linear-gradient(180deg, #FFC3BC, #F0625A) !important; }
+.sk-fwd { background: linear-gradient(180deg, #DDF3FF, #9FD8F5) !important; }
+.sk-back { background: linear-gradient(180deg, #FFE7D6, #F7B98E) !important; }
+.btn-ok { background: linear-gradient(180deg, #C9F7DA, #5ACD8E) !important; }
+.btn-fail { background: linear-gradient(180deg, #FFD0CA, #F07B72) !important; }
+.reveal-btn { background: linear-gradient(180deg, #FFF0B3, #FFC93C) !important; font-size: 1.1em !important; }
+
+/* botón principal: atardecer */
+.btn, .btn-start {
+    background: linear-gradient(90deg, #FF5FA2, #FF9A3C) !important;
+    color: #fff !important;
+    border: 2px solid var(--tinta) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 5px 0 var(--tinta), 0 0 22px rgba(255, 95, 162, .45) !important;
+}
+.btn:active:not(:disabled), .btn-start:active { transform: translateY(4px) !important; box-shadow: 0 1px 0 var(--tinta) !important; }
+
+/* botones de sabotaje / mercado / acciones */
+.spec-btn, .market-btn, .emoji-wildcard-btn, .reaction-btn, .qr-btn, .cat-req-btn {
+    background: rgba(42, 26, 94, .88) !important;
+    border: 2px solid var(--panel-borde) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 4px 0 rgba(10, 4, 30, .8), var(--brillo) !important;
+    backdrop-filter: none !important;
+}
+.spec-btn .cb-ico, .market-btn .cb-ico { height: 1.7em !important; vertical-align: -.5em !important; }
+.spec-btn:active:not(:disabled), .market-btn:active:not(:disabled) { transform: translateY(3px) !important; }
+
+/* entradas de texto */
+input, select {
+    background: rgba(255, 253, 247, .95) !important; color: var(--tinta) !important;
+    border: 2px solid var(--tinta) !important; border-radius: 14px !important;
+    box-shadow: 0 4px 0 var(--tinta) !important; backdrop-filter: none !important;
+}
+input::placeholder { color: #7A6A9A !important; }
+select option { color: var(--tinta); }
+
+/* botones redondos flotantes */
+.btn-hub, #fab-rules, #fab-remote {
+    background: var(--noche-2) !important; color: #fff !important;
+    border: 2px solid var(--panel-borde) !important; box-shadow: 0 4px 0 rgba(10, 4, 30, .8), var(--brillo) !important;
+}
+#fab-remote:not(:has(img))::after { content: 'TV'; font-family: 'Bungee', sans-serif; font-size: .55em; color: #fff; }
+
+/* ============================== MÓVIL ============================== */
+.tab-btn { color: #B9A8E8 !important; }
+.tab-btn .cb-ico { filter: saturate(.5) brightness(.85) !important; transition: transform .15s; }
+.tab-btn.active { color: #fff !important; }
+.tab-btn.active .cb-ico { filter: drop-shadow(0 0 8px var(--neon)) !important; transform: translateY(-4px) scale(1.15); }
+
+#turn-status {
+    display: inline-block; background: var(--noche-2) !important; padding: 4px 16px !important;
+    border: 2px solid var(--panel-borde) !important; border-radius: 999px !important; box-shadow: var(--brillo) !important;
+}
+.rank-pill { background: rgba(42, 26, 94, .9) !important; border: 2px solid rgba(255, 255, 255, .25) !important; }
+.rank-pill.me { border-color: var(--neon) !important; box-shadow: var(--brillo) !important; }
+
+/* reverso de la carta con marco neón */
+.card-front { border: 3px solid var(--panel-borde) !important; box-shadow: 0 0 0 4px rgba(10, 4, 30, .6), 0 0 30px color-mix(in srgb, var(--neon) 55%, transparent) !important; }
+
+/* la carta revelada es un vinilo: año en la etiqueta */
+.card-back {
+    background:
+        radial-gradient(circle at 50% 50%, #1B1035 0 3.5%, transparent 4%),
+        radial-gradient(circle at 50% 50%, var(--neon) 0 25%, #0B0618 25.5% 27%, transparent 27.5%),
+        repeating-radial-gradient(circle at 50% 50%, #17121F 0 2px, #26202F 2px 4px) !important;
+    border: 3px solid var(--panel-borde) !important;
+    justify-content: space-evenly !important;
+    box-shadow: 0 0 0 4px rgba(10, 4, 30, .6), 0 0 30px color-mix(in srgb, var(--neon) 55%, transparent) !important;
+}
+#c-artist { order: 1; color: #E9E2FF !important; background: rgba(11, 6, 24, .75); padding: 2px 8px; border-radius: 8px; }
+#c-year { order: 2; color: var(--tinta) !important; font-size: 2.6em !important; }
+#c-song { order: 3; color: #fff !important; background: rgba(11, 6, 24, .75); padding: 2px 8px; border-radius: 8px; }
+
+/* cronología: casetes */
+.card-row {
+    position: relative;
+    background: linear-gradient(180deg, #2B2140 0 20%, var(--crema) 20% 80%, #2B2140 80%) !important;
+    color: var(--tinta) !important; font-family: 'Bungee', sans-serif !important;
+    border: 2px solid var(--panel-borde) !important; border-radius: 10px !important;
+    box-shadow: 0 4px 0 rgba(10, 4, 30, .8) !important; backdrop-filter: none !important;
+    padding: 9px 10px !important;
+}
+.card-row::before, .card-row::after {
+    content: ""; position: absolute; top: 50%; width: 12px; height: 12px; margin-top: -6px; border-radius: 50%;
+    background: radial-gradient(circle, var(--crema) 0 2px, #2B2140 3px); border: 2px solid #2B2140;
+}
+.card-row::before { left: 14px; } .card-row::after { right: 14px; }
+.bet-slot { background: rgba(42, 26, 94, .6) !important; }
+
+/* fichas */
+.neon-chip {
+    width: 22px !important; height: 22px !important; border-radius: 50% !important;
+    background: url(img/ico_ficha.webp) center/contain no-repeat !important; box-shadow: 0 0 8px rgba(80, 160, 255, .6) !important; border: none !important;
+}
+
+/* vinilo que gira mientras suena */
+.cb-vinilo { width: 54px; height: 54px; filter: drop-shadow(0 0 8px var(--neon)); transition: transform .3s; }
+body.cb-sonando .cb-vinilo { animation: cb-gira 1.8s linear infinite; }
+@keyframes cb-gira { to { transform: rotate(360deg); } }
+
+/* ============================== TABLET ============================== */
+.logo { filter: drop-shadow(0 3px 0 rgba(10, 4, 30, .9)) drop-shadow(0 0 14px rgba(255, 95, 162, .6)) !important; font-size: 2.2em !important; }
+#join-code, .room-code {
+    color: #fff !important; -webkit-text-fill-color: #fff !important; background: var(--noche-2) !important;
+    border: 3px solid var(--neon) !important; border-radius: 22px !important; padding: 8px 28px !important; display: inline-block;
+    box-shadow: 0 0 0 4px rgba(10, 4, 30, .6), 0 0 34px color-mix(in srgb, var(--neon) 70%, transparent), inset 0 0 18px color-mix(in srgb, var(--neon) 40%, transparent) !important;
+}
+#live-room-code { background: var(--noche-2) !important; }
+.player-tag { background: var(--panel) !important; border: 2px solid var(--panel-borde) !important; border-radius: 16px !important; box-shadow: var(--brillo) !important; }
+
+.val-card {
+    position: relative;
+    background: rgba(20, 10, 50, .85) !important;
+    border: 3px solid var(--panel-borde) !important; border-radius: 22px !important;
+    box-shadow: inset 0 0 40px color-mix(in srgb, var(--neon) 25%, transparent), var(--brillo) !important;
+}
+.val-card .cb-vinilo { position: absolute; top: 12px; right: 14px; width: 70px; height: 70px; }
+#ui-card-year { filter: drop-shadow(0 0 12px color-mix(in srgb, var(--accent, #ff0055) 60%, transparent)); }
+.leader-item { background: rgba(42, 26, 94, .85) !important; border-radius: 14px !important; border: 1px solid rgba(255, 255, 255, .12) !important; }
+.leader-item.active { border: 2px solid var(--neon) !important; box-shadow: var(--brillo) !important; }
+
+/* estantería de casetes en las cronologías de la tablet */
+.slot {
+    background: rgba(255, 255, 255, .06) !important; border: 2px dashed rgba(255, 255, 255, .22) !important; border-radius: 8px !important;
+}
+.slot.filled, .mini-card {
+    background: linear-gradient(180deg, #2B2140 0 18%, var(--crema) 18% 82%, #2B2140 82%) !important;
+    color: var(--tinta) !important; border: 2px solid var(--panel-borde) !important; border-radius: 8px !important;
+    box-shadow: 0 3px 0 rgba(10, 4, 30, .8) !important; font-weight: 800 !important;
+}
+.player-row { padding: 10px 14px !important; }
+
+/* ---------- ajustes ---------- */
+.card-row { min-width: 140px; margin: 0 auto !important; padding: 9px 36px !important; text-align: center; }
+.card-back {
+    background:
+        radial-gradient(circle at 50% 50%, var(--neon) 0 31%, #0B0618 31.5% 33%, transparent 33.5%),
+        repeating-radial-gradient(circle at 50% 50%, #17121F 0 2px, #26202F 2px 4px) !important;
+    background-size: 100% 100%, 100% 100% !important;
+}
+#c-year { font-size: 1.9em !important; line-height: 1 !important; }
+#lobby select, #dashboard select, #lobby input, #dashboard input {
+    background: rgba(255, 253, 247, .95) !important; color: var(--tinta) !important;
+}
+#qr-btn { background: rgba(42, 26, 94, .85) !important; color: #fff !important; border: 2px solid var(--panel-borde) !important; box-shadow: 0 4px 0 rgba(10,4,30,.8) !important; }
+.market-btn { font-size: .78em !important; line-height: 1.25 !important; }
