@@ -427,3 +427,6 @@ button[onclick*="requestCategory('anime')"] img.cb-ico { content: url(img/ct_ani
 button[onclick*="requestCategory('movies')"] img.cb-ico { content: url(img/ct_pelis.webp); }
 button[onclick*="requestCategory('videojuegos')"] img.cb-ico { content: url(img/ct_gamer.webp); }
 button[onclick*="requestCategory"] img.cb-ico { height: 2em !important; vertical-align: middle !important; }
+
+/* código de sala centrado, con "Nueva sala" debajo */
+#join-code, #lobby .room-code { display: block !important; width: fit-content; margin: 20px auto 10px !important; }

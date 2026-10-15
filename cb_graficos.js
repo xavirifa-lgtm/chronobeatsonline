@@ -372,7 +372,7 @@
         });
         sel.parentNode.insertBefore(caja, sel);
         function marcar() {
-            caja.querySelectorAll('button').forEach(function (b) { b.classList.toggle('sel', b.getAttribute('data-v') === sel.value); });
+            caja.querySelectorAll('button[data-v]').forEach(function (b) { b.classList.toggle('sel', b.getAttribute('data-v') === sel.value); });
         }
         marcar();
         sel.addEventListener('change', marcar);
@@ -386,6 +386,7 @@
         b.innerHTML = '<img src="' + DIR + 'md_competitivo.webp" alt=""><span>COMPETITIVO</span>';
         b.onclick = function () { chk.checked = !chk.checked; chk.dispatchEvent(new Event('change', { bubbles: true })); pinta(); };
         function pinta() { b.classList.toggle('sel', chk.checked); }
+        setInterval(pinta, 700);
         var cajaModos = document.querySelector('.cb-modos');
         if (cajaModos) cajaModos.appendChild(b);
         chk.addEventListener('change', pinta); pinta();

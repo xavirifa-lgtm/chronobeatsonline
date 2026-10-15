@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="apple-touch-icon" href="img/app_icon_180.png">
+    <link rel="icon" type="image/png" href="img/app_icon_192.png">
     <meta name="theme-color" content="#00f2ff">
     <title>CHRONOBEATS</title>
     <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
@@ -346,6 +347,7 @@
             .btn-action { height: 60px; }
         }
     </style>
+    <link rel="stylesheet" href="cb_index.css">
 </head>
 <body>
 
@@ -356,7 +358,8 @@
 
     <!-- ══ SPLASH ══ -->
     <div id="splash">
-        <img src="logo_cyberpunk.png" alt="ChronoBeats" class="splash-img"/>
+        <img src="img/app_icon_512.png" alt="" class="splash-img"/>
+        <div class="cb-titulo">CHRONOBEATS</div>
         <div class="splash-tagline">ONLINE</div>
         <div class="splash-line"></div>
         <button class="splash-btn" onclick="enterApp()">
@@ -366,16 +369,16 @@
 
     <!-- ══ APP ══ -->
     <div id="app">
-        <img src="logo_cyberpunk.png" alt="ChronoBeats" class="app-logo-img"/>
+        <div class="cb-cabecera"><img src="img/app_icon_192.png" alt="" class="app-logo-img"/><div class="cb-titulo cb-titulo-s">CHRONOBEATS</div></div>
         <div class="app-tagline">ONLINE</div>
 
         <div class="mix-box">
             <div class="mix-label">SELECCIONA CATEGORÍAS</div>
             <div class="mix-grid">
-                <div class="mix-chip active" data-type="orig"        onclick="toggleMix(this)">🎵 ORIGINAL</div>
-                <div class="mix-chip active" data-type="movies"      onclick="toggleMix(this)">🎬 PELIS &amp; TV</div>
-                <div class="mix-chip active" data-type="anime"       onclick="toggleMix(this)">⛩️ ANIME</div>
-                <div class="mix-chip active" data-type="videojuegos" onclick="toggleMix(this)">🎮 GAMER</div>
+                <div class="mix-chip active" data-type="orig"        onclick="toggleMix(this)"><img src="img/ed_original.webp" alt=""><span>ORIGINAL</span></div>
+                <div class="mix-chip active" data-type="movies"      onclick="toggleMix(this)"><img src="img/ed_pelis.webp" alt=""><span>PELIS &amp; TV</span></div>
+                <div class="mix-chip active" data-type="anime"       onclick="toggleMix(this)"><img src="img/ed_anime.webp" alt=""><span>ANIME</span></div>
+                <div class="mix-chip active" data-type="videojuegos" onclick="toggleMix(this)"><img src="img/ed_videojuegos.webp" alt=""><span>GAMER</span></div>
             </div>
         </div>
 
@@ -447,5 +450,6 @@
             });
         }
     </script>
+    <script src="cb_iconos.js"></script>
 </body>
 </html>
