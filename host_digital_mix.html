@@ -1412,6 +1412,7 @@
 
         function onPlayerError(event) {
             console.warn("YouTube Error:", event.data);
+            window._cbErrorYT = event.data;   // para el aviso de canción no disponible
             if (!window.brokenVideoHandling) {
                 window.brokenVideoHandling = true;
                 triggerBrokenVideoAutoSkip();
@@ -1718,6 +1719,7 @@
                             return;
                         }
                         if (uniqueIds.has(currentId)) { duplicadas++; return; }
+                        if (listaNegraYT.has(currentId)) { return; }   // marcada como no disponible
                         if (!playedIds.includes(currentId)) {
                             uniqueIds.add(currentId);
                             // Filtro de décadas
@@ -1735,7 +1737,7 @@
                             if (passFilter) {
                                 categorySongs.push({
                                     artist: p[0], song: p[1], year: p[2],
-                                    id: currentId, line: index + 1,
+                                    id: currentId, line: index + 1, raw: l,
                                     type: res.type, color: res.color
                                 });
                             }
@@ -1767,6 +1769,11 @@
             console.log("Lista recargada:", songs.length, "canciones.");
         }
 
+        // ── AVISOS DE CANCIONES NO DISPONIBLES ──
+        // Pega aquí la URL de la aplicación web de Google Apps Script (ver avisos_canciones.gs).
+        // Vacía = desactivado (se sigue guardando en el registro local de la tablet).
+        var URL_AVISOS = 'https://script.google.com/macros/s/AKfycbwqWMUVJBOnAIB-Out2r0hXN12oihcSQ2YIg5sSB1fIJcaGe3sBbldrKdViCpcVQind/exec';
+
         var fetchPromises = [];
         if (mixTypes.includes('orig')) {
             fetchPromises.push(fetch('lista_final.txt?v=' + new Date().getTime()).then(function(r){return r.text()}).then(function(t){return {text:t,type:'orig',color:'#00f2ff'}}));
@@ -1781,7 +1788,21 @@
             fetchPromises.push(fetch('lista_videojuegos.txt?v=' + new Date().getTime()).then(function(r){return r.text()}).then(function(t){return {text:t,type:'videojuegos',color:'#bf00ff'}}));
         }
 
+        // Lista negra compartida (canciones que YouTube ya dijo que no están disponibles).
+        // Si no hay URL configurada o no responde en 4 s, se juega sin ella.
+        var listaNegraYT = new Set();
+        if (URL_AVISOS) {
+            fetchPromises.push(Promise.race([
+                fetch(URL_AVISOS + '?lista=1').then(function (r) { return r.json(); }).then(function (ids) {
+                    (ids || []).forEach(function (id) { listaNegraYT.add(id); });
+                    console.log('[HOST] Lista negra de YouTube:', listaNegraYT.size, 'canciones');
+                }),
+                new Promise(function (ok) { setTimeout(ok, 4000); })
+            ]).catch(function (e) { console.warn('[HOST] Sin lista negra:', e); }).then(function () { return null; }));
+        }
+
         Promise.all(fetchPromises).then(function (results) {
+            results = results.filter(function (r) { return r; });
             cachedTxts = results;
             var built = buildSongsFromCache(false);
             if (built.length < 10) {
@@ -2139,6 +2160,7 @@
 
         function nextTurn() {
             if (partidaTerminada) return;
+            gastosTurno = [];
             turnoValidado = false;
             stopCountdown();
             resetLightning();
@@ -2655,6 +2677,7 @@
                 // el mando del móvil vuelva a funcionar con las versiones buenas.
                 case 'REMOTE_REPORT_INVALID':
                     if (!window.brokenVideoHandling) {
+                        window._cbErrorYT = 'manual-mando';
                         window.brokenVideoHandling = true;
                         triggerBrokenVideoAutoSkip();
                     }
@@ -2777,7 +2800,7 @@
                     }
                     var p = players.find(function (pl) { return pl.id === peerId; });
                     if (p && p.tokens >= 1 && p.id !== players[activePlayerIdx].id && isPlaying) {
-                        updateTokens(p, -1);
+                        updateTokens(p, -1); apuntarGastoTurno(p, 1);
                         muteTimeRemaining += 15000;
 
                         if (!isMuted) {
@@ -2849,7 +2872,7 @@
                 case 'SYSTEM_ERROR_TRACK':
                     var p = players.find(function (pl) { return pl.id === peerId; });
                     if (p && isPlaying) {
-                        reportBrokenLink();   // deja constancia del enlace roto para poder arreglar la lista
+                        reportBrokenLink('manual-jugador');   // deja constancia del enlace roto para poder arreglar la lista
                         refundBets();
                         limpiarMarcasCancionNueva();
                         isPlaying = false;
@@ -2951,7 +2974,7 @@
                     }
                     var p = players.find(function (pl) { return pl.id === peerId; });
                     if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 2 && !panicActive && isPlaying && !isRevealed && (!turnPhase || turnPhase === 'NORMAL')) {
-                        updateTokens(p, -2);
+                        updateTokens(p, -2); apuntarGastoTurno(p, 2);
                         panicActive = true;
                         panicTimer = 10;
 
@@ -2998,7 +3021,7 @@
                     if (escudoBloquea(activeP, players.find(function(pl){ return pl.id === peerId; }), action)) break;
                     var p = players.find(function (pl) { return pl.id === peerId; });
                     if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 1 && isPlaying && !isRevealed && (!turnPhase || turnPhase === 'NORMAL')) {
-                        updateTokens(p, -1);
+                        updateTokens(p, -1); apuntarGastoTurno(p, 1);
                         playBuzzerWebAudio();
                         notifyVictim(players[activePlayerIdx].id, p.name, '¡ZUMBIDO!', '🔊');
                         syncState();
@@ -3019,7 +3042,7 @@
                     }
                     var p = players.find(function (pl) { return pl.id === peerId; });
                     if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 2 && !isFogActive && (!turnPhase || turnPhase === 'NORMAL')) {
-                        updateTokens(p, -2);
+                        updateTokens(p, -2); apuntarGastoTurno(p, 2);
                         isFogActive = true;
 
                         document.getElementById('host-instructions').innerHTML = "<span style='color:#aaaaaa; font-size:1.5em; font-family:Bungee;'>¡JAJAJA! ¡" + p.name + " HA LANZADO NIEBLA TEMPORAL!</span>";
@@ -3054,7 +3077,7 @@
                     }
                     var p = players.find(function (pl) { return pl.id === peerId; });
                     if (p && p.tokens >= 3 && activeGuess === null && isPlaying && !isRevealed && (!turnPhase || turnPhase === 'NORMAL')) {
-                        updateTokens(p, -3);
+                        updateTokens(p, -3); apuntarGastoTurno(p, 3);
                         refundBets();
                         isPlaying = false;
                         if (player && player.stopVideo) player.stopVideo();
@@ -3100,6 +3123,18 @@
                     if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 3 && (!turnPhase || turnPhase === 'NORMAL') && !currentDuel && !isRevealed) {
                         updateTokens(p, -3);
                         duelTriggered = true;
+                        // ── El duelo anula el turno: devolver las fichas de todo lo que se hizo en él ──
+                        // apuestas "ni de coña" / "estoy contigo", apuestas a hueco, sabotajes contra
+                        // el activo (pánico, silencio, niebla, veto, zumbido, forzar salto, robo de
+                        // turno) y doble o nada / farol / seguro del activo.
+                        refundBets();
+                        limpiarMarcasCancionNueva();
+                        if (pendingSteal) {
+                            clearTimeout(pendingSteal.timeout); pendingSteal = null;
+                            var _bnD = document.getElementById('steal-resistance-banner'); if (_bnD) _bnD.style.display = 'none';
+                        }
+                        devolverGastosTurno();
+                        isDoubleOrNothing = false; isBragging = false; failSafeActive = false; isFogActive = false;
                         var target = players[activePlayerIdx];
                         
                         // ACTIVACIÓN INMEDIATA
@@ -3208,7 +3243,7 @@
                     }
                     var p = players.find(function (pl) { return pl.id === peerId; });
                     if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 1 && players[activePlayerIdx].canReload && (!turnPhase || turnPhase === 'NORMAL')) {
-                        updateTokens(p, -1);
+                        updateTokens(p, -1); apuntarGastoTurno(p, 1);
                         players[activePlayerIdx].canReload = false;
 
                         document.getElementById('host-instructions').innerHTML = "<span style='color:#ff8800; font-size:1.5em; font-family:Bungee;'>¡" + p.name + " HA VETADO LA RECARGA!</span>";
@@ -3223,7 +3258,7 @@
                     if (escudoBloquea(activeP, players.find(function(pl){ return pl.id === peerId; }), action)) break;
                     var p = players.find(function (pl) { return pl.id === peerId; });
                     if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 4 && isPlaying && !isRevealed && !pendingSteal) {
-                        updateTokens(p, -4);
+                        updateTokens(p, -4); apuntarGastoTurno(p, 4);
                         var victim = players[activePlayerIdx];
                         pendingSteal = { thief: p, victim: victim };
 
@@ -3264,6 +3299,7 @@
                             updateTokens(resistVictim, -2);
                             // Devolver fichas al ladrón (el robo falló)
                             updateTokens(pendingSteal.thief, 4);
+                            quitarGastoTurno(pendingSteal.thief, 4);
                             addEvent('<span class="ev-name">' + resistVictim.name + '</span> <span class="ev-good">¡RESISTIÓ el robo de ' + pendingSteal.thief.name + '! 🛡️</span>');
                             document.getElementById('host-instructions').innerHTML = "<span style='color:#00ff88; font-size:1.5em; font-family:Bungee;'>¡" + resistVictim.name + " RESISTIÓ EL ROBO!</span>";
                             // Notificar al ladrón
@@ -3760,7 +3796,7 @@
                 case 'BRAG':
                     var p = players.find(function(pl){ return pl.id === peerId; });
                     if (p && isMyTurnPeer(peerId) && !isBragging && !isPlaying && !songPlayedThisTurn && !isRevealed && p.tokens >= 4) {
-                        updateTokens(p, -4);
+                        updateTokens(p, -4); apuntarGastoTurno(p, 4);
                         isBragging = true;
                         if (!stats.braggingAttempts[peerId]) stats.braggingAttempts[peerId] = 0;
                         stats.braggingAttempts[peerId]++;
@@ -3776,7 +3812,7 @@
                 case 'FAIL_SAFE':
                     var p = players.find(function(pl) { return pl.id === peerId; });
                     if (p && p.tokens >= 2 && isMyTurnPeer(peerId) && !failSafeActive && !isRevealed && (!turnPhase || turnPhase === 'NORMAL')) {
-                        updateTokens(p, -2);
+                        updateTokens(p, -2); apuntarGastoTurno(p, 2);
                         failSafeActive = true;
                         addEvent('<span class="ev-info">🛡️ ' + p.name + ' activa SEGURO DE FALLO</span>');
                         document.getElementById('host-instructions').innerHTML += " <span style='color:var(--gold);'>🛡️ SEGURO</span>";
@@ -3788,7 +3824,7 @@
                     // Solo el jugador activo puede activar doble o nada (coste 4🔵, antes de reproducir)
                     var _donP = players.find(function(pl){ return pl.id === peerId; });
                     if (players[activePlayerIdx] && peerId === players[activePlayerIdx].id && !isPlaying && !songPlayedThisTurn && !isRevealed && !isDoubleOrNothing && _donP && _donP.tokens >= 4) {
-                        updateTokens(_donP, -4);
+                        updateTokens(_donP, -4); apuntarGastoTurno(_donP, 4);
                         isDoubleOrNothing = true;
                         addEvent('<span class="ev-info">🎲 ' + players[activePlayerIdx].name + ' activa DOBLE O NADA</span>');
                         document.getElementById('host-instructions').innerHTML = "<span style='color:#ff8800;font-family:Bungee;font-size:1.2em;'>🎲 ¡DOBLE O NADA ACTIVADO!</span>";
@@ -3966,6 +4002,30 @@
                 if (_pb && !isSharedSong) updateTokens(_pb, 1);
             }
             currentBets = {};
+        }
+
+        // ── GASTOS DEL TURNO ──
+        // Fichas gastadas en este turno en cosas que dependen de él (sabotajes contra el
+        // activo y las apuestas/seguros del propio activo). Si un DUELO interrumpe el turno,
+        // se devuelven todas: esas acciones se quedan sin efecto.
+        var gastosTurno = [];
+        function apuntarGastoTurno(pl, n) { if (pl && n > 0) gastosTurno.push({ id: pl.id, n: n }); }
+        function quitarGastoTurno(pl, n) {
+            for (var i = gastosTurno.length - 1; i >= 0; i--) {
+                if (pl && gastosTurno[i].id === pl.id && gastosTurno[i].n === n) { gastosTurno.splice(i, 1); return; }
+            }
+        }
+        function devolverGastosTurno(excepto) {
+            var porJugador = {};
+            gastosTurno.forEach(function (g) { porJugador[g.id] = (porJugador[g.id] || 0) + g.n; });
+            gastosTurno = [];
+            Object.keys(porJugador).forEach(function (id) {
+                var pl = players.find(function (x) { return x.id === id; });
+                if (!pl) return;
+                updateTokens(pl, porJugador[id]);
+                try { if (connections[id]) connections[id].send({ type: 'BET_RESULT', msg: '🔫 ¡DUELO! Se cancela lo que habías hecho en este turno: te devolvemos ' + porJugador[id] + '🔵' }); } catch (e) {}
+            });
+            return porJugador;
         }
 
         function refundBets() {
@@ -6023,20 +6083,44 @@
         // Además el botón que la llamaba (btn-report-error) no existe en el HTML.
         // Ahora deja el registro en localStorage y lo vuelca por consola: sin servidor,
         // pero sin mentir. Para reportar de verdad ya está reportSystemError() (mailto).
-        function reportBrokenLink() {
+        var LISTA_POR_TIPO = { orig: 'lista_final.txt', anime: 'lista_final_anime.txt', movies: 'lista_final_pelis.txt', videojuegos: 'lista_videojuegos.txt' };
+        // Códigos de YouTube: 100 = vídeo borrado o privado; 101 y 150 = el dueño no deja
+        // reproducirlo fuera de YouTube; 2 = id no válido; 5 = fallo del reproductor (puede ser puntual).
+        var MOTIVO_YT = { 2: 'enlace no válido', 5: 'fallo del reproductor (puede ser puntual)', 100: 'vídeo eliminado o privado', 101: 'no se permite reproducir fuera de YouTube', 150: 'no se permite reproducir fuera de YouTube', 'manual-mando': 'marcada a mano desde el mando', 'manual-jugador': 'marcada a mano por el jugador (ERROR VÍDEO)' };
+        function reportBrokenLink(motivoManual) {
             var s = songs[currentSongIdx];
             if (!s || !s.id) return;
+            var codigo = motivoManual || window._cbErrorYT || '?';
+            window._cbErrorYT = null;
             var registro = JSON.parse(localStorage.getItem('CB_BrokenLinks') || '[]');
             registro.push({
                 url: 'https://www.youtube.com/watch?v=' + s.id,
                 tipo: s.type || 'General',
-                artista: s.artist, cancion: s.song, linea: s.line,
+                artista: s.artist, cancion: s.song, linea: s.line, codigo: codigo,
                 fecha: new Date().toISOString()
             });
             localStorage.setItem('CB_BrokenLinks', JSON.stringify(registro));
-            console.warn('[HOST] Enlace roto registrado:', s.artist, '-', s.song, '(fila ' + s.line + ')');
-            console.warn('[HOST] Enlaces rotos acumulados:', registro.length, registro);
+            console.warn('[HOST] Enlace roto registrado:', s.artist, '-', s.song, '(fila ' + s.line + ', código ' + codigo + ')');
             addEvent('<span class="ev-bad">🔗 Enlace roto registrado: ' + s.artist + ' — ' + s.song + '</span>');
+            // Aviso por correo (Google Apps Script). Una sola vez por canción y tablet.
+            if (!URL_AVISOS) return;
+            var enviados = JSON.parse(localStorage.getItem('CB_BrokenSent') || '[]');
+            if (enviados.indexOf(s.id) !== -1) return;
+            enviados.push(s.id);
+            localStorage.setItem('CB_BrokenSent', JSON.stringify(enviados));
+            var auto = (codigo === 100 || codigo === 101 || codigo === 150 || codigo === 2);
+            try {
+                fetch(URL_AVISOS, {
+                    method: 'POST', mode: 'no-cors',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({
+                        id: s.id, lista: LISTA_POR_TIPO[s.type] || s.type || '?', linea: s.line,
+                        artista: s.artist, cancion: s.song, anio: s.year, texto: s.raw || '',
+                        codigo: String(codigo), motivo: MOTIVO_YT[codigo] || ('código ' + codigo),
+                        auto: auto
+                    })
+                }).catch(function (e) { console.warn('[HOST] No se pudo enviar el aviso:', e); });
+            } catch (e) {}
         }
     </script>
     <script>

@@ -1,5 +1,5 @@
-// ── ChronoBeats Online — Service Worker v3.75 ──
-const CACHE_NAME = 'chronobeats-v3-23';
+// ── ChronoBeats Online — Service Worker v3.77 ──
+const CACHE_NAME = 'chronobeats-v3-25';
 
 // Recursos propios a pre-cachear en la instalación (pequeños, sin riesgo)
 const PRECACHE_URLS = [
@@ -25,7 +25,9 @@ const NEVER_CACHE = [
     'googlevideo.com',
     'peerjs.com',       // servidor de señalización PeerJS
     'metered.ca',       // servidores TURN
-    'iframe_api'        // API de YouTube (dinámica)
+    'iframe_api',       // API de YouTube (dinámica)
+    'script.google.com',          // avisos de canciones rotas (Apps Script)
+    'googleusercontent.com'
 ];
 
 // ── INSTALACIÓN ──
@@ -111,16 +113,19 @@ self.addEventListener('fetch', event => {
     }
 
     // Páginas HTML → siempre cargar directamente de red (sin cachear en SW)
+    // cache:'no-cache' obliga a preguntar al servidor: sin esto el navegador podía servir
+    // durante ~10 min la copia de su caché HTTP (GitHub Pages manda max-age=600) y los
+    // cambios recién subidos no se veían.
     if (url.endsWith('.html') || event.request.mode === 'navigate') {
         event.respondWith(
-            fetch(event.request).catch(() => caches.match(event.request))
+            fetch(url, { cache: 'no-cache', credentials: 'same-origin' }).catch(() => caches.match(event.request))
         );
         return;
     }
 
     // Recursos propios (imágenes, .txt, etc.) → network-first con fallback a caché
     event.respondWith(
-        fetch(event.request)
+        fetch(event.request, { cache: 'no-cache' })
             .then(response => {
                 if (response && response.status === 200) {
                     caches.open(CACHE_NAME).then(cache =>
