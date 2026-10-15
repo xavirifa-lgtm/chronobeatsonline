@@ -211,7 +211,7 @@ body.cb-sonando .cb-vinilo { animation: cb-gira 1.8s linear infinite; }
 .player-row { padding: 10px 14px !important; }
 
 /* ---------- ajustes ---------- */
-.card-row { min-width: 140px; margin: 0 auto !important; padding: 9px 36px !important; text-align: center; }
+.card-row { margin: 0 auto !important; text-align: center; }
 .card-back {
     background:
         radial-gradient(circle at 50% 50%, var(--neon) 0 31%, #0B0618 31.5% 33%, transparent 33.5%),
@@ -381,19 +381,27 @@ body.con-td-vinilo .cb-td-disco { filter: drop-shadow(0 6px 8px rgba(0, 0, 0, .5
 .cb-con-icono { display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; text-align: center !important; gap: 3px !important; line-height: 1.15 !important; }
 .cb-bt .neon-chip, .cb-bt .cb-ico { vertical-align: middle; }
 /* mando: play / pause / stop solo icono */
-.ctrl-btn.cb-con-icono { padding: 6px 4px !important; min-height: 0 !important; }
-.ctrl-btn .cb-bi { height: 34px; }
+.ctrl-btn.cb-con-icono { padding: 0 !important; min-height: 0 !important; background: none !important; border: none !important; box-shadow: none !important; }
+.ctrl-btn .cb-bi { height: 60px; filter: drop-shadow(0 4px 6px rgba(0,0,0,.6)); transition: transform .1s; }
+.ctrl-btn.cb-con-icono:active { transform: none !important; }
+.ctrl-btn.cb-con-icono:active .cb-bi, .btn-play.active .cb-bi, .playing-active .cb-bi { transform: scale(.9); }
+.btn-play.active .cb-bi, .playing-active .cb-bi { filter: drop-shadow(0 0 10px var(--neon)) drop-shadow(0 4px 6px rgba(0,0,0,.6)); }
 .ctrl-btn .cb-bt { display: none; }
 /* rebobinar / avanzar: icono pequeño + segundos al lado */
 .sk-btn.cb-con-icono { flex-direction: row !important; gap: 4px !important; padding: 6px 2px !important; font-size: .7em !important; }
 .sk-btn .cb-bi { height: 18px; filter: none; }
 /* comprar carta, cambiar canción, apuestas, mercado */
-.spec-btn.cb-con-icono, .market-btn.cb-con-icono { padding: 8px 8px !important; font-size: .72em !important; }
-.spec-btn .cb-bi, .market-btn .cb-bi { height: 30px; }
+.spec-btn.cb-con-icono { padding: 10px 8px !important; font-size: .82em !important; }
+.spec-btn .cb-bi { height: 42px; }
+.market-btn.cb-con-icono { padding: 10px 8px !important; font-size: .8em !important; }
+.market-btn .cb-bi { height: 38px; }
+/* apuestas y ayudas del turno */
+#btn-double-or-nothing.cb-con-icono, #btn-brag.cb-con-icono, #btn-fail-safe.cb-con-icono, #btn-steal-streak.cb-con-icono, #resist-steal-btn.cb-con-icono { padding: 8px !important; font-size: .78em !important; }
+#btn-double-or-nothing .cb-bi, #btn-brag .cb-bi, #btn-fail-safe .cb-bi, #btn-steal-streak .cb-bi, #resist-steal-btn .cb-bi { height: 40px; }
 .spec-btn .cb-ico, .market-btn .cb-ico { height: 1.3em !important; vertical-align: -.3em !important; }
 /* sabotajes */
-#sabotage-grid .spec-btn.cb-con-icono { padding: 8px 4px !important; font-size: .68em !important; }
-#sabotage-grid .spec-btn .cb-bi { height: 32px; }
+#sabotage-grid .spec-btn.cb-con-icono { padding: 9px 4px !important; font-size: .74em !important; }
+#sabotage-grid .spec-btn .cb-bi { height: 38px; }
 #sabotage-grid { align-items: stretch; }
 #btn-sabotage-blackhole.cb-con-icono, #btn-smart-steal.cb-con-icono { justify-self: stretch; width: 100% !important; margin: 0 !important; }
 
@@ -453,3 +461,7 @@ button[onclick*="requestCategory"] img.cb-ico { height: 2em !important; vertical
 #waiting-screen > div { color: #f3e9ff !important; text-shadow: 0 2px 6px rgba(0,0,0,.8); }
 #waiting-screen > div:first-child { color: var(--neon) !important; }
 @keyframes cb-flota { 0%, 100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-10px) rotate(2deg); } }
+
+/* casete de la cronología: más corto, proporción de cinta */
+.card-row { width: 108px !important; min-width: 0 !important; max-width: 108px !important; margin-left: auto !important; margin-right: auto !important; padding: 9px 6px !important; }
+.card-row::before { left: 9px; } .card-row::after { right: 9px; }

@@ -3769,9 +3769,12 @@
 
                 if (data.turnPhase === 'DUEL' && data.currentDuel) {
                     // Mostrar anuncio global si acaba de empezar (y no lo hemos visto aún para este duelo)
-                    var duelId = data.currentDuel.challenger + "_" + data.currentDuel.target;
+                    // Con el id del duelo: antes era "retador_retado" y un segundo duelo entre
+                    // los mismos no mostraba el anuncio y dejaba escrito el año del anterior.
+                    var duelId = data.currentDuel.id || (data.currentDuel.challenger + "_" + data.currentDuel.target);
                     if (window.lastDuelId !== duelId) {
                         window.lastDuelId = duelId;
+                        var _dIn = document.getElementById('duel-year-input'); if (_dIn) _dIn.value = '';
                         var p1 = data.players ? data.players.find(x => x.id === data.currentDuel.challenger) : null;
                         var p2 = data.players ? data.players.find(x => x.id === data.currentDuel.target) : null;
                         document.getElementById('duel-opponent-names').innerHTML = `

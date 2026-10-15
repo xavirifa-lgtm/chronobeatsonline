@@ -287,6 +287,11 @@
             var w = document.createTreeWalker(b, NodeFilter.SHOW_TEXT, null), t, lista = [];
             while ((t = w.nextNode())) lista.push(t);
             lista.forEach(function (t) { var q = t.nodeValue.replace(EMOJI_TXT, function (m) { return /\uD83C\uDCCF|\u{1F0CF}/u.test(m) ? m : ''; }); if (q !== t.nodeValue) t.nodeValue = q; });
+            // un 🃏 al principio del texto es decoración, no precio: fuera
+            var pri = lista.filter(function (t) { return t.nodeValue.trim(); })[0];
+            if (pri) pri.nodeValue = pri.nodeValue.replace(/^\s*\u{1F0CF}\uFE0F?\s*/u, '');
+            var ico0 = b.querySelector('.cb-ico');
+            if (ico0 && !(ico0.previousSibling && (ico0.previousSibling.textContent || '').trim())) ico0.remove();
             // texto (con su ficha de precio) en un solo bloque, debajo de la imagen
             var et = document.createElement('span'); et.className = 'cb-bt';
             while (b.firstChild) et.appendChild(b.firstChild);
