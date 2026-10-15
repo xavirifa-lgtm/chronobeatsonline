@@ -272,22 +272,29 @@
         ['activateBrag', ['ap_farolero', 'ico_comodin']], ['RESIST_STEAL', ['ap_resistir_robo', 'ico_escudo']]
     ];
     var TIENE_EMOJI = /[\u{1F000}-\u{1FAFF}☀-➿]/u;
+    var EMOJI_TXT = /(?:[\u{1F000}-\u{1FAFF}]|[\u2600-\u27BF])\uFE0F?/gu;
     function decorarBoton(b) {
         if (!b || b.nodeType !== 1 || b.tagName !== 'BUTTON' || b.querySelector('.cb-bi')) return;
         var oc = b.getAttribute('onclick') || '';
         var regla = null;
         for (var i = 0; i < BOTONES.length; i++) if (oc.indexOf(BOTONES[i][0]) !== -1) { regla = BOTONES[i]; break; }
         if (!regla) return;
-        // si el juego ya pone un emoji (que cb_iconos convierte en icono), no duplicar
-        if (b.querySelector('.cb-ico') || TIENE_EMOJI.test(b.textContent || '')) {
-            b.querySelectorAll('.cb-ico').forEach(function (im, k) { if (k === 0) im.classList.add('cb-bi-emoji'); });
-            return;
-        }
         primeraQueExista(regla[1], function (n) {
             if (!n || b.querySelector('.cb-bi')) return;
+            // fuera los emojis del texto (y los iconos pequeños que cb_iconos ya hubiera puesto),
+            // salvo la ficha del precio: la imagen grande ya dice qué es el botón
+            b.querySelectorAll('.cb-ico').forEach(function (im) { if (!/ico_ficha|ico_comodin/.test(im.src)) im.remove(); });
+            var w = document.createTreeWalker(b, NodeFilter.SHOW_TEXT, null), t, lista = [];
+            while ((t = w.nextNode())) lista.push(t);
+            lista.forEach(function (t) { var q = t.nodeValue.replace(EMOJI_TXT, function (m) { return /\uD83C\uDCCF|\u{1F0CF}/u.test(m) ? m : ''; }); if (q !== t.nodeValue) t.nodeValue = q; });
+            // texto (con su ficha de precio) en un solo bloque, debajo de la imagen
+            var et = document.createElement('span'); et.className = 'cb-bt';
+            while (b.firstChild) et.appendChild(b.firstChild);
+            et.innerHTML = et.innerHTML.replace(/\s{2,}/g, ' ').trim();
+            if (!b.title) b.title = (et.textContent || '').trim();
             var im = document.createElement('img');
             im.className = 'cb-bi'; im.alt = ''; im.src = DIR + n + '.webp';
-            b.insertBefore(im, b.firstChild);
+            b.appendChild(im); b.appendChild(et);
             b.classList.add('cb-con-icono');
         });
     }

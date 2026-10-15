@@ -1,13 +1,13 @@
-// ── ChronoBeats Online — Service Worker v3.74 ──
-const CACHE_NAME = 'chronobeats-v3-22';
+// ── ChronoBeats Online — Service Worker v3.75 ──
+const CACHE_NAME = 'chronobeats-v3-23';
 
 // Recursos propios a pre-cachear en la instalación (pequeños, sin riesgo)
 const PRECACHE_URLS = [
     './',
     './manifest.json',
-    './logo_cyberpunk.png',
-    './icon-192.png',
-    './icon-512.png'
+    './img/app_icon_180.png',
+    './img/app_icon_192.png',
+    './img/app_icon_512.png'
 ];
 
 // Librerías CDN a cachear en el primer uso (versiones fijas = seguras de cachear)

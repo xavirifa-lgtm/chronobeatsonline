@@ -375,16 +375,27 @@ body.con-td-brazo .cb-td-brazo::before, body.con-td-brazo .cb-td-brazo::after { 
 body.con-td-vinilo .cb-td-disco { filter: drop-shadow(0 6px 8px rgba(0, 0, 0, .55)); }
 
 /* iconos en los botones */
-.cb-bi { display: inline-block; height: 1.7em; width: auto; vertical-align: -.5em; margin-right: .35em; pointer-events: none; }
-.ctrl-btn.cb-con-icono, .sk-btn.cb-con-icono { display: flex !important; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
-.ctrl-btn .cb-bi { height: 2.8em; margin: 0; }
-.sk-btn .cb-bi { height: 1.6em; margin: 0; }
-.spec-btn.cb-con-icono, .market-btn.cb-con-icono, .btn.cb-con-icono { display: flex !important; align-items: center; justify-content: center; text-align: left; }
-.spec-btn .cb-bi, .market-btn .cb-bi { height: 2.1em; flex: none; }
-.spec-btn .cb-ico, .market-btn .cb-ico { height: 1.4em !important; }
-/* sabotajes: icono grande arriba, texto debajo */
-#sabotage-grid .spec-btn.cb-con-icono { flex-direction: column !important; text-align: center !important; gap: 4px; padding: 10px 6px !important; line-height: 1.15 !important; }
-#sabotage-grid .spec-btn .cb-bi { height: 3em; margin: 0; filter: drop-shadow(0 2px 3px rgba(0,0,0,.5)); }
+/* ---- botones con imagen: imagen arriba, texto debajo (tamaños fijos en px para no descuadrar el móvil) ---- */
+.cb-bi { display: block; width: auto; pointer-events: none; flex: none; filter: drop-shadow(0 2px 3px rgba(0,0,0,.45)); }
+.cb-bt { display: block; }
+.cb-con-icono { display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; text-align: center !important; gap: 3px !important; line-height: 1.15 !important; }
+.cb-bt .neon-chip, .cb-bt .cb-ico { vertical-align: middle; }
+/* mando: play / pause / stop solo icono */
+.ctrl-btn.cb-con-icono { padding: 6px 4px !important; min-height: 0 !important; }
+.ctrl-btn .cb-bi { height: 34px; }
+.ctrl-btn .cb-bt { display: none; }
+/* rebobinar / avanzar: icono pequeño + segundos al lado */
+.sk-btn.cb-con-icono { flex-direction: row !important; gap: 4px !important; padding: 6px 2px !important; font-size: .7em !important; }
+.sk-btn .cb-bi { height: 18px; filter: none; }
+/* comprar carta, cambiar canción, apuestas, mercado */
+.spec-btn.cb-con-icono, .market-btn.cb-con-icono { padding: 8px 8px !important; font-size: .72em !important; }
+.spec-btn .cb-bi, .market-btn .cb-bi { height: 30px; }
+.spec-btn .cb-ico, .market-btn .cb-ico { height: 1.3em !important; vertical-align: -.3em !important; }
+/* sabotajes */
+#sabotage-grid .spec-btn.cb-con-icono { padding: 8px 4px !important; font-size: .68em !important; }
+#sabotage-grid .spec-btn .cb-bi { height: 32px; }
+#sabotage-grid { align-items: stretch; }
+#btn-sabotage-blackhole.cb-con-icono, #btn-smart-steal.cb-con-icono { justify-self: stretch; width: 100% !important; margin: 0 !important; }
 
 /* tocadiscos ilustrado: medidas ajustadas a td_base (plato ≈ 84 % del ancho, centro a 48 % de alto) */
 body.con-td-base .cb-td-disco { width: 178px; height: 178px; margin: -89px 0 0 -89px; top: calc(50% - 5px); }
@@ -430,3 +441,15 @@ button[onclick*="requestCategory"] img.cb-ico { height: 2em !important; vertical
 
 /* código de sala centrado, con "Nueva sala" debajo */
 #join-code, #lobby .room-code { display: block !important; width: fit-content; margin: 20px auto 10px !important; }
+
+/* ---------- móvil: pantalla "esperando al host" ---------- */
+#waiting-screen {
+    background: linear-gradient(180deg, rgba(20,10,40,.55), rgba(20,10,40,.8)), url(img/fondo_movil_mix.webp) center bottom / cover no-repeat !important;
+}
+#waiting-vinyl { animation: cb-flota 3s ease-in-out infinite !important; width: 150px !important; height: 150px !important;
+    background: url(img/app_icon_512.png) center / contain no-repeat; border-radius: 28px;
+    box-shadow: 0 0 30px rgba(255, 47, 160, .45), 0 0 60px rgba(0, 242, 255, .25); }
+#waiting-vinyl svg { display: none !important; }
+#waiting-screen > div { color: #f3e9ff !important; text-shadow: 0 2px 6px rgba(0,0,0,.8); }
+#waiting-screen > div:first-child { color: var(--neon) !important; }
+@keyframes cb-flota { 0%, 100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-10px) rotate(2deg); } }
