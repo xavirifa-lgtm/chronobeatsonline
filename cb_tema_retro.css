@@ -465,3 +465,21 @@ button[onclick*="requestCategory"] img.cb-ico { height: 2em !important; vertical
 /* casete de la cronología: más corto, proporción de cinta */
 .card-row { width: 108px !important; min-width: 0 !important; max-width: 108px !important; margin-left: auto !important; margin-right: auto !important; padding: 9px 6px !important; }
 .card-row::before { left: 9px; } .card-row::after { right: 9px; }
+
+/* fichas: ganar a la regla de paneles oscuros [style*="background:#0..."] (el "¡CONMIGO!" lleva background:#00ff88 en línea y salía un círculo vacío) */
+#game-screen .neon-chip[style], #game-screen .neon-chip {
+    background: url(img/ico_ficha.webp) center/contain no-repeat !important;
+}
+/* huecos de la cronología: la ficha se ve al apostar */
+.bet-slot.occupied, .bet-slot.my-bet {
+    background: url(img/ico_ficha.webp) center/78% no-repeat, rgba(42, 26, 94, .6) !important;
+    border-style: solid !important; color: transparent !important; font-size: 0 !important;
+}
+.bet-slot.occupied .cb-ico, .bet-slot.my-bet .cb-ico { display: none !important; }
+.bet-slot.occupied { border-color: #00f2ff !important; box-shadow: 0 0 10px rgba(0, 242, 255, .7) !important; }
+.bet-slot.my-bet { border-color: var(--gold, #ffd34d) !important; box-shadow: 0 0 12px var(--gold, #ffd34d) !important; }
+/* hueco marcado por el jugador activo */
+.bet-slot.active-guess {
+    background: #fff !important; border: 2px solid #fff !important; color: #1a0f2e !important;
+    box-shadow: 0 0 14px #fff !important; font-weight: 900 !important;
+}

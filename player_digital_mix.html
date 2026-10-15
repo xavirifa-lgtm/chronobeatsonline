@@ -4058,15 +4058,16 @@
             } else {
                 // Jugador no-activo en turno normal: debe esperar al activo
                 if (lastState && lastState.activeGuess === null) {
-                    showCustomAlert("Espera a que el jugador activo coloque primero su apuesta.");
+                    var _nomAct = (lastState && lastState.activePlayer && lastState.activePlayer.name) ? lastState.activePlayer.name : "el jugador activo";
+                    showCustomAlert("Espera a que " + _nomAct + " coloque primero su apuesta.");
                     return;
                 }
                 if (isGuess) {
-                    showCustomAlert("¡Ese hueco ya lo ha elegido el jugador activo! Elige otro sitio para tu apuesta.");
+                    showCustomAlert("¡Ese hueco ya lo ha elegido " + ((lastState && lastState.activePlayer && lastState.activePlayer.name) || "el jugador activo") + "! Elige otro sitio para tu apuesta.");
                     return;
                 }
                 console.log("Rival intentando apostar en:", idx);
-                showCustomConfirm("¿Seguro que quieres RETAR A DUELO en este hueco (Coste: 2 Fichas)?", function (confirmed) {
+                showCustomConfirm("¿Apostar 1 ficha a que la canción va en este hueco? Si " + ((lastState && lastState.activePlayer && lastState.activePlayer.name) || "el jugador activo") + " falla y tú aciertas, te llevas la carta.", function (confirmed) {
                     if (confirmed) send('BET', idx);
                 });
             }
