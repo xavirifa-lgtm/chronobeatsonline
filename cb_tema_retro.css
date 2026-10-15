@@ -27,10 +27,10 @@ body::before {
 }
 /* lucecitas de feria arriba */
 body::after {
-    content: ""; position: fixed; left: 0; right: 0; top: 0; height: 26px; z-index: 0; pointer-events: none;
+    content: ""; position: fixed; left: 0; right: 0; top: 0; height: 34px; z-index: 0; pointer-events: none;
     background:
-        radial-gradient(circle, #FFD54A 0 4px, transparent 5px) 0 6px / 46px 26px repeat-x,
-        radial-gradient(circle, #FF5FA2 0 4px, transparent 5px) 23px 14px / 46px 26px repeat-x;
+        radial-gradient(circle, #FFD54A 0 4px, transparent 5px) 0 3px / 46px 16px repeat-x,
+        radial-gradient(circle, #FF5FA2 0 4px, transparent 5px) 23px 13px / 46px 16px repeat-x;
     filter: drop-shadow(0 0 6px rgba(255, 210, 90, .8));
     opacity: .85;
 }
