@@ -1426,11 +1426,11 @@
                 if (player && player.stopVideo) player.stopVideo();
             }
 
-            var countdownNum = 8;
+            var countdownNum = 3;
             var hostInstructions = document.getElementById('host-instructions');
             if (hostInstructions) {
                 hostInstructions.innerHTML = "<div style='color:#ff0055; font-family:Bungee; font-size:1.6em; animation: pulse 0.8s infinite alternate;'>⚠️ CANCIÓN NO ENCONTRADA ⚠️</div>" +
-                    "<div style='font-family:Bungee; color:var(--gold); font-size:1.1em; margin-top:6px;'>SALTANDO A LA SIGUIENTE CANCIÓN EN <span id='broken-skip-timer'>8</span>s...</div>";
+                    "<div style='font-family:Bungee; color:var(--gold); font-size:1.1em; margin-top:6px;'>SALTANDO A LA SIGUIENTE CANCIÓN EN <span id='broken-skip-timer'>3</span>s...</div>";
             }
 
             var ringFill = document.getElementById('ring-fill');
@@ -5942,5 +5942,6 @@
     </script>
     <script src="cb_iconos.js"></script>
     <script src="cb_graficos.js"></script>
+    <link rel="stylesheet" href="cb_tema_retro.css">
 </body>
 </html>

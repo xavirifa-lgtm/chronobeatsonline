@@ -224,3 +224,164 @@ body.cb-sonando .cb-vinilo { animation: cb-gira 1.8s linear infinite; }
 }
 #qr-btn { background: rgba(42, 26, 94, .85) !important; color: #fff !important; border: 2px solid var(--panel-borde) !important; box-shadow: 0 4px 0 rgba(10,4,30,.8) !important; }
 .market-btn { font-size: .78em !important; line-height: 1.25 !important; }
+
+/* ======================= MEJORAS SALA RETRO ======================= */
+
+/* 1) tocadiscos central */
+#ui-card-year { position: absolute !important; width: 1px; height: 1px; overflow: hidden; opacity: 0; pointer-events: none; }
+.val-card .cb-vinilo { display: none; }
+#cb-tocadiscos { position: relative; width: 230px; height: 230px; margin: 6px auto 4px; }
+.cb-td-plato {
+    position: absolute; inset: 0; border-radius: 26px;
+    background: linear-gradient(145deg, #6B3E26, #3E2214);
+    border: 3px solid var(--tinta);
+    box-shadow: 0 6px 0 var(--tinta), inset 0 0 0 6px rgba(255, 255, 255, .06), 0 0 30px color-mix(in srgb, var(--neon) 40%, transparent);
+}
+.cb-td-disco {
+    position: absolute; left: 50%; top: 50%; width: 196px; height: 196px; margin: -98px 0 0 -98px;
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, .5));
+}
+body.cb-sonando .cb-td-disco { animation: cb-gira 1.8s linear infinite; }
+.cb-td-etiqueta {
+    position: absolute; left: 50%; top: 50%; width: 92px; height: 92px; margin: -46px 0 0 -46px; border-radius: 50%;
+    background: radial-gradient(circle, var(--tinta) 0 4px, var(--neon) 5px);
+    border: 3px solid var(--tinta); display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 18px color-mix(in srgb, var(--neon) 70%, transparent);
+}
+#cb-td-anio { font-family: 'Bungee', sans-serif !important; font-size: 1.6em; color: var(--tinta); line-height: 1; }
+#cb-td-anio.largo { font-size: .8em; }
+#cb-tocadiscos.revelado .cb-td-etiqueta { animation: cb-revela .6s cubic-bezier(.2, 1.6, .4, 1); }
+@keyframes cb-revela { 0% { transform: scale(.4); } 100% { transform: scale(1); } }
+.cb-td-brazo {
+    position: absolute; right: 18px; top: 16px; width: 12px; height: 120px; border-radius: 8px;
+    background: linear-gradient(90deg, #DADADA, #8C8C8C); border: 2px solid var(--tinta);
+    transform-origin: 50% 8px; transform: rotate(-6deg); transition: transform .6s ease; z-index: 2;
+}
+.cb-td-brazo::before { content: ""; position: absolute; top: -10px; left: -9px; width: 26px; height: 26px; border-radius: 50%; background: #B0B0B0; border: 2px solid var(--tinta); }
+.cb-td-brazo::after { content: ""; position: absolute; bottom: -6px; left: -5px; width: 18px; height: 14px; border-radius: 3px; background: #444; border: 2px solid var(--tinta); }
+body.cb-sonando .cb-td-brazo { transform: rotate(15deg); }
+.cb-td-etiqueta { z-index: 3; }
+
+/* 2) casete que vuela a la fila del jugador */
+.card-fly { display: none !important; }
+.cb-casete-vuela {
+    position: fixed; z-index: 9990; pointer-events: none;
+    padding: 6px 18px; min-width: 70px; text-align: center;
+    font-family: 'Bungee', sans-serif !important; font-size: 1em; color: var(--tinta);
+    background: linear-gradient(180deg, #2B2140 0 18%, var(--crema) 18% 82%, #2B2140 82%);
+    border: 2px solid var(--neon); border-radius: 8px;
+    box-shadow: 0 0 22px var(--neon), 0 4px 0 rgba(10, 4, 30, .8);
+}
+.player-row.cb-recibe { animation: cb-recibe .7s ease; }
+@keyframes cb-recibe { 0% { box-shadow: 0 0 0 0 var(--neon); } 40% { box-shadow: 0 0 0 6px var(--neon), 0 0 40px var(--neon); } 100% { box-shadow: var(--sombra-panel); } }
+
+/* 3) ecualizador al pie de la tablet */
+#cb-eq {
+    position: fixed; left: 0; right: 0; bottom: 0; height: 90px; z-index: -1; pointer-events: none;
+    display: flex; align-items: flex-end; justify-content: center; gap: 6px; padding: 0 2vw; opacity: .55;
+}
+#cb-eq i {
+    flex: 1; max-width: 26px; height: 12%; border-radius: 6px 6px 0 0;
+    background: linear-gradient(180deg, #FFD54A, #FF5FA2 55%, var(--neon));
+    transform-origin: bottom; transition: height .4s ease;
+}
+body.cb-sonando #cb-eq { opacity: .8; }
+body.cb-sonando #cb-eq i { animation: cb-eq .8s ease-in-out infinite alternate; }
+@keyframes cb-eq { 0% { height: 10%; } 30% { height: 75%; } 60% { height: 35%; } 100% { height: 95%; } }
+
+/* 4) luces de feria que reaccionan */
+body.cb-sonando::after { animation: cb-luces .5s steps(2) infinite; }
+@keyframes cb-luces { 50% { filter: drop-shadow(0 0 10px rgba(255, 210, 90, 1)) brightness(1.5); } }
+body.cb-acierto::after {
+    background:
+        radial-gradient(circle, #4ADE80 0 5px, transparent 6px) 0 6px / 46px 26px repeat-x,
+        radial-gradient(circle, #B8F5CF 0 5px, transparent 6px) 23px 14px / 46px 26px repeat-x !important;
+    filter: drop-shadow(0 0 12px #4ADE80) brightness(1.4); animation: cb-luces .25s steps(2) 6;
+}
+body.cb-fallo::after {
+    background:
+        radial-gradient(circle, #FF4D4D 0 5px, transparent 6px) 0 6px / 46px 26px repeat-x,
+        radial-gradient(circle, #FFB3B3 0 5px, transparent 6px) 23px 14px / 46px 26px repeat-x !important;
+    filter: drop-shadow(0 0 12px #FF4D4D) brightness(1.4); animation: cb-luces .25s steps(2) 6;
+}
+body.cb-acierto .val-card { box-shadow: inset 0 0 50px rgba(74, 222, 128, .45), 0 0 40px rgba(74, 222, 128, .6) !important; }
+body.cb-fallo .val-card { box-shadow: inset 0 0 50px rgba(255, 77, 77, .45), 0 0 40px rgba(255, 77, 77, .6) !important; }
+
+/* 5) marcador con avatares grandes y color por jugador */
+.leader-item { --cb-jug: #A78BFA; padding: 10px 12px !important; border-left: 6px solid var(--cb-jug) !important; }
+.leader-item > div:first-child > img, .leader-item > div:first-child > div:not(.wanted-poster) {
+    width: 56px !important; height: 56px !important; border: 3px solid var(--cb-jug) !important;
+    box-shadow: 0 0 12px color-mix(in srgb, var(--cb-jug) 60%, transparent) !important; font-size: 1.6em !important;
+}
+.leader-item.active { border-left-width: 6px !important; border-color: var(--cb-jug) !important; }
+.leader-item .wanted-poster { top: -54px !important; left: 64% !important; transform: translateX(-50%) rotate(9deg) scale(.78) !important; }
+.leader-item .score { font-size: 1.15em !important; }
+
+/* 6) lobby con vida */
+#lobby-players .player-tag { --cb-i: 0; animation: cb-baila 2.4s ease-in-out infinite; animation-delay: calc(var(--cb-i) * -.37s); }
+#lobby-players .player-tag.cb-nuevo { animation: cb-entra .7s cubic-bezier(.2, 1.6, .4, 1), cb-baila 2.4s ease-in-out .7s infinite; }
+#lobby-players .player-tag > img:first-child, #lobby-players .player-tag > div:first-child { width: 44px !important; height: 44px !important; }
+@keyframes cb-entra { 0% { transform: translateY(-60px) scale(.3); opacity: 0; } 100% { transform: none; opacity: 1; } }
+@keyframes cb-baila { 0%, 100% { transform: rotate(-2.5deg) translateY(0); } 50% { transform: rotate(2.5deg) translateY(-4px); } }
+body.cb-empieza::before { animation: cb-enciende 2.4s ease-out; }
+@keyframes cb-enciende { 0% { filter: brightness(1); } 25% { filter: brightness(1.9) saturate(1.6); } 100% { filter: brightness(1); } }
+
+/* 7) cuenta atrás como vinilo */
+#countdown-ring {
+    width: 96px !important; height: 96px !important; border-radius: 50%;
+    background: url(img/st_vinilo.webp) center / 100% 100% no-repeat;
+    filter: drop-shadow(0 0 10px color-mix(in srgb, var(--neon) 60%, transparent));
+}
+#countdown-ring svg { width: 96px !important; height: 96px !important; }
+#countdown-ring .ring-bg { stroke: rgba(10, 4, 30, .55) !important; }
+#countdown-ring .ring-fill { stroke-width: 7 !important; stroke-linecap: round; }
+#countdown-ring .ring-text {
+    width: 46px; height: 46px; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important;
+    border-radius: 50%; background: var(--neon); border: 2px solid var(--tinta);
+    display: flex !important; align-items: center; justify-content: center;
+    color: var(--tinta) !important; font-family: 'Bungee', sans-serif !important; font-size: .8em !important;
+}
+/* cuenta atrás de inicio en el móvil */
+#countdown-overlay { background: radial-gradient(circle, rgba(42, 26, 94, .95), rgba(14, 6, 36, .97)) !important; }
+#countdown-number {
+    position: relative; width: 200px; height: 200px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    background: none !important; color: var(--tinta) !important; font-size: 3.2em !important; z-index: 0;
+}
+#countdown-number::before {
+    content: ""; position: absolute; inset: 0; border-radius: 50%; z-index: -1;
+    background: radial-gradient(circle, var(--neon) 0 34%, #0B0618 35% 37%, transparent 38%),
+        repeating-radial-gradient(circle, #17121F 0 2px, #26202F 2px 4px);
+    box-shadow: 0 0 40px color-mix(in srgb, var(--neon) 60%, transparent);
+    animation: cb-gira-lento 3s linear infinite;
+}
+@keyframes cb-gira-lento { to { transform: rotate(360deg); } }
+
+/* ======================= AJUSTES TRAS PRUEBA ======================= */
+/* fondo del móvil: se encuadra la jukebox (el centro de la ilustración es la cortina oscura) */
+body.cb-movil::before {
+    background-size: auto, auto, auto 100% !important;
+    background-position: center, center, 12% center !important;
+}
+body.cb-movil .tab-content { background: transparent !important; }
+
+/* el disco gira siempre; más rápido mientras suena */
+.cb-td-disco { animation: cb-gira 7s linear infinite; }
+body.cb-sonando .cb-td-disco { animation-duration: 1.8s; }
+
+/* tocadiscos ilustrado cuando existan td_base / td_vinilo / td_brazo */
+body.cb-td-base .cb-td-plato { background: var(--cb-td-base) center / contain no-repeat !important; border: none !important; box-shadow: none !important; }
+body.cb-td-brazo .cb-td-brazo { background: var(--cb-td-brazo) center top / contain no-repeat !important; border: none !important; width: 56px; height: 170px; right: 0; top: 4px; }
+body.cb-td-brazo .cb-td-brazo::before, body.cb-td-brazo .cb-td-brazo::after { display: none; }
+body.cb-td-vinilo .cb-td-disco { filter: drop-shadow(0 6px 8px rgba(0, 0, 0, .55)); }
+
+/* iconos en los botones */
+.cb-bi { display: inline-block; height: 1.7em; width: auto; vertical-align: -.5em; margin-right: .35em; pointer-events: none; }
+.ctrl-btn.cb-con-icono, .sk-btn.cb-con-icono { display: flex !important; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
+.ctrl-btn .cb-bi { height: 2.8em; margin: 0; }
+.sk-btn .cb-bi { height: 1.6em; margin: 0; }
+.spec-btn.cb-con-icono, .market-btn.cb-con-icono, .btn.cb-con-icono { display: flex !important; align-items: center; justify-content: center; text-align: left; }
+.spec-btn .cb-bi, .market-btn .cb-bi { height: 2.1em; flex: none; }
+.spec-btn .cb-ico, .market-btn .cb-ico { height: 1.4em !important; }
+/* sabotajes: icono grande arriba, texto debajo */
+#sabotage-grid .spec-btn.cb-con-icono { flex-direction: column !important; text-align: center !important; gap: 4px; padding: 10px 6px !important; line-height: 1.15 !important; }
+#sabotage-grid .spec-btn .cb-bi { height: 3em; margin: 0; filter: drop-shadow(0 2px 3px rgba(0,0,0,.5)); }

@@ -145,6 +145,179 @@
         if (antesDe) dentroDe.insertBefore(v, antesDe); else dentroDe.appendChild(v);
     }
     function marcarSonando(on) { document.body.classList.toggle('cb-sonando', !!on); }
+
+    // ================== MEJORAS "SALA RETRO" (tablet) ==================
+    // 1) tocadiscos central con el año en la etiqueta
+    function montarTocadiscos() {
+        var card = document.getElementById('val-card-ui');
+        var anio = document.getElementById('ui-card-year');
+        if (!card || !anio || document.getElementById('cb-tocadiscos')) return;
+        var td = document.createElement('div');
+        td.id = 'cb-tocadiscos';
+        td.innerHTML = '<div class="cb-td-plato"><img class="cb-td-disco" src="' + DIR + 'st_vinilo.webp" alt="">' +
+            '<div class="cb-td-etiqueta"><span id="cb-td-anio">?</span></div></div><div class="cb-td-brazo"></div>';
+        anio.parentNode.insertBefore(td, anio);
+        var copia = function () {
+            var t = (anio.textContent || '').trim();
+            var el = document.getElementById('cb-td-anio');
+            var revelado = /^\d{3,4}$/.test(t);
+            el.textContent = revelado ? t : (t.indexOf('?') !== -1 || !t ? '?' : t);
+            td.classList.toggle('revelado', revelado);
+            el.classList.toggle('largo', !revelado && t.length > 4);
+        };
+        copia();
+        new MutationObserver(copia).observe(anio, { childList: true, characterData: true, subtree: true });
+    }
+
+    // 2) el año vuela hasta la fila del jugador
+    function filaDe(nombre) {
+        var filas = document.querySelectorAll('#global-timelines .player-row');
+        for (var i = 0; i < filas.length; i++) {
+            var t = filas[i].firstElementChild ? filas[i].firstElementChild.textContent.trim() : '';
+            if (t === nombre) return filas[i];
+        }
+        return null;
+    }
+    function volarCasete(anio, nombre) {
+        var origen = document.getElementById('cb-tocadiscos') || document.getElementById('val-card-ui');
+        var fila = filaDe(nombre);
+        if (!origen || !fila || !origen.getBoundingClientRect) return;
+        var destino = fila.querySelector('.slot:not(.filled)') || fila;
+        var a = origen.getBoundingClientRect(), b = destino.getBoundingClientRect();
+        var c = document.createElement('div');
+        c.className = 'cb-casete-vuela';
+        c.textContent = anio;
+        document.body.appendChild(c);
+        var x0 = a.left + a.width / 2, y0 = a.top + a.height / 2, x1 = b.left + b.width / 2, y1 = b.top + b.height / 2;
+        c.style.left = x0 + 'px'; c.style.top = y0 + 'px';
+        var anim = c.animate([
+            { transform: 'translate(-50%,-50%) scale(2.2) rotate(0deg)', opacity: 0 },
+            { transform: 'translate(-50%,-50%) scale(2.4) rotate(-6deg)', opacity: 1, offset: .18 },
+            { transform: 'translate(calc(-50% + ' + (x1 - x0) * .5 + 'px), calc(-50% + ' + ((y1 - y0) * .5 - 120) + 'px)) scale(1.6) rotate(8deg)', opacity: 1, offset: .55 },
+            { transform: 'translate(calc(-50% + ' + (x1 - x0) + 'px), calc(-50% + ' + (y1 - y0) + 'px)) scale(1) rotate(0deg)', opacity: 1 }
+        ], { duration: 1300, easing: 'cubic-bezier(.45,.05,.35,1)', fill: 'forwards' });
+        anim.onfinish = function () {
+            c.remove();
+            fila.classList.add('cb-recibe');
+            setTimeout(function () { fila.classList.remove('cb-recibe'); }, 700);
+        };
+    }
+
+    // 3) ecualizador
+    function montarEcualizador() {
+        if (document.getElementById('cb-eq')) return;
+        var eq = document.createElement('div');
+        eq.id = 'cb-eq';
+        var n = 36, html = '';
+        for (var i = 0; i < n; i++) {
+            var d = (Math.random() * .9).toFixed(2), v = (0.55 + Math.random() * .7).toFixed(2);
+            html += '<i style="animation-delay:-' + d + 's;animation-duration:' + v + 's"></i>';
+        }
+        eq.innerHTML = html;
+        document.body.appendChild(eq);
+    }
+
+    // 4) luces que reaccionan al acierto / fallo
+    var luzTimer = null;
+    function destello(clase) {
+        document.body.classList.remove('cb-acierto', 'cb-fallo');
+        void document.body.offsetWidth;
+        document.body.classList.add(clase);
+        clearTimeout(luzTimer);
+        luzTimer = setTimeout(function () { document.body.classList.remove(clase); }, 1600);
+    }
+
+    // 5) avatares grandes con color propio; cartel solo para líder único
+    var COLORES_JUG = ['#FF5FA2', '#3BB4E5', '#FFC93C', '#4ADE80', '#A78BFA', '#FF8C42', '#22D3EE', '#F472B6'];
+    function retocarMarcador() {
+        var lista = document.getElementById('leaderboard-list');
+        if (!lista) return;
+        var carteles = lista.querySelectorAll('.wanted-poster');
+        if (carteles.length > 1) for (var i = 0; i < carteles.length; i++) carteles[i].remove();
+        var items = lista.querySelectorAll('.leader-item');
+        for (var j = 0; j < items.length; j++) {
+            var pid = items[j].getAttribute('data-pid') || '';
+            var idx = (window.players || []).findIndex(function (p) { return p.id === pid; });
+            items[j].style.setProperty('--cb-jug', COLORES_JUG[(idx < 0 ? j : idx) % COLORES_JUG.length]);
+        }
+    }
+
+    // 6) lobby con vida: los que entran aparecen con rebote; la jukebox se enciende al empezar
+    var vistos = {};
+    function animarLobby() {
+        var tags = document.querySelectorAll('#lobby-players .player-tag');
+        for (var i = 0; i < tags.length; i++) {
+            var nombre = (tags[i].textContent || '').trim();
+            tags[i].style.setProperty('--cb-i', i);
+            if (!vistos[nombre]) { vistos[nombre] = 1; tags[i].classList.add('cb-nuevo'); }
+        }
+    }
+
+    // ---------- iconos en botones que no tienen emoji (PLAY, saltos, sabotajes, mercado...) ----------
+    // [trozo del onclick, imágenes en orden de preferencia]
+    var BOTONES = [
+        ["send('PLAY')", ['ui_play']], ["send('PAUSE')", ['ui_pause']], ["send('STOP')", ['ui_stop']],
+        ["SKIP',-", ['ui_atras']], ["SKIP',", ['ui_adelante']],
+        ['SABOTAGE_MUTE', ['sb_mute']], ['SABOTAGE_BUZZER', ['sb_zumbido']], ['SABOTAGE_VETO', ['sb_veto']],
+        ['SABOTAGE_FORCE_SKIP', ['sb_salto']], ['SABOTAGE_PANIC', ['sb_panico']], ['SABOTAGE_FOG', ['sb_niebla']],
+        ['SABOTAGE_STEAL_TURN', ['sb_robar_turno']], ['SABOTAGE_BLACKHOLE', ['sb_agujero_negro']],
+        ['SABOTAGE_RUSSIAN_ROULETTE', ['sb_ruleta']], ['SABOTAGE_DUEL', ['sb_duelo']],
+        ['openSmartSteal', ['ap_robo_inteligente', 'sb_robar_ficha']], ['stealStreak', ['ap_robar_racha', 're_fuego']],
+        ["MARKET_WILDCARD', 'artist'", ['ico_pista_artista']], ["MARKET_WILDCARD', 'song'", ['ap_comodin_cancion', 'ico_comodin']],
+        ['MARKET_DECADE', ['ico_pista_decada']], ['MARKET_SHIELD', ['ico_escudo']],
+        ['AUTO_WIN', ['ico_comprar_carta']], ['RELOAD_SONG', ['ico_cambiar_cancion']], ['SYSTEM_ERROR_TRACK', ['ico_video_roto']],
+        ['BET_AGAINST_ACTIVE', ['ico_ni_de_cona']], ['BET_FOR_ACTIVE', ['ico_conmigo']],
+        ['activateDoubleOrNothing', ['ap_doble_nada']], ['activateFailSafe', ['ap_seguro', 'ico_escudo']],
+        ['activateBrag', ['ap_farolero', 'ico_comodin']], ['RESIST_STEAL', ['ap_resistir_robo', 'ico_escudo']]
+    ];
+    var TIENE_EMOJI = /[\u{1F000}-\u{1FAFF}☀-➿]/u;
+    function decorarBoton(b) {
+        if (!b || b.nodeType !== 1 || b.tagName !== 'BUTTON' || b.querySelector('.cb-bi')) return;
+        var oc = b.getAttribute('onclick') || '';
+        var regla = null;
+        for (var i = 0; i < BOTONES.length; i++) if (oc.indexOf(BOTONES[i][0]) !== -1) { regla = BOTONES[i]; break; }
+        if (!regla) return;
+        // si el juego ya pone un emoji (que cb_iconos convierte en icono), no duplicar
+        if (b.querySelector('.cb-ico') || TIENE_EMOJI.test(b.textContent || '')) {
+            b.querySelectorAll('.cb-ico').forEach(function (im, k) { if (k === 0) im.classList.add('cb-bi-emoji'); });
+            return;
+        }
+        primeraQueExista(regla[1], function (n) {
+            if (!n || b.querySelector('.cb-bi')) return;
+            var im = document.createElement('img');
+            im.className = 'cb-bi'; im.alt = ''; im.src = DIR + n + '.webp';
+            b.insertBefore(im, b.firstChild);
+            b.classList.add('cb-con-icono');
+        });
+    }
+    function decorarTodo(raiz) {
+        if (!raiz || !raiz.querySelectorAll) return;
+        if (raiz.tagName === 'BUTTON') decorarBoton(raiz);
+        raiz.querySelectorAll('button[onclick]').forEach(decorarBoton);
+    }
+    function vigilarBotones() {
+        decorarTodo(document.body);
+        new MutationObserver(function (muts) {
+            muts.forEach(function (m) {
+                if (m.type === 'childList') {
+                    m.addedNodes.forEach(function (n) { if (n.nodeType === 1) decorarTodo(n); });
+                    if (m.target && m.target.tagName === 'BUTTON') decorarBoton(m.target);
+                }
+            });
+        }).observe(document.body, { childList: true, subtree: true });
+    }
+
+    // ---------- tocadiscos ilustrado (si existen td_base / td_vinilo / td_brazo) ----------
+    function tocadiscosIlustrado() {
+        ['td_base', 'td_vinilo', 'td_brazo'].forEach(function (n) {
+            existe(n, function (ok) {
+                if (!ok) return;
+                document.documentElement.style.setProperty('--cb-' + n.replace('_', '-'), 'url(' + DIR + n + '.webp)');
+                document.body.classList.add('cb-' + n.replace('_', '-'));
+                if (n === 'td_vinilo') { var d = document.querySelector('.cb-td-disco'); if (d) d.src = DIR + 'td_vinilo.webp'; }
+            });
+        });
+    }
     // ---------- HOST ----------
     function iniciarHost() {
         ponerFondo('mix'); ponerColores('mix');
@@ -155,7 +328,20 @@
         if (ws) new MutationObserver(function () {
             if (ws.style.display && ws.style.display !== 'none') { var b = document.getElementById('cb-escena'); if (b) b.classList.remove('on'); }
         }).observe(ws, { attributes: true, attributeFilter: ['style'] });
-        vinilo(document.getElementById('val-card-ui'));
+
+        // mejoras sala retro
+        montarTocadiscos();
+        tocadiscosIlustrado();
+        montarEcualizador();
+        envolver('flyCard', function (anio, nombre) { volarCasete(anio, nombre); });
+        envolver('validateResult', function (ok) { destello(ok ? 'cb-acierto' : 'cb-fallo'); });
+        envolver('awardToChallenger', function () { destello('cb-acierto'); });
+        envolver('updateUI', retocarMarcador);
+        envolver('updateLobby', animarLobby);
+        envolver('startGame', function () {
+            document.body.classList.add('cb-empieza');
+            setTimeout(function () { document.body.classList.remove('cb-empieza'); }, 2500);
+        });
         setInterval(function () { marcarSonando(window.isPlaying); }, 400);
         var hi = document.getElementById('host-instructions');
         if (hi) new MutationObserver(function () {
@@ -233,6 +419,8 @@
         envolver('applyTheme', function (type) { ponerFondo(type); ponerReverso(type); ponerColores(type); });
         envolver('showSabotageReceived', function (atacante, sabotaje) { mostrarEscena(escenaPara(String(sabotaje || '')), 2200); });
         selectorAvatares();
+        document.body.classList.add('cb-movil');
+        vigilarBotones();
         envolver('handle', function (d) { if (d && d.type === 'STATE_UPDATE') marcarSonando(d.isPlaying); });
         css(
             // reverso de la carta central
