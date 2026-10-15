@@ -1799,6 +1799,34 @@
                 }),
                 new Promise(function (ok) { setTimeout(ok, 4000); })
             ]).catch(function (e) { console.warn('[HOST] Sin lista negra:', e); }).then(function () { return null; }));
+            // Copia de seguridad de las canciones ya jugadas: se SUMA a lo que haya en esta
+            // tablet. Si la memoria del navegador se borró, el progreso se recupera de aquí.
+            fetchPromises.push(Promise.race([
+                fetch(URL_AVISOS + '?jugadas=1').then(function (r) { return r.json(); }).then(function (ids) {
+                    var loc = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]');
+                    var set = new Set(loc), antes = set.size;
+                    (ids || []).forEach(function (id) { set.add(id); });
+                    if (set.size !== antes) {
+                        localStorage.setItem('CB_PlayedSongs', JSON.stringify(Array.from(set)));
+                        console.log('[HOST] Recuperadas', set.size - antes, 'canciones jugadas de la copia de seguridad');
+                    }
+                    if (set.size > (ids || []).length) subirJugadas(true);   // la nube iba por detrás
+                }),
+                new Promise(function (ok) { setTimeout(ok, 4000); })
+            ]).catch(function (e) { console.warn('[HOST] Sin copia de jugadas:', e); }).then(function () { return null; }));
+        }
+
+        // Sube a la copia de seguridad la lista de canciones jugadas (cada 5 nuevas, o al forzarlo).
+        var _jugadasSubidas = -1;
+        function subirJugadas(forzar) {
+            if (!URL_AVISOS) return;
+            var ids = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]');
+            if (!forzar && _jugadasSubidas >= 0 && ids.length - _jugadasSubidas < 5) return;
+            _jugadasSubidas = ids.length;
+            try {
+                fetch(URL_AVISOS, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ tipo: 'jugadas', ids: ids }) }).catch(function () {});
+            } catch (e) {}
         }
 
         Promise.all(fetchPromises).then(function (results) {
@@ -2297,6 +2325,7 @@
                 }
             }
             updateSongCounter();
+            subirJugadas(false);
             isRevealed = false;
             segundosAcumulados = 0;
             momentoDeInicio = 0;
@@ -4558,6 +4587,7 @@
             // TRAZA: si la victoria vuelve a saltar cuando no debe, aquí queda registrado
             // el modo activo y la línea exacta que la disparó.
             partidaTerminada = true;
+            subirJugadas(true);
             console.warn('[HOST] === VICTORIA ===', name, '| modo:', gameMode, '| turnPhase:', turnPhase);
             console.warn('[HOST] disparada desde:\n' + (new Error().stack || 'sin stack'));
             addEvent('<span class="ev-info">🏆 Victoria declarada (modo: ' + gameMode.toUpperCase() + ')</span>');
@@ -5254,6 +5284,11 @@
             }
             var jugadas = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]').length;
             localStorage.removeItem('CB_PlayedSongs');
+            // vaciar también la copia de seguridad, o al recargar volverían todas las jugadas
+            if (URL_AVISOS) {
+                try { fetch(URL_AVISOS, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ tipo: 'reset_jugadas' }) }).catch(function () {}); } catch (e) {}
+                _jugadasSubidas = 0;
+            }
             songs = buildSongsFromCache(true);
             currentSongIdx = -1;
             updateSongCounter();
@@ -6155,9 +6190,9 @@
             }
         }
     </script>
-    <script src="cb_iconos.js?v=20261015c"></script>
-    <script src="cb_despierto.js?v=20261015c"></script>
-    <script src="cb_graficos.js?v=20261015c"></script>
-    <link rel="stylesheet" href="cb_tema_retro.css?v=20261015c">
+    <script src="cb_iconos.js?v=20261015e"></script>
+    <script src="cb_despierto.js?v=20261015e"></script>
+    <script src="cb_graficos.js?v=20261015e"></script>
+    <link rel="stylesheet" href="cb_tema_retro.css?v=20261015e">
 </body>
 </html>

@@ -455,8 +455,8 @@ button[onclick*="requestCategory"] img.cb-ico { height: 2em !important; vertical
     background: linear-gradient(180deg, rgba(20,10,40,.55), rgba(20,10,40,.8)), url(img/fondo_movil_mix.webp) center bottom / cover no-repeat !important;
 }
 #waiting-vinyl { animation: cb-flota 3s ease-in-out infinite !important; width: 150px !important; height: 150px !important;
-    background: url(img/app_icon_512.png) center / contain no-repeat; border-radius: 28px;
-    box-shadow: 0 0 30px rgba(255, 47, 160, .45), 0 0 60px rgba(0, 242, 255, .25); }
+    background: url(img/logo.webp) center / contain no-repeat;
+    filter: drop-shadow(0 0 18px rgba(255, 47, 160, .45)); }
 #waiting-vinyl svg { display: none !important; }
 #waiting-screen > div { color: #f3e9ff !important; text-shadow: 0 2px 6px rgba(0,0,0,.8); }
 #waiting-screen > div:first-child { color: var(--neon) !important; }
@@ -482,4 +482,11 @@ button[onclick*="requestCategory"] img.cb-ico { height: 2em !important; vertical
 .bet-slot.active-guess {
     background: #fff !important; border: 2px solid #fff !important; color: #1a0f2e !important;
     box-shadow: 0 0 14px #fff !important; font-weight: 900 !important;
+}
+
+/* logo en la pantalla de entrada del móvil */
+#login-screen > div:first-child::before {
+    content: ""; display: block; width: 110px; height: 110px; margin: 0 auto 6px;
+    background: url(img/logo.webp) center / contain no-repeat;
+    filter: drop-shadow(0 0 16px rgba(255, 47, 160, .4));
 }
