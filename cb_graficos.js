@@ -364,7 +364,7 @@
     }
 
     // ---------- lobby: tarjetas de modo y de época ----------
-    var MODOS = [['normal', 'md_clasico', 'CLÁSICO'], ['rey', 'md_rey', 'REY'], ['supervivencia', 'md_supervivencia', 'SUPERVIVENCIA'], ['equipos', 'md_equipos', 'EQUIPOS']];
+    var MODOS = [['normal', 'md_clasico', 'CLÁSICO'], ['light', 'ap_robar_hueco', 'LIGHT'], ['rey', 'md_rey', 'REY'], ['supervivencia', 'md_supervivencia', 'SUPERVIVENCIA'], ['equipos', 'md_equipos', 'EQUIPOS']];
     var EPOCAS = [['all', null, 'TODAS'], ['pre80s', 'ep_pre80', '<80s'], ['80s', 'ep_80s', '80s'], ['90s', 'ep_90s', '90s'],
         ['2000s', 'ep_2000s', '2000s'], ['2010s', 'ep_2010s', '2010s'], ['2020s', 'ep_2020s', '2020s']];
     function tarjetas(sel, lista, clase) {

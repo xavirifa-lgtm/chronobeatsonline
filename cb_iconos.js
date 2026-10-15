@@ -45,7 +45,7 @@
         '🪄': 'vr_selfie', '📷': 'vr_selfie', '😈': 'rk_diablillo', '🥇': 'rk_oro',
         '🥈': 'rk_plata', '🥉': 'rk_bronce', '🕹': 'rk_joystick', '💥': 'rk_explosion',
         '🎬': 'ct_pelis', '⛩': 'ct_anime', '🎮': 'ct_gamer', '👥': 'md_equipos',
-        '🔴': 'es_equipo_rojo', '☮': 'pr_pacifista', '🦕': 'pr_paleontologo'
+        '🔴': 'es_equipo_rojo', '✨': 'ico_conmigo', '📢': 'vr_bocina', '😆': 'vr_risa', '☮': 'pr_pacifista', '🦕': 'pr_paleontologo'
     };
     // flechas emoji -> flecha de texto normal
     var TEXTO = { '⬇': '↓', '⬆': '↑', '⬅': '←', '➡': '→' };

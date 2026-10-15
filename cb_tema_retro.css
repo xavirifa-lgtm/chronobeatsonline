@@ -490,3 +490,18 @@ button[onclick*="requestCategory"] img.cb-ico { height: 2em !important; vertical
     background: url(img/logo.webp) center / contain no-repeat;
     filter: drop-shadow(0 0 16px rgba(255, 47, 160, .4));
 }
+
+/* MODO LIGHT: fuera todo lo que no se usa (la tablet además lo rechaza) */
+body.cb-light #btn-sabotage-duel, body.cb-light #btn-sabotage-panic, body.cb-light #btn-sabotage-fog,
+body.cb-light #btn-sabotage-veto, body.cb-light #btn-sabotage-steal-turn, body.cb-light #btn-sabotage-blackhole,
+body.cb-light #btn-smart-steal, body.cb-light #btn-roulette, body.cb-light #btn-double-or-nothing,
+body.cb-light #btn-brag, body.cb-light #btn-fail-safe, body.cb-light #btn-steal-streak, body.cb-light #resist-steal-btn,
+body.cb-light #tab-btn-market, body.cb-light .emoji-wildcard-btn, body.cb-light .cat-req-btn { display: none !important; }
+
+/* cuenta atrás 3-2-1 del móvil: semáforo de salida */
+#countdown-overlay { flex-direction: column !important; }
+#countdown-overlay::before {
+    content: ""; display: block; width: min(220px, 55vw); height: min(220px, 55vw); margin-bottom: 8px;
+    background: url(img/vr_cuenta_atras.webp) center / contain no-repeat;
+    filter: drop-shadow(0 0 24px rgba(255, 213, 74, .45));
+}

@@ -905,6 +905,7 @@
             <select id="game-mode-select"
                 style="padding: 10px; font-family: 'Montserrat'; font-size: 1em; border-radius: 8px; background: #222; color: #fff; border: 1px solid var(--neon);">
                 <option value="normal">CLÁSICO (Gana a los 10)</option>
+                <option value="light">LIGHT (Reglas sencillas)</option>
                 <option value="rey">MODO REY (Adivina Año Final)</option>
                 <option value="supervivencia">SUPERVIVENCIA (3 Vidas)</option>
                 <option value="equipos">EQUIPOS ROJO vs AZUL</option>
@@ -1114,6 +1115,16 @@
         var bombPassCount = 0;     // pases exitosos (para desactivar si nadie falla)
         var voiceEnabled = false;
         var competitiveMode = false;    // modo competitivo: sin sabotajes ni fichas
+        // MODO LIGHT: clásico con reglas sencillas para quien juega por primera vez.
+        // Queda: cronología, fichas, apuestas (hueco / ni de coña / conmigo), comprar carta,
+        // cambiar canción y 3 sabotajes (silencio, zumbido, forzar salto). Fuera: duelo,
+        // pánico, niebla, veto, robos, agujero negro, ruleta, mercado, farol, doble o nada,
+        // seguro, comodines, ¡todos juegan!, carta bonificación y cartas extra por racha.
+        var modoLight = false;
+        var ACCIONES_FUERA_LIGHT = ['SABOTAGE_DUEL', 'DUEL_GUESS', 'SABOTAGE_PANIC', 'SABOTAGE_FOG', 'SABOTAGE_VETO',
+            'SABOTAGE_STEAL_TURN', 'RESIST_STEAL', 'SABOTAGE_BLACKHOLE', 'SABOTAGE_SMART_STEAL', 'SABOTAGE_STEAL_TOKEN',
+            'SABOTAGE_RUSSIAN_ROULETTE', 'SABOTAGE_STEAL_STREAK', 'DOUBLE_OR_NOTHING', 'BRAG', 'FAIL_SAFE',
+            'MARKET_WILDCARD', 'MARKET_DECADE', 'MARKET_SHIELD', 'EMOJI_WILDCARD', 'REQUEST_CATEGORY'];
         var requestedCategory = null;   // categoría solicitada para la siguiente canción
         var reactionStartTime = 0;      // cuándo empezó a sonar la canción
         var tokenStarvationTurns = {};  // {playerId: N} — turnos consecutivos sin fichas
@@ -1232,6 +1243,19 @@
         // fallo ya había programado otro nextTurn() que arrancaba un turno detrás de la
         // pantalla de ganador.
         var partidaTerminada = false;
+        // ROBO DE TURNO: índice de la víctima. Al acabar el turno robado, el turno sigue por
+        // el jugador que iba DESPUÉS de la víctima (antes seguía desde el ladrón y se
+        // saltaban los jugadores que había entre medias).
+        var turnoRobadoBase = null;
+        function avanzarTurno() {
+            if (!players.length) return;
+            if (turnoRobadoBase !== null && turnoRobadoBase < players.length) {
+                activePlayerIdx = (turnoRobadoBase + 1) % players.length;
+            } else {
+                activePlayerIdx = (activePlayerIdx + 1) % players.length;
+            }
+            turnoRobadoBase = null;
+        }
         // Evita validar dos veces el mismo turno (p.ej. botón de la tablet + mando).
         var turnoValidado = false;
 
@@ -1534,7 +1558,7 @@
                 stopCountdown();
                 syncState();
                 setTimeout(function() {
-                    activePlayerIdx = (activePlayerIdx + 1) % players.length;
+                    avanzarTurno();
                     players[activePlayerIdx].canReload = true;
                     nextTurn();
                 }, 4000);
@@ -1605,8 +1629,19 @@
                 conn.on('data', function (data) {
                     console.log("Comando recibido en host:", data);
                     if (data.type === 'JOIN') {
-                        // PROTECCIÓN DUPLICADOS: Buscar si el nombre ya existe
-                        var existing = players.find(function (p) { return p.name.toLowerCase() === data.name.toLowerCase(); });
+                        // RECONEXIÓN: primero por el código propio del móvil (token); si no, por nombre.
+                        var existing = (data.token && players.find(function (p) { return p.token === data.token; })) ||
+                                       players.find(function (p) { return p.name.toLowerCase() === String(data.name || '').toLowerCase(); });
+                        // Nombre ya usado por OTRO móvil que sigue conectado: no se le quita el sitio.
+                        if (existing && data.token && existing.token && existing.token !== data.token) {
+                            var _cx = connections[existing.id];
+                            if (_cx && _cx.open !== false) {
+                                try { conn.send({ type: 'JOIN_REJECTED', msg: 'Ya hay un jugador llamado "' + existing.name + '" en la partida. Elige otro nombre.' }); } catch (e) {}
+                                setTimeout(function () { try { conn.close(); } catch (e) {} }, 500);
+                                return;
+                            }
+                        }
+                        if (existing && data.token) existing.token = data.token;
                         if (existing) {
                             console.log("Reconexión de jugador:", data.name, existing.id, '→', conn.peer);
                             var _idViejo = existing.id;
@@ -1618,7 +1653,7 @@
                             addEvent('<span class="ev-info">🔌 ' + existing.name + ' se ha reconectado</span>');
                             syncState(); // Force state sync to reconnecting player
                         } else {
-                            var _nuevo = { id: conn.peer, name: data.name, avatar: data.avatar || null, score: 1, cards: [], tokens: 3, canReload: true, wildcards: 3 };
+                            var _nuevo = { id: conn.peer, name: data.name, avatar: data.avatar || null, token: data.token || null, score: 1, cards: [], tokens: 3, canReload: true, wildcards: 3 };
                             // Si entra con la partida empezada, recibe su carta inicial (antes
                             // marcaba 1/10 con la cronología vacía) y, en Supervivencia, sus vidas.
                             if (gameStarted) {
@@ -1832,6 +1867,7 @@
         Promise.all(fetchPromises).then(function (results) {
             results = results.filter(function (r) { return r; });
             cachedTxts = results;
+            if (window.partidaRestaurada) { updateSongCounter(); return; }   // ya hay mazo (partida recuperada)
             var built = buildSongsFromCache(false);
             if (built.length < 10) {
                 // Antes esto borraba localStorage.CB_PlayedSongs POR COMPLETO, incluyendo
@@ -1936,17 +1972,20 @@
             if (!songs || songs.length === 0) { showCustomAlert('Las canciones aún se están cargando. Espera un segundo y vuelve a pulsar.'); return; }
             partidaTerminada = false;
             turnoValidado = false;
+            turnoRobadoBase = null;
             requestWakeLock();
             var tc = document.getElementById('joputismo-audio-player');
             if (tc) tc.innerHTML = '';
 
             gameMode = document.getElementById('game-mode-select').value;
+            modoLight = (gameMode === 'light');
+            if (modoLight) gameMode = 'normal';   // a efectos de victoria es un clásico
             // Bloquear el selector: una vez arrancada, cambiarlo no hace nada y confunde
             var _modeSel = document.getElementById('game-mode-select');
             if (_modeSel) { _modeSel.disabled = true; _modeSel.style.opacity = '0.5'; }
             competitiveMode = !!(document.getElementById('competitive-mode-check') && document.getElementById('competitive-mode-check').checked);
             console.log('[HOST] Partida iniciada | modo:', gameMode, '| competitivo:', competitiveMode);
-            addEvent('<span class="ev-info">▶ Partida iniciada — MODO: ' + gameMode.toUpperCase() + (competitiveMode ? ' · COMPETITIVO' : '') + '</span>');
+            addEvent('<span class="ev-info">▶ Partida iniciada — MODO: ' + (modoLight ? 'LIGHT' : gameMode.toUpperCase()) + (competitiveMode ? ' · COMPETITIVO' : '') + '</span>');
             hasShield = {};
             initStats();
             turnCounter = 0;
@@ -2032,6 +2071,16 @@
                 for (var _cid in connections) {
                     try { connections[_cid].send({ type: 'COUNTDOWN', count: n }); } catch(e) {}
                 }
+                // semáforo de salida en la tablet
+                var _ov = document.getElementById('cb-cuenta');
+                if (!_ov) {
+                    _ov = document.createElement('div'); _ov.id = 'cb-cuenta';
+                    _ov.style.cssText = 'position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(10,4,30,.78);pointer-events:none';
+                    _ov.innerHTML = '<img src="img/vr_cuenta_atras.webp" alt="" style="width:min(300px,40vw);filter:drop-shadow(0 0 30px rgba(255,213,74,.5))" onerror="this.remove()"><div id="cb-cuenta-n" style="font-family:Bungee,sans-serif;font-size:min(160px,20vw);color:#FFD54A;-webkit-text-stroke:6px #1a0f2e;paint-order:stroke"></div>';
+                    document.body.appendChild(_ov);
+                }
+                document.getElementById('cb-cuenta-n').textContent = n > 0 ? n : '¡YA!';
+                if (n <= 0) setTimeout(function () { var o = document.getElementById('cb-cuenta'); if (o) o.remove(); }, 900);
                 if (n > 0) { setTimeout(function(){ doCountdown(n-1); }, 1000); }
                 else { setTimeout(function(){ nextTurn(); }, 1000); }
             })(3);
@@ -2300,7 +2349,7 @@
             // CARTA BOMBA (pásalo-rápido). Requiere >=2 jugadores VIVOS.
             var _vivosBomba = players.filter(function(pl){ return !(pl.lives !== undefined && pl.lives <= 0); }).length;
             var _cartaBombaTurno = (gameMode === 'supervivencia' && !_repeatOwnerId && !_kingTurnComing && turnCounter === nextSharedSongTurn && _vivosBomba >= 2);
-            isSharedSong = (gameMode !== 'supervivencia' && !_repeatOwnerId && !_kingTurnComing && turnCounter === nextSharedSongTurn && players.length >= 2);
+            isSharedSong = (!modoLight && gameMode !== 'supervivencia' && !_repeatOwnerId && !_kingTurnComing && turnCounter === nextSharedSongTurn && players.length >= 2);
             if (isSharedSong || _cartaBombaTurno) {
                 nextSharedSongTurn = turnCounter + 4 + Math.floor(Math.random() * 4);
                 if (isSharedSong) sharedSongOwnerId = players[activePlayerIdx] ? players[activePlayerIdx].id : null;
@@ -2311,7 +2360,7 @@
             var banner = document.getElementById('shared-song-banner');
             if (banner) banner.style.display = isSharedSong ? 'block' : 'none';
             // CARTA BONIFICACIÓN aleatoria
-            isBonusCard = (!_kingTurnComing && turnCounter === nextBonusTurn);
+            isBonusCard = (!modoLight && !_kingTurnComing && turnCounter === nextBonusTurn);
             if (isBonusCard) nextBonusTurn = turnCounter + 7 + Math.floor(Math.random() * 4);
             else if (_kingTurnComing && turnCounter === nextBonusTurn) nextBonusTurn = turnCounter + 1;
             currentSongIdx++;
@@ -2407,7 +2456,7 @@
             var modeBadge = document.getElementById('ui-game-mode-badge');
             if (modeBadge) {
                 var modeLabels = { normal: '🎵 CLÁSICO', rey: '👑 MODO REY', supervivencia: '💿 SUPERVIVENCIA', equipos: '🔴🔵 EQUIPOS' };
-                modeBadge.innerText = modeLabels[gameMode] || gameMode.toUpperCase();
+                modeBadge.innerText = modoLight ? '🎵 LIGHT' : (modeLabels[gameMode] || gameMode.toUpperCase());
                 modeBadge.style.display = 'block';
             }
             // Botón relámpago: visible cuando está sonando y no está ya activado
@@ -2587,7 +2636,7 @@
         function advanceAndNextTurn() {
             // NO reseteamos isSharedSong/sharedSongOwnerId aquí: nextTurn() los lee para
             // devolver el turno al dueño del "¡JUGAMOS TODOS!" y luego los limpia.
-            activePlayerIdx = (activePlayerIdx + 1) % players.length;
+            avanzarTurno();
             players[activePlayerIdx].canReload = true;
             nextTurn();
         }
@@ -2662,6 +2711,8 @@
                 ];
                 if (_blocked.indexOf(action) !== -1) return;
             }
+
+            if (modoLight && ACCIONES_FUERA_LIGHT.indexOf(action) !== -1) return;
 
             // Durante la CARTA BOMBA solo se admite COLOCAR (GUESS) y reacciones; el resto
             // (música, sabotajes, apuestas, mando, validaciones) queda bloqueado.
@@ -3370,7 +3421,8 @@
                     // Antes cualquier valor desconocido caía en silencio en 'extreme'.
                     var p = players.find(function(pl) { return pl.id === peerId; });
                     if (['first', 'last', 'extreme'].indexOf(value) === -1) break;
-                    var validTargets = players.filter(function(t) { return t.id !== peerId && t.cards && t.cards.length > 0; });
+                    // La víctima debe quedarse con al menos 1 carta (hace falta una para jugar).
+                    var validTargets = players.filter(function(t) { return t.id !== peerId && t.cards && t.cards.length > 1; });
                     if (p && p.tokens >= 4 && gameStarted && (!turnPhase || turnPhase === 'NORMAL') && validTargets.length > 0) {
                         // Elegir víctima: el jugador con más cartas
                         var target = validTargets.sort(function(a,b) { return b.cards.length - a.cards.length; })[0];
@@ -3636,7 +3688,7 @@
                     // por eso este comando se ignoraba siempre y la partida arrancaba en CLÁSICO.
                     if (!gameStarted) {
                         var _sel = document.getElementById('game-mode-select');
-                        var _valid = ['normal', 'rey', 'supervivencia', 'equipos'];
+                        var _valid = ['normal', 'light', 'rey', 'supervivencia', 'equipos'];
                         if (_valid.indexOf(value) !== -1) {
                             gameMode = value;
                             if (_sel) _sel.value = value;
@@ -3885,6 +3937,7 @@
                     var p = players.find(function(pl) { return pl.id === peerId; });
                     if (p && value) {
                         showReaction(value, p.name);
+                        if (value === '📢') { try { playToneHost(233, 0.35, 'sawtooth', 0.12); setTimeout(function () { playToneHost(233, 0.5, 'sawtooth', 0.12); }, 420); } catch (e) {} }
                         syncState();
                         // ── Sistema 2: efectos colectivos ──
                         if (!reactionBuffer[value]) reactionBuffer[value] = [];
@@ -3955,7 +4008,7 @@
                 if (player && player.stopVideo) player.stopVideo();
                 isPlaying = false;
                 // Se queda en 10 — lo intentará de nuevo en su próximo turno
-                activePlayerIdx = (activePlayerIdx + 1) % players.length;
+                avanzarTurno();
                 players[activePlayerIdx].canReload = true;
                 nextTurn();
             }
@@ -3992,7 +4045,7 @@
             syncState();
             if (checkScoreVictory(winner)) return; // en normal/supervivencia puede ganar ya
             setTimeout(function() {
-                activePlayerIdx = (activePlayerIdx + 1) % players.length;
+                avanzarTurno();
                 players[activePlayerIdx].canReload = true;
                 nextTurn(); // nextTurn respeta la repetición de turno del dueño del compartido
             }, 3500);
@@ -4014,7 +4067,7 @@
             document.getElementById('host-instructions').innerHTML = "<span style='color:#ff4444; font-size:1.3em;'>Nadie acertó — nadie se lleva la carta</span>";
             syncState();
             setTimeout(function() {
-                activePlayerIdx = (activePlayerIdx + 1) % players.length;
+                avanzarTurno();
                 players[activePlayerIdx].canReload = true;
                 nextTurn();
             }, 3500);
@@ -4377,7 +4430,7 @@
                 // comprobación, así que hacía falta el 4º acierto seguido para que
                 // saltara el bonus "x3". Sumamos el acierto en curso.
                 var streakNow = (stats.streaks[players[activePlayerIdx].id] || 0) + 1;
-                if (streakNow >= 3) {
+                if (streakNow >= 3 && !modoLight) {
                     players[activePlayerIdx].score++;
                     players[activePlayerIdx].cards.push(parseInt(songs[currentSongIdx].year));
                     players[activePlayerIdx].cards.sort(function(a,b){return a-b;});
@@ -4410,7 +4463,7 @@
                 // ── HISTORIAL: marcar acierto ──
                 if (songHistory.length > 0) songHistory[songHistory.length-1].correct = true;
                 // ── EL CAMINO DEL GUERRERO: 3 fallos seguidos → carta extra ──
-                if ((stats.consecutiveFails[players[activePlayerIdx].id] || 0) >= 3) {
+                if (!modoLight && (stats.consecutiveFails[players[activePlayerIdx].id] || 0) >= 3) {
                     players[activePlayerIdx].score++;
                     players[activePlayerIdx].cards.push(parseInt(songs[currentSongIdx].year));
                     players[activePlayerIdx].cards.sort(function(a,b){return a-b;});
@@ -4499,13 +4552,13 @@
                         for (var _kc in connections) {
                             try { connections[_kc].send({ type: 'DANGER_ALERT', msg: '👑 ' + _kingName + ' ha llegado a 10. Deberá superar el DESAFÍO DEL REY para ganar.', critical: true }); } catch(e) {}
                         }
-                        activePlayerIdx = (activePlayerIdx + 1) % players.length;
+                        avanzarTurno();
                         players[activePlayerIdx].canReload = true;
                         setTimeout(function () { nextTurn(); }, 3500);
                         return;
                     }
                 }
-                activePlayerIdx = (activePlayerIdx + 1) % players.length;
+                avanzarTurno();
                 players[activePlayerIdx].canReload = true;
                 nextTurn();
             } else {
@@ -4542,7 +4595,7 @@
                     }
                     document.getElementById('challenger-buttons').innerHTML = h;
                 } else {
-                    activePlayerIdx = (activePlayerIdx + 1) % players.length;
+                    avanzarTurno();
                     players[activePlayerIdx].canReload = true; // Resetear permiso de recarga
                     nextTurn();
                 }
@@ -4578,7 +4631,7 @@
                     }
                 }
             }
-            activePlayerIdx = (activePlayerIdx + 1) % players.length;
+            avanzarTurno();
             players[activePlayerIdx].canReload = true;
             nextTurn();
         }
@@ -5095,7 +5148,8 @@
                 var p = players.find(px => px.id.toLowerCase() === id.toLowerCase());
                 var state = {
                     type: 'STATE_UPDATE',
-                    players: players,
+                    players: players.map(function (pl) { var c = Object.assign({}, pl); delete c.token; return c; }),   // sin el código secreto de reconexión
+                    modoLight: modoLight,
                     activePlayer: { id: players[activePlayerIdx] ? players[activePlayerIdx].id : null, name: players[activePlayerIdx] ? players[activePlayerIdx].name : null },
                     judgeId: currentJudgeId,
                     hostButtons: dynamicBtns,
@@ -5283,6 +5337,8 @@
                 return;
             }
             var jugadas = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]').length;
+            // Botón grande en el lobby: pedir confirmación para no borrar el progreso sin querer
+            if (jugadas > 0 && !confirm('¿Seguro que quieres rebarajar el mazo?\n\nVolverán a salir las ' + jugadas + ' canciones que ya habéis jugado.')) return;
             localStorage.removeItem('CB_PlayedSongs');
             // vaciar también la copia de seguridad, o al recargar volverían todas las jugadas
             if (URL_AVISOS) {
@@ -5645,6 +5701,7 @@
             // Ejecutar robo
             var newIdx = players.indexOf(thief);
             if (newIdx === -1) return;
+            if (turnoRobadoBase === null) turnoRobadoBase = players.indexOf(victim);
             refundBets();
             activePlayerIdx = newIdx;
             thief.canReload = true;
@@ -5781,6 +5838,7 @@
             gameStarted = false;
             partidaTerminada = false;
             turnoValidado = false;
+            turnoRobadoBase = null;
             // Mazo NUEVO: antes se reutilizaba el de la partida anterior desde el índice 0,
             // así que la revancha repetía las mismas canciones en el mismo orden.
             var _mazo = buildSongsFromCache(false);
@@ -6190,9 +6248,121 @@
             }
         }
     </script>
-    <script src="cb_iconos.js?v=20261015f"></script>
-    <script src="cb_despierto.js?v=20261015f"></script>
-    <script src="cb_graficos.js?v=20261015f"></script>
-    <link rel="stylesheet" href="cb_tema_retro.css?v=20261015f">
+
+    <script>
+    // ══════════ PARTIDA GUARDADA: si la tablet se recarga, se puede continuar ══════════
+    // Se guarda el estado (cartas, fichas, vidas, equipos, mazo, turno, estadísticas) cada
+    // vez que cambia. Al abrir la tablet con una partida a medias aparece "CONTINUAR".
+    // Los móviles vuelven solos y la tablet los reconoce por su código (token) o su nombre.
+    window.partidaRestaurada = false;
+    var CLAVE_PARTIDA = 'CB_Partida';
+    var _tGuardar = null;
+    function guardarPartida() {
+        if (!gameStarted || partidaTerminada) return;
+        try {
+            var d = {
+                v: 1, t: Date.now(), roomCode: roomCode,
+                players: players.map(function (p) { var c = Object.assign({}, p); delete c.avatar; return c; }),
+                songs: songs, currentSongIdx: currentSongIdx, activePlayerIdx: activePlayerIdx,
+                gameMode: gameMode, modoLight: modoLight, competitiveMode: competitiveMode, decadeFilter: decadeFilter,
+                turnCounter: turnCounter, nextSharedSongTurn: nextSharedSongTurn, nextBonusTurn: nextBonusTurn,
+                stats: stats, hasShield: hasShield, teams: teams, teamCards: teamCards, teamScore: teamScore, teamTurn: teamTurn,
+                songHistory: songHistory, replayLog: replayLog, emojiWildcardBonus: emojiWildcardBonus,
+                silentCurses: silentCurses, tokenStarvationTurns: tokenStarvationTurns, turnoRobadoBase: turnoRobadoBase
+            };
+            localStorage.setItem(CLAVE_PARTIDA, JSON.stringify(d));
+        } catch (e) { console.warn('[HOST] No se pudo guardar la partida:', e); }
+    }
+    function guardarPartidaPronto() { if (_tGuardar) return; _tGuardar = setTimeout(function () { _tGuardar = null; guardarPartida(); }, 1500); }
+    function borrarPartidaGuardada() { try { localStorage.removeItem(CLAVE_PARTIDA); } catch (e) {} }
+    function leerPartidaGuardada() {
+        try {
+            var d = JSON.parse(localStorage.getItem(CLAVE_PARTIDA) || 'null');
+            if (!d || d.v !== 1 || !d.players || !d.players.length || !d.songs) return null;
+            if (Date.now() - d.t > 12 * 3600 * 1000) { borrarPartidaGuardada(); return null; }   // más de 12 h: se descarta
+            return d;
+        } catch (e) { return null; }
+    }
+
+    // guardar tras cada cambio de estado (syncState ya se llama en cada cambio)
+    (function () {
+        var _sync = syncState;
+        syncState = function () { var r = _sync.apply(this, arguments); guardarPartidaPronto(); return r; };
+        var _win = showWinner;
+        showWinner = function () { borrarPartidaGuardada(); if (_tGuardar) { clearTimeout(_tGuardar); _tGuardar = null; } return _win.apply(this, arguments); };
+    })();
+
+    function continuarPartida() {
+        var d = leerPartidaGuardada();
+        if (!d || gameStarted) return;
+        window.partidaRestaurada = true;
+        // Jugadores que ya se han conectado en el lobby: se emparejan con los de la partida
+        var enLobby = players.slice();
+        players = d.players.map(function (p) { p.avatar = null; return p; });
+        enLobby.forEach(function (lp) {
+            var r = (lp.token && players.find(function (p) { return p.token === lp.token; })) ||
+                    players.find(function (p) { return p.name.toLowerCase() === lp.name.toLowerCase(); });
+            if (r) {
+                var viejo = r.id; r.id = lp.id; r.avatar = lp.avatar; if (lp.token) r.token = lp.token;
+                if (typeof migrarIdJugador === 'function') migrarIdJugador(viejo, lp.id);
+            } else {
+                // nuevo en esta partida: carta del final del mazo
+                var sg = (d.songs.length > d.currentSongIdx + 1) ? d.songs.pop() : null;
+                lp.cards = sg ? [parseInt(sg.year)] : []; lp.score = lp.cards.length;
+                if (d.gameMode === 'supervivencia') lp.lives = INITIAL_LIVES;
+                players.push(lp);
+            }
+        });
+        songs = d.songs; currentSongIdx = d.currentSongIdx; activePlayerIdx = Math.min(d.activePlayerIdx, players.length - 1);
+        gameMode = d.gameMode; modoLight = !!d.modoLight; competitiveMode = !!d.competitiveMode; decadeFilter = d.decadeFilter || 'all';
+        turnCounter = d.turnCounter || 0; nextSharedSongTurn = d.nextSharedSongTurn; nextBonusTurn = d.nextBonusTurn;
+        if (d.stats) stats = d.stats;
+        hasShield = d.hasShield || {}; teams = d.teams || { red: [], blue: [] }; teamCards = d.teamCards || { red: [], blue: [] };
+        teamScore = d.teamScore || { red: 0, blue: 0 }; teamTurn = d.teamTurn || 'red';
+        songHistory = d.songHistory || []; replayLog = d.replayLog || []; emojiWildcardBonus = d.emojiWildcardBonus || {};
+        silentCurses = d.silentCurses || []; tokenStarvationTurns = d.tokenStarvationTurns || {};
+        turnoRobadoBase = (d.turnoRobadoBase === undefined) ? null : d.turnoRobadoBase;
+        partidaTerminada = false; turnoValidado = false; gameStarted = true; readyPlayers = {};
+
+        var sel = document.getElementById('game-mode-select');
+        if (sel) { sel.value = modoLight ? 'light' : gameMode; sel.disabled = true; sel.style.opacity = '0.5'; }
+        var chk = document.getElementById('competitive-mode-check'); if (chk) chk.checked = competitiveMode;
+        document.getElementById('lobby').style.display = 'none';
+        document.getElementById('dashboard').style.display = 'grid';
+        var td = document.getElementById('team-display'); if (td) td.style.display = (gameMode === 'equipos') ? 'flex' : 'none';
+        updateTeamDisplay();
+        var aviso = document.getElementById('cb-continuar'); if (aviso) aviso.remove();
+        addEvent('<span class="ev-info">♻️ Partida recuperada — los móviles se reconectan solos</span>');
+        requestWakeLock();
+        // empieza un turno nuevo para el jugador al que le tocaba (la canción a medias se descarta)
+        if (player && player.cueVideoById) nextTurn(); else _startTurnOnReady = true;
+    }
+
+    // Aviso en el lobby
+    window.addEventListener('load', function () {
+        var d = leerPartidaGuardada();
+        if (!d || gameStarted) return;
+        var lobby = document.getElementById('lobby');
+        if (!lobby) return;
+        var min = Math.max(1, Math.round((Date.now() - d.t) / 60000));
+        var nombres = d.players.map(function (p) { return p.name + ' ' + (p.score || 0); }).join(' · ');
+        var modo = d.modoLight ? 'LIGHT' : String(d.gameMode || '').toUpperCase();
+        var caja = document.createElement('div');
+        caja.id = 'cb-continuar';
+        caja.style.cssText = 'margin:14px auto;max-width:560px;padding:16px;border-radius:16px;background:rgba(42,26,94,.92);border:2px solid #FFD54A;box-shadow:0 0 24px rgba(255,213,74,.35);text-align:center;font-family:Montserrat,sans-serif;color:#fff;position:relative;z-index:5';
+        caja.innerHTML = '<div style="font-family:Bungee,sans-serif;color:#FFD54A;font-size:1.1em;margin-bottom:6px">HAY UNA PARTIDA A MEDIAS</div>' +
+            '<div style="font-size:.85em;opacity:.9;margin-bottom:10px">' + modo + ' · hace ' + min + ' min<br>' + nombres.replace(/</g, '&lt;') + '</div>' +
+            '<button id="cb-btn-continuar" style="font-family:Bungee,sans-serif;font-size:1em;padding:12px 22px;border-radius:12px;border:none;background:linear-gradient(90deg,#ff5fa2,#ff9a3c);color:#fff;cursor:pointer;margin:4px">CONTINUAR PARTIDA</button>' +
+            '<button id="cb-btn-descartar" style="font-family:Bungee,sans-serif;font-size:.8em;padding:10px 16px;border-radius:12px;border:1px solid #aaa;background:transparent;color:#ccc;cursor:pointer;margin:4px">EMPEZAR UNA NUEVA</button>';
+        lobby.insertBefore(caja, lobby.firstChild);
+        document.getElementById('cb-btn-continuar').onclick = continuarPartida;
+        document.getElementById('cb-btn-descartar').onclick = function () { borrarPartidaGuardada(); caja.remove(); };
+    });
+    </script>
+    <script src="cb_iconos.js?v=20261015g"></script>
+    <script src="cb_despierto.js?v=20261015g"></script>
+    <script src="cb_resumen.js?v=20261015g"></script>
+    <script src="cb_graficos.js?v=20261015g"></script>
+    <link rel="stylesheet" href="cb_tema_retro.css?v=20261015g">
 </body>
 </html>

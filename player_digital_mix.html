@@ -1874,6 +1874,8 @@
                 <button class="reaction-btn" onclick="sendReaction('👏')">👏</button>
                 <button class="reaction-btn" onclick="sendReaction('💀')">💀</button>
                 <button class="reaction-btn" onclick="sendReaction('🎯')">🎯</button>
+                <button class="reaction-btn" onclick="sendReaction('📢')" title="Bocinazo al rival">📢</button>
+                <button class="reaction-btn" onclick="sendReaction('😆')" title="Risa malvada">😆</button>
             </div>
             </div><!-- /social-drawer -->
 
@@ -2049,6 +2051,18 @@
         var peer, conn, myId, playerName;
         var lastState = null;
         var playerAvatarDataUrl = null;
+        // Código propio de este móvil: la tablet reconoce al jugador por él al reconectar
+        // (antes solo por el nombre, y cualquiera que escribiera tu nombre ocupaba tu sitio).
+        var playerToken = (function () {
+            var t = null;
+            try { t = localStorage.getItem('cb_player_token'); } catch (e) {}
+            if (!t) {
+                t = 'T' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+                try { localStorage.setItem('cb_player_token', t); } catch (e) {}
+            }
+            return t;
+        })();
+        var joinRechazado = false;
 
         // Cargar datos guardados al iniciar
         window.addEventListener('load', function () {
@@ -2061,6 +2075,17 @@
             var savedName = localStorage.getItem('cb_player_name');
             if (savedName) {
                 document.getElementById('player-name').value = savedName;
+            }
+            if (!salaParam) {
+                var _lastRoom = null; try { _lastRoom = localStorage.getItem('cb_last_room'); } catch (e) {}
+                if (_lastRoom && !document.getElementById('host-id').value) document.getElementById('host-id').value = _lastRoom;
+            }
+            var _rec = null; try { _rec = sessionStorage.getItem('cb_reconectar'); } catch (e) {}
+            if (_rec && savedName) {
+                document.getElementById('host-id').value = _rec;
+                setTimeout(function () { playerName = savedName; realizarConexion(_rec); }, 600);
+            } else {
+                try { sessionStorage.removeItem('cb_reconectar_n'); } catch (e) {}
             }
             var savedAvatar = localStorage.getItem('cb_player_avatar');
             if (savedAvatar) {
@@ -2389,7 +2414,8 @@
                     if (retryTimer) clearTimeout(retryTimer);
                     console.log("¡Conectado con Host!");
                     requestWakeLockPlayer();
-                    conn.send({ type: 'JOIN', name: playerName, avatar: playerAvatarDataUrl });
+                    conn.send({ type: 'JOIN', name: playerName, avatar: playerAvatarDataUrl, token: playerToken });
+                try { localStorage.setItem('cb_last_room', hostId); sessionStorage.removeItem('cb_reconectar'); } catch (e) {}
                     document.getElementById('login-screen').style.display = 'none';
                     document.getElementById('waiting-screen').style.display = 'flex';
                     document.getElementById('game-screen').style.display = 'none';
@@ -2400,8 +2426,12 @@
 
                 conn.on('close', function () {
                     console.warn("Canal cerrado.");
+                    if (joinRechazado) return;
                     if (document.getElementById('login-screen').style.display === 'none') {
-                        showCustomAlert("Conexión cerrada. El Host se ha desconectado.");
+                        showCustomAlert("Se ha perdido la conexión con la tablet. Reconectando...");
+                        // Tras recargar, volver a entrar solo (la tablet puede estar reiniciándose
+                        // y retomando la partida guardada).
+                        try { sessionStorage.setItem('cb_reconectar', hostId); } catch (e) {}
                         setTimeout(() => location.reload(), 3000);
                     }
                 });
@@ -2409,6 +2439,19 @@
 
             peer.on('error', function (err) {
                 console.error("Error PeerJS:", err);
+                // Reconexión automática: la tablet aún no está (se está reiniciando). Reintentar.
+                var _rc = null; try { _rc = sessionStorage.getItem('cb_reconectar'); } catch (e) {}
+                if (_rc && (err.type === 'peer-unavailable' || err.type === 'network' || err.type === 'server-error')) {
+                    var n = parseInt(sessionStorage.getItem('cb_reconectar_n') || '0', 10) + 1;
+                    sessionStorage.setItem('cb_reconectar_n', String(n));
+                    if (n <= 40) {
+                        btn.innerText = "ESPERANDO A LA TABLET (" + n + ")...";
+                        try { peer.destroy(); } catch (e) {}
+                        setTimeout(function () { realizarConexion(hostId); }, 4000);
+                        return;
+                    }
+                    sessionStorage.removeItem('cb_reconectar'); sessionStorage.removeItem('cb_reconectar_n');
+                }
                 showCustomAlert("Error de conexión: " + (err.type || err));
                 btn.disabled = false;
                 btn.innerText = "ENTRAR";
@@ -3097,6 +3140,19 @@
         function handle(data) {
             console.log("Evento:", data.type, data);
 
+            if (data.type === 'JOIN_REJECTED') {
+                joinRechazado = true;
+                try { sessionStorage.removeItem('cb_reconectar'); } catch (e) {}
+                try { conn.close(); } catch (e) {}
+                try { peer.destroy(); } catch (e) {}
+                document.getElementById('waiting-screen').style.display = 'none';
+                document.getElementById('game-screen').style.display = 'none';
+                document.getElementById('login-screen').style.display = '';
+                var _jb = document.getElementById('join-btn'); if (_jb) { _jb.disabled = false; _jb.innerText = 'ENTRAR'; }
+                showCustomAlert(data.msg || 'Ese nombre ya está en uso.');
+                setTimeout(function () { joinRechazado = false; }, 1500);
+                return;
+            }
             if (data.type === 'EVENT_TOAST') {
                 showSabotageBroadcast(data.text || data.html);
                 return;
@@ -3203,6 +3259,7 @@
 
             lastState = data;
             if (data.type === 'STATE_UPDATE') {
+                document.body.classList.toggle('cb-light', !!data.modoLight);
                 detectStateChanges(data);
                 applyTheme(data.currentType || 'mix');
                 // Actualizar lista de espera si aún no ha empezado
@@ -3756,7 +3813,7 @@
 
                     if (document.getElementById('btn-smart-steal')) {
                         // Solo visible si hay rivales con cartas y no es tu turno
-                        var hasTargets = data.players && data.players.some(function(pl) { return pl.id !== myId && pl.cards && pl.cards.length > 0; });
+                        var hasTargets = data.players && data.players.some(function(pl) { return pl.id !== myId && pl.cards && pl.cards.length > 1; });
                         document.getElementById('btn-smart-steal').style.display = (!isMyTurn && hasTargets) ? 'block' : 'none';
                         document.getElementById('btn-smart-steal').disabled = (data.myTokens < 4);
                     }
@@ -4151,10 +4208,10 @@
             });
         }
     </script>
-    <script src="cb_iconos.js?v=20261015f"></script>
-    <script src="cb_despierto.js?v=20261015f"></script>
-    <script src="cb_graficos.js?v=20261015f"></script>
-    <link rel="stylesheet" href="cb_tema_retro.css?v=20261015f">
+    <script src="cb_iconos.js?v=20261015g"></script>
+    <script src="cb_despierto.js?v=20261015g"></script>
+    <script src="cb_graficos.js?v=20261015g"></script>
+    <link rel="stylesheet" href="cb_tema_retro.css?v=20261015g">
 </body>
 
 </html>
