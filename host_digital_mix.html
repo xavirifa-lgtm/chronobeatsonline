@@ -1227,6 +1227,13 @@
         var kingOptions = []; // Array de opciones para los retadores
         var cheatsEnabled = true;
         var gameStarted = false;
+        // Se pone a true al mostrar el ganador. Bloquea nextTurn(): en Supervivencia la
+        // eliminación del penúltimo programa showWinner con retardo, pero el flujo de
+        // fallo ya había programado otro nextTurn() que arrancaba un turno detrás de la
+        // pantalla de ganador.
+        var partidaTerminada = false;
+        // Evita validar dos veces el mismo turno (p.ej. botón de la tablet + mando).
+        var turnoValidado = false;
 
         // Seguimiento de tiempo para skips manuales
         var segundosAcumulados = 0;
@@ -1375,6 +1382,14 @@
         }
 
         function onPlayerStateChange(event) {
+            // DUELO: solo suena el tema del duelo. Si la canción del turno arranca por lo
+            // que sea (stopVideo ignorado mientras YouTube aún estaba cargando, alguien
+            // toca el vídeo en la tablet...), se corta en el acto.
+            if (turnPhase === 'DUEL' && (event.data === YT.PlayerState.PLAYING || event.data === YT.PlayerState.BUFFERING)) {
+                try { player.pauseVideo(); player.mute(); } catch (e) {}
+                isPlaying = false;
+                return;
+            }
             if (event.data === YT.PlayerState.PLAYING) {
                 isPlaying = true;
                 songPlayedThisTurn = true;
@@ -1421,6 +1436,7 @@
             }
             if (typeof reportBrokenLink === 'function') reportBrokenLink();
             refundBets();
+            limpiarMarcasCancionNueva();
             if (isPlaying) {
                 isPlaying = false;
                 if (player && player.stopVideo) player.stopVideo();
@@ -1601,7 +1617,22 @@
                             addEvent('<span class="ev-info">🔌 ' + existing.name + ' se ha reconectado</span>');
                             syncState(); // Force state sync to reconnecting player
                         } else {
-                            players.push({ id: conn.peer, name: data.name, avatar: data.avatar || null, score: 1, cards: [], tokens: 3, canReload: true, wildcards: 3 });
+                            var _nuevo = { id: conn.peer, name: data.name, avatar: data.avatar || null, score: 1, cards: [], tokens: 3, canReload: true, wildcards: 3 };
+                            // Si entra con la partida empezada, recibe su carta inicial (antes
+                            // marcaba 1/10 con la cronología vacía) y, en Supervivencia, sus vidas.
+                            if (gameStarted) {
+                                // sacar la carta del FINAL del mazo: mover currentSongIdx cambiaría
+                                // la canción del turno que se está jugando
+                                var _sgN = (songs.length > currentSongIdx + 1) ? songs.pop() : null;
+                                if (_sgN) _nuevo.cards.push(parseInt(_sgN.year));
+                                _nuevo.score = _nuevo.cards.length;
+                                if (gameMode === 'supervivencia') _nuevo.lives = INITIAL_LIVES;
+                                if (gameMode === 'equipos') {
+                                    _nuevo.team = teams.red.length <= teams.blue.length ? 'red' : 'blue';
+                                    teams[_nuevo.team].push(_nuevo.id);
+                                }
+                            }
+                            players.push(_nuevo);
                             connections[conn.peer] = conn;
                         }
                         updateLobby();
@@ -1851,6 +1882,11 @@
         }
 
         function startGame() {
+            // Si se pulsa EMPEZAR antes de que terminen de cargar las listas, no se repartía
+            // carta inicial a nadie (songs vacío) y la partida arrancaba rota.
+            if (!songs || songs.length === 0) { showCustomAlert('Las canciones aún se están cargando. Espera un segundo y vuelve a pulsar.'); return; }
+            partidaTerminada = false;
+            turnoValidado = false;
             requestWakeLock();
             var tc = document.getElementById('joputismo-audio-player');
             if (tc) tc.innerHTML = '';
@@ -1920,6 +1956,7 @@
                     teams[rp.team].push(rp.id);
                 });
                 document.getElementById('team-display').style.display = 'flex';
+                sembrarCartasEquipos();
             } else {
                 document.getElementById('team-display').style.display = 'none';
             }
@@ -2101,6 +2138,8 @@
         }
 
         function nextTurn() {
+            if (partidaTerminada) return;
+            turnoValidado = false;
             stopCountdown();
             resetLightning();
             // Limpiar cualquier resto de una carta bomba anterior antes del nuevo turno.
@@ -2398,6 +2437,8 @@
 
         function resolveDuel() {
             if (!currentDuel) return;
+            var _tema = document.getElementById('joputismo-audio-player');   // fin del tema del duelo
+            if (_tema) _tema.innerHTML = '';
             var s = songs[currentSongIdx];
             var actualYear = parseInt(s.year);
             var ch = players.find(p => p.id === currentDuel.challenger);
@@ -2407,6 +2448,15 @@
             var tgDist = currentDuel.targetYear !== null ? Math.abs(currentDuel.targetYear - actualYear) : 999;
             
             var winnerId = null;
+            // Nadie contestó (los dos quedaron en 9999 por el tiempo límite): antes ganaba
+            // automáticamente el retado por el desempate de tiempo (null < null es false).
+            if (currentDuel.challengerYear === 9999 && currentDuel.targetYear === 9999) {
+                duelResult = null;
+                addEvent('<span class="ev-bad">🔫 Duelo desierto: nadie contestó</span>');
+                document.getElementById('host-instructions').innerHTML = "<span style='color:#ff4444; font-size:1.5em; font-family:Bungee;'>EL DUELO QUEDÓ DESIERTO</span><br><button class='btn' style='margin-top:10px; padding:10px; font-family:Bungee; background:var(--neon); color:#000;' onclick='finishDuel()'>SIGUIENTE TURNO</button>";
+                syncState();
+                return;
+            }
             if (chDist < tgDist) {
                 winnerId = currentDuel.challenger;
             } else if (tgDist < chDist) {
@@ -2423,6 +2473,10 @@
             
             var winner = players.find(p => p.id === winnerId);
             var loser = players.find(p => p.id === (winnerId === (ch ? ch.id : currentDuel.challenger) ? (tg ? tg.id : currentDuel.target) : (ch ? ch.id : currentDuel.challenger)));
+            if (!winner || !loser) {   // un jugador desapareció: no reventar con winner.id
+                document.getElementById('host-instructions').innerHTML = "<span style='color:#ff4444; font-size:1.5em; font-family:Bungee;'>EL DUELO QUEDÓ DESIERTO</span><br><button class='btn' style='margin-top:10px; padding:10px; font-family:Bungee; background:var(--neon); color:#000;' onclick='finishDuel()'>SIGUIENTE TURNO</button>";
+                return;
+            }
             
             // Frases cabronas
             var winnerPhrases = [
@@ -2703,13 +2757,13 @@
                         if (target && msgT) try { connections[target.id].send({ type: 'BET_RESULT', msg: msgT }); } catch (e) { }
                         
                         document.getElementById('host-instructions').innerHTML = "<span style='color:#ff0055; font-size:1.5em; font-family:Bungee;'>¡" + p.name + " JUGÓ A LA RULETA RUSA!</span>";
-                        notifyVictim(players[activePlayerIdx].id, p.name, 'RULETA RUSA', '🎰');
+                        if (target && msgT) notifyVictim(target.id, p.name, 'RULETA RUSA', '🎰');   // antes avisaba al propio jugador activo
                         if (checkScoreVictory(p)) return;
                         syncState();
                     }
                     break;
                 case 'SABOTAGE_MUTE':
-                    if (hasShield[activeP.id]) {
+                    if (hasShield[activeP.id] && ataqueValido(peerId, action)) {
                         var p = players.find(function (pl) { return pl.id === peerId; });
                         if (p) {
                             var _perdidas = cobrarSabotajeRebotado(p, action);
@@ -2766,10 +2820,11 @@
                     break;
                 case 'RELOAD_SONG':
                     var p = players.find(function (pl) { return pl.id === peerId; });
-                    if (p && p.tokens >= 1 && p.canReload) {
+                    if (p && activeP && p.id === activeP.id && p.tokens >= 1 && p.canReload && !isRevealed && (!turnPhase || turnPhase === 'NORMAL')) {
                         updateTokens(p, -1);
                         p.canReload = false; // Solo uno por turno
                         refundBets();
+                        limpiarMarcasCancionNueva();
                         isPlaying = false;
                         if (player && player.stopVideo) player.stopVideo();
                         currentSongIdx++; if(songs[currentSongIdx] && songs[currentSongIdx].id) { var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]'); if(!_pl.includes(songs[currentSongIdx].id)){ _pl.push(songs[currentSongIdx].id); localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl)); } } // Descartar y pasar a la siguiente
@@ -2796,6 +2851,7 @@
                     if (p && isPlaying) {
                         reportBrokenLink();   // deja constancia del enlace roto para poder arreglar la lista
                         refundBets();
+                        limpiarMarcasCancionNueva();
                         isPlaying = false;
                         if (player && player.stopVideo) player.stopVideo();
                         currentSongIdx++; if(songs[currentSongIdx] && songs[currentSongIdx].id) { var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]'); if(!_pl.includes(songs[currentSongIdx].id)){ _pl.push(songs[currentSongIdx].id); localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl)); } }
@@ -2821,7 +2877,7 @@
                     break;
                 case 'AUTO_WIN':
                     var p = players.find(function (pl) { return pl.id === peerId; });
-                    if (p && p.id === players[activePlayerIdx].id && p.tokens >= 3 && !isRevealed) {
+                    if (p && p.id === players[activePlayerIdx].id && p.tokens >= 3 && !isRevealed && !isSharedSong && (!turnPhase || turnPhase === 'NORMAL')) {
                         updateTokens(p, -3);
                         validateResult(true, false);
                     }
@@ -2881,7 +2937,7 @@
                     }
                     break;
                 case 'SABOTAGE_PANIC':
-                    if (hasShield[activeP.id]) {
+                    if (hasShield[activeP.id] && ataqueValido(peerId, action)) {
                         var p = players.find(function (pl) { return pl.id === peerId; });
                         if (p) {
                             var _perdidas = cobrarSabotajeRebotado(p, action);
@@ -2949,7 +3005,7 @@
                     }
                     break;
                 case 'SABOTAGE_FOG':
-                    if (hasShield[activeP.id]) {
+                    if (hasShield[activeP.id] && ataqueValido(peerId, action)) {
                         var p = players.find(function (pl) { return pl.id === peerId; });
                         if (p) {
                             var _perdidas = cobrarSabotajeRebotado(p, action);
@@ -2985,7 +3041,7 @@
                     }
                     break;
                 case 'SABOTAGE_FORCE_SKIP':
-                    if (hasShield[activeP.id]) {
+                    if (hasShield[activeP.id] && ataqueValido(peerId, action)) {
                         var p = players.find(function (pl) { return pl.id === peerId; });
                         if (p) {
                             var _perdidas = cobrarSabotajeRebotado(p, action);
@@ -3048,6 +3104,7 @@
                         
                         // ACTIVACIÓN INMEDIATA
                         currentDuel = { 
+                            id: Date.now(),   // identifica cada duelo (dos duelos seguidos entre los mismos)
                             challenger: p.id, 
                             target: target.id,
                             challengerYear: null, targetYear: null,
@@ -3056,12 +3113,23 @@
                         duelResult = null;
                         turnPhase = 'DUEL';
                         
-                        // Parar musica actual
-                        if (isPlaying) {
-                            isPlaying = false;
+                        // Parar la canción del turno: pausar + silenciar + parar. Solo con
+                        // stopVideo, si YouTube estaba aún cargando, la canción podía arrancar
+                        // y sonar a la vez que el tema del duelo.
+                        isPlaying = false;
+                        try {
+                            if (player && player.pauseVideo) player.pauseVideo();
+                            if (player && player.mute) player.mute();
                             if (player && player.stopVideo) player.stopVideo();
-                        }
-                        if (typeof player !== 'undefined' && player && player.stopVideo) player.stopVideo();
+                        } catch (e) {}
+                        stopCountdown();
+                        resetLightning();
+                        // Un PÁNICO en marcha llegaba a 0, llamaba a revealData() y resolvía el
+                        // duelo antes de que nadie contestara.
+                        if (panicInterval) { clearInterval(panicInterval); panicInterval = null; }
+                        panicActive = false; panicTimer = 0;
+                        if (muteIntervalTimer) { clearInterval(muteIntervalTimer); muteIntervalTimer = null; }
+                        isMuted = false; muteTimeRemaining = 0;
                         
                         playDuelMusic();
 
@@ -3095,7 +3163,13 @@
                     }
                     break;
                 case 'DUEL_GUESS':
-                    if (currentDuel) {
+                    // Ignorar respuestas repetidas o tardías: una segunda llegada tras
+                    // resolverse llamaba otra vez a revealData() → resolveDuel() y el
+                    // ganador sumaba la carta dos veces.
+                    if (currentDuel && !currentDuel._resolved &&
+                        !((peerId === currentDuel.challenger && currentDuel.challengerYear !== null) ||
+                          (peerId === currentDuel.target && currentDuel.targetYear !== null)) &&
+                        !isNaN(parseInt(value))) {
                         playGunshot();
                         if (peerId === currentDuel.challenger) {
                             currentDuel.challengerYear = parseInt(value);
@@ -3109,7 +3183,7 @@
                         if (currentDuel.challengerYear !== null && currentDuel.targetYear !== null) {
                             currentDuel._resolved = true;
                             if (currentDuel._timeout) { clearTimeout(currentDuel._timeout); currentDuel._timeout = null; }
-                            var audioContainer = document.getElementById('audio-player-container');
+                            var audioContainer = document.getElementById('joputismo-audio-player');
                             if (audioContainer) audioContainer.innerHTML = '';
                             document.getElementById('host-instructions').innerHTML = "<div style='color:var(--gold); font-family:Bungee; font-size:2em;'>¡DUELO FINALIZADO!</div><div style='font-size:1.2em;'>Calculando resultados...</div>";
                             revealData();
@@ -3120,7 +3194,7 @@
                     }
                     break;
                 case 'SABOTAGE_VETO':
-                    if (hasShield[activeP.id]) {
+                    if (hasShield[activeP.id] && ataqueValido(peerId, action)) {
                         var p = players.find(function (pl) { return pl.id === peerId; });
                         if (p) {
                             var _perdidas = cobrarSabotajeRebotado(p, action);
@@ -3701,7 +3775,7 @@
 
                 case 'FAIL_SAFE':
                     var p = players.find(function(pl) { return pl.id === peerId; });
-                    if (p && p.tokens >= 2 && isMyTurnPeer(peerId) && !failSafeActive) {
+                    if (p && p.tokens >= 2 && isMyTurnPeer(peerId) && !failSafeActive && !isRevealed && (!turnPhase || turnPhase === 'NORMAL')) {
                         updateTokens(p, -2);
                         failSafeActive = true;
                         addEvent('<span class="ev-info">🛡️ ' + p.name + ' activa SEGURO DE FALLO</span>');
@@ -3879,6 +3953,19 @@
                 players[activePlayerIdx].canReload = true;
                 nextTurn();
             }, 3500);
+        }
+
+        // Al cambiar la canción a mitad de turno (cambiar canción, vídeo roto) la marca del
+        // activo y las apuestas a hueco eran de la canción ANTERIOR: el activo se quedaba
+        // bloqueado con su hueco viejo (GUESS se rechaza si ya hay marca) y las apuestas
+        // seguían valiendo para la canción nueva. Se limpian y se devuelven las fichas.
+        function limpiarMarcasCancionNueva() {
+            activeGuess = null;
+            for (var _pid in currentBets) {
+                var _pb = players.find(function (pl) { return pl.id === _pid; });
+                if (_pb && !isSharedSong) updateTokens(_pb, 1);
+            }
+            currentBets = {};
         }
 
         function refundBets() {
@@ -4074,6 +4161,13 @@
 
         function validateResult(isCardOk, isTokenOk) {
             if (turnPhase === 'DUEL') return; // No se valida nada en modo duelo manualmente de esta forma
+            if (partidaTerminada) return;
+            // Un turno solo se valida una vez. Tras un fallo con apuestas acertadas el turno
+            // se queda esperando a "GANÓ LA APUESTA" con isRevealed=true, y el mando podía
+            // volver a validar: se contaba el fallo dos veces (y en Supervivencia se perdían
+            // dos vidas).
+            if (turnoValidado) return;
+            turnoValidado = true;
 
             // Guarda: si no hay jugador activo o se agotó la canción, no reventar a media validación
             if (!players[activePlayerIdx] || !songs[currentSongIdx]) {
@@ -4403,6 +4497,7 @@
         function showWinner(name) {
             // TRAZA: si la victoria vuelve a saltar cuando no debe, aquí queda registrado
             // el modo activo y la línea exacta que la disparó.
+            partidaTerminada = true;
             console.warn('[HOST] === VICTORIA ===', name, '| modo:', gameMode, '| turnPhase:', turnPhase);
             console.warn('[HOST] disparada desde:\n' + (new Error().stack || 'sin stack'));
             addEvent('<span class="ev-info">🏆 Victoria declarada (modo: ' + gameMode.toUpperCase() + ')</span>');
@@ -5347,8 +5442,17 @@
         // Antes solo lo comprobaban MUTE/VETO/PÁNICO/NIEBLA/FORZAR SALTO: ROBAR FICHA,
         // ROBAR TURNO, ROBO INTELIGENTE, AGUJERO NEGRO, ZUMBIDO y la RULETA lo ignoraban
         // por completo, que son precisamente de los que uno querría protegerse.
+        // El escudo solo se gasta con un ataque que de verdad se podía lanzar: antes
+        // cualquier intento (sin fichas suficientes, o del propio dueño del escudo) lo
+        // consumía, así que un rival con 0 fichas te lo quitaba gratis.
+        function ataqueValido(peerId, accion) {
+            var at = players.find(function (pl) { return pl.id === peerId; });
+            var vi = players[activePlayerIdx];
+            return !!(at && vi && at.id !== vi.id && at.tokens >= (COSTE_SABOTAJE[accion] || 1));
+        }
         function escudoBloquea(victima, atacante, accion) {
             if (!victima || !hasShield[victima.id]) return false;
+            if (!atacante || atacante.id === victima.id || atacante.tokens < (COSTE_SABOTAJE[accion] || 1)) return false;
             hasShield[victima.id] = false;
             var perdidas = cobrarSabotajeRebotado(atacante, accion);
             if (atacante && connections[atacante.id]) {
@@ -5467,6 +5571,25 @@
             syncState();
         }
 
+        // Cada equipo empieza con una carta en su cronología compartida. Antes empezaban
+        // vacías y validateTeamResult da por buena cualquier colocación en una cronología
+        // vacía: el primer turno de cada equipo era un acierto regalado.
+        function sembrarCartasEquipos() {
+            ['red', 'blue'].forEach(function (t) {
+                currentSongIdx++;
+                if (!songs[currentSongIdx]) { reloadSongsMidGame(); currentSongIdx++; }
+                var sg = songs[currentSongIdx];
+                if (!sg) return;
+                if (sg.id) {
+                    var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]');
+                    if (!_pl.includes(sg.id)) { _pl.push(sg.id); localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl)); }
+                }
+                teamCards[t] = [parseInt(sg.year)];
+                teamScore[t] = 1;
+            });
+            updateTeamDisplay();
+        }
+
         // ── MODO EQUIPOS: votos y validación ──
         function resolveTeamVote() {
             if (teamVoteResolved) return;
@@ -5561,6 +5684,12 @@
         function rematch() {
             // Resetear estado de juego
             gameStarted = false;
+            partidaTerminada = false;
+            turnoValidado = false;
+            // Mazo NUEVO: antes se reutilizaba el de la partida anterior desde el índice 0,
+            // así que la revancha repetía las mismas canciones en el mismo orden.
+            var _mazo = buildSongsFromCache(false);
+            songs = (_mazo.length >= 10) ? _mazo : buildSongsFromCache(true);
             currentSongIdx = -1;
             activePlayerIdx = 0;
             turnPhase = 'NORMAL';
@@ -5648,6 +5777,8 @@
             teamTurn = 'red';
             teamVotes = {};
             teamVoteResolved = false;
+
+            if (gameMode === 'equipos') sembrarCartasEquipos();
 
             // Ocultar winner-screen, mostrar dashboard
             document.getElementById('winner-screen').style.display = 'none';
@@ -5940,9 +6071,9 @@
             }
         }
     </script>
-    <script src="cb_iconos.js"></script>
-    <script src="cb_despierto.js"></script>
-    <script src="cb_graficos.js"></script>
-    <link rel="stylesheet" href="cb_tema_retro.css">
+    <script src="cb_iconos.js?v=20261015c"></script>
+    <script src="cb_despierto.js?v=20261015c"></script>
+    <script src="cb_graficos.js?v=20261015c"></script>
+    <link rel="stylesheet" href="cb_tema_retro.css?v=20261015c">
 </body>
 </html>

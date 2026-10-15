@@ -3552,7 +3552,7 @@
                 var fsBtn = document.getElementById('btn-fail-safe');
                 if (fsBtn) {
                     var myPl4 = data.players && data.players.find(function(pl){return pl.id===myId;});
-                    var showFs = isMyTurn && data.gameStarted && !data.failSafeActive && !data.isPlaying && myPl4 && myPl4.tokens >= 2;
+                    var showFs = isMyTurn && data.gameStarted && !data.failSafeActive && !data.isPlaying && !data.revealed && (!data.turnPhase || data.turnPhase === 'NORMAL') && myPl4 && myPl4.tokens >= 2;
                     fsBtn.style.display = showFs ? 'block' : 'none';
                     if (data.failSafeActive && isMyTurn) {
                         fsBtn.innerText = '🛡️ SEGURO ACTIVO';
@@ -4147,10 +4147,10 @@
             });
         }
     </script>
-    <script src="cb_iconos.js"></script>
-    <script src="cb_despierto.js"></script>
-    <script src="cb_graficos.js"></script>
-    <link rel="stylesheet" href="cb_tema_retro.css">
+    <script src="cb_iconos.js?v=20261015c"></script>
+    <script src="cb_despierto.js?v=20261015c"></script>
+    <script src="cb_graficos.js?v=20261015c"></script>
+    <link rel="stylesheet" href="cb_tema_retro.css?v=20261015c">
 </body>
 
 </html>
