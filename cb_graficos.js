@@ -75,6 +75,7 @@
             var root = document.documentElement.style;
             root.setProperty('--cb-fondo', 'url(' + DIR + n + '.webp)');
             root.setProperty('--cb-fondo-op', ES_HOST ? '.55' : '.35');
+            document.body.classList.toggle('cb-fondo-movil', n.indexOf('fondo_movil') === 0);
         });
     }
 
@@ -313,10 +314,81 @@
             existe(n, function (ok) {
                 if (!ok) return;
                 document.documentElement.style.setProperty('--cb-' + n.replace('_', '-'), 'url(' + DIR + n + '.webp)');
-                document.body.classList.add('cb-' + n.replace('_', '-'));
+                document.body.classList.add('con-' + n.replace('_', '-'));
                 if (n === 'td_vinilo') { var d = document.querySelector('.cb-td-disco'); if (d) d.src = DIR + 'td_vinilo.webp'; }
             });
         });
+    }
+
+    // ---------- vidas de Supervivencia: vinilo con corazón ----------
+    function vidasIlustradas() {
+        var f = function (active) { return '<img class="cb-vida' + (active ? '' : ' perdida') + '" src="' + DIR + 'es_vida.webp" alt="">'; };
+        existe('es_vida', function (ok) {
+            if (!ok) return;
+            if (typeof window.vinylSVG === 'function') window.vinylSVG = f;
+            if (typeof window.vinylSVGSmall === 'function') window.vinylSVGSmall = f;
+        });
+    }
+
+    // ---------- medallas de la pantalla de ganador ----------
+    var PREMIOS = {
+        'CANCION MAS DIFICIL': 'es_eliminado', 'MAS SABOTEADOR': 'pr_terrorista', 'MAS SABOTEADO': 'pr_objetivo',
+        'MEJOR RACHA': 'pr_racha', 'MEJOR APOSTADOR': 'pr_tahur', 'EL OIDO DE PALO': 'x_carta_perdida',
+        'EL GRAN TURISTA': 'rk_bronce', 'EL PALEONTOLOGO': 'pr_paleontologo', 'EL MONJE SHAOLIN': 'pr_pacifista',
+        'EL INTOCABLE': 'pr_intocable', 'EL TERRORISTA': 'pr_terrorista', 'EL FAROLERO': 'pr_farolero',
+        'LA RACHA': 'pr_racha', 'EL OBJETIVO': 'pr_objetivo', 'EL PACIFISTA': 'pr_pacifista',
+        'EL TAHUR': 'pr_tahur', 'EL RAYO': 'pr_rayo'
+    };
+    function norm(t) { return (t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase().trim(); }
+    function medallasPremios() {
+        document.querySelectorAll('.award-card').forEach(function (c) {
+            if (c.classList.contains('cb-pr')) return;
+            var t = c.querySelector('.award-title'), ic = c.querySelector('.award-icon');
+            var n = t && PREMIOS[norm(t.textContent)];
+            if (!n || !ic) return;
+            c.classList.add('cb-pr');
+            existe(n, function (ok) { if (ok) ic.innerHTML = '<img class="cb-medalla" src="' + DIR + n + '.webp" alt="">'; });
+        });
+    }
+
+    // ---------- lobby: tarjetas de modo y de época ----------
+    var MODOS = [['normal', 'md_clasico', 'CLÁSICO'], ['rey', 'md_rey', 'REY'], ['supervivencia', 'md_supervivencia', 'SUPERVIVENCIA'], ['equipos', 'md_equipos', 'EQUIPOS']];
+    var EPOCAS = [['all', null, 'TODAS'], ['pre80s', 'ep_pre80', '<80s'], ['80s', 'ep_80s', '80s'], ['90s', 'ep_90s', '90s'],
+        ['2000s', 'ep_2000s', '2000s'], ['2010s', 'ep_2010s', '2010s'], ['2020s', 'ep_2020s', '2020s']];
+    function tarjetas(sel, lista, clase) {
+        if (!sel || document.querySelector('.' + clase)) return;
+        var caja = document.createElement('div');
+        caja.className = 'cb-tarjetas ' + clase;
+        lista.forEach(function (m) {
+            var b = document.createElement('button');
+            b.type = 'button'; b.setAttribute('data-v', m[0]);
+            b.innerHTML = (m[1] ? '<img src="' + DIR + m[1] + '.webp" alt="">' : '<span class="cb-todas">∞</span>') + '<span>' + m[2] + '</span>';
+            b.onclick = function () {
+                sel.value = m[0];
+                sel.dispatchEvent(new Event('change', { bubbles: true }));
+                marcar();
+            };
+            caja.appendChild(b);
+        });
+        sel.parentNode.insertBefore(caja, sel);
+        function marcar() {
+            caja.querySelectorAll('button').forEach(function (b) { b.classList.toggle('sel', b.getAttribute('data-v') === sel.value); });
+        }
+        marcar();
+        sel.addEventListener('change', marcar);
+        setInterval(marcar, 700); // por si el modo se cambia desde el mando del móvil
+    }
+    function tarjetaCompetitivo() {
+        var chk = document.getElementById('competitive-mode-check');
+        if (!chk || document.getElementById('cb-competitivo')) return;
+        var b = document.createElement('button');
+        b.type = 'button'; b.id = 'cb-competitivo';
+        b.innerHTML = '<img src="' + DIR + 'md_competitivo.webp" alt=""><span>COMPETITIVO</span>';
+        b.onclick = function () { chk.checked = !chk.checked; chk.dispatchEvent(new Event('change', { bubbles: true })); pinta(); };
+        function pinta() { b.classList.toggle('sel', chk.checked); }
+        var cajaModos = document.querySelector('.cb-modos');
+        if (cajaModos) cajaModos.appendChild(b);
+        chk.addEventListener('change', pinta); pinta();
     }
     // ---------- HOST ----------
     function iniciarHost() {
@@ -331,6 +403,14 @@
 
         // mejoras sala retro
         montarTocadiscos();
+        vidasIlustradas();
+        tarjetas(document.getElementById('game-mode-select'), MODOS, 'cb-modos');
+        tarjetaCompetitivo();
+        tarjetas(document.getElementById('decade-filter-select'), EPOCAS, 'cb-epocas');
+        ['winner-awards-left', 'winner-awards-right'].forEach(function (id) {
+            var el = document.getElementById(id);
+            if (el) new MutationObserver(medallasPremios).observe(el, { childList: true, subtree: true });
+        });
         tocadiscosIlustrado();
         montarEcualizador();
         envolver('flyCard', function (anio, nombre) { volarCasete(anio, nombre); });
@@ -421,6 +501,7 @@
         selectorAvatares();
         document.body.classList.add('cb-movil');
         vigilarBotones();
+        vidasIlustradas();
         envolver('handle', function (d) { if (d && d.type === 'STATE_UPDATE') marcarSonando(d.isPlaying); });
         css(
             // reverso de la carta central

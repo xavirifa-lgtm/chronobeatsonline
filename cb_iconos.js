@@ -16,7 +16,7 @@
     var MAPA = {
         // fichas, comodines, sabotajes
         '🔵': 'ico_ficha', '🔘': 'ico_ficha', '🃏': 'ico_comodin', '🎴': 'ico_comodin',
-        '💀': 're_calavera', '☠': 're_calavera', '🛡': 'ico_escudo',
+        '💀': 're_calavera', '☠': 'es_eliminado', '🛡': 'ico_escudo',
         '🔫': 'sb_duelo', '🤠': 'sb_duelo', '⚔': 'sb_duelo', '🗡': 'sb_duelo',
         '🔇': 'sb_mute', '⏰': 'sb_panico', '🌫': 'sb_niebla', '🎰': 'sb_ruleta', '⏭': 'sb_salto',
         '🚫': 'sb_veto', '🌌': 'sb_agujero_negro', '🕳': 'sb_agujero_negro',
@@ -28,7 +28,7 @@
         // interfaz
         '🛒': 'ui_tab_mercado', '💰': 'ui_tab_mercado', '🎸': 'ui_tab_juego', '📖': 'ui_reglas',
         '🏠': 'ui_hub', '▶': 'ui_play', '⏸': 'ui_pause', '🎤': 'ui_micro',
-        '🎵': 'st_vinilo', '💿': 'st_vinilo',
+        '🎵': 'st_vinilo', '💿': 'es_vida',
         // sistema
         '✅': 'sy_correcto', '❌': 'sy_incorrecto', '⏳': 'sy_esperando', '⚠': 'sy_alerta',
         '🚨': 'sy_alerta', '👁': 'sy_revelar', '👀': 'sy_revelar', '⭐': 'sy_bonus', '🎁': 'sy_bonus',
@@ -67,7 +67,7 @@
         img.alt = '';
         img.draggable = false;
         img.src = DIR + nombre + '.webp';
-        img.onerror = function () { if (img.parentNode) img.parentNode.removeChild(img); };
+        img.onerror = function () { console.warn('[cb_iconos] no se encuentra ' + img.src); if (img.parentNode) img.parentNode.removeChild(img); };
         return img;
     }
 

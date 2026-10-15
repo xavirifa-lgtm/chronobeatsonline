@@ -369,10 +369,10 @@ body.cb-movil .tab-content { background: transparent !important; }
 body.cb-sonando .cb-td-disco { animation-duration: 1.8s; }
 
 /* tocadiscos ilustrado cuando existan td_base / td_vinilo / td_brazo */
-body.cb-td-base .cb-td-plato { background: var(--cb-td-base) center / contain no-repeat !important; border: none !important; box-shadow: none !important; }
-body.cb-td-brazo .cb-td-brazo { background: var(--cb-td-brazo) center top / contain no-repeat !important; border: none !important; width: 56px; height: 170px; right: 0; top: 4px; }
-body.cb-td-brazo .cb-td-brazo::before, body.cb-td-brazo .cb-td-brazo::after { display: none; }
-body.cb-td-vinilo .cb-td-disco { filter: drop-shadow(0 6px 8px rgba(0, 0, 0, .55)); }
+body.con-td-base .cb-td-plato { background: var(--cb-td-base) center / contain no-repeat !important; border: none !important; box-shadow: none !important; }
+body.con-td-brazo .cb-td-brazo { background: var(--cb-td-brazo) center top / contain no-repeat !important; border: none !important; width: 56px; height: 170px; right: 0; top: 4px; }
+body.con-td-brazo .cb-td-brazo::before, body.con-td-brazo .cb-td-brazo::after { display: none; }
+body.con-td-vinilo .cb-td-disco { filter: drop-shadow(0 6px 8px rgba(0, 0, 0, .55)); }
 
 /* iconos en los botones */
 .cb-bi { display: inline-block; height: 1.7em; width: auto; vertical-align: -.5em; margin-right: .35em; pointer-events: none; }
@@ -385,3 +385,45 @@ body.cb-td-vinilo .cb-td-disco { filter: drop-shadow(0 6px 8px rgba(0, 0, 0, .55
 /* sabotajes: icono grande arriba, texto debajo */
 #sabotage-grid .spec-btn.cb-con-icono { flex-direction: column !important; text-align: center !important; gap: 4px; padding: 10px 6px !important; line-height: 1.15 !important; }
 #sabotage-grid .spec-btn .cb-bi { height: 3em; margin: 0; filter: drop-shadow(0 2px 3px rgba(0,0,0,.5)); }
+
+/* tocadiscos ilustrado: medidas ajustadas a td_base (plato ≈ 84 % del ancho, centro a 48 % de alto) */
+body.con-td-base .cb-td-disco { width: 178px; height: 178px; margin: -89px 0 0 -89px; top: calc(50% - 5px); }
+body.con-td-base .cb-td-etiqueta { width: 74px; height: 74px; margin: -37px 0 0 -37px; top: calc(50% - 5px); }
+body.con-td-base #cb-td-anio { font-size: 1.3em; }
+body.con-td-brazo .cb-td-brazo { right: -16px; top: -8px; width: 50px; height: 172px; transform-origin: 50% 14px; }
+body.cb-movil.cb-fondo-movil::before { background-size: auto, auto, cover !important; background-position: center, center, center bottom !important; }
+#cb-tocadiscos.revelado .cb-td-etiqueta { background: var(--neon) !important; }
+
+/* ======================= HOJAS NUEVAS ======================= */
+/* vidas */
+.cb-vida { width: 100%; height: 100%; object-fit: contain; display: block; }
+.cb-vida.perdida { filter: grayscale(1) brightness(.5); opacity: .45; }
+.lives-display { display: inline-flex; gap: 2px; }
+.lives-display .cb-vida { width: 20px; height: 20px; }
+/* medallas del ganador */
+.award-icon .cb-medalla { height: 64px; width: auto; display: block; margin: 0 auto; filter: drop-shadow(0 3px 4px rgba(0,0,0,.5)); }
+.award-icon .cb-ico { height: 1.4em; }
+/* tarjetas de modo y época en el lobby */
+.cb-tarjetas { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 4px auto 12px; }
+.cb-tarjetas button {
+    display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer;
+    background: rgba(42, 26, 94, .85); border: 2px solid rgba(255,255,255,.18); border-radius: 16px; padding: 6px 6px 8px;
+    color: #E9E2FF; font-family: 'Bungee', sans-serif; font-size: .62em; letter-spacing: .5px;
+    box-shadow: 0 4px 0 rgba(10,4,30,.8); transition: transform .15s, border-color .15s, box-shadow .15s;
+}
+.cb-tarjetas button:active { transform: translateY(3px); }
+.cb-tarjetas button.sel { border-color: var(--neon); box-shadow: 0 4px 0 rgba(10,4,30,.8), 0 0 18px color-mix(in srgb, var(--neon) 60%, transparent); color: #fff; transform: translateY(-3px); }
+.cb-modos button img { width: 104px; height: 104px; object-fit: contain; }
+.cb-epocas button img { width: 54px; height: 54px; object-fit: contain; }
+.cb-epocas button { min-width: 70px; }
+.cb-todas { width: 54px; height: 54px; display: flex; align-items: center; justify-content: center; font-size: 2.6em; color: var(--neon); }
+#game-mode-select { display: none !important; }
+#decade-filter-select { margin-top: 2px; font-size: .85em !important; }
+#competitive-mode-check, label[for="competitive-mode-check"] { display: none !important; }
+#competitive-mode-check + label { display: none !important; }
+/* pedir categoría con sus insignias (sustituye el icono del emoji) */
+button[onclick*="requestCategory('orig')"] img.cb-ico { content: url(img/ct_original.webp); }
+button[onclick*="requestCategory('anime')"] img.cb-ico { content: url(img/ct_anime.webp); }
+button[onclick*="requestCategory('movies')"] img.cb-ico { content: url(img/ct_pelis.webp); }
+button[onclick*="requestCategory('videojuegos')"] img.cb-ico { content: url(img/ct_gamer.webp); }
+button[onclick*="requestCategory"] img.cb-ico { height: 2em !important; vertical-align: middle !important; }
