@@ -3137,6 +3137,65 @@
             container.innerHTML = html;
         }
 
+
+        // ── VALIDAR DESDE EL MÓVIL ──
+        // Al revelar la carta, los rivales (no el jugador del turno) ven los mismos botones que
+        // la tablet. El primero que pulse valida y los botones desaparecen en todos los móviles.
+        function _escHtml(t) { return String(t == null ? '' : t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+        function pintarValidacionMovil(data) {
+            var v = data.validacionMovil;
+            var soyActivo = data.activePlayer && data.activePlayer.id === myId;
+            var caja = document.getElementById('cb-validar');
+            if (!v || !v.pendiente || soyActivo) { if (caja) caja.remove(); return; }
+            var t = data.currentTrack || {};
+            var clave = (t.id || '') + '|' + (data.turnCounter || 0) + '|' + v.correcta;
+            if (caja && caja.dataset.clave === clave) return;   // ya está pintada
+            if (caja) caja.remove();
+            caja = document.createElement('div');
+            caja.id = 'cb-validar';
+            caja.dataset.clave = clave;
+            var nom = _escHtml(v.activoNombre || 'el jugador');
+            var botones = v.correcta
+                ? '<button class="cb-val-btn cb-val-ok" data-a="REMOTE_CORRECT">✅ ACIERTO</button>' +
+                  '<button class="cb-val-btn cb-val-oro" data-a="REMOTE_CORRECT_TOKEN">✅ ACIERTO + FICHA<small>dijo el grupo o la canción</small></button>'
+                : '<button class="cb-val-btn cb-val-no" data-a="REMOTE_INCORRECT">❌ FALLO</button>' +
+                  '<button class="cb-val-btn cb-val-oro" data-a="REMOTE_INCORRECT_TOKEN">❌ FALLO + FICHA<small>pero dijo el grupo o la canción</small></button>';
+            caja.innerHTML =
+                '<div class="cb-val-tit">' + (v.correcta ? '¡' + nom + ' HA COLOCADO BIEN LA CARTA!' : nom + ' HA FALLADO EL HUECO') + '</div>' +
+                '<div class="cb-val-can">' + _escHtml(t.artist) + ' — ' + _escHtml(t.song) + ' <b>(' + _escHtml(t.year) + ')</b></div>' +
+                '<div class="cb-val-pre">¿Dijo también el grupo o la canción?</div>' +
+                '<div class="cb-val-fila">' + botones + '</div>';
+            caja.querySelectorAll('.cb-val-btn').forEach(function (b) {
+                b.onclick = function () {
+                    caja.querySelectorAll('.cb-val-btn').forEach(function (x) { x.disabled = true; });
+                    b.classList.add('cb-val-pulsado');
+                    send(b.getAttribute('data-a'));
+                    setTimeout(function () { var c = document.getElementById('cb-validar'); if (c && c.dataset.clave === clave) c.remove(); }, 4000);
+                };
+            });
+            document.body.appendChild(caja);
+            try { if (navigator.vibrate) navigator.vibrate(60); } catch (e) {}
+        }
+
+        // ── PISTAS COMPRADAS (comodín artista / canción, pista de década) ──
+        function pintarPistas(data) {
+            var pz = data.misPistas;
+            var caja = document.getElementById('cb-pistas');
+            var hay = pz && (pz.artista || pz.cancion || pz.decada);
+            if (!hay) { if (caja) caja.remove(); return; }
+            if (!caja) {
+                caja = document.createElement('div');
+                caja.id = 'cb-pistas';
+                var ref = document.getElementById('normal-card-container');
+                if (ref && ref.parentNode) ref.parentNode.insertBefore(caja, ref.nextSibling); else document.body.appendChild(caja);
+            }
+            var h = '<div class="cb-pis-tit">TUS PISTAS</div>';
+            if (pz.artista) h += '<div><span>ARTISTA</span> ' + _escHtml(pz.artista) + '</div>';
+            if (pz.cancion) h += '<div><span>CANCIÓN</span> ' + _escHtml(pz.cancion) + '</div>';
+            if (pz.decada) h += '<div><span>DÉCADA</span> ' + _escHtml(pz.decada) + '</div>';
+            if (caja.innerHTML !== h) caja.innerHTML = h;
+        }
+
         function handle(data) {
             console.log("Evento:", data.type, data);
 
@@ -3260,6 +3319,7 @@
             lastState = data;
             if (data.type === 'STATE_UPDATE') {
                 document.body.classList.toggle('cb-light', !!data.modoLight);
+                try { pintarValidacionMovil(data); pintarPistas(data); } catch (e) { console.warn(e); }
                 detectStateChanges(data);
                 applyTheme(data.currentType || 'mix');
                 // Actualizar lista de espera si aún no ha empezado
@@ -4208,10 +4268,10 @@
             });
         }
     </script>
-    <script src="cb_iconos.js?v=20261015g"></script>
-    <script src="cb_despierto.js?v=20261015g"></script>
-    <script src="cb_graficos.js?v=20261015g"></script>
-    <link rel="stylesheet" href="cb_tema_retro.css?v=20261015g">
+    <script src="cb_iconos.js?v=20261016a"></script>
+    <script src="cb_despierto.js?v=20261016a"></script>
+    <script src="cb_graficos.js?v=20261016a"></script>
+    <link rel="stylesheet" href="cb_tema_retro.css?v=20261016a">
 </body>
 
 </html>

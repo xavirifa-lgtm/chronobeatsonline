@@ -505,3 +505,35 @@ body.cb-light #tab-btn-market, body.cb-light .emoji-wildcard-btn, body.cb-light 
     background: url(img/vr_cuenta_atras.webp) center / contain no-repeat;
     filter: drop-shadow(0 0 24px rgba(255, 213, 74, .45));
 }
+
+/* validar desde el móvil */
+#cb-validar {
+    position: fixed; left: 12px; right: 12px; bottom: 92px; z-index: 9000;
+    background: rgba(26, 15, 46, .97); border: 3px solid #FFD54A; border-radius: 20px;
+    box-shadow: 0 0 30px rgba(255, 213, 74, .35), 0 8px 0 rgba(10, 4, 30, .8);
+    padding: 14px 14px 16px; text-align: center; color: #fff; font-family: 'Montserrat', sans-serif;
+    animation: cb-val-entra .35s cubic-bezier(.16,1,.3,1);
+}
+@keyframes cb-val-entra { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+#cb-validar .cb-val-tit { font-family: 'Bungee', sans-serif; font-size: .95em; color: #FFD54A; line-height: 1.2; }
+#cb-validar .cb-val-can { font-size: .82em; margin: 6px 0 4px; opacity: .95; }
+#cb-validar .cb-val-pre { font-size: .75em; opacity: .75; margin-bottom: 10px; }
+#cb-validar .cb-val-fila { display: flex; gap: 10px; }
+#cb-validar .cb-val-btn {
+    flex: 1; font-family: 'Bungee', sans-serif; font-size: .82em; padding: 14px 6px; border-radius: 14px;
+    border: 2px solid #1a0f2e; box-shadow: 0 5px 0 #1a0f2e; color: #1a0f2e; cursor: pointer; line-height: 1.15;
+}
+#cb-validar .cb-val-btn small { display: block; font-family: 'Montserrat', sans-serif; font-size: .7em; font-weight: 700; margin-top: 4px; text-transform: none; }
+#cb-validar .cb-val-btn .cb-ico { height: 1.1em !important; }
+#cb-validar .cb-val-ok { background: linear-gradient(180deg, #7CF29A, #2FBF5B); }
+#cb-validar .cb-val-no { background: linear-gradient(180deg, #FF8A8A, #E0393E); color: #fff; }
+#cb-validar .cb-val-oro { background: linear-gradient(180deg, #FFE27A, #FFB43A); }
+#cb-validar .cb-val-btn:disabled { opacity: .45; }
+#cb-validar .cb-val-btn.cb-val-pulsado { opacity: 1; transform: translateY(4px); box-shadow: 0 1px 0 #1a0f2e; }
+/* pistas compradas */
+#cb-pistas {
+    order: 4; width: 100%; max-width: 340px; margin: 8px auto; padding: 10px 12px; border-radius: 14px;
+    background: rgba(42, 26, 94, .9); border: 2px solid #FFD54A; color: #fff; font-family: 'Montserrat', sans-serif; font-size: .85em; text-align: left;
+}
+#cb-pistas .cb-pis-tit { font-family: 'Bungee', sans-serif; color: #FFD54A; font-size: .85em; margin-bottom: 4px; text-align: center; }
+#cb-pistas span { display: inline-block; min-width: 72px; font-family: 'Bungee', sans-serif; font-size: .75em; color: #00f2ff; }

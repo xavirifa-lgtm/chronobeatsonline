@@ -1247,6 +1247,12 @@
         // el jugador que iba DESPUÉS de la víctima (antes seguía desde el ladrón y se
         // saltaban los jugadores que había entre medias).
         var turnoRobadoBase = null;
+        // VALIDAR DESDE LOS MÓVILES: al revelar, los rivales ven en su móvil los mismos botones
+        // que la tablet (acierto / + ficha / fallo). posicionCorrecta = lo que calculó la tablet.
+        var posicionCorrecta = null;
+        // PISTAS COMPRADAS este turno (comodín artista / canción, pista de década): se muestran
+        // también en el móvil de quien las compró, no solo en la pantalla grande.
+        var pistasTurno = {};
         function avanzarTurno() {
             if (!players.length) return;
             if (turnoRobadoBase !== null && turnoRobadoBase < players.length) {
@@ -1430,6 +1436,15 @@
             }
             if (event.data === YT.PlayerState.ENDED) {
                 if (bombActive) return; // la bomba se gestiona con su propio temporizador
+                // Un vídeo no disponible a veces no da error: "termina" nada más empezar. Antes
+                // eso contaba como TIEMPO AGOTADO y se perdía el turno (también el del Rey).
+                var _sonado = segundosAcumulados + (momentoDeInicio ? (Date.now() - momentoDeInicio) / 1000 : 0);
+                if (_sonado < 4 && !window.brokenVideoHandling) {
+                    window.brokenVideoHandling = true;
+                    window._cbErrorYT = window._cbErrorYT || 'fin-inmediato';
+                    triggerBrokenVideoAutoSkip();
+                    return;
+                }
                 handleSongEnd();
             }
         }
@@ -1450,6 +1465,7 @@
             // de carta con opciones nuevas, manteniendo la fase de rey coherente.
             if (turnPhase === 'KING_SELECTION' || turnPhase === 'KING_GUESS' || turnPhase === 'KING_GUESS_RESULT') {
                 window.brokenVideoHandling = false;
+                if (turnPhase === 'KING_GUESS' && typeof reportBrokenLink === 'function') reportBrokenLink();   // aviso por correo
                 reiniciarSeleccionRey();
                 return;
             }
@@ -1524,6 +1540,29 @@
         }
 
         function handleSongEnd() {
+            // MODO REY: si la canción termina (de verdad, no un vídeo roto) y el rey no ha dicho
+            // el año, cuenta como fallo: sigue con 10 y lo reintentará en su próximo turno.
+            if (turnPhase === 'KING_SELECTION' || turnPhase === 'KING_GUESS' || turnPhase === 'KING_GUESS_RESULT') {
+                isPlaying = false;
+                stopCountdown();
+                if (turnPhase === 'KING_GUESS') {
+                    turnPhase = 'KING_GUESS_RESULT';
+                    kingLastResult = false;
+                    var _sk = songs[currentSongIdx];
+                    if (_sk) {
+                        document.getElementById('ui-card-artist').innerText = _sk.artist;
+                        document.getElementById('ui-card-song').innerText = _sk.song;
+                        document.getElementById('ui-card-year').innerText = _sk.year;
+                    }
+                    document.getElementById('host-instructions').innerHTML = "<span style='color:#ff4444; font-size:1.5em;'>¡TIEMPO AGOTADO!</span><br>El rey no dijo el año a tiempo." + (_sk ? " (Era " + _sk.year + ")" : "");
+                    addEvent('<span class="ev-name">' + (players[activePlayerIdx] ? players[activePlayerIdx].name : '?') + '</span> <span class="ev-bad">👑 se quedó sin tiempo en el desafío del rey</span>');
+                    syncState();
+                    setTimeout(function () { if (turnPhase === 'KING_GUESS_RESULT' && kingLastResult === false) resolveKingMode(false); }, 3500);
+                    return;
+                }
+                syncState();
+                return;
+            }
             // Modo equipos: resolver con los votos que haya
             if (gameMode === 'equipos' && !teamVoteResolved) {
                 resolveTeamVote();
@@ -2237,6 +2276,7 @@
 
         function nextTurn() {
             if (partidaTerminada) return;
+            posicionCorrecta = null; pistasTurno = {};
             gastosTurno = [];
             turnoValidado = false;
             stopCountdown();
@@ -2729,6 +2769,7 @@
 
             switch (action) {
                 case 'REMOTE_TOGGLE_PLAY':
+                    if (!(!turnPhase || turnPhase === 'NORMAL' || turnPhase === 'KING_GUESS')) break;
                     if (!isPlaying) {
                         momentoDeInicio = Date.now();
                         if (player && player.playVideo) {
@@ -2755,6 +2796,9 @@
                 // duplicados, TAPABAN a las versiones correctas y con guardas de más abajo
                 // (un switch ejecuta el primer case que coincide). Se han eliminado para que
                 // el mando del móvil vuelva a funcionar con las versiones buenas.
+                case 'REMOTE_TOGGLE_LIGHTNING':
+                    if (puedeUsarMando(peerId) && (!turnPhase || turnPhase === 'NORMAL')) activateLightning();
+                    break;
                 case 'REMOTE_REPORT_INVALID':
                     if (!window.brokenVideoHandling) {
                         window._cbErrorYT = 'manual-mando';
@@ -3159,6 +3203,7 @@
                     if (p && p.tokens >= 3 && activeGuess === null && isPlaying && !isRevealed && (!turnPhase || turnPhase === 'NORMAL')) {
                         updateTokens(p, -3); apuntarGastoTurno(p, 3);
                         refundBets();
+                        limpiarMarcasCancionNueva();
                         isPlaying = false;
                         if (player && player.stopVideo) player.stopVideo();
                         currentSongIdx++; if(songs[currentSongIdx] && songs[currentSongIdx].id) { var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]'); if(!_pl.includes(songs[currentSongIdx].id)){ _pl.push(songs[currentSongIdx].id); localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl)); } }
@@ -3647,11 +3692,12 @@
                 // autoconcederse la carta desde su móvil.
                 case 'REMOTE_REVEAL':
                     if (!puedeUsarMando(peerId)) break;
-                    if (turnPhase !== 'LOBBY' && !isRevealed) {
+                    if ((!turnPhase || turnPhase === 'NORMAL') && gameStarted && !isRevealed && !bombActive) {
                         revealData();
                     }
                     break;
                 case 'REMOTE_CORRECT':
+                    if (players[activePlayerIdx] && peerId === players[activePlayerIdx].id) break;   // nadie valida su propio turno
                     // Solo tras revelar (que es cuando el mando enseña estos botones).
                     // Esto además descarta las pulsaciones repetidas: en cuanto se valida
                     // se pasa de turno e isRevealed vuelve a false.
@@ -3659,6 +3705,7 @@
                     validateResult(true, false);
                     break;
                 case 'REMOTE_CORRECT_TOKEN':
+                    if (players[activePlayerIdx] && peerId === players[activePlayerIdx].id) break;   // nadie valida su propio turno
                     // Solo tras revelar (que es cuando el mando enseña estos botones).
                     // Esto además descarta las pulsaciones repetidas: en cuanto se valida
                     // se pasa de turno e isRevealed vuelve a false.
@@ -3666,6 +3713,7 @@
                     validateResult(true, true);
                     break;
                 case 'REMOTE_INCORRECT':
+                    if (players[activePlayerIdx] && peerId === players[activePlayerIdx].id) break;   // nadie valida su propio turno
                     // Solo tras revelar (que es cuando el mando enseña estos botones).
                     // Esto además descarta las pulsaciones repetidas: en cuanto se valida
                     // se pasa de turno e isRevealed vuelve a false.
@@ -3673,6 +3721,7 @@
                     validateResult(false, false);
                     break;
                 case 'REMOTE_INCORRECT_TOKEN':
+                    if (players[activePlayerIdx] && peerId === players[activePlayerIdx].id) break;   // nadie valida su propio turno
                     // Solo tras revelar (que es cuando el mando enseña estos botones).
                     // Esto además descarta las pulsaciones repetidas: en cuanto se valida
                     // se pasa de turno e isRevealed vuelve a false.
@@ -3729,11 +3778,13 @@
                         if (p.wildcards === undefined) p.wildcards = 3;
                         p.wildcards--;
                         if (value === 'artist') {
+                            pistasTurno.artista = s.artist;
                             document.getElementById('ui-card-artist').innerText = s.artist;
                             document.getElementById('ui-card-artist').style.color = "var(--gold)";
                             try { connections[peerId].send({ type: 'BET_RESULT', msg: '🃏 Artista revelado en la pantalla grande: ' + s.artist + ' (te quedan ' + p.wildcards + ' comodines)' }); } catch(e) {}
                             addEvent('<span class="ev-info">🃏 ' + p.name + ' gastó un comodín: artista revelado</span>');
                         } else {
+                            pistasTurno.cancion = s.song;
                             document.getElementById('ui-card-song').innerText = s.song;
                             document.getElementById('ui-card-song').style.color = "var(--gold)";
                             try { connections[peerId].send({ type: 'BET_RESULT', msg: '🃏 Canción revelada en la pantalla grande: ' + s.song + ' (te quedan ' + p.wildcards + ' comodines)' }); } catch(e) {}
@@ -3751,6 +3802,7 @@
                         if (!isNaN(sYear)) {
                             decadeStr = Math.floor(sYear / 10) * 10 + "s";
                         }
+                        pistasTurno.decada = decadeStr;
                         try {
                             if (connections[p.id]) connections[p.id].send({ type: 'BET_RESULT', msg: "PISTA! Años " + decadeStr });
                         } catch (e) { }
@@ -4079,6 +4131,8 @@
         // seguían valiendo para la canción nueva. Se limpian y se devuelven las fichas.
         function limpiarMarcasCancionNueva() {
             activeGuess = null;
+            pistasTurno = {};          // las pistas eran de la canción anterior
+            posicionCorrecta = null;
             for (var _pid in currentBets) {
                 var _pb = players.find(function (pl) { return pl.id === _pid; });
                 if (_pb && !isSharedSong) updateTokens(_pb, 1);
@@ -4156,9 +4210,11 @@
                 window.location.href = mailtoUrl;
                 alert("¡Error registrado! Se ha preparado un email para " + recipient + ".\nSe descarta esta canción y repites el turno.");
             }
+            // En fase de rey: se vuelven a elegir cartas para el MISMO rey. Antes se restaba 1 a
+            // activePlayerIdx y, como nextTurn() no avanza, el turno pasaba al jugador anterior.
             if (turnPhase === 'KING_GUESS' || turnPhase === 'KING_GUESS_RESULT' || turnPhase === 'KING_SELECTION') {
-                activePlayerIdx--;
-                if (activePlayerIdx < 0) activePlayerIdx = players.length - 1;
+                reiniciarSeleccionRey();
+                return;
             }
             nextTurn();
         }
@@ -4213,6 +4269,7 @@
             }
 
             document.getElementById('validation-buttons').style.display = 'flex';
+            posicionCorrecta = isCorrect;
             if (isCorrect) {
                 document.getElementById('host-instructions').innerHTML = "<span style='color:#00ff00; font-size:1.5em;'>¡POSICIÓN CORRECTA! ✅</span><br>¿Detalles?";
                 document.getElementById('validation-buttons').innerHTML = `
@@ -4594,6 +4651,7 @@
                         }
                     }
                     document.getElementById('challenger-buttons').innerHTML = h;
+                    syncState();   // que desaparezcan los botones de validar de los móviles
                 } else {
                     avanzarTurno();
                     players[activePlayerIdx].canReload = true; // Resetear permiso de recarga
@@ -5086,11 +5144,18 @@
 
             if (isValidationVisible) {
                 btns.push({ id: 'correct', label: '✅ CORRECTO (Acierto)', action: 'REMOTE_CORRECT', color: 'green' });
-                btns.push({ id: 'wrong', label: '❌ INCORRECTO (Fallo)', action: 'REMOTE_WRONG', color: 'red' });
+                btns.push({ id: 'wrong', label: '❌ INCORRECTO (Fallo)', action: 'REMOTE_INCORRECT', color: 'red' });
                 btns.push({ id: 'next_turn', label: '⏭️ SIGUIENTE TURNO', action: 'REMOTE_NEXT_TURN', color: 'neon' });
                 return btns;
             }
 
+            if (turnPhase === 'KING_SELECTION') return btns;   // los rivales eligen la carta en su móvil
+            if (turnPhase === 'KING_GUESS') {
+                // sin "revelar": revelaría la carta y daría el turno del rey por fallado
+                btns.push({ id: 'play_pause', label: isPlaying ? '⏸️ PAUSAR MÚSICA' : '▶️ REPRODUCIR MÚSICA', action: 'REMOTE_TOGGLE_PLAY', color: 'blue' });
+                btns.push({ id: 'invalid_vid', label: '⏭️ VÍDEO NO VÁLIDO (elegir otra carta)', action: 'REMOTE_REPORT_INVALID', color: 'gray' });
+                return btns;
+            }
             if (turnPhase === 'KING_GUESS_RESULT') {
                 btns.push({ id: 'king_res', label: '👑 ACEPTAR RESULTADO REY', action: 'REMOTE_KING_RESOLVE', color: 'gold' });
                 return btns;
@@ -5105,7 +5170,7 @@
 
             if (isRevealed) {
                 btns.push({ id: 'correct', label: '✅ CORRECTO', action: 'REMOTE_CORRECT', color: 'green' });
-                btns.push({ id: 'wrong', label: '❌ INCORRECTO', action: 'REMOTE_WRONG', color: 'red' });
+                btns.push({ id: 'wrong', label: '❌ INCORRECTO', action: 'REMOTE_INCORRECT', color: 'red' });
                 btns.push({ id: 'next_turn', label: '⏭️ SIGUIENTE TURNO', action: 'REMOTE_NEXT_TURN', color: 'neon' });
                 return btns;
             }
@@ -5113,8 +5178,7 @@
             btns.push({ id: 'reveal', label: '👁️ REVELAR AÑO / HUECO', action: 'REMOTE_REVEAL', color: 'neon' });
             btns.push({ id: 'play_pause', label: isPlaying ? '⏸️ PAUSAR MÚSICA' : '▶️ REPRODUCIR MÚSICA', action: 'REMOTE_TOGGLE_PLAY', color: 'blue' });
             btns.push({ id: 'invalid_vid', label: '⏭️ VÍDEO NO VÁLIDO', action: 'REMOTE_REPORT_INVALID', color: 'gray' });
-            btns.push({ id: 'lightning', label: '⚡ MODO RELÁMPAGO (5s)', action: 'REMOTE_TOGGLE_LIGHTNING', color: 'yellow' });
-            btns.push({ id: 'shared', label: '🎵 ¡JUGAMOS TODOS!', action: 'REMOTE_SHARED_SONG', color: 'pink' });
+            if (isPlaying && !isLightningSong && gameMode !== 'equipos') btns.push({ id: 'lightning', label: '⚡ MODO RELÁMPAGO (5s)', action: 'REMOTE_TOGGLE_LIGHTNING', color: 'yellow' });
 
             return btns;
         }
@@ -5150,11 +5214,21 @@
                     type: 'STATE_UPDATE',
                     players: players.map(function (pl) { var c = Object.assign({}, pl); delete c.token; return c; }),   // sin el código secreto de reconexión
                     modoLight: modoLight,
+                    validacionMovil: {
+                        pendiente: !!(isRevealed && !turnoValidado && !partidaTerminada && (!turnPhase || turnPhase === 'NORMAL') &&
+                                      !isSharedSong && !bombActive && gameMode !== 'equipos' && posicionCorrecta !== null),
+                        correcta: posicionCorrecta,
+                        activoNombre: players[activePlayerIdx] ? players[activePlayerIdx].name : ''
+                    },
+                    misPistas: (p && players[activePlayerIdx] && p.id === players[activePlayerIdx].id) ? pistasTurno : null,
                     activePlayer: { id: players[activePlayerIdx] ? players[activePlayerIdx].id : null, name: players[activePlayerIdx] ? players[activePlayerIdx].name : null },
                     judgeId: currentJudgeId,
                     hostButtons: dynamicBtns,
                     leader: { name: leaderName, score: leaderScore },
-                    currentTrack: songs[currentSongIdx] || null,
+                    // La canción (artista, título, AÑO, enlace) solo viaja a los móviles al revelarla.
+                    // Antes iba siempre y con las herramientas del navegador se veía la respuesta.
+                    currentTrack: (isRevealed || turnPhase === 'KING_GUESS_RESULT') ? (songs[currentSongIdx] || null)
+                                  : (songs[currentSongIdx] ? { type: songs[currentSongIdx].type, color: songs[currentSongIdx].color } : null),
                     revealed: isRevealed,
                     isRevealed: isRevealed,          // alias: el player lo usaba y llegaba undefined
                     activePlayerIdx: activePlayerIdx, // el player lo usaba y llegaba undefined
@@ -5207,7 +5281,7 @@
                     activeGuess: activeGuess,
                     currentDuel: currentDuel,
                     duelResult: duelResult,
-                    kingOptions: kingOptions,
+                    kingOptions: (p && players[activePlayerIdx] && p.id === players[activePlayerIdx].id) ? [] : kingOptions,   // el rey no ve las cartas
                     cheatsEnabled: cheatsEnabled,
                     turnPhase: turnPhase,
                     currentType: songs[currentSongIdx] ? songs[currentSongIdx].type : 'mix',
@@ -6359,10 +6433,10 @@
         document.getElementById('cb-btn-descartar').onclick = function () { borrarPartidaGuardada(); caja.remove(); };
     });
     </script>
-    <script src="cb_iconos.js?v=20261015g"></script>
-    <script src="cb_despierto.js?v=20261015g"></script>
-    <script src="cb_resumen.js?v=20261015g"></script>
-    <script src="cb_graficos.js?v=20261015g"></script>
-    <link rel="stylesheet" href="cb_tema_retro.css?v=20261015g">
+    <script src="cb_iconos.js?v=20261016a"></script>
+    <script src="cb_despierto.js?v=20261016a"></script>
+    <script src="cb_resumen.js?v=20261016a"></script>
+    <script src="cb_graficos.js?v=20261016a"></script>
+    <link rel="stylesheet" href="cb_tema_retro.css?v=20261016a">
 </body>
 </html>
