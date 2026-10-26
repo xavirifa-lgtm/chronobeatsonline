@@ -1253,6 +1253,55 @@
         // PISTAS COMPRADAS este turno (comodín artista / canción, pista de década): se muestran
         // también en el móvil de quien las compró, no solo en la pantalla grande.
         var pistasTurno = {};
+        // ¡TODOS JUEGAN!: cada móvil confirma con OK que se ha enterado; hasta entonces no
+        // arranca la canción (salvo que en la tablet se pulse EMPEZAR YA).
+        var sharedAcks = {}, sharedForzado = false;
+        // REVISAR CANCIÓN: aviso por correo de una canción con datos dudosos (año que no
+        // cuadra, título mal…). No cambia nada del turno: después se valida como siempre.
+        var revisadaTurno = false;
+        function revisarCancion(quien) {
+            var s = songs[currentSongIdx];
+            if (!s || revisadaTurno) return;
+            revisadaTurno = true;
+            addEvent('<span class="ev-info">🔍 ' + (quien || 'Tablet') + ' ha marcado para revisar: ' + s.artist + ' — ' + s.song + ' (' + s.year + ')</span>');
+            var b = document.getElementById('btn-revisar');
+            if (b) { b.disabled = true; b.innerText = '✓ ENVIADA A REVISAR'; b.style.opacity = '.6'; }
+            try {
+                var reg = JSON.parse(localStorage.getItem('CB_Revisar') || '[]');
+                reg.push({ id: s.id, lista: LISTA_POR_TIPO[s.type] || s.type, linea: s.line, artista: s.artist, cancion: s.song, anio: s.year, fecha: new Date().toISOString(), quien: quien || 'Tablet' });
+                localStorage.setItem('CB_Revisar', JSON.stringify(reg));
+            } catch (e) {}
+            if (URL_AVISOS) {
+                try {
+                    fetch(URL_AVISOS, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify({ tipo: 'revisar', id: s.id, lista: LISTA_POR_TIPO[s.type] || s.type || '?', linea: s.line,
+                            artista: s.artist, cancion: s.song, anio: s.year, texto: s.raw || '', codigo: 'revisar',
+                            motivo: 'marcada para revisar por ' + (quien || 'la tablet') + ' (año u otros datos dudosos)', auto: false, quien: quien || 'Tablet' })
+                    }).catch(function () {});
+                } catch (e) {}
+            }
+            syncState();
+        }
+        function jugadoresConectados() {
+            return players.filter(function (pl) { var c = connections[pl.id]; return c && c.open !== false; });
+        }
+        function faltanPorAceptar() {
+            return jugadoresConectados().filter(function (pl) { return !sharedAcks[pl.id]; });
+        }
+        function pintarEsperaTodosJuegan() {
+            var el = document.getElementById('host-instructions');
+            if (!el || !isSharedSong || isPlaying || songPlayedThisTurn) return;
+            var faltan = faltanPorAceptar();
+            if (!faltan.length || sharedForzado) {
+                el.innerHTML = "<span style='color:#FFD54A; font-family:Bungee; font-size:1.3em;'>🎵 ¡TODOS JUEGAN!</span><br>Todos listos — " + (players[activePlayerIdx] ? players[activePlayerIdx].name : '') + " puede darle a PLAY";
+            } else {
+                el.innerHTML = "<span style='color:#FFD54A; font-family:Bungee; font-size:1.3em;'>🎵 ¡TODOS JUEGAN!</span><br>Esperando a que acepten en el móvil: " +
+                    faltan.map(function (pl) { return pl.name; }).join(', ') +
+                    "<br><button class='btn' style='margin-top:8px; padding:8px 14px; font-family:Bungee; font-size:.8em;' onclick='sharedForzado=true; pintarEsperaTodosJuegan(); syncState();'>EMPEZAR YA</button>";
+            }
+        }
+        // CARTA BOMBA: el temporizador de 15 s no empieza hasta que suena la canción
+        var bombEsperaPlay = false;
         function avanzarTurno() {
             if (!players.length) return;
             if (turnoRobadoBase !== null && turnoRobadoBase < players.length) {
@@ -1421,6 +1470,7 @@
                 return;
             }
             if (event.data === YT.PlayerState.PLAYING) {
+                if (bombActive && bombEsperaPlay) { bombEsperaPlay = false; iniciarTimerBomba(); }
                 isPlaying = true;
                 songPlayedThisTurn = true;
                 momentoDeInicio = Date.now();
@@ -2173,10 +2223,11 @@
             document.getElementById('ui-card-year').innerText = "????";
             var _rev = document.getElementById('btn-reveal-host'); if (_rev) _rev.style.display = 'none';
             var _val = document.getElementById('validation-buttons'); if (_val) _val.style.display = 'none';
-            document.getElementById('host-instructions').innerHTML = "<span style='color:#ff3b3b; font-size:1.4em; font-family:Bungee;'>💣 CARTA BOMBA — " + holder.name + "</span>";
-            if (player && player.playVideo) { player.playVideo(); if (isMuted) player.mute(); else player.unMute(); }
-            isPlaying = true; songPlayedThisTurn = true; momentoDeInicio = Date.now();
-            iniciarTimerBomba();
+            // La canción NO arranca sola (no sonaba): el portador le da a PLAY y entonces
+            // empiezan los 15 s.
+            bombEsperaPlay = true; bombTimer = 15;
+            document.getElementById('host-instructions').innerHTML = "<span style='color:#ff3b3b; font-size:1.4em; font-family:Bungee;'>💣 CARTA BOMBA — " + holder.name + "</span><br>Dale a PLAY en tu móvil: los 15 segundos empiezan al sonar la canción";
+            syncState();
         }
 
         function _pintarBombaTV() {
@@ -2202,7 +2253,7 @@
         }
 
         function resolverColocacionBomba(peerId, valNum) {
-            if (!bombActive) return;
+            if (!bombActive || bombEsperaPlay) return;   // primero tiene que sonar la canción
             var holder = players[activePlayerIdx];
             if (!holder || peerId !== holder.id) return;          // solo cuenta el portador
             if (isNaN(valNum) || valNum < 0 || valNum > holder.cards.length) return;
@@ -2276,6 +2327,7 @@
 
         function nextTurn() {
             if (partidaTerminada) return;
+            sharedAcks = {}; sharedForzado = false; bombEsperaPlay = false; revisadaTurno = false;
             posicionCorrecta = null; pistasTurno = {};
             gastosTurno = [];
             turnoValidado = false;
@@ -2400,7 +2452,8 @@
             var banner = document.getElementById('shared-song-banner');
             if (banner) banner.style.display = isSharedSong ? 'block' : 'none';
             // CARTA BONIFICACIÓN aleatoria
-            isBonusCard = (!modoLight && !_kingTurnComing && turnCounter === nextBonusTurn);
+            // En SUPERVIVENCIA las cartas no hacen ganar: la carta bonificación no tiene sentido.
+            isBonusCard = (!modoLight && gameMode !== 'supervivencia' && !_kingTurnComing && turnCounter === nextBonusTurn);
             if (isBonusCard) nextBonusTurn = turnCounter + 7 + Math.floor(Math.random() * 4);
             else if (_kingTurnComing && turnCounter === nextBonusTurn) nextBonusTurn = turnCounter + 1;
             currentSongIdx++;
@@ -2527,6 +2580,7 @@
                 miniEl.innerHTML = chips.join('');
             }
             document.getElementById('host-instructions').innerText = "ESPERANDO ACCIÓN...";
+            if (isSharedSong) pintarEsperaTodosJuegan();
             // cueVideoById prepara el vídeo SIN reproducirlo ni disparar eventos PLAYING
             // (loadVideoById causaba eventos asíncronos que corrompían isPlaying)
             if (player && player.cueVideoById && s) {
@@ -2753,11 +2807,18 @@
             }
 
             if (modoLight && ACCIONES_FUERA_LIGHT.indexOf(action) !== -1) return;
+            // SUPERVIVENCIA: lo que solo sirve para ganar cartas no tiene sentido (se gana con vidas)
+            if (gameMode === 'supervivencia' && (action === 'BRAG' || action === 'DOUBLE_OR_NOTHING' || (action === 'EMOJI_WILDCARD' && value === '🔥'))) {
+                try { if (connections[peerId]) connections[peerId].send({ type: 'BET_RESULT', msg: 'En Supervivencia no hay farol, doble o nada ni comodín 🔥: aquí se gana con las vidas, no con cartas. No se te ha cobrado.' }); } catch (e) {}
+                return;
+            }
 
             // Durante la CARTA BOMBA solo se admite COLOCAR (GUESS) y reacciones; el resto
             // (música, sabotajes, apuestas, mando, validaciones) queda bloqueado.
             if (bombActive) {
-                if (['GUESS','REACTION','QUICK_REACT','CONFETTI_BURST'].indexOf(action) === -1) return;
+                var _okBomba = ['GUESS','REACTION','QUICK_REACT','CONFETTI_BURST'];
+                if (bombEsperaPlay) _okBomba.push('PLAY', 'REMOTE_TOGGLE_PLAY');   // arrancar la canción de la bomba
+                if (_okBomba.indexOf(action) === -1) return;
             }
 
             // Durante un DUELO suena SOLO el tema del duelo ("El bueno, el feo y el malo"):
@@ -2769,14 +2830,16 @@
 
             switch (action) {
                 case 'REMOTE_TOGGLE_PLAY':
-                    if (!(!turnPhase || turnPhase === 'NORMAL' || turnPhase === 'KING_GUESS')) break;
+                    if (!(!turnPhase || turnPhase === 'NORMAL' || turnPhase === 'KING_GUESS' || (turnPhase === 'BOMB' && bombEsperaPlay))) break;
+                    if (isSharedSong && !sharedForzado && !songPlayedThisTurn && !isPlaying && faltanPorAceptar().length) { pintarEsperaTodosJuegan(); break; }
+                    if (bombActive && bombEsperaPlay) setTimeout(function () { if (bombActive && bombEsperaPlay) { bombEsperaPlay = false; iniciarTimerBomba(); } }, 2500);
                     if (!isPlaying) {
                         momentoDeInicio = Date.now();
                         if (player && player.playVideo) {
                             player.playVideo();
                             if (isMuted) player.mute(); else player.unMute();
                         }
-                        isPlaying = true;
+                        isPlaying = true; songPlayedThisTurn = true;
                         document.getElementById('host-instructions').innerText = "REPRODUCIENDO" + (isMuted ? " (MUTE)" : "");
                         syncState();
                         startCountdown();
@@ -2796,6 +2859,18 @@
                 // duplicados, TAPABAN a las versiones correctas y con guardas de más abajo
                 // (un switch ejecuta el primer case que coincide). Se han eliminado para que
                 // el mando del móvil vuelva a funcionar con las versiones buenas.
+                case 'REMOTE_REVIEW_SONG':
+                    if (isRevealed && players.some(function (pl) { return pl.id === peerId; })) {
+                        revisarCancion((players.find(function (pl) { return pl.id === peerId; }) || {}).name);
+                    }
+                    break;
+                case 'SHARED_ACK':
+                    if (isSharedSong && players.some(function (pl) { return pl.id === peerId; })) {
+                        sharedAcks[peerId] = true;
+                        pintarEsperaTodosJuegan();
+                        syncState();
+                    }
+                    break;
                 case 'REMOTE_TOGGLE_LIGHTNING':
                     if (puedeUsarMando(peerId) && (!turnPhase || turnPhase === 'NORMAL')) activateLightning();
                     break;
@@ -2814,13 +2889,23 @@
                         return pl.id === peerId && pl.team === teamTurn;
                     });
                     if (peerId !== activeP.id && !isTeamMember) return;
+                    if (isSharedSong && !sharedForzado && !songPlayedThisTurn && faltanPorAceptar().length) {
+                        var _faltan = faltanPorAceptar().map(function (pl) { return pl.name; }).join(', ');
+                        try { if (connections[peerId]) connections[peerId].send({ type: 'BET_RESULT', msg: '🎵 ¡TODOS JUEGAN! Aún no han aceptado: ' + _faltan + '. Espera un momento.' }); } catch (e) {}
+                        pintarEsperaTodosJuegan();
+                        return;
+                    }
+                    if (bombActive && bombEsperaPlay) {
+                        // si YouTube no avisa de que suena, arrancar igualmente los 15 s
+                        setTimeout(function () { if (bombActive && bombEsperaPlay) { bombEsperaPlay = false; iniciarTimerBomba(); } }, 2500);
+                    }
                     if (!isPlaying) {
                         momentoDeInicio = Date.now();
                         if (player && player.playVideo) {
                             player.playVideo();
                             if (isMuted) player.mute(); else player.unMute();
                         }
-                        isPlaying = true;
+                        isPlaying = true; songPlayedThisTurn = true;
                         document.getElementById('host-instructions').innerText = "REPRODUCIENDO" + (isMuted ? " (MUTE)" : "");
                         syncState();
                         startCountdown();
@@ -3041,6 +3126,7 @@
                     for (var pid in currentBets) { if (currentBets[pid] == valNum) slotOccupied = true; }
 
                     var maxSlot = players[activePlayerIdx].cards.length;
+                    if (isSharedSong && !songPlayedThisTurn) break;   // ¡todos juegan!: no antes de que suene
                     var canBetShared = isSharedSong && p.id === players[activePlayerIdx].id && activeGuess === null;
                     if ((p.id !== players[activePlayerIdx].id || canBetShared) && p.tokens >= 1 && currentBets[peerId] === undefined && !slotOccupied && (activeGuess !== null || isSharedSong) && valNum >= 0 && valNum <= maxSlot) {
                         console.log("[OK] Apuesta (Duelo) aceptada para", p.name);
@@ -3200,7 +3286,10 @@
                         break;
                     }
                     var p = players.find(function (pl) { return pl.id === peerId; });
-                    if (p && p.tokens >= 3 && activeGuess === null && isPlaying && !isRevealed && (!turnPhase || turnPhase === 'NORMAL')) {
+                    // Se puede forzar el salto aunque el activo ya haya marcado: su marca se borra
+                    // (limpiarMarcasCancionNueva) porque era para la canción anterior.
+                    if (p && p.tokens >= 3 && p.id !== activeP.id && isPlaying && !isRevealed && !isSharedSong && (!turnPhase || turnPhase === 'NORMAL')) {
+                        var _teniaMarca = (activeGuess !== null);
                         updateTokens(p, -3); apuntarGastoTurno(p, 3);
                         refundBets();
                         limpiarMarcasCancionNueva();
@@ -3231,7 +3320,7 @@
                         if (targetConn) {
                             targetConn.send({
                                 type: 'SABOTAGE_SKIP_ALERT',
-                                msg: "¡" + p.name + " HA SALTADO TU CANCIÓN! ⏭️"
+                                msg: "¡" + p.name + " HA SALTADO TU CANCIÓN! ⏭️" + (_teniaMarca ? "\nTu hueco marcado se ha borrado: vuelve a colocar con la canción nueva." : "")
                             });
                         }
 
@@ -3567,6 +3656,10 @@
                     // El primer acierto se lleva la carta al instante; fallar bloquea tu
                     // intento pero NO cuesta ficha (como colocar en tu turno normal).
                     if (isSharedSong && (!turnPhase || turnPhase === 'NORMAL') && p) {
+                        if (!songPlayedThisTurn) {   // nadie coloca hasta que empiece a sonar
+                            try { if (connections[peerId]) connections[peerId].send({ type: 'BET_RESULT', msg: '🎵 Espera a que empiece a sonar la canción para colocar.' }); } catch (e) {}
+                            break;
+                        }
                         var _esActivo = (p.id === players[activePlayerIdx].id);
                         var _yaJugo = _esActivo ? (activeGuess !== null) : (currentBets[peerId] !== undefined);
                         if (_yaJugo) break;                                   // un solo intento
@@ -4275,14 +4368,14 @@
                 document.getElementById('validation-buttons').innerHTML = `
                     <button class="btn-val btn-ok" onclick="validateResult(true, false)">SÍ</button>
                     <button class="btn-val btn-ok" style="background:#ffd700; color:#000;" onclick="validateResult(true, true)">SÍ (+ 🔵 FICHA)</button>
-                    <button class="btn-val btn-fail" style="background:#555;" onclick="reportSystemError()">ERROR SISTEMA</button>
+                    <button class="btn-val" id="btn-revisar" style="background:#7c5cff; color:#fff;" onclick="revisarCancion()">🔍 REVISAR CANCIÓN</button>
                  `;
             } else {
                 document.getElementById('host-instructions').innerHTML = "<span style='color:#ff4444; font-size:1.5em;'>POSICIÓN INCORRECTA ❌</span><br>¿Pero acertó Algo?";
                 document.getElementById('validation-buttons').innerHTML = `
                     <button class="btn-val btn-fail" onclick="validateResult(false, false)">NO</button>
                     <button class="btn-val btn-ok" style="background:#00f2fe; color:#000;" onclick="validateResult(false, true)">SÍ (+ 🔵 FICHA)</button>
-                    <button class="btn-val btn-fail" style="background:#00f2fe; color:#000; font-size: 0.6em;" onclick="reportSystemError()">ERROR SISTEMA (REPETIR)</button>
+                    <button class="btn-val" id="btn-revisar" style="background:#7c5cff; color:#fff;" onclick="revisarCancion()">🔍 REVISAR CANCIÓN</button>
                  `;
             }
             syncState();
@@ -4487,7 +4580,7 @@
                 // comprobación, así que hacía falta el 4º acierto seguido para que
                 // saltara el bonus "x3". Sumamos el acierto en curso.
                 var streakNow = (stats.streaks[players[activePlayerIdx].id] || 0) + 1;
-                if (streakNow >= 3 && !modoLight) {
+                if (streakNow >= 3 && !modoLight && gameMode !== 'supervivencia') {
                     players[activePlayerIdx].score++;
                     players[activePlayerIdx].cards.push(parseInt(songs[currentSongIdx].year));
                     players[activePlayerIdx].cards.sort(function(a,b){return a-b;});
@@ -4520,7 +4613,7 @@
                 // ── HISTORIAL: marcar acierto ──
                 if (songHistory.length > 0) songHistory[songHistory.length-1].correct = true;
                 // ── EL CAMINO DEL GUERRERO: 3 fallos seguidos → carta extra ──
-                if (!modoLight && (stats.consecutiveFails[players[activePlayerIdx].id] || 0) >= 3) {
+                if (!modoLight && gameMode !== 'supervivencia' && (stats.consecutiveFails[players[activePlayerIdx].id] || 0) >= 3) {
                     players[activePlayerIdx].score++;
                     players[activePlayerIdx].cards.push(parseInt(songs[currentSongIdx].year));
                     players[activePlayerIdx].cards.sort(function(a,b){return a-b;});
@@ -5214,10 +5307,14 @@
                     type: 'STATE_UPDATE',
                     players: players.map(function (pl) { var c = Object.assign({}, pl); delete c.token; return c; }),   // sin el código secreto de reconexión
                     modoLight: modoLight,
+                    sharedAcks: sharedAcks,
+                    sharedListo: !!(isSharedSong && (sharedForzado || !faltanPorAceptar().length)),
+                    bombEsperaPlay: bombEsperaPlay,
                     validacionMovil: {
                         pendiente: !!(isRevealed && !turnoValidado && !partidaTerminada && (!turnPhase || turnPhase === 'NORMAL') &&
                                       !isSharedSong && !bombActive && gameMode !== 'equipos' && posicionCorrecta !== null),
                         correcta: posicionCorrecta,
+                        revisada: revisadaTurno,
                         activoNombre: players[activePlayerIdx] ? players[activePlayerIdx].name : ''
                     },
                     misPistas: (p && players[activePlayerIdx] && p.id === players[activePlayerIdx].id) ? pistasTurno : null,
@@ -5908,6 +6005,9 @@
 
         // ── REVANCHA SIN RECONEXIÓN ──
         function rematch() {
+            // Parar el confeti de la victoria (seguía disparando durante la revancha)
+            if (window.victoryInterval) { clearInterval(window.victoryInterval); window.victoryInterval = null; }
+            try { if (typeof confetti === 'function' && confetti.reset) confetti.reset(); } catch (e) {}
             // Resetear estado de juego
             gameStarted = false;
             partidaTerminada = false;
@@ -6362,9 +6462,32 @@
     (function () {
         var _sync = syncState;
         syncState = function () { var r = _sync.apply(this, arguments); guardarPartidaPronto(); return r; };
+        // Cartel grande "TURNO DE: X" en la tablet al empezar cada turno
+        var _nt = nextTurn;
+        nextTurn = function () { var r = _nt.apply(this, arguments); try { anunciarTurnoTablet(); } catch (e) {} return r; };
         var _win = showWinner;
         showWinner = function () { borrarPartidaGuardada(); if (_tGuardar) { clearTimeout(_tGuardar); _tGuardar = null; } return _win.apply(this, arguments); };
     })();
+
+    function anunciarTurnoTablet() {
+        if (!gameStarted || partidaTerminada || !players[activePlayerIdx]) return;
+        var titulo = 'TURNO DE', nombre = players[activePlayerIdx].name, color = '#00f2ff';
+        if (gameMode === 'equipos') nombre = (teamTurn === 'red' ? 'EQUIPO ROJO' : 'EQUIPO AZUL');
+        if (turnPhase === 'KING_SELECTION') { titulo = 'DESAFÍO DEL REY'; color = '#FFD54A'; }
+        if (isSharedSong) { titulo = '¡TODOS JUEGAN!'; nombre = 'canción de ' + nombre; color = '#ff5fa2'; }
+        if (bombActive) { titulo = 'CARTA BOMBA'; color = '#ff3b3b'; }
+        var ov = document.getElementById('cb-turno-tv');
+        if (ov) ov.remove();
+        ov = document.createElement('div'); ov.id = 'cb-turno-tv';
+        ov.style.cssText = 'position:fixed;inset:0;z-index:99990;display:flex;align-items:center;justify-content:center;pointer-events:none;background:rgba(10,4,30,.55);transition:opacity .4s';
+        var t = document.createElement('div');
+        t.style.cssText = 'text-align:center;padding:26px 48px;border-radius:26px;background:rgba(42,26,94,.96);border:4px solid ' + color + ';box-shadow:0 0 50px ' + color + '88;animation:cb-val-entra .35s cubic-bezier(.16,1,.3,1)';
+        t.innerHTML = '<div style="font-family:Bungee,sans-serif;font-size:1.4em;color:' + color + ';letter-spacing:2px">' + titulo + '</div>' +
+            '<div style="font-family:Bungee,sans-serif;font-size:3.2em;color:#fff;-webkit-text-stroke:3px #1a0f2e;paint-order:stroke;max-width:80vw;overflow-wrap:anywhere">' + String(nombre).replace(/</g, '&lt;') + '</div>';
+        ov.appendChild(t); document.body.appendChild(ov);
+        setTimeout(function () { ov.style.opacity = '0'; }, 1800);
+        setTimeout(function () { if (ov.parentNode) ov.remove(); }, 2300);
+    }
 
     function continuarPartida() {
         var d = leerPartidaGuardada();
@@ -6433,10 +6556,10 @@
         document.getElementById('cb-btn-descartar').onclick = function () { borrarPartidaGuardada(); caja.remove(); };
     });
     </script>
-    <script src="cb_iconos.js?v=20261016a"></script>
-    <script src="cb_despierto.js?v=20261016a"></script>
-    <script src="cb_resumen.js?v=20261016a"></script>
-    <script src="cb_graficos.js?v=20261016a"></script>
-    <link rel="stylesheet" href="cb_tema_retro.css?v=20261016a">
+    <script src="cb_iconos.js?v=20261026c"></script>
+    <script src="cb_despierto.js?v=20261026c"></script>
+    <script src="cb_resumen.js?v=20261026c"></script>
+    <script src="cb_graficos.js?v=20261026c"></script>
+    <link rel="stylesheet" href="cb_tema_retro.css?v=20261026c">
 </body>
 </html>

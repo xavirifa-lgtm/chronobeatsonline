@@ -3148,7 +3148,7 @@
             var caja = document.getElementById('cb-validar');
             if (!v || !v.pendiente || soyActivo) { if (caja) caja.remove(); return; }
             var t = data.currentTrack || {};
-            var clave = (t.id || '') + '|' + (data.turnCounter || 0) + '|' + v.correcta;
+            var clave = (t.id || '') + '|' + (data.turnCounter || 0) + '|' + v.correcta + '|' + (v.revisada ? 1 : 0);
             if (caja && caja.dataset.clave === clave) return;   // ya está pintada
             if (caja) caja.remove();
             caja = document.createElement('div');
@@ -3164,7 +3164,11 @@
                 '<div class="cb-val-tit">' + (v.correcta ? '¡' + nom + ' HA COLOCADO BIEN LA CARTA!' : nom + ' HA FALLADO EL HUECO') + '</div>' +
                 '<div class="cb-val-can">' + _escHtml(t.artist) + ' — ' + _escHtml(t.song) + ' <b>(' + _escHtml(t.year) + ')</b></div>' +
                 '<div class="cb-val-pre">¿Dijo también el grupo o la canción?</div>' +
-                '<div class="cb-val-fila">' + botones + '</div>';
+                '<div class="cb-val-fila">' + botones + '</div>' +
+                (v.revisada ? '<div class="cb-val-rev-ok">✓ Enviada a revisar. Ahora valida el turno.</div>'
+                            : '<button class="cb-val-rev">🔍 REVISAR CANCIÓN<small>¿El año no cuadra o hay algún dato mal? Te avisa por correo</small></button>');
+            var _rev = caja.querySelector('.cb-val-rev');
+            if (_rev) _rev.onclick = function () { _rev.disabled = true; _rev.innerText = 'ENVIANDO...'; send('REMOTE_REVIEW_SONG'); };
             caja.querySelectorAll('.cb-val-btn').forEach(function (b) {
                 b.onclick = function () {
                     caja.querySelectorAll('.cb-val-btn').forEach(function (x) { x.disabled = true; });
@@ -3175,6 +3179,63 @@
             });
             document.body.appendChild(caja);
             try { if (navigator.vibrate) navigator.vibrate(60); } catch (e) {}
+        }
+
+        // ── ¡TODOS JUEGAN!: aviso grande con OK. La canción no arranca hasta que todos aceptan ──
+        function pintarAvisoTodosJuegan(data) {
+            var caja = document.getElementById('cb-todos-juegan');
+            var acks = data.sharedAcks || {};
+            var mostrar = data.isSharedSong && data.gameStarted && !acks[myId] && !data.songPlayedThisTurn && !data.sharedListo;
+            if (!mostrar) { if (caja) caja.remove(); return; }
+            if (caja) return;
+            caja = document.createElement('div');
+            caja.id = 'cb-todos-juegan';
+            var dueno = (data.activePlayer && data.activePlayer.name) ? _escHtml(data.activePlayer.name) : 'el jugador del turno';
+            caja.innerHTML = '<div class="cb-tj-caja">' +
+                '<div class="cb-tj-tit">🎵 ¡TODOS JUEGAN!</div>' +
+                '<div class="cb-tj-txt">Esta canción la jugáis <b>todos a la vez</b>, gratis y con un solo intento.<br>' +
+                'Cuando empiece a sonar, coloca el año en la cronología de <b>' + dueno + '</b>.<br>El primero que acierte se lleva la carta.</div>' +
+                '<button class="cb-tj-ok">¡ENTENDIDO!</button></div>';
+            caja.querySelector('.cb-tj-ok').onclick = function () {
+                send('SHARED_ACK');
+                caja.querySelector('.cb-tj-ok').disabled = true;
+                caja.querySelector('.cb-tj-ok').innerText = 'ESPERANDO A LOS DEMÁS...';
+                setTimeout(function () { var c = document.getElementById('cb-todos-juegan'); if (c) c.remove(); }, 1200);
+            };
+            document.body.appendChild(caja);
+            try { if (navigator.vibrate) navigator.vibrate([150, 80, 150]); } catch (e) {}
+        }
+
+        // ── CARTEL "TURNO DE: X" al empezar cada turno (o si roban el turno) ──
+        var _ultTurnoAnunciado = null;
+        function anunciarTurno(data) {
+            if (!data.gameStarted || !data.activePlayer || !data.activePlayer.id) return;
+            var clave = (data.turnCounter || 0) + '|' + data.activePlayer.id + '|' + (data.turnPhase === 'KING_SELECTION' ? 'K' : '');
+            if (clave === _ultTurnoAnunciado) return;
+            var primera = (_ultTurnoAnunciado === null);
+            _ultTurnoAnunciado = clave;
+            if (data.isSharedSong) return;           // ya sale el aviso de ¡TODOS JUEGAN!
+            var soyYo = data.activePlayer.id === myId;
+            var nombre = data.activePlayer.name || '?';
+            if (data.gameMode === 'equipos') nombre = data.teamTurn === 'red' ? 'EQUIPO ROJO' : 'EQUIPO AZUL';
+            var pl = (data.players || []).find(function (x) { return x.id === data.activePlayer.id; });
+            var titulo = soyYo ? '¡TE TOCA!' : 'TURNO DE';
+            if (data.turnPhase === 'KING_SELECTION') titulo = soyYo ? '¡ERES EL REY!' : 'DESAFÍO DEL REY';
+            if (data.bombActive) titulo = soyYo ? '¡LA BOMBA ES TUYA!' : 'CARTA BOMBA';
+            var ov = document.getElementById('cb-turno');
+            if (ov) ov.remove();
+            ov = document.createElement('div'); ov.id = 'cb-turno';
+            if (soyYo) ov.className = 'cb-turno-mio';
+            var foto = pl && pl.avatar ? '<img class="cb-turno-av" src="' + pl.avatar + '" alt="">' :
+                '<div class="cb-turno-av cb-turno-ini">' + _escHtml(String(nombre).charAt(0).toUpperCase()) + '</div>';
+            ov.innerHTML = '<div class="cb-turno-caja">' + (data.gameMode === 'equipos' ? '' : foto) +
+                '<div class="cb-turno-tit">' + titulo + '</div>' +
+                (soyYo && data.gameMode !== 'equipos' ? '' : '<div class="cb-turno-nom">' + _escHtml(nombre) + '</div>') + '</div>';
+            ov.onclick = function () { ov.remove(); };
+            document.body.appendChild(ov);
+            if (soyYo) { try { if (navigator.vibrate) navigator.vibrate([120, 60, 120]); } catch (e) {} }
+            setTimeout(function () { if (ov.parentNode) ov.classList.add('cb-turno-fuera'); }, primera ? 1800 : 2200);
+            setTimeout(function () { if (ov.parentNode) ov.remove(); }, primera ? 2200 : 2600);
         }
 
         // ── PISTAS COMPRADAS (comodín artista / canción, pista de década) ──
@@ -3319,7 +3380,8 @@
             lastState = data;
             if (data.type === 'STATE_UPDATE') {
                 document.body.classList.toggle('cb-light', !!data.modoLight);
-                try { pintarValidacionMovil(data); pintarPistas(data); } catch (e) { console.warn(e); }
+                document.body.classList.toggle('cb-superv', data.gameMode === 'supervivencia');
+                try { pintarValidacionMovil(data); pintarPistas(data); pintarAvisoTodosJuegan(data); anunciarTurno(data); } catch (e) { console.warn(e); }
                 detectStateChanges(data);
                 applyTheme(data.currentType || 'mix');
                 // Actualizar lista de espera si aún no ha empezado
@@ -3550,9 +3612,9 @@
                     if (data.bombActive) {
                         bombOv.style.display = 'block';
                         var soyHolder = (data.bombHolderId === myId);
-                        document.getElementById('bomb-holder-txt').innerText = soyHolder
-                            ? '¡LA TIENES TÚ! COLOCA YA ⬇️'
-                            : 'La tiene ' + (data.bombHolderName || '?');
+                        document.getElementById('bomb-holder-txt').innerText = data.bombEsperaPlay
+                            ? (soyHolder ? '¡LA TIENES TÚ! DALE A PLAY PARA EMPEZAR' : 'La tiene ' + (data.bombHolderName || '?') + ' — esperando al PLAY')
+                            : (soyHolder ? '¡LA TIENES TÚ! COLOCA YA ⬇️' : 'La tiene ' + (data.bombHolderName || '?'));
                         document.getElementById('bomb-timer-txt').innerText = (data.bombTimer != null ? data.bombTimer : '');
                         bombOv.style.background = (data.bombTimer != null && data.bombTimer <= 5)
                             ? 'linear-gradient(180deg, rgba(255,0,0,0.98), rgba(150,0,0,0.92))'
@@ -4141,7 +4203,10 @@
         function interactuarSlot(idx, amIActive, isGuess, isTakenByOther) {
             // CARTA BOMBA: colocación inmediata, sin confirmación (los 15s corren).
             if (lastState && lastState.bombActive) {
-                if (lastState.bombHolderId === myId) { send('GUESS', idx); }
+                if (lastState.bombHolderId === myId) {
+                    if (lastState.bombEsperaPlay) { showCustomAlert("💣 Primero dale a PLAY: la cuenta de 15 segundos empieza al sonar la canción."); return; }
+                    send('GUESS', idx);
+                }
                 return;
             }
 
@@ -4151,6 +4216,10 @@
             }
 
             var isShared = lastState && lastState.isSharedSong;
+            if (isShared && !lastState.songPlayedThisTurn) {
+                showCustomAlert("🎵 ¡TODOS JUEGAN! Espera a que empiece a sonar la canción para colocar.");
+                return;
+            }
 
             if (amIActive) {
                 // Jugador activo — apuesta normal
@@ -4268,10 +4337,10 @@
             });
         }
     </script>
-    <script src="cb_iconos.js?v=20261016a"></script>
-    <script src="cb_despierto.js?v=20261016a"></script>
-    <script src="cb_graficos.js?v=20261016a"></script>
-    <link rel="stylesheet" href="cb_tema_retro.css?v=20261016a">
+    <script src="cb_iconos.js?v=20261026c"></script>
+    <script src="cb_despierto.js?v=20261026c"></script>
+    <script src="cb_graficos.js?v=20261026c"></script>
+    <link rel="stylesheet" href="cb_tema_retro.css?v=20261026c">
 </body>
 
 </html>
