@@ -458,7 +458,11 @@
     // ---------- PLAYER ----------
     var AVATARES = ['av_rockero', 'av_diva', 'av_metalero', 'av_abuela_walkman', 'av_rapero', 'av_punki',
         'av_ochentero', 'av_dj', 'av_otaku', 'av_gamer', 'av_cinefilo', 'av_flamenca', 'av_reggaetonero',
-        'av_clasico', 'av_tito_karaoke', 'av_indie'];
+        'av_clasico', 'av_tito_karaoke', 'av_indie',
+        'av_mascara_hockey', 'av_superheroe', 'av_fontanero', 'av_astronauta', 'av_rolero', 'av_agente', 'av_orejitas', 'av_exploradora',
+        'av_mago', 'av_elfo', 'av_motero', 'av_payasa', 'av_minera', 'av_pistolero', 'av_aventurero', 'av_dragona',
+        'av_espartano', 'av_velocista', 'av_luchadora', 'av_espadachin', 'av_entrenadora', 'av_cubos', 'av_gata', 'av_soldado',
+        'av_saiyan', 'av_colegiala', 'av_ninja', 'av_piloto', 'av_heroe', 'av_kimono', 'av_entrenador', 'av_pirata'];
 
     function ponerReverso(tipo) {
         var ed = TIPOS[tipo] || 'mix';
@@ -492,18 +496,23 @@
         var grid = caja.querySelector('#cb-avatares');
         var guardado = '';
         try { guardado = localStorage.getItem('cb_player_avatar') || ''; } catch (e) {}
+        // se crean en orden y se quita el que no cargue (antes salían en el orden en que cargaban)
         AVATARES.forEach(function (n) {
-            existe(n, function (ok) {
-                if (!ok) return;
-                var im = document.createElement('img');
-                im.src = DIR + n + '.webp';
-                im.alt = '';
-                im.setAttribute('data-av', n);
-                if (guardado.indexOf('/' + n + '.webp') !== -1) im.className = 'sel';
-                im.onclick = function () { elegirAvatar(n); };
-                grid.appendChild(im);
-            });
+            var im = document.createElement('img');
+            im.alt = '';
+            im.loading = 'lazy';
+            im.setAttribute('data-av', n);
+            if (guardado.indexOf('/' + n + '.webp') !== -1) im.className = 'sel';
+            im.onerror = function () { im.remove(); };
+            im.onclick = function () { elegirAvatar(n); };
+            im.src = DIR + n + '.webp';
+            grid.appendChild(im);
         });
+        var sel = grid.querySelector('img.sel');
+        if (sel) setTimeout(function () {
+            var r = sel.getBoundingClientRect(), g = grid.getBoundingClientRect();
+            grid.scrollLeft += (r.left - g.left) - (g.width - r.width) / 2;
+        }, 300);
     }
 
     function iniciarPlayer() {
@@ -525,8 +534,10 @@
             // selector de avatares
             '#cb-avatares-caja{width:100%;max-width:300px;margin:-4px auto 14px}' +
             '.cb-av-tit{font-family:Bungee,sans-serif;font-size:.62em;color:var(--neon);text-align:center;margin-bottom:6px;letter-spacing:1px}' +
-            '#cb-avatares{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 8px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}' +
-            '#cb-avatares img{width:56px;height:56px;flex:0 0 56px;border-radius:50%;cursor:pointer;scroll-snap-align:start;' +
+            // 2 filas con desplazamiento horizontal: con 48 personajes una sola fila era eterna
+            '#cb-avatares{display:grid;grid-template-rows:repeat(2,56px);grid-auto-flow:column;grid-auto-columns:56px;gap:8px;' +
+            'overflow-x:auto;padding:4px 2px 8px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}' +
+            '#cb-avatares img{width:56px;height:56px;border-radius:50%;cursor:pointer;scroll-snap-align:start;object-fit:contain;' +
             'border:2px solid transparent;transition:transform .15s,border-color .15s}' +
             '#cb-avatares img.sel{border-color:var(--neon);transform:scale(1.08);box-shadow:0 0 12px var(--neon)}' +
             // iconos más grandes donde son protagonistas
