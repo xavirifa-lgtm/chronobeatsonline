@@ -8,7 +8,6 @@ Junichi Masuda|Pokémon Red/Blue (Opening)|1996|https://www.youtube.com/watch?v=
 Junichi Masuda|Pokémon Red/Blue (Battle Theme)|1996|https://www.youtube.com/watch?v=2Jmty_NiaXc
 Martin O'Donnell|Halo: Combat Evolved (Main Theme)|2001|https://www.youtube.com/watch?v=0jXTBAGv9ZQ
 Nobuo Uematsu|Final Fantasy VII (One-Winged Angel)|1997|https://www.youtube.com/watch?v=mYdf0yqK_Fc
-Nobuo Uematsu|Final Fantasy X (To Zanarkand)|2001|https://www.youtube.com/watch?v=h-0G_FI61a8
 Jeremy Soule|The Elder Scrolls V: Skyrim (Dragonborn)|2011|https://www.youtube.com/watch?v=eVUXPUF4OzI
 Gustavo Santaolalla|The Last of Us (Main Theme)|2013|https://www.youtube.com/watch?v=Pt1pOY3_W64
 Masato Nakamura|Sonic the Hedgehog (Green Hill Zone)|1991|https://www.youtube.com/watch?v=y-7sX0_9S6w
@@ -50,7 +49,6 @@ Hiroshi Kawaguchi|Out Run (Magical Sound Shower)|1986|https://www.youtube.com/wa
 Hideki Naganuma|Jet Set Radio (Concept of Love)|2002|https://www.youtube.com/watch?v=Xh0Yp-n_5wI
 Jun Senoue|Sonic Adventure 2 (Live and Learn)|2001|https://www.youtube.com/watch?v=3gPBmDptqlQ
 Ari Pulkkinen|Angry Birds (Main Theme)|2009|https://www.youtube.com/watch?v=M7SIn6X5bXk
-Kazumi Totaka|Wii Sports (Main Theme)|2006|https://www.youtube.com/watch?v=d5c4KOopwLs
 The Rolling Stones|GTA: San Andreas (Paint It Black)|2004|https://www.youtube.com/watch?v=f-fS_ZreRNo
 Michael Jackson|Sonic the Hedgehog 3 (Ice Cap Zone)|1994|https://www.youtube.com/watch?v=hYxlqNpZ-24
 Robin Beanland|Conker's Bad Fur Day (The Mighty Poo)|2001|https://www.youtube.com/watch?v=0w5neZildNw
