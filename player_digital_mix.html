@@ -3142,11 +3142,29 @@
         // Al revelar la carta, los rivales (no el jugador del turno) ven los mismos botones que
         // la tablet. El primero que pulse valida y los botones desaparecen en todos los móviles.
         function _escHtml(t) { return String(t == null ? '' : t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+        // Cartel "¿ACERTÓ LA CANCIÓN?" (mismo estilo que la tablet: #cb-pregunta en cb_tema_retro.css)
+        function cbPreguntaCancion(nombre, cb) {
+            var v = document.getElementById('cb-pregunta'); if (v) v.remove();
+            var caja = document.createElement('div');
+            caja.id = 'cb-pregunta';
+            caja.dataset.origen = 'validar';
+            caja.innerHTML = '<div class="cb-pr-caja"><div class="cb-pr-tit">¿ACERTÓ LA CANCIÓN?</div><div class="cb-pr-txt"></div>' +
+                '<div class="cb-pr-fila"><button class="cb-pr-si">SÍ (+1 FICHA)</button><button class="cb-pr-no">NO</button></div></div>';
+            caja.querySelector('.cb-pr-txt').textContent = '¿' + (nombre || 'El jugador') + ' dijo también el título o el grupo? Si es que sí, se lleva una ficha.';
+            caja.querySelector('.cb-pr-si').onclick = function () { caja.remove(); cb(true); };
+            caja.querySelector('.cb-pr-no').onclick = function () { caja.remove(); cb(false); };
+            document.body.appendChild(caja);
+        }
+
         function pintarValidacionMovil(data) {
             var v = data.validacionMovil;
             var soyActivo = data.activePlayer && data.activePlayer.id === myId;
             var caja = document.getElementById('cb-validar');
-            if (!v || !v.pendiente || soyActivo) { if (caja) caja.remove(); return; }
+            if (!v || !v.pendiente || soyActivo) {
+                if (caja) caja.remove();
+                var _pq = document.getElementById('cb-pregunta'); if (_pq && _pq.dataset.origen === 'validar') _pq.remove();
+                return;
+            }
             var t = data.currentTrack || {};
             var clave = (t.id || '') + '|' + (data.turnCounter || 0) + '|' + v.correcta + '|' + (v.revisada ? 1 : 0);
             if (caja && caja.dataset.clave === clave) return;   // ya está pintada
@@ -3156,14 +3174,11 @@
             caja.dataset.clave = clave;
             var nom = _escHtml(v.activoNombre || 'el jugador');
             var botones = v.correcta
-                ? '<button class="cb-val-btn cb-val-ok" data-a="REMOTE_CORRECT">✅ ACIERTO</button>' +
-                  '<button class="cb-val-btn cb-val-oro" data-a="REMOTE_CORRECT_TOKEN">✅ ACIERTO + FICHA<small>dijo el grupo o la canción</small></button>'
-                : '<button class="cb-val-btn cb-val-no" data-a="REMOTE_INCORRECT">❌ FALLO</button>' +
-                  '<button class="cb-val-btn cb-val-oro" data-a="REMOTE_INCORRECT_TOKEN">❌ FALLO + FICHA<small>pero dijo el grupo o la canción</small></button>';
+                ? '<button class="cb-val-btn cb-val-ok" data-ok="1">✅ ACERTÓ</button>'
+                : '<button class="cb-val-btn cb-val-no" data-ok="0">❌ FALLÓ</button>';
             caja.innerHTML =
                 '<div class="cb-val-tit">' + (v.correcta ? '¡' + nom + ' HA COLOCADO BIEN LA CARTA!' : nom + ' HA FALLADO EL HUECO') + '</div>' +
                 '<div class="cb-val-can">' + _escHtml(t.artist) + ' — ' + _escHtml(t.song) + ' <b>(' + _escHtml(t.year) + ')</b></div>' +
-                '<div class="cb-val-pre">¿Dijo también el grupo o la canción?</div>' +
                 '<div class="cb-val-fila">' + botones + '</div>' +
                 (v.revisada ? '<div class="cb-val-rev-ok">✓ Enviada a revisar. Ahora valida el turno.</div>'
                             : '<button class="cb-val-rev">🔍 REVISAR CANCIÓN<small>¿El año no cuadra o hay algún dato mal? Te avisa por correo</small></button>');
@@ -3171,10 +3186,14 @@
             if (_rev) _rev.onclick = function () { _rev.disabled = true; _rev.innerText = 'ENVIANDO...'; send('REMOTE_REVIEW_SONG'); };
             caja.querySelectorAll('.cb-val-btn').forEach(function (b) {
                 b.onclick = function () {
-                    caja.querySelectorAll('.cb-val-btn').forEach(function (x) { x.disabled = true; });
-                    b.classList.add('cb-val-pulsado');
-                    send(b.getAttribute('data-a'));
-                    setTimeout(function () { var c = document.getElementById('cb-validar'); if (c && c.dataset.clave === clave) c.remove(); }, 4000);
+                    var ok = b.getAttribute('data-ok') === '1';
+                    cbPreguntaCancion(v.activoNombre, function (si) {
+                        if (!document.getElementById('cb-validar')) return;   // ya lo validó otro
+                        caja.querySelectorAll('.cb-val-btn').forEach(function (x) { x.disabled = true; });
+                        b.classList.add('cb-val-pulsado');
+                        send(ok ? (si ? 'REMOTE_CORRECT_TOKEN' : 'REMOTE_CORRECT') : (si ? 'REMOTE_INCORRECT_TOKEN' : 'REMOTE_INCORRECT'));
+                        setTimeout(function () { var c = document.getElementById('cb-validar'); if (c && c.dataset.clave === clave) c.remove(); }, 4000);
+                    });
                 };
             });
             document.body.appendChild(caja);
@@ -3570,11 +3589,13 @@
                             rContainer.innerHTML = `<button class="btn" style="background:var(--neon); color:#000; padding:20px; font-size:1.2em;" onclick="send('REMOTE_REVEAL'); toggleRemote();">👀 REVELAR CARTA</button>
                             <button class="btn" style="background:#555; color:white; border-color:#555; margin-top:20px;" onclick="send('REMOTE_SYSTEM_ERROR'); toggleRemote();">ERROR DE SISTEMA (REPETIR)</button>`;
                         } else {
-                            rContainer.innerHTML = `
-                                <button class="btn" style="background:#00ff00; color:#000; padding:15px; margin-bottom:10px;" onclick="send('REMOTE_CORRECT'); toggleRemote();">✅ SÍ (Acertó y gana carta)</button>
-                                <button class="btn" style="background:#ffd700; color:#000; padding:15px; margin-bottom:10px;" onclick="send('REMOTE_CORRECT_TOKEN'); toggleRemote();">🔵 SÍ (+ Ficha Azul)</button>
-                                <button class="btn" style="background:#ff4444; color:#fff; padding:15px; margin-bottom:10px;" onclick="send('REMOTE_INCORRECT'); toggleRemote();">❌ NO (Falló todo)</button>
-                                <button class="btn" style="background:#00f2fe; color:#000; padding:15px; margin-bottom:10px;" onclick="send('REMOTE_INCORRECT_TOKEN'); toggleRemote();">🔵 NO (+ Ficha Consolación)</button>
+                            // ACERTÓ / FALLÓ y luego la pregunta "¿ACERTÓ LA CANCIÓN?" (SÍ = + ficha).
+                            // Si la tablet ya sabe si la posición es correcta, solo sale el botón que toca.
+                            var _vm = data.validacionMovil, _nomA = (data.activePlayer && data.activePlayer.name) ? data.activePlayer.name.replace(/['"<>\\`$]/g, '') : '';
+                            var _btnOk = `<button class="btn" style="background:#00ff00; color:#000; padding:15px; margin-bottom:10px;" onclick="toggleRemote(); cbPreguntaCancion('${_nomA}', function(si){ send(si ? 'REMOTE_CORRECT_TOKEN' : 'REMOTE_CORRECT'); });">✅ ACERTÓ</button>`;
+                            var _btnNo = `<button class="btn" style="background:#ff4444; color:#fff; padding:15px; margin-bottom:10px;" onclick="toggleRemote(); cbPreguntaCancion('${_nomA}', function(si){ send(si ? 'REMOTE_INCORRECT_TOKEN' : 'REMOTE_INCORRECT'); });">❌ FALLÓ</button>`;
+                            rContainer.innerHTML =
+                                ((_vm && _vm.pendiente) ? (_vm.correcta ? _btnOk : _btnNo) : (_btnOk + _btnNo)) + `
                                 <button class="btn" style="background:#444; color:white; border-color:#444; margin-top:10px;" onclick="send('REMOTE_NEXT_TURN'); toggleRemote();">PASAR TURNO (Nadie acertó)</button>
                                 <button class="btn" style="background:#555; color:white; border-color:#555; margin-top:20px;" onclick="send('REMOTE_SYSTEM_ERROR'); toggleRemote();">ERROR SISTEMA</button>
                             `;
@@ -3643,12 +3664,14 @@
                             var html = "<h3 style='color:var(--neon);font-family:Bungee;'>¡ELIGE LA CARTA MÁS DIFÍCIL!</h3>";
                             if (data.kingOptions) {
                                 data.kingOptions.forEach(function (opt, idx) {
-                                    html += "<div style='background:#111; border:1px solid var(--neon); border-radius:10px; padding:10px; margin-bottom:10px; text-align:left;'>";
-                                    html += "<span style='color:#00f2fe; font-family:Bungee; font-size:1.2em; margin-right:10px;'>#" + (idx + 1) + "</span>";
-                                    html += "<span style='font-size:0.8em; color:#aaa;'>" + opt.artist + "</span><br>";
-                                    html += "<strong style='font-family:Bungee;'>" + opt.song + "</strong><br>";
-                                    html += "<span style='color:var(--accent); font-family:Bungee; font-size:1.2em;'>" + opt.year + "</span>";
-                                    html += "<button class='btn' style='margin-top:10px; padding:10px; font-size:1em;' onclick=\"send('KING_SELECT_CARD', " + idx + ")\">¡ELEGIR ESTA!</button>";
+                                    // 5 opciones: fila compacta (texto a la izquierda, botón a la derecha)
+                                    html += "<div style='background:#111; border:1px solid var(--neon); border-radius:10px; padding:8px 10px; margin-bottom:8px; text-align:left; display:flex; align-items:center; gap:8px; width:100%; box-sizing:border-box;'>";
+                                    html += "<div style='flex:1; min-width:0;'>";
+                                    html += "<span style='font-size:0.75em; color:#aaa;'>" + opt.artist + "</span><br>";
+                                    html += "<strong style='font-family:Bungee; font-size:0.85em;'>" + opt.song + "</strong> ";
+                                    html += "<span style='color:var(--accent); font-family:Bungee;'>" + opt.year + "</span>";
+                                    html += "</div>";
+                                    html += "<button class='btn' style='flex:0 0 auto; width:auto; margin:0; padding:8px 12px; font-size:0.8em;' onclick=\"send('KING_SELECT_CARD', " + idx + ")\">ELEGIR</button>";
                                     html += "</div>";
                                 });
                             }
@@ -4047,30 +4070,13 @@
 
                     if (isMyTurn) {
                         if (data.myCards) {
-                            var h = "";
-                            var isSingleCard = (data.myCards.length === 1);
-                            if (isSingleCard) h += '<div style="font-size:0.8em; color:var(--neon); text-align:center; font-family:\'Bungee\'; margin-bottom:5px;">↑ ANTES ↑</div>';
-                            h += renderBetSlot(0, data.currentBets, data.activeGuess, true);
-                            data.myCards.forEach(function (year, idx) {
-                                var displayYear = (data.isFogActive) ? "????" : year;
-                                h += '<div class="card-row">' + displayYear + '</div>';
-                                h += renderBetSlot(idx + 1, data.currentBets, data.activeGuess, true);
-                            });
-                            if (isSingleCard) h += '<div style="font-size:0.8em; color:var(--neon); text-align:center; font-family:\'Bungee\'; margin-top:5px;">↓ DESPUÉS ↓</div>';
-                            document.getElementById('my-cards-list').innerHTML = h;
+                            document.getElementById('my-cards-list').innerHTML =
+                                htmlCronologia(data.myCards, data.isFogActive, data.currentBets, data.activeGuess, true, '');
                         }
                     } else {
                         if (data.activeTimeline) {
-                            var h = "";
-                            var isSingleCard = (data.activeTimeline.length === 1);
-                            if (isSingleCard) h += '<div style="font-size:0.8em; color:var(--neon); text-align:center; font-family:\'Bungee\'; margin-bottom:5px;">↑ ANTES ↑</div>';
-                            h += renderBetSlot(0, data.currentBets, data.activeGuess, false);
-                            data.activeTimeline.forEach(function (year, idx) {
-                                h += '<div class="card-row" style="border-color: #444; color: #888;">' + year + '</div>';
-                                h += renderBetSlot(idx + 1, data.currentBets, data.activeGuess, false);
-                            });
-                            if (isSingleCard) h += '<div style="font-size:0.8em; color:var(--neon); text-align:center; font-family:\'Bungee\'; margin-top:5px;">↓ DESPUÉS ↓</div>';
-                            document.getElementById('my-cards-list').innerHTML = h;
+                            document.getElementById('my-cards-list').innerHTML =
+                                htmlCronologia(data.activeTimeline, false, data.currentBets, data.activeGuess, false, ' style="border-color: #444; color: #888;"');
                         }
                     }
 
@@ -4162,6 +4168,36 @@
                     }
                 }
             }
+        }
+
+        // Cronología con las cartas del mismo año agrupadas: una sola casete con "×2".
+        // Los huecos de dentro de un grupo (entre dos 1992) se ocultan: colocar antes o
+        // después del grupo es igual de correcto. Si alguno estuviera ocupado, se muestra.
+        function htmlCronologia(cards, fog, bets, guess, amIActive, rowAttr) {
+            var grupos = 0;
+            for (var g = 0; g < cards.length; g++) if (g === 0 || String(cards[g]) !== String(cards[g - 1])) grupos++;
+            var aviso = function (t, m) { return '<div style="font-size:0.8em; color:var(--neon); text-align:center; font-family:\'Bungee\'; ' + m + '">' + t + '</div>'; };
+            var ocupado = function (k) {
+                if (guess !== null && guess !== undefined && guess == k) return true;
+                for (var pid in (bets || {})) if (bets[pid] == k) return true;
+                return false;
+            };
+            var h = '';
+            if (grupos === 1) h += aviso('↑ ANTES ↑', 'margin-bottom:5px;');
+            h += renderBetSlot(0, bets, guess, amIActive);
+            var i = 0;
+            while (i < cards.length) {
+                var j = i;
+                while (j + 1 < cards.length && String(cards[j + 1]) === String(cards[i])) j++;
+                var n = j - i + 1;
+                h += '<div class="card-row"' + (rowAttr || '') + '>' + (fog ? '????' : cards[i]) +
+                     (n > 1 ? '<span class="cb-repes">×' + n + '</span>' : '') + '</div>';
+                for (var k = i + 1; k <= j; k++) if (ocupado(k)) h += renderBetSlot(k, bets, guess, amIActive);
+                h += renderBetSlot(j + 1, bets, guess, amIActive);
+                i = j + 1;
+            }
+            if (grupos === 1) h += aviso('↓ DESPUÉS ↓', 'margin-top:5px;');
+            return h;
         }
 
         function renderBetSlot(idx, bets, activeGuess, amIActive) {
@@ -4337,10 +4373,10 @@
             });
         }
     </script>
-    <script src="cb_iconos.js?v=20261028a"></script>
-    <script src="cb_despierto.js?v=20261028a"></script>
-    <script src="cb_graficos.js?v=20261028a"></script>
-    <link rel="stylesheet" href="cb_tema_retro.css?v=20261028a">
+    <script src="cb_iconos.js?v=20261111a"></script>
+    <script src="cb_despierto.js?v=20261111a"></script>
+    <script src="cb_graficos.js?v=20261111a"></script>
+    <link rel="stylesheet" href="cb_tema_retro.css?v=20261111a">
 </body>
 
 </html>

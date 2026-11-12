@@ -1236,6 +1236,7 @@
         }
         var turnPhase = 'NORMAL'; // 'NORMAL', 'KING_SELECTION', 'KING_GUESS', 'KING_GUESS_RESULT'
         var kingOptions = []; // Array de opciones para los retadores
+        var KING_OPCIONES = 5;  // cartas que ven los rivales para elegir la del Rey
         var cheatsEnabled = true;
         var gameStarted = false;
         // Se pone a true al mostrar el ganador. Bloquea nextTurn(): en Supervivencia la
@@ -2287,9 +2288,17 @@
             while (players[next] && players[next].lives !== undefined && players[next].lives <= 0 && guard < players.length);
             activePlayerIdx = next;
             var holder = players[activePlayerIdx];
-            document.getElementById('host-instructions').innerHTML = "<span style='color:#ff3b3b; font-size:1.4em; font-family:Bungee;'>💣 CARTA BOMBA — " + holder.name + "</span>";
+            // Al pasar la bomba se PARA la canción y la cuenta: el nuevo portador le da a PLAY
+            // y empiezan otros 15 s enteros (antes seguía sonando y el contador continuaba).
+            if (bombInterval) { clearInterval(bombInterval); bombInterval = null; }
+            if (isPlaying && momentoDeInicio) segundosAcumulados += Math.floor((Date.now() - momentoDeInicio) / 1000);
+            try { if (player && player.pauseVideo) player.pauseVideo(); } catch (e) {}
+            isPlaying = false;
+            stopCountdown();
+            bombEsperaPlay = true; bombTimer = 15;
+            document.getElementById('host-instructions').innerHTML = "<span style='color:#ff3b3b; font-size:1.4em; font-family:Bungee;'>💣 CARTA BOMBA — " + holder.name + "</span><br>Dale a PLAY en tu móvil: los 15 segundos empiezan al sonar la canción";
+            var _cpb = document.getElementById('ui-current-player'); if (_cpb) _cpb.innerText = '💣 ' + holder.name;
             for (var _bp in connections) { try { connections[_bp].send({ type: 'BOMB_PASS', holder: holder.name }); } catch(e){} }
-            iniciarTimerBomba();
             syncState();
         }
 
@@ -2495,8 +2504,8 @@
             if (gameMode === 'rey' && players.length >= 2 && players[activePlayerIdx] && players[activePlayerIdx].score >= 10) {
                 turnPhase = 'KING_SELECTION';
                 kingOptions = [];
-                // Calcular un número de cartas igual a (players.length - 1)
-                var numOptions = Math.max(1, players.length - 1);
+                // Siempre 5 cartas para elegir (antes una por rival)
+                var numOptions = KING_OPCIONES;
                 for (var i = 0; i < numOptions; i++) {
                     currentSongIdx++; if(songs[currentSongIdx] && songs[currentSongIdx].id) { var _pl = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]'); if(!_pl.includes(songs[currentSongIdx].id)){ _pl.push(songs[currentSongIdx].id); localStorage.setItem('CB_PlayedSongs', JSON.stringify(_pl)); } }
                     if (!songs[currentSongIdx]) { reloadSongsMidGame(); currentSongIdx++; }
@@ -4117,7 +4126,7 @@
         function reiniciarSeleccionRey() {
             turnPhase = 'KING_SELECTION';
             kingOptions = [];
-            var numOpts = Math.max(1, players.length - 1);
+            var numOpts = KING_OPCIONES;
             for (var ki = 0; ki < numOpts; ki++) {
                 currentSongIdx++;
                 if (songs[currentSongIdx] && songs[currentSongIdx].id) {
@@ -4364,17 +4373,15 @@
             document.getElementById('validation-buttons').style.display = 'flex';
             posicionCorrecta = isCorrect;
             if (isCorrect) {
-                document.getElementById('host-instructions').innerHTML = "<span style='color:#00ff00; font-size:1.5em;'>¡POSICIÓN CORRECTA! ✅</span><br>¿Detalles?";
+                document.getElementById('host-instructions').innerHTML = "<span style='color:#00ff00; font-size:1.5em;'>¡POSICIÓN CORRECTA! ✅</span>";
                 document.getElementById('validation-buttons').innerHTML = `
-                    <button class="btn-val btn-ok" onclick="validateResult(true, false)">SÍ</button>
-                    <button class="btn-val btn-ok" style="background:#ffd700; color:#000;" onclick="validateResult(true, true)">SÍ (+ 🔵 FICHA)</button>
+                    <button class="btn-val btn-ok" onclick="validarConPregunta(true)">✅ ACERTÓ</button>
                     <button class="btn-val" id="btn-revisar" style="background:#7c5cff; color:#fff;" onclick="revisarCancion()">🔍 REVISAR CANCIÓN</button>
                  `;
             } else {
-                document.getElementById('host-instructions').innerHTML = "<span style='color:#ff4444; font-size:1.5em;'>POSICIÓN INCORRECTA ❌</span><br>¿Pero acertó Algo?";
+                document.getElementById('host-instructions').innerHTML = "<span style='color:#ff4444; font-size:1.5em;'>POSICIÓN INCORRECTA ❌</span>";
                 document.getElementById('validation-buttons').innerHTML = `
-                    <button class="btn-val btn-fail" onclick="validateResult(false, false)">NO</button>
-                    <button class="btn-val btn-ok" style="background:#00f2fe; color:#000;" onclick="validateResult(false, true)">SÍ (+ 🔵 FICHA)</button>
+                    <button class="btn-val btn-fail" onclick="validarConPregunta(false)">❌ FALLÓ</button>
                     <button class="btn-val" id="btn-revisar" style="background:#7c5cff; color:#fff;" onclick="revisarCancion()">🔍 REVISAR CANCIÓN</button>
                  `;
             }
@@ -4451,7 +4458,31 @@
             return seguro;
         }
 
+        // ACERTÓ / FALLÓ → pregunta "¿ACERTÓ LA CANCIÓN?" (título o grupo). SÍ = + 1 ficha.
+        // Mismo cartel que en los móviles (cb_tema_retro.css, #cb-pregunta).
+        function cbPregunta(titulo, texto, si, no, cb) {
+            var v = document.getElementById('cb-pregunta'); if (v) v.remove();
+            var caja = document.createElement('div');
+            caja.id = 'cb-pregunta';
+            caja.innerHTML = '<div class="cb-pr-caja"><div class="cb-pr-tit"></div><div class="cb-pr-txt"></div>' +
+                '<div class="cb-pr-fila"><button class="cb-pr-si"></button><button class="cb-pr-no"></button></div></div>';
+            caja.querySelector('.cb-pr-tit').textContent = titulo;
+            caja.querySelector('.cb-pr-txt').textContent = texto;
+            caja.querySelector('.cb-pr-si').textContent = si;
+            caja.querySelector('.cb-pr-no').textContent = no;
+            caja.querySelector('.cb-pr-si').onclick = function () { caja.remove(); cb(true); };
+            caja.querySelector('.cb-pr-no').onclick = function () { caja.remove(); cb(false); };
+            document.body.appendChild(caja);
+        }
+        function validarConPregunta(isCardOk) {
+            if (turnoValidado || !isRevealed) return;
+            var nom = players[activePlayerIdx] ? players[activePlayerIdx].name : 'el jugador';
+            cbPregunta('¿ACERTÓ LA CANCIÓN?', '¿' + nom + ' dijo también el título o el grupo? Si es que sí, se lleva una ficha.',
+                'SÍ (+1 FICHA)', 'NO', function (si) { validateResult(isCardOk, si); });
+        }
+
         function validateResult(isCardOk, isTokenOk) {
+            var _pq = document.getElementById('cb-pregunta'); if (_pq) _pq.remove();
             if (turnPhase === 'DUEL') return; // No se valida nada en modo duelo manualmente de esta forma
             if (partidaTerminada) return;
             // Un turno solo se valida una vez. Tras un fallo con apuestas acertadas el turno
@@ -5463,9 +5494,15 @@
 
             // Mostrar cartas del jugador actual en el centro
             var currentCardsHtml = "";
-            players[activePlayerIdx].cards.forEach(function (year) {
-                currentCardsHtml += '<div class="mini-card">' + (isFogActive ? '????' : year) + '</div>';
-            });
+            // mismo año repetido → una sola carta con "×2"
+            var _cc = players[activePlayerIdx].cards;
+            for (var _ci = 0; _ci < _cc.length; ) {
+                var _cj = _ci; while (_cj + 1 < _cc.length && String(_cc[_cj + 1]) === String(_cc[_ci])) _cj++;
+                var _cn = _cj - _ci + 1;
+                currentCardsHtml += '<div class="mini-card" style="position:relative">' + (isFogActive ? '????' : _cc[_ci]) +
+                    (_cn > 1 ? '<span class="cb-repes">×' + _cn + '</span>' : '') + '</div>';
+                _ci = _cj + 1;
+            }
             document.getElementById('active-player-inventory').innerHTML = currentCardsHtml;
 
             var timelinesHtml = ""; players.forEach(function (p) {
@@ -5477,9 +5514,11 @@
         }    
         // ── SALA PERSISTENTE ──
         function resetRoomCode() {
-            if (!confirm('¿Generar un nuevo código de sala? Los jugadores actuales perderán la conexión.')) return;
-            localStorage.removeItem('CB_RoomCode');
-            location.reload();
+            cbPregunta('¿CÓDIGO NUEVO?', 'Se generará un código de sala nuevo y los jugadores conectados perderán la conexión.', 'SÍ, CAMBIAR', 'NO', function (si) {
+                if (!si) return;
+                localStorage.removeItem('CB_RoomCode');
+                location.reload();
+            });
         }
 
         // ── CONTADOR DE CANCIONES ──
@@ -5502,14 +5541,18 @@
         }
 
         // ── REBARAJAR MAZO: olvidar canciones jugadas y reconstruir ──
-        function resetPlayedSongs() {
+        function resetPlayedSongs(confirmado) {
             if (gameStarted) {
                 showCustomAlert('No se puede rebarajar con la partida en marcha.');
                 return;
             }
             var jugadas = JSON.parse(localStorage.getItem('CB_PlayedSongs') || '[]').length;
             // Botón grande en el lobby: pedir confirmación para no borrar el progreso sin querer
-            if (jugadas > 0 && !confirm('¿Seguro que quieres rebarajar el mazo?\n\nVolverán a salir las ' + jugadas + ' canciones que ya habéis jugado.')) return;
+            if (jugadas > 0 && confirmado !== true) {
+                cbPregunta('¿REBARAJAR EL MAZO?', 'Volverán a salir las ' + jugadas + ' canciones que ya habéis jugado.', 'SÍ, REBARAJAR', 'NO',
+                    function (si) { if (si) resetPlayedSongs(true); });
+                return;
+            }
             localStorage.removeItem('CB_PlayedSongs');
             // vaciar también la copia de seguridad, o al recargar volverían todas las jugadas
             if (URL_AVISOS) {
@@ -6556,10 +6599,10 @@
         document.getElementById('cb-btn-descartar').onclick = function () { borrarPartidaGuardada(); caja.remove(); };
     });
     </script>
-    <script src="cb_iconos.js?v=20261028a"></script>
-    <script src="cb_despierto.js?v=20261028a"></script>
-    <script src="cb_resumen.js?v=20261028a"></script>
-    <script src="cb_graficos.js?v=20261028a"></script>
-    <link rel="stylesheet" href="cb_tema_retro.css?v=20261028a">
+    <script src="cb_iconos.js?v=20261111a"></script>
+    <script src="cb_despierto.js?v=20261111a"></script>
+    <script src="cb_resumen.js?v=20261111a"></script>
+    <script src="cb_graficos.js?v=20261111a"></script>
+    <link rel="stylesheet" href="cb_tema_retro.css?v=20261111a">
 </body>
 </html>

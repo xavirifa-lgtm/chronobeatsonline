@@ -411,7 +411,7 @@ body.con-td-base .cb-td-etiqueta { width: 74px; height: 74px; margin: -37px 0 0 
 body.con-td-base #cb-td-anio { font-size: 1.3em; }
 body.con-td-brazo .cb-td-brazo { right: -16px; top: -8px; width: 50px; height: 172px; transform-origin: 50% 14px; }
 body.cb-movil.cb-fondo-movil::before { background-size: auto, auto, cover !important; background-position: center, center, center bottom !important; }
-#cb-tocadiscos.revelado .cb-td-etiqueta { background: var(--neon) !important; }
+#cb-tocadiscos.revelado .cb-td-etiqueta { background: radial-gradient(circle, #0B0618 0 64%, var(--neon) 66% 72%, #0B0618 74%) !important; box-shadow: 0 0 22px var(--neon) !important; }
 
 /* ======================= HOJAS NUEVAS ======================= */
 /* vidas */
@@ -579,3 +579,44 @@ body.cb-superv #btn-brag, body.cb-superv #btn-double-or-nothing, body.cb-superv 
 #lobby-players .player-tag > img:first-child, #lobby-players .player-tag > div:first-child {
     width: 60px !important; height: 60px !important; min-width: 60px; margin: 0 !important; flex: none; }
 #lobby-players .player-tag > span { margin: 0 !important; position: absolute; top: 6px; right: 8px; }
+
+/* cronología: cartas repetidas del mismo año (una casete con ×2) */
+.card-row { overflow: visible !important; }
+.cb-repes {
+    position: absolute; top: -9px; right: -14px; z-index: 2;
+    font-family: 'Bungee', sans-serif; font-size: .72em; line-height: 1;
+    padding: 4px 7px; border-radius: 999px;
+    background: var(--neon, #00f2ff); color: #140a2a !important;
+    border: 2px solid #140a2a; box-shadow: 0 2px 0 rgba(10, 4, 30, .8);
+}
+.mini-card .cb-repes { top: -8px; right: -8px; font-size: .55em; padding: 3px 5px; }
+
+/* año revelado en el color de la edición (cian Original, rosa Anime, ámbar Pelis, violeta Gamer).
+   Antes iba en negro sobre la etiqueta de color y costaba leerlo. Ahora la etiqueta es oscura
+   con aro de neón y el año brilla en el color del juego. */
+.cb-td-etiqueta {
+    background: radial-gradient(circle, #0B0618 0 64%, var(--neon) 66% 72%, #0B0618 74%) !important;
+    border-color: var(--neon) !important;
+}
+#cb-td-anio { color: var(--neon) !important; text-shadow: 0 0 10px var(--neon), 0 2px 0 #000; }
+.card-back {
+    background:
+        radial-gradient(circle at 50% 50%, #0B0618 0 23%, var(--neon) 23.5% 25%, #0B0618 25.5% 27%, transparent 27.5%),
+        repeating-radial-gradient(circle at 50% 50%, #17121F 0 2px, #26202F 2px 4px) !important;
+}
+#c-year { color: var(--neon) !important; text-shadow: 0 0 12px var(--neon), 0 2px 0 #000; }
+
+/* año en el panel de validar del móvil, en el color de la edición */
+#cb-validar .cb-val-can b { color: var(--neon); text-shadow: 0 0 8px var(--neon); }
+
+/* pregunta "¿ACERTÓ LA CANCIÓN?" (tablet y móviles, mismo cartel que ¡TODOS JUEGAN!) */
+#cb-pregunta { position: fixed; inset: 0; z-index: 21000; background: rgba(10, 4, 30, .82); display: flex; align-items: center; justify-content: center; padding: 18px; }
+#cb-pregunta .cb-pr-caja { max-width: 380px; width: 100%; background: rgba(42, 26, 94, .98); border: 3px solid #FFD54A; border-radius: 22px; padding: 22px 18px; text-align: center; color: #fff;
+    box-shadow: 0 0 40px rgba(255, 213, 74, .45), 0 8px 0 rgba(10, 4, 30, .9); font-family: 'Montserrat', sans-serif; animation: cb-val-entra .35s cubic-bezier(.16,1,.3,1); }
+#cb-pregunta .cb-pr-tit { font-family: 'Bungee', sans-serif; font-size: 1.45em; color: #FFD54A; margin-bottom: 10px; line-height: 1.15; }
+#cb-pregunta .cb-pr-txt { font-size: .95em; line-height: 1.4; margin-bottom: 18px; }
+#cb-pregunta .cb-pr-fila { display: flex; gap: 12px; }
+#cb-pregunta button { flex: 1; font-family: 'Bungee', sans-serif; font-size: 1.05em; padding: 15px 8px; border-radius: 14px; border: 2px solid #1a0f2e; box-shadow: 0 5px 0 #1a0f2e; cursor: pointer; }
+#cb-pregunta button:active { transform: translateY(4px); box-shadow: 0 1px 0 #1a0f2e; }
+#cb-pregunta .cb-pr-si { background: linear-gradient(180deg, #FFE27A, #FFB43A); color: #1a0f2e; }
+#cb-pregunta .cb-pr-no { background: linear-gradient(180deg, #8f7bd8, #5b45b0); color: #fff; }
