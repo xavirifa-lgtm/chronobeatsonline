@@ -3473,21 +3473,6 @@
                         }
                     }
 
-                    // Mostrar cronología del EQUIPO (no la individual) cuando es turno del equipo
-                    var cardList = document.getElementById('my-cards-list');
-                    if (cardList && isActiveTeam && !iVoted && data.teamCards && data.teamCards[myTeam]) {
-                        var tc = data.teamCards[myTeam];
-                        var tcHtml = '';
-                        var isSingle = (tc.length === 1);
-                        if (isSingle) tcHtml += '<div style="font-size:0.8em;color:var(--neon);text-align:center;font-family:Bungee;margin-bottom:5px;">↑ ANTES ↑</div>';
-                        tcHtml += renderBetSlot(0, {}, null, true);
-                        tc.forEach(function(yr, idx) {
-                            tcHtml += '<div class="card-row">' + yr + '</div>';
-                            tcHtml += renderBetSlot(idx + 1, {}, null, true);
-                        });
-                        if (isSingle) tcHtml += '<div style="font-size:0.8em;color:var(--neon);text-align:center;font-family:Bungee;margin-top:5px;">↓ DESPUÉS ↓</div>';
-                        cardList.innerHTML = tcHtml;
-                    }
                 } else {
                     if (voteBanner) voteBanner.style.display = 'none';
                 }
@@ -3586,19 +3571,31 @@
                         // 'KING_GUESS_RESULT', así que en un turno normal (el 95% de la
                         // partida) el mando salía VACÍO o con los botones de la fase anterior.
                         if (!data.revealed) {
-                            rContainer.innerHTML = `<button class="btn" style="background:var(--neon); color:#000; padding:20px; font-size:1.2em;" onclick="send('REMOTE_REVEAL'); toggleRemote();">👀 REVELAR CARTA</button>
-                            <button class="btn" style="background:#555; color:white; border-color:#555; margin-top:20px;" onclick="send('REMOTE_SYSTEM_ERROR'); toggleRemote();">ERROR DE SISTEMA (REPETIR)</button>`;
+                            var _soyActivoR = !!(data.activePlayer && data.activePlayer.id === myId);
+                            rContainer.innerHTML = `<button class="btn" style="background:var(--neon); color:#000; padding:20px; font-size:1.2em;" onclick="send('REMOTE_REVEAL'); toggleRemote();">👀 REVELAR CARTA</button>` +
+                            (_soyActivoR ? '' : `<button class="btn" style="background:#555; color:white; border-color:#555; margin-top:20px;" onclick="send('REMOTE_SYSTEM_ERROR'); toggleRemote();">ERROR DE SISTEMA (otra canción)</button>`);
                         } else {
                             // ACERTÓ / FALLÓ y luego la pregunta "¿ACERTÓ LA CANCIÓN?" (SÍ = + ficha).
                             // Si la tablet ya sabe si la posición es correcta, solo sale el botón que toca.
                             var _vm = data.validacionMovil, _nomA = (data.activePlayer && data.activePlayer.name) ? data.activePlayer.name.replace(/['"<>\\`$]/g, '') : '';
                             var _btnOk = `<button class="btn" style="background:#00ff00; color:#000; padding:15px; margin-bottom:10px;" onclick="toggleRemote(); cbPreguntaCancion('${_nomA}', function(si){ send(si ? 'REMOTE_CORRECT_TOKEN' : 'REMOTE_CORRECT'); });">✅ ACERTÓ</button>`;
                             var _btnNo = `<button class="btn" style="background:#ff4444; color:#fff; padding:15px; margin-bottom:10px;" onclick="toggleRemote(); cbPreguntaCancion('${_nomA}', function(si){ send(si ? 'REMOTE_INCORRECT_TOKEN' : 'REMOTE_INCORRECT'); });">❌ FALLÓ</button>`;
-                            rContainer.innerHTML =
-                                ((_vm && _vm.pendiente) ? (_vm.correcta ? _btnOk : _btnNo) : (_btnOk + _btnNo)) + `
-                                <button class="btn" style="background:#444; color:white; border-color:#444; margin-top:10px;" onclick="send('REMOTE_NEXT_TURN'); toggleRemote();">PASAR TURNO (Nadie acertó)</button>
-                                <button class="btn" style="background:#555; color:white; border-color:#555; margin-top:20px;" onclick="send('REMOTE_SYSTEM_ERROR'); toggleRemote();">ERROR SISTEMA</button>
-                            `;
+                            // Fase de APUESTAS (el activo falló y algún rival acertó el hueco): botones
+                            // para dar la carta al que la ganó. Antes salía "PASAR TURNO", que se la quitaba.
+                            var _award = (data.hostButtons || []).filter(function (b) { return b.action === 'REMOTE_AWARD_CHALLENGER'; });
+                            var _soyActivoM = !!(data.activePlayer && data.activePlayer.id === myId);
+                            if (_award.length) {
+                                rContainer.innerHTML = _award.map(function (b) {
+                                    return '<button class="btn" style="background:var(--gold); color:#000; padding:15px; margin-bottom:10px;" onclick="send(\'REMOTE_AWARD_CHALLENGER\', \'' + String(b.value).replace(/[^\w-]/g, '') + '\'); toggleRemote();">' + _escHtml(b.label) + '</button>';
+                                }).join('') + '<button class="btn" style="background:#444; color:white; border-color:#444; margin-top:10px;" onclick="send(\'REMOTE_NEXT_TURN\'); toggleRemote();">NADIE RECLAMA LA CARTA</button>';
+                            } else if (_vm && !_vm.pendiente && !_soyActivoM) {
+                                rContainer.innerHTML = `<p style="color:#888;">Turno ya validado. Esperando al siguiente...</p>`;
+                            } else {
+                                rContainer.innerHTML =
+                                    (_soyActivoM ? '<p style="color:#888;">Es tu turno: que lo valide otro jugador.</p>' :
+                                    ((_vm && _vm.pendiente) ? (_vm.correcta ? _btnOk : _btnNo) : (_btnOk + _btnNo)) +
+                                    `<button class="btn" style="background:#555; color:white; border-color:#555; margin-top:20px;" onclick="send('REMOTE_SYSTEM_ERROR'); toggleRemote();">ERROR SISTEMA (otra canción)</button>`);
+                            }
                         }
                     }
                 }
@@ -4059,7 +4056,18 @@
                     document.getElementById('card').classList.remove('flipped');
                 }
 
-                if (!isKingMode) {
+                if (!isKingMode && data.gameMode === 'equipos' && data.gameStarted) {
+                    var _yoE = (data.players || []).find(function (pl) { return pl.id === myId; });
+                    var _equipoTurno = data.teamTurn;
+                    var _nomEq = _equipoTurno === 'red' ? 'EQUIPO ROJO' : 'EQUIPO AZUL';
+                    var _miEquipo = !!(_yoE && _yoE.team === _equipoTurno);
+                    var _yaVote = (data.teamVotedIds || []).indexOf(myId) !== -1;
+                    document.getElementById('inventory-title').innerText = _miEquipo
+                        ? (_yaVote ? 'VOTO ENVIADO — CRONOLOGÍA DE TU EQUIPO' : 'VOTA EL HUECO — CRONOLOGÍA DE TU EQUIPO')
+                        : 'CRONOLOGÍA DEL ' + _nomEq;
+                    document.getElementById('my-cards-list').innerHTML =
+                        htmlCronologia(((data.teamCards || {})[_equipoTurno]) || [], false, {}, null, _miEquipo && !_yaVote, '');
+                } else if (!isKingMode) {
                     if (isMyTurn) {
                         document.getElementById('inventory-title').innerText = data.bombActive
                             ? "💣 ¡COLOCA ANTES DE QUE EXPLOTE!"
@@ -4246,6 +4254,18 @@
                 return;
             }
 
+            // EQUIPOS: se vota en la cronología del EQUIPO (no en la de un jugador)
+            if (lastState && lastState.gameMode === 'equipos') {
+                var _yo = (lastState.players || []).find(function (pl) { return pl.id === myId; });
+                if (!_yo || _yo.team !== lastState.teamTurn) { showCustomAlert("Ahora vota el otro equipo. Espera a vuestro turno."); return; }
+                if ((lastState.teamVotedIds || []).indexOf(myId) !== -1) { showCustomAlert("Ya has votado. Espera a que vote el resto de tu equipo."); return; }
+                showCustomConfirm("¿Votar este hueco para la cronología de tu equipo?", function (ok) { if (ok) send('GUESS', idx); });
+                return;
+            }
+            if (lastState && lastState.isRevealed && !lastState.isSharedSong) {
+                showCustomAlert("La carta ya está revelada: ya no se puede colocar ni apostar.");
+                return;
+            }
             if (isTakenByOther) {
                 showCustomAlert("¡Este hueco ya lo ha pillado otro jugador!");
                 return;
@@ -4373,10 +4393,10 @@
             });
         }
     </script>
-    <script src="cb_iconos.js?v=20261111a"></script>
-    <script src="cb_despierto.js?v=20261111a"></script>
-    <script src="cb_graficos.js?v=20261111a"></script>
-    <link rel="stylesheet" href="cb_tema_retro.css?v=20261111a">
+    <script src="cb_iconos.js?v=20261120a"></script>
+    <script src="cb_despierto.js?v=20261120a"></script>
+    <script src="cb_graficos.js?v=20261120a"></script>
+    <link rel="stylesheet" href="cb_tema_retro.css?v=20261120a">
 </body>
 
 </html>

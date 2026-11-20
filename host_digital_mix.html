@@ -1113,6 +1113,16 @@
         var bombTimer = 0;         // segundos que le quedan al portador actual
         var bombInterval = null;   // handle del temporizador de 15s
         var bombPassCount = 0;     // pases exitosos (para desactivar si nadie falla)
+        // Quién tenía el turno cuando salió la bomba. Al terminar (explote o no), el turno sigue
+        // por el jugador siguiente a ÉL. Antes seguía desde la víctima (o desde el último que
+        // la tuvo) y los jugadores que había entre medias se quedaban sin su turno normal.
+        var bombStarterIdx = null;
+        function turnoTrasBomba() {
+            var base = (bombStarterIdx !== null && bombStarterIdx < players.length) ? bombStarterIdx : activePlayerIdx;
+            bombStarterIdx = null;
+            activePlayerIdx = (base + 1) % players.length;   // nextTurn() se salta a los eliminados
+            if (players[activePlayerIdx]) players[activePlayerIdx].canReload = true;
+        }
         var voiceEnabled = false;
         var competitiveMode = false;    // modo competitivo: sin sabotajes ni fichas
         // MODO LIGHT: clásico con reglas sencillas para quien juega por primera vez.
@@ -1314,6 +1324,10 @@
         }
         // Evita validar dos veces el mismo turno (p.ej. botón de la tablet + mando).
         var turnoValidado = false;
+        // Cronología del activo en el momento de validar. Las penalizaciones del fallo (farol,
+        // doble o nada, jinx) le quitan cartas ANTES de mirar las apuestas a hueco, y los huecos
+        // se desplazaban: un rival que había acertado el hueco perdía la carta.
+        var cronologiaValidacion = null;
 
         // Seguimiento de tiempo para skips manuales
         var segundosAcumulados = 0;
@@ -1706,6 +1720,7 @@
         function _wireHostPeerEvents() {
             peer.on('open', function (id) {
                 console.log("Host Peer Abierto:", id);
+                _hostReconN = 0; estadoServidorHost(null);
                 var liveCodeTextEl = document.getElementById('live-code-text');
                 if (liveCodeTextEl) liveCodeTextEl.innerText = roomCode;
                 document.getElementById('live-room-code').style.display = 'block';
@@ -1776,15 +1791,56 @@
                     console.error("Error en conexión:", err);
                 });
             });
+            // Si se cae la conexión con el servidor de PeerJS (wifi que parpadea, tablet que
+            // vuelve de segundo plano...), PeerJS NO reconecta solo: la tablet seguía jugando
+            // con los móviles ya conectados, pero ninguno podía volver a entrar (y el móvil se
+            // recarga en cuanto pierde el canal). Además salía un alert() que bloqueaba la tablet.
+            peer.on('disconnected', function () { reconectarHost(); });
             peer.on('error', function (err) {
-                if (err.type === 'unavailable-id') {
-                    alert("El ID de sala ya existe o hay un error. Probando uno nuevo...");
-                    window.location.reload();
-                } else {
-                    alert("Error PeerJS Host: " + err.type);
+                var t = err && err.type;
+                console.warn('[HOST] Error PeerJS:', t, err);
+                if (['network', 'server-error', 'socket-error', 'socket-closed', 'disconnected'].indexOf(t) !== -1) { reconectarHost(); return; }
+                if (t === 'unavailable-id') {
+                    // Con la partida en marcha el ID suele estar "ocupado" unos segundos por la
+                    // conexión anterior: se reintenta sin recargar la tablet.
+                    if (gameStarted || players.length) { reconectarHost(); return; }
+                    showCustomAlert('La sala ' + roomCode + ' aún está ocupada en el servidor. Reintentando...');
+                    setTimeout(function () { window.location.reload(); }, 4000);
+                    return;
                 }
+                showCustomAlert('Error de conexión: ' + (t || err));
             });
         }
+
+        var _hostReconTimer = null, _hostReconN = 0;
+        function reconectarHost(inmediato) {
+            if (!peer || peer.destroyed || _hostReconTimer) return;
+            if (!peer.disconnected) return;
+            var espera = inmediato ? 300 : Math.min(30000, Math.round(2000 * Math.pow(1.6, _hostReconN)));
+            _hostReconN++;
+            estadoServidorHost('Sin conexión con el servidor — reconectando... (los móviles conectados siguen jugando)');
+            _hostReconTimer = setTimeout(function () {
+                _hostReconTimer = null;
+                try { if (peer && !peer.destroyed && peer.disconnected) peer.reconnect(); }
+                catch (e) { console.warn('[HOST] reconnect falló:', e); reconectarHost(); }
+                // si no vuelve a abrirse, otro intento
+                setTimeout(function () { if (peer && peer.disconnected && !_hostReconTimer) reconectarHost(); }, 8000);
+            }, espera);
+        }
+        function estadoServidorHost(msg) {
+            var el = document.getElementById('cb-estado-servidor');
+            if (!msg) { if (el) el.remove(); return; }
+            if (!el) {
+                el = document.createElement('div'); el.id = 'cb-estado-servidor';
+                el.style.cssText = 'position:fixed;left:50%;bottom:10px;transform:translateX(-50%);z-index:99995;padding:8px 16px;border-radius:12px;background:rgba(120,20,40,.92);border:2px solid #ff5f7a;color:#fff;font:600 13px Montserrat,sans-serif;pointer-events:none;max-width:90vw;text-align:center';
+                document.body.appendChild(el);
+            }
+            el.textContent = '⚠️ ' + msg;
+        }
+        // Al volver de segundo plano, reconectar en el acto si se había caído
+        document.addEventListener('visibilitychange', function () {
+            if (!document.hidden && peer && peer.disconnected && !peer.destroyed) { clearTimeout(_hostReconTimer); _hostReconTimer = null; reconectarHost(true); }
+        });
         function applyTheme(type) {
             let color = '#00f2ff'; // Mix / Default
             let label = ' - MODO MIX';
@@ -2236,6 +2292,7 @@
             bombActive = true;
             turnPhase = 'BOMB';
             bombPassCount = 0;
+            bombStarterIdx = activePlayerIdx;
             var holder = players[activePlayerIdx];
             if (!holder) { bombActive = false; turnPhase = 'NORMAL'; nextTurn(); return; }
             addEvent('<span class="ev-bad">💣 ¡CARTA BOMBA! Empieza ' + holder.name + ' — 15s para colocar</span>', '💣');
@@ -2339,8 +2396,7 @@
             for (var _be in connections) { try { connections[_be].send({ type: 'BOMB_EXPLODE', victim: victim.name }); } catch(e){} }
             // loseLife gestiona la eliminación y el fin de partida (último vivo gana).
             loseLife(victim, function () {
-                activePlayerIdx = (activePlayerIdx + 1) % players.length;
-                if (players[activePlayerIdx]) players[activePlayerIdx].canReload = true;
+                turnoTrasBomba();
                 nextTurn();
             });
             syncState();
@@ -2352,7 +2408,8 @@
             if (player && player.pauseVideo) player.pauseVideo();
             isPlaying = false;
             for (var _bf in connections) { try { connections[_bf].send({ type: 'BOMB_END' }); } catch(e){} }
-            if (players[activePlayerIdx]) players[activePlayerIdx].canReload = true;
+            turnoTrasBomba();
+            syncState();
             setTimeout(function () { nextTurn(); }, 1500);
         }
 
@@ -2362,6 +2419,7 @@
             posicionCorrecta = null; pistasTurno = {};
             gastosTurno = [];
             turnoValidado = false;
+            cronologiaValidacion = null;
             stopCountdown();
             resetLightning();
             // Limpiar cualquier resto de una carta bomba anterior antes del nuevo turno.
@@ -2977,7 +3035,7 @@
                         triggerFlash();
                         
                         // Pick a random target (someone else)
-                        var otherPlayers = players.filter(x => x.id !== p.id);
+                        var otherPlayers = players.filter(x => x.id !== p.id && !cronologiaCongelada(x));
                         var target = otherPlayers.length > 0 ? otherPlayers[Math.floor(Math.random() * otherPlayers.length)] : null;
                         
                         var result = Math.floor(Math.random() * 4); // 0, 1, 2, 3
@@ -2985,7 +3043,7 @@
                         var msgT = "";
                         
                         if (result === 0) { // Robar 1 carta
-                            if (target && target.cards && target.cards.length > 1) {
+                            if (target && target.cards && target.cards.length > 1 && !cronologiaCongelada(p)) {
                                 var card = target.cards.pop();
                                 p.cards.push(parseInt(card));
                                 p.cards.sort(function(a,b){return a-b;});
@@ -3158,6 +3216,12 @@
 
                     var maxSlot = players[activePlayerIdx].cards.length;
                     if (isSharedSong && !songPlayedThisTurn) break;   // ¡todos juegan!: no antes de que suene
+                    // Con la carta ya revelada (año a la vista en la tablet y en los móviles) se
+                    // podía apostar al hueco bueno y llevarse la carta si el activo fallaba.
+                    if (isRevealed || (turnPhase && turnPhase !== 'NORMAL')) {
+                        try { if (connections[peerId]) connections[peerId].send({ type: 'BET_RESULT', msg: 'La carta ya está revelada: no se puede apostar. No se te ha cobrado.' }); } catch (e) {}
+                        break;
+                    }
                     var canBetShared = isSharedSong && p.id === players[activePlayerIdx].id && activeGuess === null;
                     if ((p.id !== players[activePlayerIdx].id || canBetShared) && p.tokens >= 1 && currentBets[peerId] === undefined && !slotOccupied && (activeGuess !== null || isSharedSong) && valNum >= 0 && valNum <= maxSlot) {
                         console.log("[OK] Apuesta (Duelo) aceptada para", p.name);
@@ -3364,6 +3428,10 @@
                     break;
                 case 'SABOTAGE_DUEL':
                     if (turnPhase === 'DUEL' || duelTriggered) return;
+                    if (gameMode === 'equipos') {
+                        try { if (connections[peerId]) connections[peerId].send({ type: 'BET_RESULT', msg: 'En Equipos no hay duelos. No se te ha cobrado.' }); } catch (e) {}
+                        return;
+                    }
                     var p = players.find(x => x.id === peerId);
                     if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 3 && (!turnPhase || turnPhase === 'NORMAL') && !currentDuel && !isRevealed) {
                         updateTokens(p, -3);
@@ -3561,7 +3629,7 @@
                 case 'SABOTAGE_BLACKHOLE':
                     var p = players.find(function (pl) { return pl.id === peerId; });
                     if (p && p.id !== players[activePlayerIdx].id && p.tokens >= 5 && (!turnPhase || turnPhase === 'NORMAL')) {
-                        var validTargets = players.filter(function (t) { return t.id !== p.id && t.score > 1 && t.cards.length > 0; });
+                        var validTargets = players.filter(function (t) { return t.id !== p.id && t.score > 1 && t.cards.length > 0 && !cronologiaCongelada(t); });
                         if (validTargets.length > 0) {
                             var target = validTargets[Math.floor(Math.random() * validTargets.length)];
                             if (escudoBloquea(target, p, action)) break;   // el escudo de la víctima rebota
@@ -3587,7 +3655,11 @@
                     var p = players.find(function(pl) { return pl.id === peerId; });
                     if (['first', 'last', 'extreme'].indexOf(value) === -1) break;
                     // La víctima debe quedarse con al menos 1 carta (hace falta una para jugar).
-                    var validTargets = players.filter(function(t) { return t.id !== peerId && t.cards && t.cards.length > 1; });
+                    var validTargets = players.filter(function(t) { return t.id !== peerId && t.cards && t.cards.length > 1 && !cronologiaCongelada(t); });
+                    if (p && cronologiaCongelada(p)) {
+                        try { if (connections[peerId]) connections[peerId].send({ type: 'BET_RESULT', msg: 'Ya has colocado tu carta: roba después de validar. No se te ha cobrado.' }); } catch (e) {}
+                        break;
+                    }
                     if (p && p.tokens >= 4 && gameStarted && (!turnPhase || turnPhase === 'NORMAL') && validTargets.length > 0) {
                         // Elegir víctima: el jugador con más cartas
                         var target = validTargets.sort(function(a,b) { return b.cards.length - a.cards.length; })[0];
@@ -3754,7 +3826,7 @@
                     }
                     break;
                 case 'CONFETTI_BURST':
-                    lanzarConfeti();
+                    if (typeof window.lanzarConfeti === 'function') window.lanzarConfeti();
                     break;
                 case 'KING_SKIP_VIDEO':
                     // El rey salta el video (link inválido) — volver a selección con cartas nuevas
@@ -3854,7 +3926,12 @@
                     break;
                 case 'REMOTE_SYSTEM_ERROR':
                     if (!puedeUsarMando(peerId)) break;
-                    reportSystemError();
+                    // El propio jugador activo podía cambiarse la canción gratis cuando no la sabía.
+                    if (players[activePlayerIdx] && peerId === players[activePlayerIdx].id) {
+                        try { if (connections[peerId]) connections[peerId].send({ type: 'BET_RESULT', msg: 'En tu propio turno no puedes marcar ERROR DE SISTEMA: que lo haga otro jugador.' }); } catch (e) {}
+                        break;
+                    }
+                    reportSystemError((players.find(function (pl) { return pl.id === peerId; }) || {}).name);
                     break;
                 case 'REMOTE_SET_GAME_MODE':
                     // Solo en el lobby (antes de empezar). turnPhase NUNCA vale 'LOBBY',
@@ -3879,10 +3956,17 @@
                     }
                     break;
                 case 'REMOTE_NEXT_TURN':
+                    // Antes, con la carta revelada, pasaba el turno SIN validar: no se apuntaba el
+                    // fallo, en Supervivencia no se perdía vida, el farol / doble o nada no
+                    // penalizaban y las apuestas "ni de coña" se perdían. Y lo podía pulsar el propio
+                    // jugador activo. Ahora solo sirve para cerrar un duelo ya terminado y para la
+                    // fase de apuestas (nadie reclama la carta).
                     if (!puedeUsarMando(peerId)) break;
                     if (turnPhase === 'DUEL' && !currentDuel) {
                         advanceAndNextTurn();
-                    } else if (isRevealed) {
+                    } else if (isRevealed && turnoValidado && document.getElementById('challenger-validation') &&
+                               document.getElementById('challenger-validation').style.display !== 'none' &&
+                               players[activePlayerIdx] && peerId !== players[activePlayerIdx].id) {
                         advanceAndNextTurn();
                     }
                     break;
@@ -3892,12 +3976,15 @@
                     break;
                 case 'REMOTE_AWARD_CHALLENGER':
                     if (!puedeUsarMando(peerId)) break;
-                    if (value && typeof awardToChallenger === 'function') awardToChallenger(value);
+                    // Solo en la fase de apuestas y a quien de verdad acertó el hueco (antes
+                    // cualquier móvil podía dar una carta a cualquiera en cualquier momento).
+                    if (value && apuestaGanadora(value)) awardToChallenger(value);
                     break;
                 case 'MARKET_WILDCARD':
                     var p = players.find(function (pl) { return pl.id === peerId; });
                     // Un valor desconocido caía en silencio en 'song'. Se valida.
                     if (value !== 'artist' && value !== 'song') break;
+                    if (!pistaPermitida(peerId)) break;
                     if (p && p.id === activeP.id && (p.wildcards === undefined || p.wildcards > 0)) {
                         if (p.wildcards === undefined) p.wildcards = 3;
                         p.wildcards--;
@@ -3919,6 +4006,7 @@
                     break;
                 case 'MARKET_DECADE':
                     var p = players.find(function (pl) { return pl.id === peerId; });
+                    if (!pistaPermitida(peerId)) break;
                     if (p && p.id === activeP.id && p.tokens >= 1) {
                         updateTokens(p, -1);
                         var sYear = parseInt(s.year);
@@ -4275,7 +4363,7 @@
                 if (pl && gastosTurno[i].id === pl.id && gastosTurno[i].n === n) { gastosTurno.splice(i, 1); return; }
             }
         }
-        function devolverGastosTurno(excepto) {
+        function devolverGastosTurno(prefijo) {
             var porJugador = {};
             gastosTurno.forEach(function (g) { porJugador[g.id] = (porJugador[g.id] || 0) + g.n; });
             gastosTurno = [];
@@ -4283,7 +4371,7 @@
                 var pl = players.find(function (x) { return x.id === id; });
                 if (!pl) return;
                 updateTokens(pl, porJugador[id]);
-                try { if (connections[id]) connections[id].send({ type: 'BET_RESULT', msg: '🔫 ¡DUELO! Se cancela lo que habías hecho en este turno: te devolvemos ' + porJugador[id] + '🔵' }); } catch (e) {}
+                try { if (connections[id]) connections[id].send({ type: 'BET_RESULT', msg: (typeof prefijo === 'string' ? prefijo : '🔫 ¡DUELO! Se cancela lo que habías hecho en este turno: te devolvemos ') + porJugador[id] + '🔵' }); } catch (e) {}
             });
             return porJugador;
         }
@@ -4309,37 +4397,24 @@
             if (refunded) syncState();
         }
 
-        function reportSystemError() {
-            refundBets();
+        // ERROR DE SISTEMA (desde el mando): la canción tiene datos mal (año, título...) o no
+        // suena bien. Se manda a revisar por correo (como REVISAR CANCIÓN) y el MISMO jugador
+        // repite con otra canción. Antes abría un prompt() en la tablet (la bloqueaba hasta que
+        // alguien escribiera el año) y navegaba a un mailto:.
+        function reportSystemError(quien) {
+            if (partidaTerminada || turnoValidado || bombActive || turnPhase === 'DUEL') return;
             var s = songs[currentSongIdx];
             if (!s || !s.id) return;
-            var newYear = prompt("ERROR EN DATOS: " + s.artist + " - " + s.song + "\nIntroduce el AÑO CORRECTO para registro:");
-            if (newYear) {
-                var recipient = "xavi.rifa@gmail.com";
-                var subject = "CORRECCION CHRONOBEATS: Fila " + s.line;
-                var body = "DETECTADO ERROR EN LISTA\n\n" +
-                    "Fila: " + s.line + "\n" +
-                    "Artista: " + s.artist + "\n" +
-                    "Canción: " + s.song + "\n" +
-                    "Año en TXT: " + s.year + "\n" +
-                    "Año Correcto: " + newYear + "\n\n" +
-                    "Instrucciones: Abrir lista_final.txt en la fila " + s.line + " y corregir el año.";
-
-                var mailtoUrl = "mailto:" + recipient + "?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
-
-                console.log("!!! ERROR DE SISTEMA DETECTADO !!!");
-                console.log("Referencia: " + s.artist + " - " + s.song + " (Fila " + s.line + ")");
-                console.log("Corrección: " + s.year + " -> " + newYear);
-
-                window.location.href = mailtoUrl;
-                alert("¡Error registrado! Se ha preparado un email para " + recipient + ".\nSe descarta esta canción y repites el turno.");
-            }
-            // En fase de rey: se vuelven a elegir cartas para el MISMO rey. Antes se restaba 1 a
-            // activePlayerIdx y, como nextTurn() no avanza, el turno pasaba al jugador anterior.
+            revisarCancion(quien || 'Mando');
+            // En fase de rey: se vuelven a elegir cartas para el MISMO rey.
             if (turnPhase === 'KING_GUESS' || turnPhase === 'KING_GUESS_RESULT' || turnPhase === 'KING_SELECTION') {
                 reiniciarSeleccionRey();
                 return;
             }
+            refundBets();
+            limpiarMarcasCancionNueva();
+            devolverGastosTurno('⚠️ Canción anulada por error: te devolvemos ');
+            addEvent('<span class="ev-info">⚠️ ' + (quien || 'Mando') + ': error en la canción — ' + (players[activePlayerIdx] ? players[activePlayerIdx].name : '') + ' repite con otra</span>');
             nextTurn();
         }
 
@@ -4414,6 +4489,21 @@
         // El mando del móvil (📺) es la tablet en remoto: sirve para manejarla cuando
         // estás lejos. Como cualquiera puede coger la tablet, cualquiera puede usar el
         // mando. No hay rol de "juez": solo hace falta ser un jugador de la partida.
+        // Pistas (comodín artista/canción, década): solo en un turno normal, con la carta sin
+        // revelar. En un DUELO el retado podía comprar la década de la misma canción que se
+        // disputaba, y en el desafío del Rey el rey se compraba la década por 1 ficha.
+        function pistaPermitida(peerId) {
+            var ok = gameStarted && !isRevealed && !bombActive && !isSharedSong && (!turnPhase || turnPhase === 'NORMAL');
+            if (!ok) { try { if (connections[peerId]) connections[peerId].send({ type: 'BET_RESULT', msg: 'Las pistas solo se pueden comprar en un turno normal antes de revelar. No se te ha cobrado.' }); } catch (e) {} }
+            return ok;
+        }
+        // Cronología "congelada": el activo ya ha marcado (o hay apuestas a hueco) y aún no se
+        // ha validado. Si en ese momento se le quita o se le da una carta, los huecos se
+        // desplazan y la validación sale mal (un acierto contaba como fallo).
+        function cronologiaCongelada(pl) {
+            return !!(pl && gameStarted && players[activePlayerIdx] && pl.id === players[activePlayerIdx].id &&
+                      !turnoValidado && (activeGuess !== null || Object.keys(currentBets).length > 0));
+        }
         function puedeUsarMando(peerId) {
             return players.some(function (pl) { return pl.id === peerId; });
         }
@@ -4522,6 +4612,7 @@
                 return;
             }
 
+            cronologiaValidacion = players[activePlayerIdx].cards.slice();
             if (isTokenOk) {
                 updateTokens(players[activePlayerIdx], 1);
             }
@@ -4772,12 +4863,15 @@
                 // Modo supervivencia: perder vida al fallar (el Seguro también protege esto).
                 if (gameMode === 'supervivencia' && !_seguroActivo) {
                     loseLife(players[activePlayerIdx], null);
+                    // Era la última vida que decidía la partida: el ganador sale en 2 s.
+                    // Antes arrancaba un turno nuevo justo antes de la pantalla de ganador.
+                    if (players.filter(function (pl) { return pl.lives > 0; }).length <= 1) { syncState(); return; }
                 }
                 // Si no hay carta para el activo, ver si hay robos
                 var challengersExist = Object.keys(currentBets).length > 0;
                 var anyChallengerCorrect = false;
                 for (var pid in currentBets) {
-                    if (isSlotCorrect(currentBets[pid], songs[currentSongIdx].year, players[activePlayerIdx].cards)) anyChallengerCorrect = true;
+                    if (isSlotCorrect(currentBets[pid], songs[currentSongIdx].year, cronologiaValidacion)) anyChallengerCorrect = true;
                 }
 
                 if (challengersExist && anyChallengerCorrect) {
@@ -4788,7 +4882,7 @@
                     for (var pid in currentBets) {
                         var p = players.find(x => x.id === pid);
                         var s = songs[currentSongIdx];
-                        var slotCorrect = isSlotCorrect(currentBets[pid], s.year, players[activePlayerIdx].cards);
+                        var slotCorrect = isSlotCorrect(currentBets[pid], s.year, cronologiaValidacion);
 
                         if (p && slotCorrect) {
                             h += '<button class="btn-val" style="background:var(--gold); color:#000; border: 2px solid #00ff00;" onclick="awardToChallenger(\'' + pid + '\')">' + p.name + ' GANÓ LA APUESTA (✅)</button>';
@@ -4806,7 +4900,17 @@
             }
         }
 
+        function apuestaGanadora(pid) {
+            var cv = document.getElementById('challenger-validation');
+            var s = songs[currentSongIdx];
+            return !!(cv && cv.style.display !== 'none' && turnoValidado && s && currentBets[pid] !== undefined &&
+                      isSlotCorrect(currentBets[pid], s.year, cronologiaValidacion || (players[activePlayerIdx] ? players[activePlayerIdx].cards : [])));
+        }
         function awardToChallenger(pid) {
+            // una sola vez (doble toque, o tablet + mando a la vez)
+            var _cv = document.getElementById('challenger-validation');
+            if (!_cv || _cv.style.display === 'none') return;
+            _cv.style.display = 'none';
             var p = players.find(x => x.id === pid);
             if (p) {
                 p.score++;
@@ -5274,7 +5378,7 @@
                 for (var pid in currentBets) {
                     var p = players.find(function(x) { return x.id === pid; });
                     var s = songs[currentSongIdx];
-                    if (p && s && players[activePlayerIdx] && isSlotCorrect(currentBets[pid], s.year, players[activePlayerIdx].cards)) {
+                    if (p && s && players[activePlayerIdx] && isSlotCorrect(currentBets[pid], s.year, cronologiaValidacion || players[activePlayerIdx].cards)) {
                         btns.push({
                             id: 'award_' + pid,
                             label: '🏆 ' + p.name.toUpperCase() + ' GANÓ LA APUESTA',
@@ -5939,10 +6043,9 @@
             if (newIdx === -1) return;
             if (turnoRobadoBase === null) turnoRobadoBase = players.indexOf(victim);
             refundBets();
+            limpiarMarcasCancionNueva();   // devuelve también las apuestas a hueco (antes se perdían)
             activePlayerIdx = newIdx;
             thief.canReload = true;
-            currentBets = {};
-            activeGuess = null;
             bettingAgainst = [];
             bettingFor = [];
 
@@ -6622,10 +6725,10 @@
         document.getElementById('cb-btn-descartar').onclick = function () { borrarPartidaGuardada(); caja.remove(); };
     });
     </script>
-    <script src="cb_iconos.js?v=20261111a"></script>
-    <script src="cb_despierto.js?v=20261111a"></script>
-    <script src="cb_resumen.js?v=20261111a"></script>
-    <script src="cb_graficos.js?v=20261111a"></script>
-    <link rel="stylesheet" href="cb_tema_retro.css?v=20261111a">
+    <script src="cb_iconos.js?v=20261120a"></script>
+    <script src="cb_despierto.js?v=20261120a"></script>
+    <script src="cb_resumen.js?v=20261120a"></script>
+    <script src="cb_graficos.js?v=20261120a"></script>
+    <link rel="stylesheet" href="cb_tema_retro.css?v=20261120a">
 </body>
 </html>
