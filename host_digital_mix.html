@@ -1941,6 +1941,27 @@
             ]).catch(function (e) { console.warn('[HOST] Sin copia de jugadas:', e); }).then(function () { return null; }));
         }
 
+        // Aviso por correo de cada partida que empieza (hoja "Partidas" del Apps Script).
+        // Solo al empezar y en la revancha; al recuperar una partida a medias no se avisa.
+        var NOMBRE_TIPO = { orig: 'Original', anime: 'Anime', movies: 'Pelis', videojuegos: 'Videojuegos' };
+        function avisarPartida(esRevancha) {
+            if (!URL_AVISOS) return;
+            try {
+                var porTipo = {};
+                (songs || []).forEach(function (s) { var t = NOMBRE_TIPO[s.type] || s.type || '?'; porTipo[t] = (porTipo[t] || 0) + 1; });
+                var modo = modoLight ? 'LIGHT' : String(gameMode || '').toUpperCase();
+                fetch(URL_AVISOS, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({
+                        tipo: 'partida',
+                        jugadores: players.map(function (p) { return p.name; }),
+                        modo: modo + (competitiveMode ? ' · COMPETITIVO' : ''),
+                        revancha: !!esRevancha,
+                        canciones: Object.keys(porTipo).map(function (t) { return t + ' ' + porTipo[t]; }).join(', '),
+                        sala: roomCode || ''
+                    }) }).catch(function () {});
+            } catch (e) {}
+        }
+
         // Sube a la copia de seguridad la lista de canciones jugadas (cada 5 nuevas, o al forzarlo).
         var _jugadasSubidas = -1;
         function subirJugadas(forzar) {
@@ -2076,6 +2097,7 @@
             competitiveMode = !!(document.getElementById('competitive-mode-check') && document.getElementById('competitive-mode-check').checked);
             console.log('[HOST] Partida iniciada | modo:', gameMode, '| competitivo:', competitiveMode);
             addEvent('<span class="ev-info">▶ Partida iniciada — MODO: ' + (modoLight ? 'LIGHT' : gameMode.toUpperCase()) + (competitiveMode ? ' · COMPETITIVO' : '') + '</span>');
+            avisarPartida(false);
             hasShield = {};
             initStats();
             turnCounter = 0;
@@ -6159,6 +6181,7 @@
             for (var cid in connections) {
                 try { connections[cid].send({ type: 'REMATCH' }); } catch(e) {}
             }
+            avisarPartida(true);
 
             gameStarted = true;
             requestWakeLock();
