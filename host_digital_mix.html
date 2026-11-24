@@ -5618,13 +5618,13 @@
                 var progCls = (gameMode === 'supervivencia')
                     ? (pLives <= 1 ? ' critical' : pLives <= 2 ? ' warning' : '')
                     : (p.score >= 9 ? ' critical' : p.score >= 7 ? ' warning' : '');
-                h += '<div class=\"leader-item ' + (p.id === players[activePlayerIdx].id ? 'active' : '') + '\" data-pid=\"' + p.id + '\" style=\"display:flex; align-items:center; margin-bottom:10px; position:relative;' + elimStyle + '\">' +
+                h += '<div class=\"leader-wrap\"><div class=\"leader-item ' + (p.id === players[activePlayerIdx].id ? 'active' : '') + '\" data-pid=\"' + p.id + '\" style=\"display:flex; align-items:center; margin-bottom:10px; position:relative;' + elimStyle + '\">' +
                      avatarHtml +
                      '<span style=\"flex:1; font-family:Bungee,sans-serif; font-size:0.8em;\">' + p.name + (gameMode === 'equipos' && p.team ? '<span class=\"team-badge team-' + p.team + '\">' + (p.team==='red'?'🔴':'🔵') + '</span>' : '') + '<div>' + livesHtml + '</div><span style=\"opacity:0.6; font-size:0.7em;\">' + chipsHtml + '</span></span>' +
                      '<span class=\"score\" style=\"font-family:Bungee,sans-serif; color:var(--gold);\">' + scoreLabel + '</span></div>' +
                      '<div class=\"progress-bar-wrap\">' +
                      '<div class=\"progress-bar-fill' + progCls + '\" style=\"width:' + progWidth + '%\"></div>' +
-                     '</div>';
+                     '</div></div>';
             });
             var lbEl = document.getElementById('leaderboard-list');
             lbEl.innerHTML = h;
@@ -5650,7 +5650,15 @@
 
             var timelinesHtml = ""; players.forEach(function (p) {
                 timelinesHtml += '<div class="player-row"><div style="font-size:0.6em;color:#888;">' + p.name + '</div><div class="slots">';
-                for (var k = 0; k < 10; k++) timelinesHtml += '<div class="slot ' + (p.cards[k] ? 'filled' : '') + '">' + (p.cards[k] ? (isFogActive ? '????' : p.cards[k]) : '') + '</div>';
+                // mismo año repetido → una sola carta con "×N" (igual que en el móvil)
+                for (var k = 0; k < p.cards.length; ) {
+                    var k2 = k; while (k2 + 1 < p.cards.length && String(p.cards[k2 + 1]) === String(p.cards[k])) k2++;
+                    var kn = k2 - k + 1;
+                    timelinesHtml += '<div class="slot filled" style="position:relative">' + (isFogActive ? '????' : p.cards[k]) +
+                        (kn > 1 ? '<span class="cb-repes">×' + kn + '</span>' : '') + '</div>';
+                    k = k2 + 1;
+                }
+                for (var ke = p.cards.length; ke < 10; ke++) timelinesHtml += '<div class="slot"></div>';
                 timelinesHtml += '</div></div>';
             });
             document.getElementById('global-timelines').innerHTML = timelinesHtml;
@@ -6742,10 +6750,11 @@
         document.getElementById('cb-btn-descartar').onclick = function () { borrarPartidaGuardada(); caja.remove(); };
     });
     </script>
-    <script src="cb_iconos.js?v=20261121a"></script>
-    <script src="cb_despierto.js?v=20261121a"></script>
-    <script src="cb_resumen.js?v=20261121a"></script>
-    <script src="cb_graficos.js?v=20261121a"></script>
-    <link rel="stylesheet" href="cb_tema_retro.css?v=20261121a">
+    <script src="cb_iconos.js?v=20261124a"></script>
+    <script src="cb_despierto.js?v=20261124a"></script>
+    <script src="cb_resumen.js?v=20261124a"></script>
+    <script src="cb_graficos.js?v=20261124a"></script>
+    <script src="cb_pantalla.js?v=20261124a"></script>
+    <link rel="stylesheet" href="cb_tema_retro.css?v=20261124a">
 </body>
 </html>
